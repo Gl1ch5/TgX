@@ -11,22 +11,102 @@ const tgIcons = {
     share: `<svg class="icon-stroke" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>`
 };
 
+// Helper function to prevent XSS
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 class RenderManager {
     constructor() {
-        this.data = window.mockData;
+        this.data = window.mockData || { posts: [], channels: [], comments: {} };
     }
 
-    renderFeed() {
+    async renderFeed() {
         const container = document.getElementById('feed-container');
         if (!container) return;
 
-        container.innerHTML = ''; // Clear existing
+        container.innerHTML = '<div style="text-align:center; padding: 20px;">Loading feed...</div>';
 
-        this.data.posts.forEach(post => {
-            const channel = this.data.channels.find(c => c.id === post.channelId);
-            const postEl = this.createPostCard(post, channel);
-            container.appendChild(postEl);
-        });
+        try {
+            const response = await fetch('/api/feed');
+            if (!response.ok) {
+                if (response.status === 401) {
+                    if (window.AppRouter) window.AppRouter.navigate('login');
+                    return;
+                }
+                throw new Error('Failed to load feed');
+            }
+
+            const data = await response.json();
+
+            // Format incoming API data to match frontend structure
+            if (data && data.posts && data.posts.length > 0) {
+                this.data.posts = data.posts.map(p => ({
+                    id: p.id,
+                    channelId: p.channelId,
+                    text: p.text,
+                    timestamp: p.dateStr ? p.dateStr.split(', ')[1] : 'Now',
+                    date: p.dateStr ? p.dateStr.split(', ')[0] : 'Today',
+                    views: p.metrics.views >= 1000 ? (p.metrics.views / 1000).toFixed(1) + 'K' : p.metrics.views,
+                    reactions: [
+                        { type: 'like', count: p.metrics.likes, active: false },
+                        { type: 'fire', count: p.metrics.fire, active: false }
+                    ].filter(r => r.count > 0),
+                    commentsCount: p.metrics.comments || 0,
+                    sharesCount: p.metrics.reposts || 0,
+                    media: p.media
+                }));
+
+                const uniqueChannels = {};
+                data.posts.forEach(p => {
+                    if (!uniqueChannels[p.channelId]) {
+                        uniqueChannels[p.channelId] = {
+                            id: p.channelId,
+                            name: p.channelName,
+                            username: p.author ? p.author.replace('@', '') : 'channel',
+                            avatar: p.avatarUrl,
+                            description: `Official channel of ${p.channelName}`,
+                            subscribers: 'N/A'
+                        };
+                    }
+                });
+                this.data.channels = Object.values(uniqueChannels);
+            }
+
+            container.innerHTML = ''; // Clear existing
+
+            if (!this.data.posts || this.data.posts.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No channels or posts found.</div>';
+                return;
+            }
+
+            this.data.posts.forEach(post => {
+                const channel = this.data.channels.find(c => c.id === post.channelId);
+                const postEl = this.createPostCard(post, channel);
+                container.appendChild(postEl);
+            });
+
+        } catch (error) {
+            console.error('Feed load error:', error);
+            // Fallback to mock data on error for prototype demonstration
+            container.innerHTML = '';
+            if (window.mockData && window.mockData.posts) {
+                this.data = window.mockData;
+                this.data.posts.forEach(post => {
+                    const channel = this.data.channels.find(c => c.id === post.channelId);
+                    const postEl = this.createPostCard(post, channel);
+                    container.appendChild(postEl);
+                });
+            } else {
+                container.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
+            }
+        }
     }
 
     createPostCard(post, channel) {
@@ -43,16 +123,25 @@ class RenderManager {
             `).join('');
         }
 
+        let mediaHTML = '';
+        if (post.media) {
+            mediaHTML = `<img src="${post.media}" style="width:100%; border-radius:12px; margin-top:12px;" alt="Post media">`;
+        }
+
+        const safeChannelName = escapeHTML(channel?.name || 'Unknown Channel');
+        const safePostText = escapeHTML(post.text);
+
         el.innerHTML = `
-            <img src="${channel.avatar}" alt="${channel.name}" class="avatar" data-channel-id="${channel.id}">
+            <img src="${channel?.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}" class="avatar" data-channel-id="${channel?.id}">
             <div class="post-content-wrap">
                 <div class="post-header">
                     <div class="post-meta">
-                        <span class="channel-name">${channel.name} ${tgIcons.verified}</span>
+                        <span class="channel-name">${safeChannelName} ${tgIcons.verified}</span>
                         <span class="post-time">· ${post.timestamp}</span>
                     </div>
                 </div>
-                <div class="post-text">${post.text}</div>
+                <div class="post-text">${safePostText}</div>
+                ${mediaHTML}
                 <div class="post-footer">
                     ${reactionsHTML}
                 </div>
@@ -89,25 +178,37 @@ class RenderManager {
     }
 
     renderPostDetail(postId) {
-        const post = this.data.posts.find(p => p.id === postId);
+        // Handle id types
+        const post = this.data.posts.find(p => p.id.toString() === postId.toString());
         if (!post) return;
 
         const channel = this.data.channels.find(c => c.id === post.channelId);
+        if (!channel) return;
 
         const container = document.getElementById('post-detail-container');
         if (container) {
             container.innerHTML = '';
-            // Render the main post body similar to feed, but expanded
+
+            let mediaHTML = '';
+            if (post.media) {
+                mediaHTML = `<img src="${post.media}" style="width:100%; border-radius:12px; margin-top:12px;" alt="Post media">`;
+            }
+
+            const safeChannelName = escapeHTML(channel.name);
+            const safeUsername = escapeHTML(channel.username);
+            const safePostText = escapeHTML(post.text);
+
             const postHtml = `
                 <div style="padding: 16px;">
                     <div style="display:flex; gap:12px; margin-bottom:12px;">
                         <img src="${channel.avatar}" alt="" class="avatar" data-channel-id="${channel.id}">
                         <div>
-                            <div class="channel-name">${channel.name} ${tgIcons.verified}</div>
-                            <div class="post-time">@${channel.username}</div>
+                            <div class="channel-name">${safeChannelName} ${tgIcons.verified}</div>
+                            <div class="post-time">@${safeUsername}</div>
                         </div>
                     </div>
-                    <div class="post-text" style="font-size:16px;">${post.text}</div>
+                    <div class="post-text" style="font-size:16px;">${safePostText}</div>
+                    ${mediaHTML}
                     <div class="post-time" style="margin-top:12px;">${post.timestamp} · ${post.date} · <strong>${post.views || '1M'}</strong> Просмотры</div>
                 </div>
             `;
@@ -115,7 +216,10 @@ class RenderManager {
         }
 
         // Fill stats
-        document.getElementById('stats-likes').innerText = post.reactions.reduce((sum, r) => sum + r.count, 0).toLocaleString();
+        const likesCountEl = document.getElementById('stats-likes');
+        if (likesCountEl && post.reactions) {
+            likesCountEl.innerText = post.reactions.reduce((sum, r) => sum + r.count, 0).toLocaleString();
+        }
 
         // Fill actions
         const actionContainer = document.getElementById('detail-actions');
@@ -149,23 +253,28 @@ class RenderManager {
             const commentEl = document.createElement('div');
             commentEl.className = 'comment';
 
+            const safeCommentName = escapeHTML(comment.name);
+            const safeCommentUser = escapeHTML(comment.username);
+            const safeCommentText = escapeHTML(comment.text);
+            const replyToUser = escapeHTML(this.data.channels.find(c => c.id === this.data.posts.find(p=>p.id.toString()===postId.toString())?.channelId)?.username || 'user');
+
             // Replicating the screenshot's nested comment look
             commentEl.innerHTML = `
                 <div class="comment-thread-line"></div>
-                <img src="${comment.avatar}" alt="${comment.name}" class="avatar">
+                <img src="${comment.avatar}" alt="${safeCommentName}" class="avatar">
                 <div style="flex-grow:1; min-width:0;">
                     <div class="comment-header">
-                        <span class="comment-name">${comment.name} ${comment.verified ? tgIcons.verified : ''}</span>
-                        <span class="comment-username">@${comment.username} · ${comment.timestamp}</span>
+                        <span class="comment-name">${safeCommentName} ${comment.verified ? tgIcons.verified : ''}</span>
+                        <span class="comment-username">@${safeCommentUser} · ${comment.timestamp}</span>
                     </div>
                     <div class="reply-context">
-                        В ответ <a href="#">@HedgieMarkets</a>
+                        В ответ <a href="#">@${replyToUser}</a>
                     </div>
-                    <div class="comment-text">${comment.text}</div>
+                    <div class="comment-text">${safeCommentText}</div>
                     <div class="comment-actions">
                         <button class="action-btn">${tgIcons.comment} ${comment.repliesCount || ''}</button>
                         <button class="action-btn">${tgIcons.repost} ${comment.sharesCount || ''}</button>
-                        <button class="action-btn">${tgIcons.like} ${comment.reactions[0].count}</button>
+                        <button class="action-btn">${tgIcons.like} ${comment.reactions ? comment.reactions[0]?.count : ''}</button>
                         <button class="action-btn">
                             <svg class="icon-stroke" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             ${comment.views || ''}
@@ -179,22 +288,29 @@ class RenderManager {
     }
 
     renderProfile(channelId) {
-        const channel = this.data.channels.find(c => c.id === channelId);
+        const channel = this.data.channels.find(c => c.id.toString() === channelId.toString());
         if (!channel) return;
 
-        document.getElementById('profile-name').innerHTML = `${channel.name} ${tgIcons.verified}`;
-        document.getElementById('profile-username').innerText = `@${channel.username}`;
-        document.getElementById('profile-bio').innerText = channel.description;
-        document.getElementById('profile-subscribers').innerText = channel.subscribers;
+        const nameEl = document.getElementById('profile-name');
+        if (nameEl) nameEl.innerHTML = `${escapeHTML(channel.name)} ${tgIcons.verified}`;
+
+        const usernameEl = document.getElementById('profile-username');
+        if (usernameEl) usernameEl.innerText = `@${escapeHTML(channel.username)}`;
+
+        const bioEl = document.getElementById('profile-bio');
+        if (bioEl) bioEl.innerText = escapeHTML(channel.description);
+
+        const subsEl = document.getElementById('profile-subscribers');
+        if (subsEl) subsEl.innerText = escapeHTML(channel.subscribers);
 
         const avatar = document.getElementById('profile-avatar');
-        avatar.src = channel.avatar;
+        if (avatar) avatar.src = channel.avatar;
 
         // Render feed for profile
         const profileFeed = document.getElementById('profile-feed');
         if (profileFeed) {
             profileFeed.innerHTML = '';
-            const channelPosts = this.data.posts.filter(p => p.channelId === channelId);
+            const channelPosts = this.data.posts.filter(p => p.channelId.toString() === channelId.toString());
             channelPosts.forEach(post => {
                 const postEl = this.createPostCard(post, channel);
                 profileFeed.appendChild(postEl);
