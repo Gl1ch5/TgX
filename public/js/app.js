@@ -5,35 +5,65 @@ const appState = {
     activePostId: null,
     activeProfileId: null,
     isAuthenticated: false,
-    phoneData: {} // Store phoneCodeHash during login flow
+    phoneData: {}, // Store phoneCodeHash during login flow
+    isDesktop: window.innerWidth > 768
 };
 
-// Simple router to fetch and inject HTML views, and toggle visibility
+// Listen to resize to update layout (simple implementation, reload is better for structural changes)
+window.addEventListener('resize', () => {
+    const newIsDesktop = window.innerWidth > 768;
+    if (newIsDesktop !== appState.isDesktop) {
+        appState.isDesktop = newIsDesktop;
+        window.location.reload(); // Reload to fetch correct templates
+    }
+});
+
 class Router {
     constructor() {
         this.mainContent = document.getElementById('app');
-        if (!this.mainContent) {
-            // For older setup compatibility
-            this.mainContent = document.body;
-        }
         this.views = {};
         this.init();
     }
 
     async init() {
-        // Check auth status from cookie
         appState.isAuthenticated = document.cookie.includes('authenticated=true');
 
-        // Load HTML templates into the DOM
-        await this.loadView('login', '/html/login.html');
-        await this.loadView('feed', '/html/feed.html');
-        await this.loadView('post-detail', '/html/post-detail.html');
-        await this.loadView('profile', '/html/profile.html');
+        // Load specific CSS
+        const head = document.head;
+        const cssFolder = appState.isDesktop ? 'desktop' : 'mobile';
 
-        // Setup global event listeners
+        const loadCSS = (href) => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            head.appendChild(link);
+        };
+
+        if (appState.isDesktop) {
+            loadCSS('/css/desktop/feed.css');
+            // Desktop login uses mobile login styles for simplicity right now
+            loadCSS('/css/mobile/login.css');
+        } else {
+            loadCSS('/css/mobile/main.css');
+            loadCSS('/css/mobile/feed.css');
+            loadCSS('/css/mobile/post-detail.css');
+            loadCSS('/css/mobile/profile.css');
+            loadCSS('/css/mobile/login.css');
+        }
+
+        // Load HTML templates into the DOM
+        await this.loadView('login', '/html/mobile/login.html'); // Shared login
+
+        if (appState.isDesktop) {
+            await this.loadView('feed', '/html/desktop/feed.html');
+        } else {
+            await this.loadView('feed', '/html/mobile/feed.html');
+            await this.loadView('post-detail', '/html/mobile/post-detail.html');
+            await this.loadView('profile', '/html/mobile/profile.html');
+        }
+
         this.setupEventListeners();
 
-        // Initial render
         if (appState.isAuthenticated) {
             this.navigate('feed');
         } else {
@@ -46,22 +76,17 @@ class Router {
             const response = await fetch(url);
             const html = await response.text();
 
-            // Create a wrapper div to parse and append the content
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
 
-            // Get the main view container from the fetched HTML
             const viewElement = tempDiv.firstElementChild;
             if (viewElement) {
                 this.mainContent.appendChild(viewElement);
                 this.views[id] = viewElement;
 
-                // Ensure it has the hidden class initially
                 viewElement.classList.add('hidden');
-                // Optional ID assignment for CSS matching if not there
+                viewElement.style.display = 'none';
                 if (!viewElement.id) viewElement.id = `${id}-view`;
-            } else {
-                console.error(`No root element found in template ${url}`);
             }
         } catch (error) {
             console.error(`Failed to load view ${id}:`, error);
@@ -69,28 +94,28 @@ class Router {
     }
 
     navigate(viewId, param = null) {
-        // Enforce Auth
         if (!appState.isAuthenticated && viewId !== 'login') {
             viewId = 'login';
         }
 
-        // Hide all views
         Object.values(this.views).forEach(view => {
             if (view) {
                 view.classList.add('hidden');
-                view.style.display = 'none'; // Ensure it's hidden if classes differ
+                view.style.display = 'none';
             }
         });
 
-        // Show target view
         if (this.views[viewId]) {
             this.views[viewId].classList.remove('hidden');
-            this.views[viewId].style.display = ''; // Reset display block
-            window.scrollTo(0, 0);
+            this.views[viewId].style.display = '';
+
+            // Only scroll to top if on mobile
+            if (!appState.isDesktop) {
+                window.scrollTo(0, 0);
+            }
 
             appState.currentView = viewId;
 
-            // Trigger specific renders based on view
             if (viewId === 'login') {
                 this.bindLoginEvents();
             } else if (viewId === 'feed') {
@@ -187,10 +212,9 @@ class Router {
                         appState.isAuthenticated = true;
                         this.navigate('feed');
                     } else if (data.requiresPassword) {
-                        // Move to Step 3: Cloud Password
                         document.getElementById('step2').style.display = 'none';
                         document.getElementById('step3').style.display = 'block';
-                        loginBtn.innerText = "Log In"; // reset for later
+                        loginBtn.innerText = "Log In";
                     } else {
                         throw new Error(data.error || "Failed to log in");
                     }
@@ -246,33 +270,47 @@ class Router {
     }
 
     setupEventListeners() {
-        // Back buttons
-        document.addEventListener('click', (e) => {
-            const backBtn = e.target.closest('#post-back-btn') || e.target.closest('#profile-back-btn');
-            if (backBtn) {
-                this.navigate('feed');
-            }
+        if (!appState.isDesktop) {
+            // Mobile Specific Listeners
+            document.addEventListener('click', (e) => {
+                const backBtn = e.target.closest('#post-back-btn') || e.target.closest('#profile-back-btn');
+                if (backBtn) {
+                    this.navigate('feed');
+                }
 
-            // Click on a post in feed -> go to detail
-            const postCard = e.target.closest('.post[data-post-id]');
-            // Don't navigate if clicking a reaction or profile avatar
-            if (postCard && !e.target.closest('.reaction-pill') && !e.target.closest('.avatar')) {
-                const postId = postCard.getAttribute('data-post-id');
-                this.navigate('post-detail', postId);
-            }
+                const postCard = e.target.closest('.post[data-post-id]');
+                if (postCard && !e.target.closest('.reaction-pill') && !e.target.closest('.avatar')) {
+                    const postId = postCard.getAttribute('data-post-id');
+                    this.navigate('post-detail', postId);
+                }
 
-            // Click on an avatar -> go to profile
-            const avatar = e.target.closest('.avatar[data-channel-id]');
-            if (avatar) {
-                e.stopPropagation(); // prevent post click
-                const channelId = avatar.getAttribute('data-channel-id');
-                this.navigate('profile', channelId);
-            }
-        });
+                const avatar = e.target.closest('.avatar[data-channel-id]');
+                if (avatar) {
+                    e.stopPropagation();
+                    const channelId = avatar.getAttribute('data-channel-id');
+                    this.navigate('profile', channelId);
+                }
+            });
+        } else {
+            // Desktop Specific Listeners
+            document.addEventListener('click', (e) => {
+                // Click on left sidebar channel
+                const chatItem = e.target.closest('.chat-item');
+                if (chatItem) {
+                    // Update active state
+                    document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+                    chatItem.classList.add('active');
+
+                    const channelId = chatItem.getAttribute('data-channel-id');
+                    if (window.RenderManager) {
+                        window.RenderManager.renderDesktopChat(channelId);
+                    }
+                }
+            });
+        }
     }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.AppRouter = new Router();
 });

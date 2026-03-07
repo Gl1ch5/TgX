@@ -28,10 +28,12 @@ class RenderManager {
     }
 
     async renderFeed() {
-        const container = document.getElementById('feed-container');
-        if (!container) return;
+        // Support both mobile and desktop feed elements
+        const mobileContainer = document.getElementById('feed-container');
+        const desktopList = document.getElementById('dt-chat-list');
 
-        container.innerHTML = '<div style="text-align:center; padding: 20px;">Loading feed...</div>';
+        if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px;">Loading feed...</div>';
+        if (desktopList) desktopList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Loading channels...</div>';
 
         try {
             const response = await fetch('/api/feed');
@@ -79,23 +81,130 @@ class RenderManager {
                 this.data.channels = Object.values(uniqueChannels);
             }
 
-            container.innerHTML = ''; // Clear existing
-
             if (!this.data.posts || this.data.posts.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No channels or posts found.</div>';
+                if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No channels or posts found.</div>';
+                if (desktopList) desktopList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No channels found.</div>';
                 return;
             }
 
-            this.data.posts.forEach(post => {
-                const channel = this.data.channels.find(c => c.id === post.channelId);
-                const postEl = this.createPostCard(post, channel);
-                container.appendChild(postEl);
-            });
+            if (mobileContainer) {
+                mobileContainer.innerHTML = '';
+                this.data.posts.forEach(post => {
+                    const channel = this.data.channels.find(c => c.id === post.channelId);
+                    mobileContainer.appendChild(this.createPostCard(post, channel));
+                });
+            }
+
+            if (desktopList) {
+                desktopList.innerHTML = '';
+                this.data.channels.forEach(channel => {
+                    // Find latest post for preview
+                    const latestPost = this.data.posts.find(p => p.channelId === channel.id);
+                    desktopList.appendChild(this.createDesktopChatItem(channel, latestPost));
+                });
+            }
 
         } catch (error) {
             console.error('Feed load error:', error);
-            container.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
+            if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
+            if (desktopList) desktopList.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
         }
+    }
+
+    createDesktopChatItem(channel, latestPost) {
+        const el = document.createElement('div');
+        el.className = 'chat-item';
+        el.setAttribute('data-channel-id', channel.id);
+
+        const safeChannelName = escapeHTML(channel.name);
+        const safePreview = escapeHTML(latestPost ? latestPost.text.substring(0, 50) + '...' : 'No posts yet');
+        const timeStr = latestPost ? escapeHTML(latestPost.timestamp) : '';
+
+        el.innerHTML = `
+            <div class="avatar"><img src="${channel.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}"></div>
+            <div class="chat-info">
+                <div class="chat-header-row">
+                    <div class="chat-title">${safeChannelName} <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2L15.09 5.09L19.5 4.5L20.09 8.91L23.18 12L20.09 15.09L19.5 19.5L15.09 18.91L12 22L8.91 18.91L4.5 19.5L3.91 15.09L0.82 12L3.91 8.91L4.5 4.5L8.91 5.09L12 2ZM10.5 15L17.5 8L16.09 6.59L10.5 12.17L7.91 9.59L6.5 11L10.5 15Z"/></svg></div>
+                </div>
+                <div class="chat-preview">${safePreview}</div>
+            </div>
+            <div class="chat-meta">
+                <div class="chat-time">${timeStr}</div>
+            </div>
+        `;
+        return el;
+    }
+
+    renderDesktopChat(channelId) {
+        const mainChat = document.getElementById('dt-main-chat');
+        if (!mainChat) return;
+
+        const channel = this.data.channels.find(c => c.id === channelId);
+        if (!channel) return;
+
+        const safeChannelName = escapeHTML(channel.name);
+        const posts = this.data.posts.filter(p => p.channelId === channelId);
+
+        let postsHTML = posts.map(post => {
+            const safePostText = escapeHTML(post.text);
+            let mediaHTML = '';
+            if (post.media) {
+                mediaHTML = `<div class="msg-media"><img src="${post.media}" alt="Post media"></div>`;
+            }
+
+            // Map reactions
+            let reactionsHTML = '';
+            if (post.reactions && post.reactions.length > 0) {
+                reactionsHTML = post.reactions.map(r => `
+                    <div class="reaction">
+                        ${tgIcons[r.type] || tgIcons.like}
+                        ${r.count}
+                    </div>
+                `).join('');
+            }
+
+            return `
+                <div class="message-bubble">
+                    <div class="msg-author">${safeChannelName}</div>
+                    <div class="msg-text">${safePostText}</div>
+                    ${mediaHTML}
+                    <div class="msg-footer">
+                        <div class="reactions">${reactionsHTML}</div>
+                        <div class="msg-meta">
+                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                            ${post.views || ''}
+                            <span>${post.timestamp}</span>
+                        </div>
+                    </div>
+                    <div class="forward-btn">
+                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+                    </div>
+                </div>
+            `;
+        }).reverse().join(''); // Reverse to show oldest top (or keep chronological)
+
+        mainChat.innerHTML = `
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <div class="header-avatar"><img src="${channel.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}"></div>
+                    <div class="header-text">
+                        <div class="header-title">${safeChannelName}</div>
+                        <div class="header-subtitle">Channel</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M7 12h10v2H7z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                </div>
+            </div>
+            <div class="chat-history">
+                ${postsHTML}
+            </div>
+            <div class="chat-input">
+                ОТКЛ. УВЕДОМЛЕНИЯ
+            </div>
+        `;
     }
 
     createPostCard(post, channel) {
