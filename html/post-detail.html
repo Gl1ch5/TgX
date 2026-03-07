@@ -1,0 +1,53 @@
+<div id="post-detail-view" class="view hidden">
+    <header class="view-header">
+        <button class="back-btn" id="post-back-btn">
+            <!-- Telegram native back arrow SVG -->
+            <svg viewBox="0 0 24 24" class="icon" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;"><path d="M20 12H4M10 18l-6-6 6-6"/></svg>
+        </button>
+        <h2>Пост</h2> <!-- "Post" in Russian -->
+    </header>
+
+    <div id="post-detail-container" style="padding-bottom: 60px;">
+        <!-- Expanded post goes here -->
+    </div>
+
+    <!-- Stats separator imitating screenshot -->
+    <div class="stats-separator">
+        <div class="stats-line" id="stats-line-1">
+            <span class="stat-count">9 661</span> <span class="stat-label">Репост</span>
+            <span class="stat-count" style="margin-left:12px;">1 088</span> <span class="stat-label">Цитаты</span>
+        </div>
+        <div class="stats-line">
+            <span class="stat-count" id="stats-likes">26,1K</span> <span class="stat-label">Отметки( -ок) «Нравится»</span>
+        </div>
+        <div class="stats-line">
+            <span class="stat-count" id="stats-bookmarks">6 365</span> <span class="stat-label">Закладки</span>
+        </div>
+        <div class="action-bar-detail" id="detail-actions">
+            <!-- action icons here -->
+        </div>
+    </div>
+
+    <!-- Divider for comments -->
+    <div class="comments-header-sort">
+        <span>Наиболее актуальные ответы</span>
+        <svg viewBox="0 0 24 24" class="icon" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+
+    <div id="comments-container">
+        <!-- Comments list goes here -->
+    </div>
+
+    <!-- Telegram style fixed input bottom bar -->
+    <div class="tg-input-bar">
+        <!-- Attach clip -->
+        <button class="input-action-btn">
+            <svg viewBox="0 0 24 24" class="icon" style="width:24px;height:24px;fill:none;stroke:var(--text-secondary);stroke-width:2;stroke-linecap:round;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <input type="text" placeholder="Опубликовать ответ" class="tg-text-input" id="comment-input">
+        <!-- Camera/Mic icon depending on input -->
+        <button class="input-action-btn" style="color:var(--text-blue);">
+            <svg viewBox="0 0 24 24" class="icon" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+    </div>
+</div>

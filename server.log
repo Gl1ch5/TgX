@@ -1,0 +1,11 @@
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /css/main.css HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /css/feed.css HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /js/data.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /css/profile.css HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /css/post-detail.css HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /js/render.js HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:09] "GET /html/feed.html HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:10] "GET /html/post-detail.html HTTP/1.1" 200 -
+127.0.0.1 - - [07/Mar/2026 05:16:10] "GET /html/profile.html HTTP/1.1" 200 -

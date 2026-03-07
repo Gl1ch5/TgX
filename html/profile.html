@@ -1,0 +1,46 @@
+<div id="profile-view" class="view hidden">
+    <header class="view-header" style="background: rgba(0,0,0,0.5);">
+        <button class="back-btn" id="profile-back-btn">
+            <svg viewBox="0 0 24 24" class="icon" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;"><path d="M20 12H4M10 18l-6-6 6-6"/></svg>
+        </button>
+        <h2 id="profile-header-name">Профиль</h2> <!-- Profile header -->
+    </header>
+
+    <div class="profile-hero">
+        <div class="banner"></div>
+        <div class="profile-header-content">
+            <img src="" alt="Avatar" class="profile-avatar" id="profile-avatar">
+            <div class="profile-actions">
+                <button class="tg-btn outline">
+                    <!-- Notifications icon -->
+                    <svg viewBox="0 0 24 24" class="icon"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                </button>
+                <button class="tg-btn outline">
+                    <!-- Search icon -->
+                    <svg viewBox="0 0 24 24" class="icon" style="fill:none;stroke:currentColor;stroke-width:2.5;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/></svg>
+                </button>
+                <button class="tg-btn primary">Подписаться</button> <!-- Subscribe -->
+            </div>
+        </div>
+
+        <div class="profile-info">
+            <h1 class="profile-name" id="profile-name">Имя</h1>
+            <div class="profile-username" id="profile-username">@username</div>
+            <div class="profile-bio" id="profile-bio">Био канала или пользователя</div>
+            <div class="profile-stats">
+                <span><strong id="profile-subscribers">0</strong> Подписчики</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tg-tabs">
+        <div class="tab active">Посты</div>
+        <div class="tab">Медиа</div>
+        <div class="tab">Ссылки</div>
+    </div>
+
+    <div id="profile-feed">
+        <!-- Profile specific posts -->
+    </div>
+</div>
