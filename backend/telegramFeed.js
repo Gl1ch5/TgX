@@ -36,6 +36,17 @@ async function getFeed() {
 
                 for (const msg of messages) {
                     // Extract relevant data
+
+                    // Defensive parsing for reactions due to potentially varied MTProto structures
+                    let likesCount = 0;
+                    let fireCount = 0;
+                    if (msg.reactions && msg.reactions.results && Array.isArray(msg.reactions.results)) {
+                        const like = msg.reactions.results.find(r => r.reaction && r.reaction.emoticon === '👍');
+                        if (like) likesCount = like.count || 0;
+                        const fire = msg.reactions.results.find(r => r.reaction && r.reaction.emoticon === '🔥');
+                        if (fire) fireCount = fire.count || 0;
+                    }
+
                     const postData = {
                         id: msg.id,
                         channelId: channel.id.toString(),
@@ -47,18 +58,23 @@ async function getFeed() {
                         text: msg.message || '',
                         media: null,
                         metrics: {
-                            likes: msg.reactions ? (msg.reactions.results.find(r => r.reaction.emoticon === '👍')?.count || 0) : 0,
+                            likes: likesCount,
                             comments: msg.replies ? msg.replies.replies : 0,
                             reposts: msg.forwards || 0,
                             views: msg.views || 0,
-                            fire: msg.reactions ? (msg.reactions.results.find(r => r.reaction.emoticon === '🔥')?.count || 0) : 0
+                            fire: fireCount
                         }
                     };
 
                     // 4. Download media if present (and not too big, prioritize photos for prototype)
                     if (msg.media && msg.media.photo) {
                         try {
-                            const buffer = await client.downloadMedia(msg.media);
+                            // Enforce a hard timeout so hanging downloads don't ruin the feed load
+                            const downloadPromise = client.downloadMedia(msg.media);
+                            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000));
+
+                            const buffer = await Promise.race([downloadPromise, timeoutPromise]);
+
                             if (buffer) {
                                 const filename = `post_${msg.id}_${Date.now()}.jpg`;
                                 const filepath = path.join(imgDir, filename);
@@ -66,7 +82,7 @@ async function getFeed() {
                                 postData.media = `/img/${filename}`;
                             }
                         } catch (mediaError) {
-                            console.error(`Error downloading media for msg ${msg.id}`, mediaError);
+                            console.error(`Media skipped for msg ${msg.id} (Timeout/Error)`);
                         }
                     }
 
