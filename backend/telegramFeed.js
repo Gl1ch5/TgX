@@ -29,8 +29,23 @@ async function getFeed() {
 
         const channelPromises = channelsToFetch.map(async (channel) => {
             try {
-                const messages = await client.getMessages(channel.entity, { limit: 5 });
+                // Fetch Avatar
                 let avatarUrl = '/assets/reactions/default-avatar.svg';
+                try {
+                    const avatarBuffer = await client.downloadProfilePhoto(channel.entity);
+                    if (avatarBuffer) {
+                        const avatarFilename = `avatar_${channel.id.toString()}.jpg`;
+                        const avatarFilepath = path.join(imgDir, avatarFilename);
+                        if (!fs.existsSync(avatarFilepath)) {
+                            fs.writeFileSync(avatarFilepath, avatarBuffer);
+                        }
+                        avatarUrl = `/img/${avatarFilename}`;
+                    }
+                } catch (e) {
+                    console.log(`Failed to download avatar for ${channel.title}`);
+                }
+
+                const messages = await client.getMessages(channel.entity, { limit: 5 });
 
                 // Process messages concurrently
                 const messagePromises = messages.map(async (msg) => {
@@ -43,8 +58,20 @@ async function getFeed() {
                         if (fire) fireCount = fire.count || 0;
                     }
 
+                    // Handle BigInt views and comments safely
+                    let viewsCount = 0;
+                    if (msg.views) viewsCount = Number(msg.views);
+
+                    let commentsCount = 0;
+                    if (msg.replies && typeof msg.replies.replies !== 'undefined') {
+                        commentsCount = Number(msg.replies.replies);
+                    }
+
+                    let repostsCount = 0;
+                    if (msg.forwards) repostsCount = Number(msg.forwards);
+
                     const postData = {
-                        id: msg.id,
+                        id: msg.id.toString(), // stringify ID
                         channelId: channel.id.toString(),
                         channelName: channel.title,
                         author: '@' + (channel.entity.username || channel.title.replace(/\s+/g, '').toLowerCase()),
@@ -54,11 +81,11 @@ async function getFeed() {
                         text: msg.message || '',
                         media: null,
                         metrics: {
-                            likes: likesCount,
-                            comments: msg.replies ? msg.replies.replies : 0,
-                            reposts: msg.forwards || 0,
-                            views: msg.views || 0,
-                            fire: fireCount
+                            likes: Number(likesCount),
+                            comments: commentsCount,
+                            reposts: repostsCount,
+                            views: viewsCount,
+                            fire: Number(fireCount)
                         }
                     };
 

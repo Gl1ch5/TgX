@@ -24,7 +24,7 @@ function escapeHTML(str) {
 
 class RenderManager {
     constructor() {
-        this.data = window.mockData || { posts: [], channels: [], comments: {} };
+        this.data = { posts: [], channels: [], comments: {} };
     }
 
     async renderFeed() {
@@ -94,18 +94,7 @@ class RenderManager {
 
         } catch (error) {
             console.error('Feed load error:', error);
-            // Fallback to mock data on error for prototype demonstration
-            container.innerHTML = '';
-            if (window.mockData && window.mockData.posts) {
-                this.data = window.mockData;
-                this.data.posts.forEach(post => {
-                    const channel = this.data.channels.find(c => c.id === post.channelId);
-                    const postEl = this.createPostCard(post, channel);
-                    container.appendChild(postEl);
-                });
-            } else {
-                container.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
-            }
+            container.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
         }
     }
 
@@ -170,14 +159,13 @@ class RenderManager {
             pill.addEventListener('click', (e) => {
                 e.stopPropagation();
                 pill.classList.toggle('active');
-                // Normally we'd update state here
             });
         });
 
         return el;
     }
 
-    renderPostDetail(postId) {
+    async renderPostDetail(postId) {
         // Handle id types
         const post = this.data.posts.find(p => p.id.toString() === postId.toString());
         if (!post) return;
@@ -233,58 +221,67 @@ class RenderManager {
             `;
         }
 
-        // Render Comments mimicking Telegram replies
-        this.renderComments(postId);
+        // Fetch and Render actual comments via API
+        await this.renderComments(channel.id, postId, channel.username);
     }
 
-    renderComments(postId) {
-        const commentsList = this.data.comments[postId] || [];
+    async renderComments(channelId, postId, channelUsername) {
         const container = document.getElementById('comments-container');
         if (!container) return;
 
-        container.innerHTML = '';
+        container.innerHTML = '<div style="padding:20px; text-align:center;">Загрузка комментариев...</div>';
 
-        if (commentsList.length === 0) {
-            container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary);">Нет ответов</div>';
-            return;
+        try {
+            const response = await fetch(`/api/comments/${channelId}/${postId}`);
+            if (!response.ok) throw new Error('Failed to fetch comments');
+            const data = await response.json();
+
+            container.innerHTML = '';
+
+            if (!data.comments || data.comments.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary);">Нет ответов</div>';
+                return;
+            }
+
+            data.comments.forEach(comment => {
+                const commentEl = document.createElement('div');
+                commentEl.className = 'comment';
+
+                const safeCommentName = escapeHTML(comment.name);
+                const safeCommentUser = escapeHTML(comment.username);
+                const safeCommentText = escapeHTML(comment.text);
+                const replyToUser = escapeHTML(channelUsername || 'channel');
+
+                // Replicating the screenshot's nested comment look
+                commentEl.innerHTML = `
+                    <div class="comment-thread-line"></div>
+                    <img src="${comment.avatar}" alt="${safeCommentName}" class="avatar">
+                    <div style="flex-grow:1; min-width:0;">
+                        <div class="comment-header">
+                            <span class="comment-name">${safeCommentName} ${comment.verified ? tgIcons.verified : ''}</span>
+                            <span class="comment-username">@${safeCommentUser} · ${comment.timestamp}</span>
+                        </div>
+                        <div class="reply-context">
+                            В ответ <a href="#">@${replyToUser}</a>
+                        </div>
+                        <div class="comment-text">${safeCommentText}</div>
+                        <div class="comment-actions">
+                            <button class="action-btn">${tgIcons.comment} ${comment.repliesCount || ''}</button>
+                            <button class="action-btn">${tgIcons.repost}</button>
+                            <button class="action-btn">${tgIcons.like} ${comment.likes || ''}</button>
+                            <button class="action-btn">
+                                <svg class="icon-stroke" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <button class="action-btn">${tgIcons.share}</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(commentEl);
+            });
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            container.innerHTML = '<div style="padding:20px; text-align:center; color:#f4212e;">Не удалось загрузить комментарии</div>';
         }
-
-        commentsList.forEach(comment => {
-            const commentEl = document.createElement('div');
-            commentEl.className = 'comment';
-
-            const safeCommentName = escapeHTML(comment.name);
-            const safeCommentUser = escapeHTML(comment.username);
-            const safeCommentText = escapeHTML(comment.text);
-            const replyToUser = escapeHTML(this.data.channels.find(c => c.id === this.data.posts.find(p=>p.id.toString()===postId.toString())?.channelId)?.username || 'user');
-
-            // Replicating the screenshot's nested comment look
-            commentEl.innerHTML = `
-                <div class="comment-thread-line"></div>
-                <img src="${comment.avatar}" alt="${safeCommentName}" class="avatar">
-                <div style="flex-grow:1; min-width:0;">
-                    <div class="comment-header">
-                        <span class="comment-name">${safeCommentName} ${comment.verified ? tgIcons.verified : ''}</span>
-                        <span class="comment-username">@${safeCommentUser} · ${comment.timestamp}</span>
-                    </div>
-                    <div class="reply-context">
-                        В ответ <a href="#">@${replyToUser}</a>
-                    </div>
-                    <div class="comment-text">${safeCommentText}</div>
-                    <div class="comment-actions">
-                        <button class="action-btn">${tgIcons.comment} ${comment.repliesCount || ''}</button>
-                        <button class="action-btn">${tgIcons.repost} ${comment.sharesCount || ''}</button>
-                        <button class="action-btn">${tgIcons.like} ${comment.reactions ? comment.reactions[0]?.count : ''}</button>
-                        <button class="action-btn">
-                            <svg class="icon-stroke" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            ${comment.views || ''}
-                        </button>
-                        <button class="action-btn">${tgIcons.share}</button>
-                    </div>
-                </div>
-            `;
-            container.appendChild(commentEl);
-        });
     }
 
     renderProfile(channelId) {

@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 const tgAuth = require('./backend/telegramAuth');
 const tgFeed = require('./backend/telegramFeed');
+const tgComments = require('./backend/telegramComments');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,6 +75,21 @@ app.get('/api/feed', async (req, res) => {
         console.error("Feed error:", e);
         // Fallback to empty array if disconnected
         res.status(500).json({ error: 'Failed to fetch feed', posts: [] });
+    }
+});
+
+app.get('/api/comments/:channelId/:msgId', async (req, res) => {
+    try {
+        const isConnected = await tgAuth.isConnected();
+        if (!isConnected) {
+            return res.status(401).json({ error: 'Not authenticated', comments: [] });
+        }
+
+        const comments = await tgComments.getComments(req.params.channelId, req.params.msgId);
+        res.json({ comments });
+    } catch (e) {
+        console.error("Comments error:", e);
+        res.status(500).json({ error: 'Failed to fetch comments', comments: [] });
     }
 });
 
