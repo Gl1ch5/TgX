@@ -1,432 +1,152 @@
-// SVG Library mimicking Telegram Icons
-const tgIcons = {
-    verified: `<svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-1.3 14.7L6 12l1.4-1.4 3.3 3.3L16.6 8 18 9.4l-7.3 7.3z"/></svg>`,
-    like: `<svg class="reaction-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M2 10.5a5.5 5.5 0 0110.6-2.2l.4 1.1.4-1.1A5.5 5.5 0 0122 10.5c0 5-6 10-10 11.5-4-1.5-10-6.5-10-11.5z"/></svg>`,
-    fire: `<svg class="reaction-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c0 0-4 4-4 9s2 5 2 5 2-1 2-1 2 4 4 2 2-3 2-6-4-6-4-9-4-0-4-0z"/></svg>`,
-    mindblown: `<svg class="reaction-icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="10" r="1.5"/><circle cx="16" cy="10" r="1.5"/><path d="M12 16c-2 0-3.5-1-4-2h8c-.5 1-2 2-4 2z"/></svg>`,
-    heart: `<svg class="reaction-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
-    comment: `<svg class="icon-stroke" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-    repost: `<svg class="icon-stroke" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>`,
-    bookmark: `<svg class="icon-stroke" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
-    share: `<svg class="icon-stroke" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>`
-};
+const render = {
+    // Escape HTML to prevent XSS
+    escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    },
 
-// Helper function to prevent XSS
-function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
+    // Convert Telegram markdown entities to HTML
+    formatText(text, entities) {
+        if (!text) return '';
+        let html = this.escapeHtml(text);
+        // Simple entity replacement (linkification is basic here for UI)
+        html = html.replace(/\n/g, '<br>');
+        return html;
+    },
 
-class RenderManager {
-    constructor() {
-        this.data = { posts: [], channels: [], comments: {} };
-    }
+    formatDate(timestamp) {
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' · ' +
+               date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    },
 
-    async renderFeed() {
-        // Support both mobile and desktop feed elements
-        const mobileContainer = document.getElementById('feed-container');
-        const desktopList = document.getElementById('dt-chat-list');
+    formatCount(count) {
+        if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
+        if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
+        return count.toString();
+    },
 
-        if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px;">Loading feed...</div>';
-        if (desktopList) desktopList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Loading channels...</div>';
-
-        try {
-            const response = await fetch('/api/feed');
-            if (!response.ok) {
-                if (response.status === 401) {
-                    if (window.AppRouter) window.AppRouter.navigate('login');
-                    return;
-                }
-                throw new Error('Failed to load feed');
-            }
-
-            const data = await response.json();
-
-            // Format incoming API data to match frontend structure
-            if (data && data.posts && data.posts.length > 0) {
-                this.data.posts = data.posts.map(p => ({
-                    id: p.id,
-                    channelId: p.channelId,
-                    text: p.text,
-                    timestamp: p.dateStr ? p.dateStr.split(', ')[1] : 'Now',
-                    date: p.dateStr ? p.dateStr.split(', ')[0] : 'Today',
-                    views: p.metrics.views >= 1000 ? (p.metrics.views / 1000).toFixed(1) + 'K' : p.metrics.views,
-                    reactions: [
-                        { type: 'like', count: p.metrics.likes, active: false },
-                        { type: 'fire', count: p.metrics.fire, active: false }
-                    ].filter(r => r.count > 0),
-                    commentsCount: p.metrics.comments || 0,
-                    sharesCount: p.metrics.reposts || 0,
-                    media: p.media
-                }));
-
-                const uniqueChannels = {};
-                data.posts.forEach(p => {
-                    if (!uniqueChannels[p.channelId]) {
-                        uniqueChannels[p.channelId] = {
-                            id: p.channelId,
-                            name: p.channelName,
-                            username: p.author ? p.author.replace('@', '') : 'channel',
-                            avatar: p.avatarUrl,
-                            description: `Official channel of ${p.channelName}`,
-                            subscribers: 'N/A'
-                        };
-                    }
-                });
-                this.data.channels = Object.values(uniqueChannels);
-            }
-
-            if (!this.data.posts || this.data.posts.length === 0) {
-                if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No channels or posts found.</div>';
-                if (desktopList) desktopList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No channels found.</div>';
-                return;
-            }
-
-            if (mobileContainer) {
-                mobileContainer.innerHTML = '';
-                this.data.posts.forEach(post => {
-                    const channel = this.data.channels.find(c => c.id === post.channelId);
-                    mobileContainer.appendChild(this.createPostCard(post, channel));
-                });
-            }
-
-            if (desktopList) {
-                desktopList.innerHTML = '';
-                this.data.channels.forEach(channel => {
-                    // Find latest post for preview
-                    const latestPost = this.data.posts.find(p => p.channelId === channel.id);
-                    desktopList.appendChild(this.createDesktopChatItem(channel, latestPost));
-                });
-            }
-
-        } catch (error) {
-            console.error('Feed load error:', error);
-            if (mobileContainer) mobileContainer.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
-            if (desktopList) desktopList.innerHTML = '<div style="text-align:center; padding: 20px; color: #f4212e;">Error loading feed.</div>';
+    // Get Avatar HTML (Image or Placeholder)
+    getAvatarHtml(channel) {
+        if (channel.avatarUrl) {
+            return `<img src="${this.escapeHtml(channel.avatarUrl)}" alt="${this.escapeHtml(channel.channelName)}">`;
         }
-    }
+        const initial = channel.channelName ? channel.channelName.charAt(0).toUpperCase() : '?';
+        const bgColors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+        const color = bgColors[(channel.id || 0) % bgColors.length];
+        return `<div class="avatar-placeholder" style="background-color: ${color};">${this.escapeHtml(initial)}</div>`;
+    },
 
-    createDesktopChatItem(channel, latestPost) {
-        const el = document.createElement('div');
-        el.className = 'chat-item';
-        el.setAttribute('data-channel-id', channel.id);
-
-        const safeChannelName = escapeHTML(channel.name);
-        const safePreview = escapeHTML(latestPost ? latestPost.text.substring(0, 50) + '...' : 'No posts yet');
-        const timeStr = latestPost ? escapeHTML(latestPost.timestamp) : '';
-
-        el.innerHTML = `
-            <div class="avatar"><img src="${channel.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}"></div>
-            <div class="chat-info">
-                <div class="chat-header-row">
-                    <div class="chat-title">${safeChannelName} <svg class="verified-icon" viewBox="0 0 24 24"><path d="M12 2L15.09 5.09L19.5 4.5L20.09 8.91L23.18 12L20.09 15.09L19.5 19.5L15.09 18.91L12 22L8.91 18.91L4.5 19.5L3.91 15.09L0.82 12L3.91 8.91L4.5 4.5L8.91 5.09L12 2ZM10.5 15L17.5 8L16.09 6.59L10.5 12.17L7.91 9.59L6.5 11L10.5 15Z"/></svg></div>
-                </div>
-                <div class="chat-preview">${safePreview}</div>
-            </div>
-            <div class="chat-meta">
-                <div class="chat-time">${timeStr}</div>
-            </div>
-        `;
-        return el;
-    }
-
-    renderDesktopChat(channelId) {
-        const mainChat = document.getElementById('dt-main-chat');
-        if (!mainChat) return;
-
-        const channel = this.data.channels.find(c => c.id === channelId);
-        if (!channel) return;
-
-        const safeChannelName = escapeHTML(channel.name);
-        const posts = this.data.posts.filter(p => p.channelId === channelId);
-
-        let postsHTML = posts.map(post => {
-            const safePostText = escapeHTML(post.text);
-            let mediaHTML = '';
-            if (post.media) {
-                mediaHTML = `<div class="msg-media"><img src="${post.media}" alt="Post media"></div>`;
-            }
-
-            // Map reactions
-            let reactionsHTML = '';
-            if (post.reactions && post.reactions.length > 0) {
-                reactionsHTML = post.reactions.map(r => `
-                    <div class="reaction">
-                        ${tgIcons[r.type] || tgIcons.like}
-                        ${r.count}
-                    </div>
-                `).join('');
-            }
-
+    // Get Media HTML
+    getMediaHtml(media) {
+        if (!media) return '';
+        if (media.type === 'photo' && media.url) {
             return `
-                <div class="message-bubble">
-                    <div class="msg-author">${safeChannelName}</div>
-                    <div class="msg-text">${safePostText}</div>
-                    ${mediaHTML}
-                    <div class="msg-footer">
-                        <div class="reactions">${reactionsHTML}</div>
-                        <div class="msg-meta">
-                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                            ${post.views || ''}
-                            <span>${post.timestamp}</span>
-                        </div>
-                    </div>
-                    <div class="forward-btn">
-                        <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
-                    </div>
-                </div>
-            `;
-        }).reverse().join(''); // Reverse to show oldest top (or keep chronological)
-
-        mainChat.innerHTML = `
-            <div class="chat-header">
-                <div class="chat-header-info">
-                    <div class="header-avatar"><img src="${channel.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}"></div>
-                    <div class="header-text">
-                        <div class="header-title">${safeChannelName}</div>
-                        <div class="header-subtitle">Channel</div>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M7 12h10v2H7z"/></svg>
-                    <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                </div>
-            </div>
-            <div class="chat-history">
-                ${postsHTML}
-            </div>
-            <div class="chat-input">
-                ОТКЛ. УВЕДОМЛЕНИЯ
-            </div>
-        `;
-    }
-
-    createPostCard(post, channel) {
-        const el = document.createElement('div');
-        el.className = 'post';
-        el.setAttribute('data-post-id', post.id);
-
-        let reactionsHTML = '';
-        if (post.reactions && post.reactions.length > 0) {
-            reactionsHTML = post.reactions.map(r => `
-                <div class="reaction-pill ${r.active ? 'active' : ''}" data-reaction-type="${r.type}">
-                    ${tgIcons[r.type] || tgIcons.like} <span>${r.count}</span>
-                </div>
-            `).join('');
+            <div class="post-media">
+                <img src="${this.escapeHtml(media.url)}" alt="Post media">
+            </div>`;
         }
+        return '';
+    },
 
-        let mediaHTML = '';
-        if (post.media) {
-            mediaHTML = `<img src="${post.media}" style="width:100%; border-radius:12px; margin-top:12px;" alt="Post media">`;
+    // Get Reactions HTML (Telegram UI styling)
+    getReactionsHtml(reactions) {
+        if (!reactions || !reactions.results || reactions.results.length === 0) return '';
+        let html = '<div class="tg-reactions">';
+        for (const reaction of reactions.results) {
+            let emoji = reaction.reaction;
+            if (typeof emoji !== 'string') {
+                if (emoji.emoticon) emoji = emoji.emoticon;
+                else emoji = '👍'; // fallback
+            }
+            html += `
+            <div class="tg-reaction">
+                <span class="tg-reaction-emoji">${this.escapeHtml(emoji)}</span>
+                <span class="tg-reaction-count">${this.formatCount(reaction.count)}</span>
+            </div>`;
         }
+        html += '</div>';
+        return html;
+    },
 
-        const safeChannelName = escapeHTML(channel?.name || 'Unknown Channel');
-        const safePostText = escapeHTML(post.text);
+    // Render a single post item (X Grid structure, Telegram UI details)
+    post(post, isThread = false) {
+        const avatar = this.getAvatarHtml(post);
+        const media = post.media ? `<div class="post-media"><img src="${this.escapeHtml(post.media)}" alt="Media"></div>` : "";
+        const reactions = "";
+        const text = this.formatText(post.text, post.entities);
 
-        el.innerHTML = `
-            <img src="${channel?.avatar || '/assets/reactions/default-avatar.svg'}" alt="${safeChannelName}" class="avatar" data-channel-id="${channel?.id}">
-            <div class="post-content-wrap">
+        // Use generic icons for X actions
+        const commentIcon = `<svg viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"></path></svg>`;
+        const repostIcon = `<svg viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"></path></svg>`;
+        const likeIcon = `<svg viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"></path></svg>`;
+        const viewIcon = `<svg viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></svg>`;
+
+        const onclickAttr = !isThread ? `onclick="app.openThread('${post.channelId}', '${post.id}')"` : '';
+
+        return `
+        <article class="post" ${onclickAttr} data-id="${post.id}">
+            <div class="post-avatar">${avatar}</div>
+            <div class="post-content-area">
                 <div class="post-header">
-                    <div class="post-meta">
-                        <span class="channel-name">${safeChannelName} ${tgIcons.verified}</span>
-                        <span class="post-time">· ${post.timestamp}</span>
-                    </div>
+                    <span class="post-author">${this.escapeHtml(post.channelName)}</span>
+                    <span class="post-meta">· ${this.formatDate(post.date)}</span>
                 </div>
-                <div class="post-text">${safePostText}</div>
-                ${mediaHTML}
-                <div class="post-footer">
-                    ${reactionsHTML}
-                </div>
-                <div class="action-bar">
-                    <button class="action-btn">
-                        ${tgIcons.comment} ${post.commentsCount || ''}
+                <div class="post-text">${text}</div>
+                ${media}
+                ${reactions}
+                <div class="post-actions">
+                    <button class="action-btn comment">
+                        ${commentIcon}
+                        <span>${this.formatCount(post.metrics?.comments || 0)}</span>
                     </button>
-                    <button class="action-btn">
-                        ${tgIcons.repost} ${post.sharesCount || ''}
+                    <button class="action-btn repost">
+                        ${repostIcon}
+                        <span>${this.formatCount(post.metrics?.reposts || 0)}</span>
                     </button>
-                    <button class="action-btn">
-                        <!-- Views eye -->
-                        <svg class="icon-stroke" viewBox="0 0 24 24" style="stroke-width:1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        ${post.views || ''}
+                    <button class="action-btn like">
+                        ${likeIcon}
+                        <span>${this.formatCount(post.metrics?.likes || 0)}</span>
                     </button>
-                    <button class="action-btn">
-                        ${tgIcons.share}
+                    <button class="action-btn view">
+                        ${viewIcon}
+                        <span>${this.formatCount(post.metrics?.views || 0)}</span>
                     </button>
                 </div>
             </div>
+        </article>
         `;
+    },
 
-        // Add reaction toggle listener (preventing bubbling to navigate)
-        const pills = el.querySelectorAll('.reaction-pill');
-        pills.forEach(pill => {
-            pill.addEventListener('click', (e) => {
-                e.stopPropagation();
-                pill.classList.toggle('active');
-            });
-        });
+    feed(posts) {
+        if (!posts || posts.length === 0) {
+            return '<div style="padding: 20px; text-align: center; color: var(--x-text-secondary);">No posts found. Make sure you are subscribed to channels.</div>';
+        }
+        return posts.map(p => this.post(p)).join('');
+    },
 
-        return el;
-    }
-
-    async renderPostDetail(postId) {
-        // Handle id types
-        const post = this.data.posts.find(p => p.id.toString() === postId.toString());
-        if (!post) return;
-
-        const channel = this.data.channels.find(c => c.id === post.channelId);
-        if (!channel) return;
-
-        const container = document.getElementById('post-detail-container');
-        if (container) {
-            container.innerHTML = '';
-
-            let mediaHTML = '';
-            if (post.media) {
-                mediaHTML = `<img src="${post.media}" style="width:100%; border-radius:12px; margin-top:12px;" alt="Post media">`;
-            }
-
-            const safeChannelName = escapeHTML(channel.name);
-            const safeUsername = escapeHTML(channel.username);
-            const safePostText = escapeHTML(post.text);
-
-            const postHtml = `
-                <div style="padding: 16px;">
-                    <div style="display:flex; gap:12px; margin-bottom:12px;">
-                        <img src="${channel.avatar}" alt="" class="avatar" data-channel-id="${channel.id}">
-                        <div>
-                            <div class="channel-name">${safeChannelName} ${tgIcons.verified}</div>
-                            <div class="post-time">@${safeUsername}</div>
-                        </div>
-                    </div>
-                    <div class="post-text" style="font-size:16px;">${safePostText}</div>
-                    ${mediaHTML}
-                    <div class="post-time" style="margin-top:12px;">${post.timestamp} · ${post.date} · <strong>${post.views || '1M'}</strong> Просмотры</div>
+    comment(comment) {
+        const avatar = this.getAvatarHtml({channelName: comment.author.title, avatarUrl: null});
+        const text = this.formatText(comment.text, comment.entities);
+        return `
+        <article class="post" data-id="${comment.id}">
+            <div class="post-avatar">${avatar}</div>
+            <div class="post-content-area">
+                <div class="post-header">
+                    <span class="post-author">${this.escapeHtml(comment.author.title)}</span>
+                    <span class="post-meta">· ${this.formatDate(comment.date)}</span>
                 </div>
-            `;
-            container.innerHTML = postHtml;
-        }
+                <div class="post-text">${text}</div>
+            </div>
+        </article>
+        `;
+    },
 
-        // Fill stats
-        const likesCountEl = document.getElementById('stats-likes');
-        if (likesCountEl && post.reactions) {
-            likesCountEl.innerText = post.reactions.reduce((sum, r) => sum + r.count, 0).toLocaleString();
+    comments(comments) {
+        if (!comments || comments.length === 0) {
+            return '<div style="padding: 20px; text-align: center; color: var(--x-text-secondary);">No comments yet.</div>';
         }
-
-        // Fill actions
-        const actionContainer = document.getElementById('detail-actions');
-        if (actionContainer) {
-            actionContainer.innerHTML = `
-                <button class="action-btn">${tgIcons.comment}</button>
-                <button class="action-btn">${tgIcons.repost}</button>
-                <button class="action-btn">${tgIcons.heart}</button>
-                <button class="action-btn">${tgIcons.bookmark}</button>
-                <button class="action-btn">${tgIcons.share}</button>
-            `;
-        }
-
-        // Fetch and Render actual comments via API
-        await this.renderComments(channel.id, postId, channel.username);
+        return comments.map(c => this.comment(c)).join('');
     }
-
-    async renderComments(channelId, postId, channelUsername) {
-        const container = document.getElementById('comments-container');
-        if (!container) return;
-
-        container.innerHTML = '<div style="padding:20px; text-align:center;">Загрузка комментариев...</div>';
-
-        try {
-            const response = await fetch(`/api/comments/${channelId}/${postId}`);
-            if (!response.ok) throw new Error('Failed to fetch comments');
-            const data = await response.json();
-
-            container.innerHTML = '';
-
-            if (!data.comments || data.comments.length === 0) {
-                container.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary);">Нет ответов</div>';
-                return;
-            }
-
-            data.comments.forEach(comment => {
-                const commentEl = document.createElement('div');
-                commentEl.className = 'comment';
-
-                const safeCommentName = escapeHTML(comment.name);
-                const safeCommentUser = escapeHTML(comment.username);
-                const safeCommentText = escapeHTML(comment.text);
-                const replyToUser = escapeHTML(channelUsername || 'channel');
-
-                // Replicating the screenshot's nested comment look
-                commentEl.innerHTML = `
-                    <div class="comment-thread-line"></div>
-                    <img src="${comment.avatar}" alt="${safeCommentName}" class="avatar">
-                    <div style="flex-grow:1; min-width:0;">
-                        <div class="comment-header">
-                            <span class="comment-name">${safeCommentName} ${comment.verified ? tgIcons.verified : ''}</span>
-                            <span class="comment-username">@${safeCommentUser} · ${comment.timestamp}</span>
-                        </div>
-                        <div class="reply-context">
-                            В ответ <a href="#">@${replyToUser}</a>
-                        </div>
-                        <div class="comment-text">${safeCommentText}</div>
-                        <div class="comment-actions">
-                            <button class="action-btn">${tgIcons.comment} ${comment.repliesCount || ''}</button>
-                            <button class="action-btn">${tgIcons.repost}</button>
-                            <button class="action-btn">${tgIcons.like} ${comment.likes || ''}</button>
-                            <button class="action-btn">
-                                <svg class="icon-stroke" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
-                            <button class="action-btn">${tgIcons.share}</button>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(commentEl);
-            });
-        } catch (error) {
-            console.error('Error loading comments:', error);
-            container.innerHTML = '<div style="padding:20px; text-align:center; color:#f4212e;">Не удалось загрузить комментарии</div>';
-        }
-    }
-
-    renderProfile(channelId) {
-        const channel = this.data.channels.find(c => c.id.toString() === channelId.toString());
-        if (!channel) return;
-
-        const nameEl = document.getElementById('profile-name');
-        if (nameEl) nameEl.innerHTML = `${escapeHTML(channel.name)} ${tgIcons.verified}`;
-
-        const usernameEl = document.getElementById('profile-username');
-        if (usernameEl) usernameEl.innerText = `@${escapeHTML(channel.username)}`;
-
-        const bioEl = document.getElementById('profile-bio');
-        if (bioEl) bioEl.innerText = escapeHTML(channel.description);
-
-        const subsEl = document.getElementById('profile-subscribers');
-        if (subsEl) subsEl.innerText = escapeHTML(channel.subscribers);
-
-        const avatar = document.getElementById('profile-avatar');
-        if (avatar) avatar.src = channel.avatar;
-
-        // Render feed for profile
-        const profileFeed = document.getElementById('profile-feed');
-        if (profileFeed) {
-            profileFeed.innerHTML = '';
-            const channelPosts = this.data.posts.filter(p => p.channelId.toString() === channelId.toString());
-            channelPosts.forEach(post => {
-                const postEl = this.createPostCard(post, channel);
-                profileFeed.appendChild(postEl);
-            });
-            if (channelPosts.length === 0) {
-                 profileFeed.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-secondary);">Здесь пока ничего нет.</div>';
-            }
-        }
-    }
-}
-
-// Global instance
-window.RenderManager = new RenderManager();
+};

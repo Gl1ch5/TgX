@@ -1,0 +1,312 @@
+/* Auth Specific */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--tg-bg-color);
+}
+
+.auth-box {
+    background: var(--tg-bg-secondary);
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+.auth-logo {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+.auth-box h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: var(--tg-text-color);
+}
+
+.auth-subtitle {
+    color: var(--tg-text-secondary);
+    font-size: 15px;
+    margin-bottom: 24px;
+}
+
+/* Post Components (Telegram Design, X Grid) */
+.post {
+    display: flex;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--x-border-color);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.post-avatar {
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.post-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.post-content-area {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.post-author {
+    font-weight: 700;
+    color: var(--x-text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+}
+
+.post-meta {
+    color: var(--x-text-secondary);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.post-text {
+    font-size: 15px;
+    line-height: 1.4;
+    word-break: break-word;
+    margin-bottom: 12px;
+}
+
+.post-media {
+    margin-top: 12px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--x-border-color);
+}
+
+.post-media img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Actions */
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    max-width: 425px;
+    margin-top: 12px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    color: var(--x-text-secondary);
+    font-size: 13px;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.action-btn svg {
+    width: 18.75px;
+    height: 18.75px;
+    margin-right: 4px;
+    fill: currentColor;
+}
+
+.action-btn:hover {
+    color: var(--tg-primary-color);
+}
+
+.action-btn.comment:hover {
+    color: rgb(29, 155, 240);
+}
+
+.action-btn.repost:hover {
+    color: rgb(0, 186, 124);
+}
+
+.action-btn.like:hover {
+    color: rgb(249, 24, 128);
+}
+
+/* Telegram Specific Reactions */
+.tg-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.tg-reaction {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.tg-reaction:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tg-reaction.selected {
+    background-color: rgba(51, 144, 236, 0.15);
+    border-color: rgba(51, 144, 236, 0.4);
+    color: var(--tg-primary-color);
+}
+
+.tg-reaction-emoji {
+    font-size: 16px;
+    margin-right: 4px;
+    display: inline-block;
+}
+
+.tg-reaction-count {
+    color: var(--x-text-color);
+    font-weight: 500;
+}
+
+/* Reply Box */
+.reply-box {
+    display: flex;
+    padding: 16px;
+    border-bottom: 1px solid var(--x-border-color);
+    align-items: center;
+}
+
+.reply-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--tg-primary-color);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.reply-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: var(--x-text-color);
+    font-size: 20px;
+    outline: none;
+    padding: 12px 0;
+}
+
+.reply-input::placeholder {
+    color: var(--x-text-secondary);
+}
+
+#send-reply-btn {
+    width: auto;
+    border-radius: 9999px;
+    padding: 8px 16px;
+    font-weight: 700;
+    margin-left: 12px;
+}
+
+/* Loading */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--tg-primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 40px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.back-btn {
+    margin-right: 20px;
+    color: var(--x-text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.thread-main-post {
+    border-bottom: 1px solid var(--x-border-color);
+}
+
+.thread-main-post .post {
+    border-bottom: none;
+    padding: 16px;
+}
+
+.thread-main-post .post-text {
+    font-size: 17px;
+}
+
+.thread-main-post .post-avatar img {
+    width: 48px;
+    height: 48px;
+}
+
+/* Markdown Support */
+.post-text a {
+    color: var(--tg-primary-color);
+    text-decoration: none;
+}
+.post-text a:hover {
+    text-decoration: underline;
+}
+.post-text b {
+    font-weight: 700;
+}
+.post-text i {
+    font-style: italic;
+}
+.post-text code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}

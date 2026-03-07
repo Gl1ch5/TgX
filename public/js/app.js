@@ -1,316 +1,203 @@
-// Main Application Logic & Router
+const app = {
+    state: {
+        phone: '',
+        phoneCodeHash: '',
+        feedPosts: []
+    },
 
-const appState = {
-    currentView: 'login', // 'login', 'feed', 'post-detail', 'profile'
-    activePostId: null,
-    activeProfileId: null,
-    isAuthenticated: false,
-    phoneData: {}, // Store phoneCodeHash during login flow
-    isDesktop: window.innerWidth > 768
-};
+    elements: {
+        views: {
+            auth: document.getElementById('auth-view'),
+            main: document.getElementById('main-view'),
+            thread: document.getElementById('thread-view')
+        },
+        auth: {
+            steps: {
+                1: document.getElementById('auth-step-1'),
+                2: document.getElementById('auth-step-2'),
+                3: document.getElementById('auth-step-3')
+            },
+            phoneInput: document.getElementById('phone-input'),
+            codeInput: document.getElementById('code-input'),
+            passwordInput: document.getElementById('password-input'),
+            sendCodeBtn: document.getElementById('send-code-btn'),
+            verifyCodeBtn: document.getElementById('verify-code-btn'),
+            verifyPasswordBtn: document.getElementById('verify-password-btn'),
+            error: document.getElementById('auth-error')
+        },
+        feedContainer: document.getElementById('feed-container'),
+        threadPost: document.getElementById('thread-post'),
+        commentsContainer: document.getElementById('comments-container'),
+        logoutBtn: document.getElementById('logout-btn')
+    },
 
-// Listen to resize to update layout (simple implementation, reload is better for structural changes)
-window.addEventListener('resize', () => {
-    const newIsDesktop = window.innerWidth > 768;
-    if (newIsDesktop !== appState.isDesktop) {
-        appState.isDesktop = newIsDesktop;
-        window.location.reload(); // Reload to fetch correct templates
-    }
-});
+    init() {
+        this.bindEvents();
+        this.checkAuthStatus();
+    },
 
-class Router {
-    constructor() {
-        this.mainContent = document.getElementById('app');
-        this.views = {};
-        this.init();
-    }
+    bindEvents() {
+        this.elements.auth.sendCodeBtn.addEventListener('click', () => this.handleSendCode());
+        this.elements.auth.verifyCodeBtn.addEventListener('click', () => this.handleVerifyCode());
+        this.elements.auth.verifyPasswordBtn.addEventListener('click', () => this.handleVerifyPassword());
+        this.elements.logoutBtn.addEventListener('click', () => this.handleLogout());
 
-    async init() {
-        appState.isAuthenticated = document.cookie.includes('authenticated=true');
+        // Allow Enter key to trigger buttons
+        this.elements.auth.phoneInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSendCode();
+        });
+        this.elements.auth.codeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleVerifyCode();
+        });
+        this.elements.auth.passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleVerifyPassword();
+        });
+    },
 
-        // Load specific CSS
-        const head = document.head;
-        const cssFolder = appState.isDesktop ? 'desktop' : 'mobile';
+    showError(msg) {
+        this.elements.auth.error.textContent = msg;
+    },
 
-        const loadCSS = (href) => {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            head.appendChild(link);
-        };
+    showView(viewName) {
+        Object.values(this.elements.views).forEach(v => v.classList.remove('active'));
+        Object.values(this.elements.views).forEach(v => v.classList.add('hidden'));
 
-        if (appState.isDesktop) {
-            loadCSS('/css/desktop/feed.css');
-            // Desktop login uses mobile login styles for simplicity right now
-            loadCSS('/css/mobile/login.css');
-        } else {
-            loadCSS('/css/mobile/main.css');
-            loadCSS('/css/mobile/feed.css');
-            loadCSS('/css/mobile/post-detail.css');
-            loadCSS('/css/mobile/profile.css');
-            loadCSS('/css/mobile/login.css');
-        }
+        this.elements.views[viewName].classList.remove('hidden');
+        this.elements.views[viewName].classList.add('active');
 
-        // Load HTML templates into the DOM
-        await this.loadView('login', '/html/mobile/login.html'); // Shared login
+        // Ensure scroll to top
+        window.scrollTo(0, 0);
+    },
 
-        if (appState.isDesktop) {
-            await this.loadView('feed', '/html/desktop/feed.html');
-        } else {
-            await this.loadView('feed', '/html/mobile/feed.html');
-            await this.loadView('post-detail', '/html/mobile/post-detail.html');
-            await this.loadView('profile', '/html/mobile/profile.html');
-        }
+    showAuthStep(step) {
+        Object.values(this.elements.auth.steps).forEach(s => s.classList.remove('active'));
+        Object.values(this.elements.auth.steps).forEach(s => s.classList.add('hidden'));
+        this.elements.auth.steps[step].classList.remove('hidden');
+        this.elements.auth.steps[step].classList.add('active');
+        this.showError('');
+    },
 
-        this.setupEventListeners();
-
-        if (appState.isAuthenticated) {
-            this.navigate('feed');
-        } else {
-            this.navigate('login');
-        }
-    }
-
-    async loadView(id, url) {
+    async checkAuthStatus() {
         try {
-            const response = await fetch(url);
-            const html = await response.text();
-
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-
-            const viewElement = tempDiv.firstElementChild;
-            if (viewElement) {
-                this.mainContent.appendChild(viewElement);
-                this.views[id] = viewElement;
-
-                viewElement.classList.add('hidden');
-                viewElement.style.display = 'none';
-                if (!viewElement.id) viewElement.id = `${id}-view`;
+            const isAuth = await api.checkAuth();
+            if (isAuth) {
+                this.showView('main');
+                this.loadFeed();
+            } else {
+                this.showView('auth');
+                this.showAuthStep(1);
             }
         } catch (error) {
-            console.error(`Failed to load view ${id}:`, error);
+            console.error('Auth check failed:', error);
+            this.showView('auth');
         }
-    }
+    },
 
-    navigate(viewId, param = null) {
-        if (!appState.isAuthenticated && viewId !== 'login') {
-            viewId = 'login';
+    async handleSendCode() {
+        this.state.phone = this.elements.auth.phoneInput.value.trim();
+        if (!this.state.phone) return this.showError('Phone number required');
+
+        this.elements.auth.sendCodeBtn.disabled = true;
+        this.showError('');
+
+        try {
+            this.state.phoneCodeHash = await api.sendPhone(this.state.phone);
+            this.showAuthStep(2);
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            this.elements.auth.sendCodeBtn.disabled = false;
         }
+    },
 
-        Object.values(this.views).forEach(view => {
-            if (view) {
-                view.classList.add('hidden');
-                view.style.display = 'none';
+    async handleVerifyCode() {
+        const code = this.elements.auth.codeInput.value.trim();
+        if (!code) return this.showError('Code required');
+
+        this.elements.auth.verifyCodeBtn.disabled = true;
+        this.showError('');
+
+        try {
+            const res = await api.verifyCode(this.state.phone, code, this.state.phoneCodeHash);
+            if (res.needsPassword) {
+                this.showAuthStep(3);
+            } else {
+                this.showView('main');
+                this.loadFeed();
             }
-        });
-
-        if (this.views[viewId]) {
-            this.views[viewId].classList.remove('hidden');
-            this.views[viewId].style.display = '';
-
-            // Only scroll to top if on mobile
-            if (!appState.isDesktop) {
-                window.scrollTo(0, 0);
-            }
-
-            appState.currentView = viewId;
-
-            if (viewId === 'login') {
-                this.bindLoginEvents();
-            } else if (viewId === 'feed') {
-                if (window.RenderManager) window.RenderManager.renderFeed();
-            } else if (viewId === 'post-detail' && param) {
-                appState.activePostId = param;
-                if (window.RenderManager) window.RenderManager.renderPostDetail(param);
-            } else if (viewId === 'profile' && param) {
-                appState.activeProfileId = param;
-                if (window.RenderManager) window.RenderManager.renderProfile(param);
-            }
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            this.elements.auth.verifyCodeBtn.disabled = false;
         }
-    }
+    },
 
-    bindLoginEvents() {
-        const sendCodeBtn = document.getElementById('sendCodeBtn');
-        const loginBtn = document.getElementById('loginBtn');
-        const passwordBtn = document.getElementById('passwordBtn');
+    async handleVerifyPassword() {
+        const password = this.elements.auth.passwordInput.value.trim();
+        if (!password) return this.showError('Password required');
 
-        if (sendCodeBtn && !sendCodeBtn.dataset.bound) {
-            sendCodeBtn.dataset.bound = true;
-            sendCodeBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const phoneNumber = document.getElementById('phoneNumber').value.trim();
-                const errorDiv = document.getElementById('phoneError');
-                errorDiv.style.display = 'none';
+        this.elements.auth.verifyPasswordBtn.disabled = true;
+        this.showError('');
 
-                if (!phoneNumber) {
-                    errorDiv.innerText = "Please enter a valid phone number.";
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                sendCodeBtn.disabled = true;
-                sendCodeBtn.innerText = "Sending...";
-
-                try {
-                    const res = await fetch('/api/auth/sendCode', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ phoneNumber })
-                    });
-
-                    const data = await res.json();
-
-                    if (data.success) {
-                        appState.phoneData.phoneNumber = phoneNumber;
-                        appState.phoneData.phoneCodeHash = data.phoneCodeHash;
-                        document.getElementById('step1').style.display = 'none';
-                        document.getElementById('step2').style.display = 'block';
-                    } else {
-                        throw new Error(data.error || "Failed to send code");
-                    }
-                } catch (err) {
-                    errorDiv.innerText = err.message;
-                    errorDiv.style.display = 'block';
-                    sendCodeBtn.disabled = false;
-                    sendCodeBtn.innerText = "Send Code";
-                }
-            });
+        try {
+            await api.verifyPassword(password);
+            this.showView('main');
+            this.loadFeed();
+        } catch (error) {
+            this.showError(error.message);
+        } finally {
+            this.elements.auth.verifyPasswordBtn.disabled = false;
         }
+    },
 
-        if (loginBtn && !loginBtn.dataset.bound) {
-            loginBtn.dataset.bound = true;
-            loginBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const phoneCode = document.getElementById('authCode').value.trim();
-                const errorDiv = document.getElementById('codeError');
-                errorDiv.style.display = 'none';
-
-                if (!phoneCode) {
-                    errorDiv.innerText = "Please enter the verification code.";
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                loginBtn.disabled = true;
-                loginBtn.innerText = "Logging in...";
-
-                try {
-                    const res = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            phoneNumber: appState.phoneData.phoneNumber,
-                            phoneCodeHash: appState.phoneData.phoneCodeHash,
-                            phoneCode: phoneCode
-                        })
-                    });
-
-                    const data = await res.json();
-
-                    if (data.success) {
-                        appState.isAuthenticated = true;
-                        this.navigate('feed');
-                    } else if (data.requiresPassword) {
-                        document.getElementById('step2').style.display = 'none';
-                        document.getElementById('step3').style.display = 'block';
-                        loginBtn.innerText = "Log In";
-                    } else {
-                        throw new Error(data.error || "Failed to log in");
-                    }
-                } catch (err) {
-                    errorDiv.innerText = err.message;
-                    errorDiv.style.display = 'block';
-                    loginBtn.disabled = false;
-                    loginBtn.innerText = "Log In";
-                }
-            });
+    async handleLogout() {
+        try {
+            await api.logout();
+            this.showView('auth');
+            this.showAuthStep(1);
+        } catch (error) {
+            console.error('Logout failed:', error);
         }
+    },
 
-        if (passwordBtn && !passwordBtn.dataset.bound) {
-            passwordBtn.dataset.bound = true;
-            passwordBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const password = document.getElementById('cloudPassword').value;
-                const errorDiv = document.getElementById('passwordError');
-                errorDiv.style.display = 'none';
-
-                if (!password) {
-                    errorDiv.innerText = "Please enter your cloud password.";
-                    errorDiv.style.display = 'block';
-                    return;
-                }
-
-                passwordBtn.disabled = true;
-                passwordBtn.innerText = "Submitting...";
-
-                try {
-                    const res = await fetch('/api/auth/password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password })
-                    });
-
-                    const data = await res.json();
-
-                    if (data.success) {
-                        appState.isAuthenticated = true;
-                        this.navigate('feed');
-                    } else {
-                        throw new Error(data.error || "Failed to log in with password");
-                    }
-                } catch (err) {
-                    errorDiv.innerText = err.message;
-                    errorDiv.style.display = 'block';
-                    passwordBtn.disabled = false;
-                    passwordBtn.innerText = "Submit Password";
-                }
-            });
+    async loadFeed() {
+        this.elements.feedContainer.innerHTML = '<div class="loading-spinner"></div>';
+        try {
+            this.state.feedPosts = await api.getFeed();
+            this.elements.feedContainer.innerHTML = render.feed(this.state.feedPosts);
+        } catch (error) {
+            this.elements.feedContainer.innerHTML = `<div class="error-text">Failed to load feed: ${error.message}</div>`;
         }
-    }
+    },
 
-    setupEventListeners() {
-        if (!appState.isDesktop) {
-            // Mobile Specific Listeners
-            document.addEventListener('click', (e) => {
-                const backBtn = e.target.closest('#post-back-btn') || e.target.closest('#profile-back-btn');
-                if (backBtn) {
-                    this.navigate('feed');
-                }
+    showMainView() {
+        this.showView('main');
+    },
 
-                const postCard = e.target.closest('.post[data-post-id]');
-                if (postCard && !e.target.closest('.reaction-pill') && !e.target.closest('.avatar')) {
-                    const postId = postCard.getAttribute('data-post-id');
-                    this.navigate('post-detail', postId);
-                }
+    openThread(channelId, msgId) {
+        this.showView('thread');
+        this.elements.threadPost.innerHTML = '<div class="loading-spinner"></div>';
+        this.elements.commentsContainer.innerHTML = '<div class="loading-spinner"></div>';
 
-                const avatar = e.target.closest('.avatar[data-channel-id]');
-                if (avatar) {
-                    e.stopPropagation();
-                    const channelId = avatar.getAttribute('data-channel-id');
-                    this.navigate('profile', channelId);
-                }
-            });
+        // Find main post from state
+        const post = this.state.feedPosts.find(p => p.id == msgId && p.channel.id == channelId);
+        if (post) {
+            this.elements.threadPost.innerHTML = render.post(post, true); // true = isThread view
         } else {
-            // Desktop Specific Listeners
-            document.addEventListener('click', (e) => {
-                // Click on left sidebar channel
-                const chatItem = e.target.closest('.chat-item');
-                if (chatItem) {
-                    // Update active state
-                    document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-                    chatItem.classList.add('active');
+            this.elements.threadPost.innerHTML = '<div class="error-text">Post not found</div>';
+        }
 
-                    const channelId = chatItem.getAttribute('data-channel-id');
-                    if (window.RenderManager) {
-                        window.RenderManager.renderDesktopChat(channelId);
-                    }
-                }
-            });
+        this.loadComments(channelId, msgId);
+    },
+
+    async loadComments(channelId, msgId) {
+        try {
+            const comments = await api.getComments(channelId, msgId);
+            this.elements.commentsContainer.innerHTML = render.comments(comments);
+        } catch (error) {
+            this.elements.commentsContainer.innerHTML = `<div class="error-text">Failed to load comments: ${error.message}</div>`;
         }
     }
-}
+};
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.AppRouter = new Router();
-});
+document.addEventListener('DOMContentLoaded', () => app.init());
