@@ -23,7 +23,9 @@ async function initClient() {
             connectionRetries: 5,
             deviceModel: "Desktop",
             systemVersion: "Windows 10",
-            appVersion: "1.0.0"
+            appVersion: "4.15.0",
+            langCode: "ru",
+            systemLangCode: "ru"
         });
         await client.connect();
     }
