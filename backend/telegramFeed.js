@@ -22,22 +22,18 @@ async function getFeed() {
         // 2. Filter out ONLY channels (exclude groups and bots)
         const channels = dialogs.filter(d => d.isChannel && d.entity && d.entity.broadcast);
 
-        // 3. Collect messages
+        // 3. Collect messages concurrently using Promise.all to speed up the feed significantly
         let allMessages = [];
-        // Only fetch from top 10 channels to avoid flood wait for this prototype
-        const channelsToFetch = channels.slice(0, 10);
+        // Only fetch from top 8 channels to stay fast and avoid flood wait
+        const channelsToFetch = channels.slice(0, 8);
 
-        for (const channel of channelsToFetch) {
+        const channelPromises = channelsToFetch.map(async (channel) => {
             try {
                 const messages = await client.getMessages(channel.entity, { limit: 5 });
-
-                // Process channel info (like avatar) - Simplified for prototype to save performance
                 let avatarUrl = '/assets/reactions/default-avatar.svg';
 
-                for (const msg of messages) {
-                    // Extract relevant data
-
-                    // Defensive parsing for reactions due to potentially varied MTProto structures
+                // Process messages concurrently
+                const messagePromises = messages.map(async (msg) => {
                     let likesCount = 0;
                     let fireCount = 0;
                     if (msg.reactions && msg.reactions.results && Array.isArray(msg.reactions.results)) {
@@ -66,36 +62,40 @@ async function getFeed() {
                         }
                     };
 
-                    // 4. Download media if present (and not too big, prioritize photos for prototype)
+                    // Download media extremely fast (thumbnail preview size instead of full bytes)
                     if (msg.media && msg.media.photo) {
                         try {
-                            // Enforce a hard timeout so hanging downloads don't ruin the feed load
-                            const downloadPromise = client.downloadMedia(msg.media);
-                            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 3000));
+                            const downloadPromise = client.downloadMedia(msg.media, { thumb: 1 }); // '1' is the smallest size index usually available for thumbnail
+                            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 1500));
 
                             const buffer = await Promise.race([downloadPromise, timeoutPromise]);
 
                             if (buffer) {
                                 const filename = `post_${msg.id}_${Date.now()}.jpg`;
                                 const filepath = path.join(imgDir, filename);
-                                fs.writeFileSync(filepath, buffer);
+                                fs.promises.writeFile(filepath, buffer); // async write to not block execution
                                 postData.media = `/img/${filename}`;
                             }
                         } catch (mediaError) {
-                            console.error(`Media skipped for msg ${msg.id} (Timeout/Error)`);
+                            // Silently fail to keep logs clean, media just won't show
                         }
                     }
+                    return postData;
+                });
 
-                    allMessages.push(postData);
-                }
-
-                // Add a small delay to avoid FloodWait
-                await new Promise(r => setTimeout(r, 500));
-
+                const resolvedMessages = await Promise.all(messagePromises);
+                return resolvedMessages;
             } catch (chanErr) {
                 console.error(`Error fetching from channel ${channel.title}`, chanErr);
+                return [];
             }
-        }
+        });
+
+        // Wait for all channels to fetch concurrently
+        const results = await Promise.all(channelPromises);
+        results.forEach(channelPosts => {
+            allMessages.push(...channelPosts);
+        });
 
         // Sort chronologically (newest first)
         allMessages.sort((a, b) => b.date - a.date);

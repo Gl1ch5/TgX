@@ -1,4 +1,4 @@
 node_modules/
 session.txt
-.env
 server.log
+.env
