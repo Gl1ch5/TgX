@@ -1,5 +1,5 @@
 @echo off
 echo Starting TeleX Server...
-npm install
+call npm install
 node server.js
 pause
