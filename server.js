@@ -1,7 +1,8 @@
+require("dotenv").config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
-const { getClient, sendPhoneCode, signIn, signInWithPassword, logout } = require('./backend/telegramAuth');
+const { getClient, initClient, sendCode, login, loginWithPassword, logout } = require('./backend/telegramAuth');
 const { getFeed } = require('./backend/telegramFeed');
 const { getComments } = require('./backend/telegramComments');
 
@@ -12,7 +13,7 @@ const port = 8081;
 app.use(express.json());
 
 // Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Configure sessions
 app.use(session({
@@ -33,16 +34,22 @@ app.use((req, res, next) => {
 });
 
 // Main Route - serve the unified index.html
+// Serve static files based on device
+app.use((req, res, next) => {
+    const folder = req.isMobile ? 'mobile' : 'pc';
+    express.static(path.join(__dirname, 'public', folder))(req, res, next);
+});
+
+// Fallback index.html route explicitly checking req.isMobile again
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const folder = req.isMobile ? 'mobile' : 'pc';
+    res.sendFile(path.join(__dirname, 'public', folder, 'index.html'));
 });
 
 // Authentication Routes
 app.get('/api/auth/status', async (req, res) => {
     try {
-        const client = getClient();
-        if (!client) return res.json({ authenticated: false });
-        await client.connect();
+        const client = await initClient();
         const isAuth = await client.isUserAuthorized();
         res.json({ authenticated: isAuth });
     } catch (error) {
@@ -56,7 +63,8 @@ app.post('/api/auth/sendCode', async (req, res) => {
     if (!phone) return res.status(400).json({ error: 'Phone number is required' });
 
     try {
-        const phoneCodeHash = await sendPhoneCode(phone);
+        const result = await sendCode(phone);
+        const phoneCodeHash = result.phoneCodeHash;
         req.session.phone = phone; // Store phone in session
         res.json({ success: true, phoneCodeHash });
     } catch (error) {
@@ -70,7 +78,7 @@ app.post('/api/auth/verifyCode', async (req, res) => {
     if (!phone || !code || !phoneCodeHash) return res.status(400).json({ error: 'Missing parameters' });
 
     try {
-        const result = await signIn(phone, phoneCodeHash, code);
+        const result = await login(phone, phoneCodeHash, code);
         res.json({ success: true, needsPassword: false });
     } catch (error) {
         if (error.message.includes('SESSION_PASSWORD_NEEDED')) {
@@ -87,7 +95,7 @@ app.post('/api/auth/verifyPassword', async (req, res) => {
     if (!password) return res.status(400).json({ error: 'Password is required' });
 
     try {
-        await signInWithPassword(password);
+        await loginWithPassword(password);
         res.json({ success: true });
     } catch (error) {
         console.error('Password verification failed:', error);

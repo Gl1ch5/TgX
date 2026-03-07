@@ -101,11 +101,23 @@ async function isConnected() {
     return client.connected;
 }
 
+async function logout() {
+    if (client) {
+        await client.disconnect();
+        if (fs.existsSync(sessionFile)) {
+            fs.unlinkSync(sessionFile);
+        }
+        stringSession = new StringSession('');
+        client = null;
+    }
+}
+
 module.exports = {
     initClient,
     sendCode,
     login,
     loginWithPassword,
+    logout,
     isConnected,
     getClient: () => client
 };
