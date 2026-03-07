@@ -2,8 +2,8 @@ const { TelegramClient } = require('telegram');
 const { StringSession } = require('telegram/sessions');
 const fs = require('fs');
 
-const apiId = parseInt(process.env.API_ID);
-const apiHash = process.env.API_HASH;
+const apiId = 1234567; // Replace with your actual API_ID
+const apiHash = '0123456789abcdef0123456789abcdef'; // Replace with your actual API_HASH
 
 // Session management
 const sessionFile = 'session.txt';

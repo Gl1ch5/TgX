@@ -1,0 +1,6 @@
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+Telegram client server listening at http://localhost:8081
+[33m[2026-03-07T09:59:08.398] [INFO] - [Running gramJS version 2.26.21][0m
+[33m[2026-03-07T09:59:08.404] [INFO] - [Connecting to 149.154.167.91:80/TCPFull...][0m
+[33m[2026-03-07T09:59:10.102] [INFO] - [Connection to 149.154.167.91:80/TCPFull complete!][0m
+[33m[2026-03-07T09:59:10.103] [INFO] - [Using LAYER 198 for initial connect][0m

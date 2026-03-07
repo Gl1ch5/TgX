@@ -51,7 +51,22 @@ app.get('/api/auth/status', async (req, res) => {
     try {
         const client = await initClient();
         const isAuth = await client.isUserAuthorized();
-        res.json({ authenticated: isAuth });
+        if (isAuth) {
+            try {
+                // Perform a dummy request to check if 2FA is needed.
+                // If the user hasn't completed 2FA, this will throw SESSION_PASSWORD_NEEDED.
+                await client.getMe();
+                res.json({ authenticated: true });
+            } catch (err) {
+                if (err.message && err.message.includes('SESSION_PASSWORD_NEEDED')) {
+                    res.json({ authenticated: false, needsPassword: true });
+                } else {
+                    res.json({ authenticated: false });
+                }
+            }
+        } else {
+            res.json({ authenticated: false });
+        }
     } catch (error) {
         console.error('Auth status check failed:', error);
         res.json({ authenticated: false });
@@ -79,7 +94,11 @@ app.post('/api/auth/verifyCode', async (req, res) => {
 
     try {
         const result = await login(phone, phoneCodeHash, code);
-        res.json({ success: true, needsPassword: false });
+        if (result && result.requiresPassword) {
+            res.json({ success: true, needsPassword: true });
+        } else {
+            res.json({ success: true, needsPassword: false });
+        }
     } catch (error) {
         if (error.message.includes('SESSION_PASSWORD_NEEDED')) {
             res.json({ success: true, needsPassword: true });

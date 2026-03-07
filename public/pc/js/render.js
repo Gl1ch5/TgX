@@ -74,7 +74,14 @@ const render = {
     post(post, isThread = false) {
         const avatar = this.getAvatarHtml(post);
         const media = post.media ? `<div class="post-media"><img src="${this.escapeHtml(post.media)}" alt="Media"></div>` : "";
-        const reactions = "";
+        let reactions = '';
+        if (post.reactions && post.reactions.length > 0) {
+            reactions = '<div class="tg-reactions">';
+            for (const r of post.reactions) {
+                reactions += `<div class="tg-reaction"><span class="tg-reaction-emoji">${this.escapeHtml(r.emoji)}</span><span class="tg-reaction-count">${this.formatCount(r.count)}</span></div>`;
+            }
+            reactions += '</div>';
+        }
         const text = this.formatText(post.text, post.entities);
 
         // Use generic icons for X actions
@@ -107,7 +114,7 @@ const render = {
                     </button>
                     <button class="action-btn like">
                         ${likeIcon}
-                        <span>${this.formatCount(post.metrics?.likes || 0)}</span>
+                        <span></span>
                     </button>
                     <button class="action-btn view">
                         ${viewIcon}

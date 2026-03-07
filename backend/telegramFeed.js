@@ -49,13 +49,13 @@ async function getFeed() {
 
                 // Process messages concurrently
                 const messagePromises = messages.map(async (msg) => {
-                    let likesCount = 0;
-                    let fireCount = 0;
+                    let parsedReactions = [];
                     if (msg.reactions && msg.reactions.results && Array.isArray(msg.reactions.results)) {
-                        const like = msg.reactions.results.find(r => r.reaction && r.reaction.emoticon === '👍');
-                        if (like) likesCount = like.count || 0;
-                        const fire = msg.reactions.results.find(r => r.reaction && r.reaction.emoticon === '🔥');
-                        if (fire) fireCount = fire.count || 0;
+                        for (const r of msg.reactions.results) {
+                            if (r.reaction && r.reaction.emoticon) {
+                                parsedReactions.push({ emoji: r.reaction.emoticon, count: r.count });
+                            }
+                        }
                     }
 
                     // Handle BigInt views and comments safely
@@ -81,12 +81,11 @@ async function getFeed() {
                         text: msg.message || '',
                         media: null,
                         metrics: {
-                            likes: Number(likesCount),
                             comments: commentsCount,
                             reposts: repostsCount,
-                            views: viewsCount,
-                            fire: Number(fireCount)
-                        }
+                            views: viewsCount
+                        },
+                        reactions: parsedReactions
                     };
 
                     // Download media extremely fast (thumbnail preview size instead of full bytes)

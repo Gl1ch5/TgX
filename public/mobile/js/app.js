@@ -79,10 +79,13 @@ const app = {
 
     async checkAuthStatus() {
         try {
-            const isAuth = await api.checkAuth();
-            if (isAuth) {
+            const authData = await api.checkAuth();
+            if (authData.authenticated) {
                 this.showView('main');
                 this.loadFeed();
+            } else if (authData.needsPassword) {
+                this.showView('auth');
+                this.showAuthStep(3);
             } else {
                 this.showView('auth');
                 this.showAuthStep(1);

@@ -35,7 +35,7 @@ const api = {
     async checkAuth() {
         const response = await fetch('/api/auth/status');
         const data = await response.json();
-        return data.authenticated;
+        return data;
     },
 
     async logout() {
