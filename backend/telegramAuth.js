@@ -64,7 +64,34 @@ async function login(phoneNumber, phoneCodeHash, phoneCode) {
 
         return { success: true };
     } catch (e) {
+        if (e.message.includes('SESSION_PASSWORD_NEEDED')) {
+            return { success: false, requiresPassword: true };
+        }
         console.error("Error logging in:", e);
+        throw e;
+    }
+}
+
+async function loginWithPassword(password) {
+    const c = await initClient();
+    try {
+        // GramJS requires calling sign in with a computed SRP or the specific helper method
+        // Using built-in auth logic handling SRP
+        await c.signInWithPassword({
+            apiId: apiId,
+            apiHash: apiHash
+        }, {
+            password: async () => password
+        });
+
+        // Save session after successful login
+        const sessionString = c.session.save();
+        fs.writeFileSync(sessionFile, sessionString);
+        stringSession = new StringSession(sessionString);
+
+        return { success: true };
+    } catch (e) {
+        console.error("Error logging in with password:", e);
         throw e;
     }
 }
@@ -78,6 +105,7 @@ module.exports = {
     initClient,
     sendCode,
     login,
+    loginWithPassword,
     isConnected,
     getClient: () => client
 };

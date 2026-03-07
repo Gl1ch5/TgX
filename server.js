@@ -33,11 +33,31 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        await tgAuth.login(phoneNumber, phoneCodeHash, phoneCode);
+        const result = await tgAuth.login(phoneNumber, phoneCodeHash, phoneCode);
+
+        if (result && result.requiresPassword) {
+            return res.json({ success: false, requiresPassword: true });
+        }
+
         res.cookie('authenticated', 'true', { maxAge: 900000, httpOnly: false }); // Optional client-side flag
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message || 'Error logging in' });
+    }
+});
+
+app.post('/api/auth/password', async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+
+        await tgAuth.loginWithPassword(password);
+        res.cookie('authenticated', 'true', { maxAge: 900000, httpOnly: false });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message || 'Error with password' });
     }
 });
 

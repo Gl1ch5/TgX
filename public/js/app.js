@@ -108,6 +108,7 @@ class Router {
     bindLoginEvents() {
         const sendCodeBtn = document.getElementById('sendCodeBtn');
         const loginBtn = document.getElementById('loginBtn');
+        const passwordBtn = document.getElementById('passwordBtn');
 
         if (sendCodeBtn && !sendCodeBtn.dataset.bound) {
             sendCodeBtn.dataset.bound = true;
@@ -185,6 +186,11 @@ class Router {
                     if (data.success) {
                         appState.isAuthenticated = true;
                         this.navigate('feed');
+                    } else if (data.requiresPassword) {
+                        // Move to Step 3: Cloud Password
+                        document.getElementById('step2').style.display = 'none';
+                        document.getElementById('step3').style.display = 'block';
+                        loginBtn.innerText = "Log In"; // reset for later
                     } else {
                         throw new Error(data.error || "Failed to log in");
                     }
@@ -193,6 +199,47 @@ class Router {
                     errorDiv.style.display = 'block';
                     loginBtn.disabled = false;
                     loginBtn.innerText = "Log In";
+                }
+            });
+        }
+
+        if (passwordBtn && !passwordBtn.dataset.bound) {
+            passwordBtn.dataset.bound = true;
+            passwordBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const password = document.getElementById('cloudPassword').value;
+                const errorDiv = document.getElementById('passwordError');
+                errorDiv.style.display = 'none';
+
+                if (!password) {
+                    errorDiv.innerText = "Please enter your cloud password.";
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+
+                passwordBtn.disabled = true;
+                passwordBtn.innerText = "Submitting...";
+
+                try {
+                    const res = await fetch('/api/auth/password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        appState.isAuthenticated = true;
+                        this.navigate('feed');
+                    } else {
+                        throw new Error(data.error || "Failed to log in with password");
+                    }
+                } catch (err) {
+                    errorDiv.innerText = err.message;
+                    errorDiv.style.display = 'block';
+                    passwordBtn.disabled = false;
+                    passwordBtn.innerText = "Submit Password";
                 }
             });
         }
