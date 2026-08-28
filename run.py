@@ -4,8 +4,13 @@ import asyncio
 import webbrowser
 import uvicorn
 
-# Fix Windows ProactorEventLoop connection reset noise
+# Fix Windows encoding for emojis in console
 if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 # Ensure HTTP and HTTPS proxy are set in environment
