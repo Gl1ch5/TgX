@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.spec
+build/
+dist/
+
+# Telegram credentials and sessions
+*.session
+*.session-journal
+*.session*
+app/sessions/*.session
+app/sessions/*.session-journal
+app/sessions/*_cache.json
+app/media_cache/
+
+# Local tokens and configs
+.github_token
+.env
+*.log
