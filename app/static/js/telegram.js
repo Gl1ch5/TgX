@@ -8,6 +8,7 @@
  */
 
 import { TelegramClient, Api, utils, StringSession, computeCheck, bigInt } from './vendor/gramjs.js';
+import { getPrefs } from './core/prefs.js';
 
 // Telegram application credentials (https://my.telegram.org). Public by design:
 // every web client ships them; the user's own session is what grants access.
@@ -16,12 +17,12 @@ const API_HASH = '1462d961e4a7bf6b5139309255f09fd6';
 
 const LS = {
   session: 'telex.session',
+  me: 'telex.me',
   channels: 'telex.channels',
   posts: 'telex.posts',
   favorites: 'telex.favorites',
 };
 
-const FEED_CHANNELS = 20;
 const FEED_CONCURRENCY = 5;
 const POSTS_CACHE_LIMIT = 200;
 const STREAM_CHUNK = 512 * 1024;
@@ -48,6 +49,28 @@ function lsSet(key, value) {
 function lsDel(key) {
   try { localStorage.removeItem(key); } catch {}
 }
+
+// ---------------- Session persistence ----------------
+
+/**
+ * StringSession that writes itself to localStorage every time GramJS saves
+ * (new auth key, DC switch, reconnect). Empty saves never overwrite a good one.
+ */
+class PersistentSession extends StringSession {
+  constructor(value) {
+    super(value);
+    this.disabled = false;
+  }
+
+  save() {
+    const value = super.save();
+    if (value && !this.disabled) lsSet(LS.session, value);
+    return value;
+  }
+}
+
+const SESSION_DEAD = /AUTH_KEY_UNREGISTERED|AUTH_KEY_INVALID|SESSION_REVOKED|SESSION_EXPIRED|USER_DEACTIVATED/;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---------------- HTML formatting ----------------
 
@@ -135,6 +158,8 @@ class TelegramService {
     this.posts = new Map(Object.entries(lsGet(LS.posts, {})));
     this.favorites = new Map(Object.entries(lsGet(LS.favorites, {})));
     this.comments = new Map();
+    this.commentMsgs = new Map(); // "chatId/msgId" -> Api.Message (comment media)
+    this.discussions = new Map();
     this.dialogsLoaded = null;
     this.phone = null;
     this.phoneCodeHash = null;
@@ -149,7 +174,7 @@ class TelegramService {
     if (this.connecting) return this.connecting;
     this.connecting = (async () => {
       if (!this.client) {
-        const session = new StringSession(lsGet(LS.session, ''));
+        const session = new PersistentSession(lsGet(LS.session, ''));
         this.client = new TelegramClient(session, API_ID, API_HASH, {
           connectionRetries: 5,
           useWSS: true,
@@ -176,21 +201,51 @@ class TelegramService {
   }
 
   saveSession() {
-    lsSet(LS.session, this.client.session.save());
+    this.client.session.save();
   }
 
+  dropSession() {
+    if (this.client) this.client.session.disabled = true;
+    lsDel(LS.session);
+    lsDel(LS.me);
+    this.authorized = false;
+  }
+
+  /** Last known profile, so the UI can show who is logged in before connecting. */
+  cachedMe() {
+    return lsGet(LS.me, null);
+  }
+
+  /**
+   * True while the stored session is valid. Network failures are retried and
+   * never log the user out — only Telegram saying the key is revoked does.
+   */
   async isAuthorized() {
     if (this.authorized) return true;
     if (!this.hasSession()) return false;
-    try {
-      const client = await this.getClient();
-      this.authorized = await client.checkAuthorization();
-      return this.authorized;
-    } catch (e) {
-      console.error('[TeleX] auth check failed', e);
-      return false;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const client = await this.getClient();
+        await client.invoke(new Api.updates.GetState());
+        this.authorized = true;
+        this.saveSession();
+        return true;
+      } catch (e) {
+        const code = (e && e.errorMessage) || '';
+        if (SESSION_DEAD.test(code)) {
+          console.warn('[TeleX] session revoked:', code);
+          this.dropSession();
+          return false;
+        }
+        console.warn(`[TeleX] auth check failed (attempt ${attempt})`, e);
+        await sleep(1200 * attempt);
+      }
     }
+    // Offline or Telegram unreachable: keep the session, show cached data.
+    this.offline = true;
+    return true;
   }
+
 
   // ----- entities & avatars -----
 
@@ -206,12 +261,12 @@ class TelegramService {
     return key;
   }
 
-  avatarUrl(entity) {
+  avatarUrl(entity, big = false) {
     if (!entity) return null;
     const photo = entity.photo;
     if (!photo || photo instanceof Api.ChatPhotoEmpty || photo instanceof Api.UserProfilePhotoEmpty) return null;
     const key = this.rememberEntity(entity);
-    return `media/avatar/${key}/${photo.photoId}`;
+    return `media/${big ? 'avatarbig' : 'avatar'}/${key}/${photo.photoId}`;
   }
 
   formatUser(me) {
@@ -225,14 +280,50 @@ class TelegramService {
       phone: me.phone || '',
       premium: !!me.premium,
       avatar: this.avatarUrl(me),
+      avatar_big: this.avatarUrl(me, true),
     };
+  }
+
+  /** Bio and birthday of the logged-in user (users.getFullUser). */
+  async getFullMe() {
+    const client = await this.getClient();
+    const res = await client.invoke(new Api.users.GetFullUser({ id: new Api.InputUserSelf() }));
+    const full = res.fullUser || {};
+    const b = full.birthday;
+    return {
+      about: full.about || '',
+      birthday: b ? { day: b.day, month: b.month, year: b.year || null } : null,
+    };
+  }
+
+  /** Active sessions (account.getAuthorizations). */
+  async getAuthorizations() {
+    const client = await this.getClient();
+    const res = await client.invoke(new Api.account.GetAuthorizations());
+    return (res.authorizations || []).map((a) => ({
+      hash: a.hash.toString(),
+      current: !!a.current,
+      app: `${a.appName || 'Telegram'} ${a.appVersion || ''}`.trim(),
+      device: [a.deviceModel, a.platform, a.systemVersion].filter(Boolean).join(', '),
+      location: [a.ip, a.country].filter(Boolean).join(' — '),
+      active: a.dateActive || 0,
+      official: !!a.officialApp,
+    }));
+  }
+
+  async resetAuthorization(hash) {
+    const client = await this.getClient();
+    await client.invoke(new Api.account.ResetAuthorization({ hash: bigInt(hash) }));
+    return { status: 'success' };
   }
 
   async getMe() {
     const client = await this.getClient();
     const me = await client.getMe();
     this.me = me;
-    return me ? this.formatUser(me) : null;
+    const user = me ? this.formatUser(me) : null;
+    if (user) lsSet(LS.me, user);
+    return user;
   }
 
   async channelEntity(channelId) {
@@ -359,6 +450,7 @@ class TelegramService {
   }
 
   async logout() {
+    if (this.client) this.client.session.disabled = true;
     try {
       const client = await this.getClient();
       await client.invoke(new Api.auth.LogOut());
@@ -374,6 +466,8 @@ class TelegramService {
     this.channels.clear();
     this.posts.clear();
     this.comments.clear();
+    this.commentMsgs.clear();
+    this.discussions.clear();
     this.favorites.clear();
     this.dialogsLoaded = null;
     Object.values(LS).forEach(lsDel);
@@ -384,6 +478,8 @@ class TelegramService {
   async clearCaches() {
     this.posts.clear();
     this.comments.clear();
+    this.commentMsgs.clear();
+    this.discussions.clear();
     lsDel(LS.posts);
     try { await caches.delete('telex-media-v1'); } catch {}
   }
@@ -594,6 +690,7 @@ class TelegramService {
       views: primary.views ?? null,
       forwards: primary.forwards || 0,
       replies_count: (primary.replies && primary.replies.replies) || 0,
+      comments_enabled: !!(primary.replies && primary.replies.comments),
       reactions: this.reactionsOf(primary),
       tg_url: tgUrl,
       is_pinned: !!primary.pinned,
@@ -663,7 +760,10 @@ class TelegramService {
 
     // Instant first paint from the localStorage cache; the UI refreshes afterwards.
     if (!offsetDate && !searchQuery && !channelId && !refresh && this.posts.size) {
-      const cached = this.filterFeed([...this.posts.values()].map((p) => ({ ...p, is_favorite: this.favorites.has(p.id) })), feedType);
+      const excluded = new Set(getPrefs().excludedChannels.map(Number));
+      const cached = this.filterFeed([...this.posts.values()]
+        .filter((p) => !excluded.has(p.channel_id))
+        .map((p) => ({ ...p, is_favorite: this.favorites.has(p.id) })), feedType);
       if (cached.length) return this.page(cached, limit, { from_cache: true });
     }
 
@@ -675,7 +775,11 @@ class TelegramService {
       const ch = this.channels.get(Number(channelId));
       targets = ch ? [ch] : [];
     } else {
-      targets = [...this.channels.values()].filter((c) => c.is_broadcast).slice(0, FEED_CHANNELS);
+      const prefs = getPrefs();
+      const excluded = new Set(prefs.excludedChannels.map(Number));
+      targets = [...this.channels.values()]
+        .filter((c) => (c.is_broadcast || prefs.showGroups) && !excluded.has(c.id))
+        .slice(0, prefs.feedSize);
     }
 
     const perChannel = channelId ? limit : 20;
@@ -705,57 +809,115 @@ class TelegramService {
 
   // ----- comments -----
 
-  async getComments(channelId, msgId, refresh = false) {
+  /** Linked discussion chat + root message for a channel post (cached). */
+  async discussionOf(channelId, msgId) {
     const key = `${channelId}_${msgId}`;
-    if (!refresh && this.comments.has(key)) return this.comments.get(key);
+    if (this.discussions.has(key)) return this.discussions.get(key);
     const client = await this.getClient();
     const entity = await this.channelEntity(channelId);
-    const replies = await client.getMessages(entity, { replyTo: msgId, limit: 35 });
+    const res = await client.invoke(new Api.messages.GetDiscussionMessage({ peer: entity, msgId }));
+    const root = res.messages && res.messages[0];
+    if (!root) throw new Error('Комментарии к этому посту отключены');
+    const chat = (res.chats || []).find((c) => String(c.id) === String(root.peerId.channelId));
+    if (chat) this.rememberEntity(chat);
+    const info = { chat: chat || root.peerId, rootId: root.id, chatId: chat ? Number(chat.id) : Number(root.peerId.channelId) };
+    this.discussions.set(key, info);
+    return info;
+  }
+
+  commentMedia(r, path) {
+    const media = r.media;
+    if (media instanceof Api.MessageMediaPhoto && media.photo) {
+      const big = (media.photo.sizes || []).filter((s) => s.w && s.h).pop() || {};
+      return { type: 'photo', url: `media/cmedia/${path}`, width: big.w, height: big.h };
+    }
+    if (media instanceof Api.MessageMediaDocument && media.document instanceof Api.Document) {
+      const doc = media.document;
+      const attrs = doc.attributes || [];
+      const sticker = attrs.some((x) => x instanceof Api.DocumentAttributeSticker);
+      const thumb = this.bestThumb(doc);
+      if (sticker && doc.mimeType === 'image/webp') return { type: 'sticker', url: `media/cmedia/${path}` };
+      if (thumb) return { type: sticker ? 'sticker' : 'photo', url: `media/cthumb/${path}` };
+    }
+    return null;
+  }
+
+  /**
+   * Comments under a channel post, oldest first. Pass `offsetId` (smallest id
+   * already shown) to page further back. Returns { comments, total, has_more }.
+   */
+  async getComments(channelId, msgId, { refresh = false, offsetId = 0, limit = 50 } = {}) {
+    const key = `${channelId}_${msgId}`;
+    if (!refresh && !offsetId && this.comments.has(key)) return this.comments.get(key);
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    const replies = await client.getMessages(entity, { replyTo: msgId, limit, offsetId: offsetId || undefined });
+    const myId = this.me ? Number(this.me.id) : null;
+    const byId = new Map();
     const list = [];
     for (const r of replies) {
-      if (!r || !r.message) continue;
+      if (!r || (!r.message && !r.media)) continue;
       const sender = r.sender || (r.getSender ? await r.getSender().catch(() => null) : null);
-      list.push({
+      const path = `${Number(r.peerId.channelId || 0)}/${r.id}`;
+      this.commentMsgs.set(path, r);
+      const reply = r.replyTo;
+      const replyToId = reply && reply.replyToTopId && reply.replyToMsgId !== reply.replyToTopId ? reply.replyToMsgId : null;
+      const item = {
         id: r.id,
-        text: r.message,
-        text_html: toHtml(r.message, r.entities),
+        text: r.message || '',
+        text_html: toHtml(r.message || '', r.entities),
         date: new Date(r.date * 1000).toISOString(),
         timestamp: r.date,
         sender_id: sender ? Number(sender.id) : null,
         sender_name: sender ? utils.getDisplayName(sender) || 'Пользователь' : 'Пользователь',
         sender_avatar: this.avatarUrl(sender),
+        is_out: !!r.out || (myId != null && sender && Number(sender.id) === myId),
+        reply_to_id: replyToId,
+        media: this.commentMedia(r, path),
         reactions: this.reactionsOf(r),
-      });
+      };
+      byId.set(item.id, item);
+      list.push(item);
     }
-    list.sort((a, b) => a.timestamp - b.timestamp);
-    this.comments.set(key, list);
-    return list;
+    list.sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
+    const result = { comments: list, total: replies.total ?? list.length, has_more: replies.length >= limit };
+    if (!offsetId) this.comments.set(key, result);
+    return result;
   }
 
-  async sendComment(channelId, msgId, text) {
+  async sendComment(channelId, msgId, text, replyToCommentId = null) {
     const clean = (text || '').trim();
     if (!clean) return { status: 'error', message: 'Текст комментария пуст' };
     const client = await this.getClient();
-    const entity = await this.channelEntity(channelId);
-    let sent;
-    try {
-      sent = await client.sendMessage(entity, { message: clean, commentTo: msgId });
-    } catch {
-      sent = await client.sendMessage(entity, { message: clean, replyTo: msgId });
-    }
+    const disc = await this.discussionOf(channelId, msgId);
+    const sent = await client.invoke(new Api.messages.SendMessage({
+      peer: disc.chat,
+      message: clean,
+      randomId: bigInt(Math.floor(Math.random() * 2 ** 52)),
+      replyTo: new Api.InputReplyToMessage({ replyToMsgId: replyToCommentId || disc.rootId, topMsgId: disc.rootId }),
+    }));
+    const upd = (sent.updates || []).find((u) => u.message && u.message.id);
     const me = this.me ? this.formatUser(this.me) : null;
     const comment = {
-      id: sent ? sent.id : Date.now(),
+      id: upd ? upd.message.id : Date.now(),
       text: clean,
       text_html: escapeHtml(clean),
       date: new Date().toISOString(),
       timestamp: Math.floor(Date.now() / 1000),
+      sender_id: me ? me.id : null,
       sender_name: me ? me.name : 'Вы',
       sender_avatar: me ? me.avatar : null,
+      is_out: true,
+      reply_to_id: replyToCommentId,
+      media: null,
       reactions: [],
     };
     const key = `${channelId}_${msgId}`;
-    if (this.comments.has(key)) this.comments.get(key).push(comment);
+    const cached = this.comments.get(key);
+    if (cached) {
+      cached.comments.push(comment);
+      cached.total += 1;
+    }
     return { status: 'success', comment };
   }
 
@@ -825,12 +987,22 @@ class TelegramService {
     const [kind, a, b] = path.split('/');
     const client = await this.getClient();
 
-    if (kind === 'avatar') {
+    if (kind === 'avatar' || kind === 'avatarbig') {
       if (!this.entities.has(a)) await this.loadDialogs();
       const entity = this.entities.get(a);
       if (!entity) return null;
-      const bytes = await client.downloadProfilePhoto(entity, { isBig: false });
+      const bytes = await client.downloadProfilePhoto(entity, { isBig: kind === 'avatarbig' });
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
+    }
+
+    if (kind === 'cmedia' || kind === 'cthumb') {
+      const msg = this.commentMsgs.get(`${a}/${b}`);
+      if (!msg || !msg.media) return null;
+      const doc = msg.media.document;
+      const opts = kind === 'cthumb' && doc ? { thumb: this.bestThumb(doc) } : {};
+      const bytes = await client.downloadMedia(msg, opts);
+      const mime = kind === 'cmedia' && doc ? doc.mimeType : 'image/jpeg';
+      return bytes && bytes.length ? { bytes, mime } : null;
     }
 
     const msg = await this.getMessage(Number(a), Number(b));

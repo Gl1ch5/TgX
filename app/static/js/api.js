@@ -20,7 +20,7 @@ export const api = {
   // Auth
   async getAuthStatus() {
     const isAuth = await telegram.isAuthorized();
-    const user = isAuth ? await telegram.getMe().catch(() => null) : null;
+    const user = isAuth ? (await telegram.getMe().catch(() => null)) || telegram.cachedMe() : null;
     return { is_authorized: isAuth, user };
   },
 
@@ -52,6 +52,10 @@ export const api = {
     return safe(() => telegram.logout());
   },
 
+  cachedUser() {
+    return telegram.hasSession() ? telegram.cachedMe() : null;
+  },
+
   // Channels & Feed
   async getChannels(refresh = false) {
     return { channels: await telegram.getChannels(refresh) };
@@ -62,12 +66,25 @@ export const api = {
   },
 
   // Comments
-  async getComments(channelId, msgId, refresh = false) {
-    return { comments: await telegram.getComments(channelId, msgId, refresh) };
+  getComments(channelId, msgId, opts = {}) {
+    return telegram.getComments(channelId, msgId, opts);
   },
 
-  sendComment(channelId, msgId, text) {
-    return safe(() => telegram.sendComment(channelId, msgId, text));
+  sendComment(channelId, msgId, text, replyToId = null) {
+    return safe(() => telegram.sendComment(channelId, msgId, text, replyToId));
+  },
+
+  // Profile & sessions
+  getFullMe() {
+    return telegram.getFullMe();
+  },
+
+  getSessions() {
+    return telegram.getAuthorizations();
+  },
+
+  terminateSession(hash) {
+    return safe(() => telegram.resetAuthorization(hash));
   },
 
   // Reactions & Actions
