@@ -285,6 +285,9 @@ export async function loadFeed(forceRefresh = false) {
   if (state.posts.length === 0 && state.isAuth) show(loader, true);
   show(sentinelText, false);
 
+  // Nothing on screen yet: paint channels as they arrive (text first, media streams in after).
+  const progressive = state.posts.length === 0 || !!state.activeChannelId || !!state.searchQuery;
+  const view = `${state.feedType}|${state.activeChannelId}|${state.searchQuery}`;
   try {
     const data = await api.getFeed({
       feedType: state.feedType,
@@ -292,6 +295,13 @@ export async function loadFeed(forceRefresh = false) {
       searchQuery: state.searchQuery,
       limit: 40,
       refresh: forceRefresh,
+      onPartial: progressive ? (partial) => {
+        if (view !== `${state.feedType}|${state.activeChannelId}|${state.searchQuery}`) return;
+        state.posts = partial.posts || [];
+        state.hasMore = false;
+        show(loader, false);
+        renderFeed();
+      } : null,
     });
     const posts = data.posts || [];
     const apply = () => {

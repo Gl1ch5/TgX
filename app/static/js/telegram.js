@@ -369,7 +369,9 @@ class TelegramService {
   rememberEntity(entity) {
     if (!entity || entity.id == null) return null;
     const key = this.entityKey(entity);
-    this.entities.set(key, entity);
+    const known = this.entities.get(key);
+    // A "min" copy (no access hash) must never replace a full one.
+    if (!(entity.min && known && !known.min)) this.entities.set(key, entity);
     return key;
   }
 
@@ -383,11 +385,27 @@ class TelegramService {
     const photo = entity.photo;
     if (!photo || photo instanceof Api.ChatPhotoEmpty || photo instanceof Api.UserProfilePhotoEmpty) return null;
     const key = this.rememberEntity(entity);
+    let tail = `${photo.photoId}/${photo.dcId || 0}`;
     if (ctx) {
       this.peerContext = this.peerContext || new Map();
       this.peerContext.set(key, ctx);
+      // The message the person was seen in travels inside the URL, so the photo
+      // can still be fetched after a reload (when the user object is gone).
+      const ctxKey = this.peerKeyOf(ctx.peer);
+      if (ctxKey) tail += `/${ctxKey}/${ctx.msgId}`;
     }
-    return `media/${big ? 'avatarbig' : 'avatar'}/${key}/${photo.photoId}`;
+    return `media/${big ? 'avatarbig' : 'avatar'}/${key}/${tail}`;
+  }
+
+  /** InputPeer for a "c123"/"u456" key from what we know (dialogs are loaded if needed). */
+  async inputPeerFor(key) {
+    let e = this.entities.get(key);
+    if (!e && key && key[0] === 'c') {
+      try { await this.loadDialogs(); } catch {}
+      e = this.entities.get(key);
+    }
+    if (!e) return null;
+    try { return await (await this.getClient()).getInputEntity(e); } catch { return null; }
   }
 
   formatUser(me) {
@@ -935,7 +953,7 @@ class TelegramService {
     return peers.slice(0, 3).map((p) => {
       const key = p.userId != null ? `u${p.userId}` : `c${p.channelId || p.chatId}`;
       const e = people && people.get(key);
-      return e ? { id: Number(e.id), name: e.title || utils.getDisplayName(e), avatar: this.avatarUrl(e) } : null;
+      return e ? { id: Number(e.id), name: e.title || utils.getDisplayName(e), avatar: this.avatarUrl(e, false, { peer: msg.peerId, msgId: msg.id }) } : null;
     }).filter(Boolean);
   }
 
@@ -967,7 +985,7 @@ class TelegramService {
     };
   }
 
-  async getFeed({ feedType = 'all', channelId = null, searchQuery = '', offsetDate = null, limit = 40, refresh = false } = {}) {
+  async getFeed({ feedType = 'all', channelId = null, searchQuery = '', offsetDate = null, limit = 40, refresh = false, onPartial = null } = {}) {
     const favs = () => [...this.favorites.values()]
       .map((p) => ({ ...p, is_favorite: true }))
       .filter((p) => !offsetDate || p.timestamp < offsetDate)
@@ -1005,18 +1023,32 @@ class TelegramService {
 
     const perChannel = channelId ? limit : 20;
     const posts = [];
+    // Show what has arrived so far instead of waiting for the slowest channel.
+    let partialTimer = null;
+    const partial = () => {
+      if (!onPartial || partialTimer) return;
+      partialTimer = setTimeout(() => {
+        partialTimer = null;
+        let shown = this.filterFeed(posts.slice(), feedType);
+        if (offsetDate) shown = shown.filter((p) => p.timestamp < offsetDate);
+        if (shown.length) onPartial(this.page(shown, limit, { partial: true }));
+      }, 250);
+    };
     const queue = [...targets];
     const worker = async () => {
       while (queue.length) {
         const ch = queue.shift();
         try {
           posts.push(...await this.fetchChannelPosts(ch, { limit: perChannel, offsetDate, search: searchQuery }));
+          partial();
         } catch (e) {
           console.warn('[TeleX] channel fetch failed', ch.title, e);
         }
       }
     };
     await Promise.all(Array.from({ length: FEED_CONCURRENCY }, worker));
+    clearTimeout(partialTimer);
+    partialTimer = 1; // no partial update after the final result
 
     if (!searchQuery) {
       posts.forEach((p) => this.posts.set(p.id, p));
@@ -1666,21 +1698,36 @@ class TelegramService {
     const client = await this.getClient();
 
     if (kind === 'avatar' || kind === 'avatarbig') {
-      if (!this.entities.has(a)) await this.loadDialogs();
-      const entity = this.entities.get(a);
-      if (!entity || !entity.photo) return null;
+      const [, key, photoId, dcId, ctxKey, ctxMsg] = path.split('/');
       const big = kind === 'avatarbig';
-      const ctx = this.peerContext && this.peerContext.get(a);
+      let entity = this.entities.get(key);
+      if (!entity && key[0] === 'c') {
+        try { await this.loadDialogs(); } catch {}
+        entity = this.entities.get(key);
+      }
+      const photo = entity && entity.photo && entity.photo.photoId ? entity.photo : null;
+      const ctx = (this.peerContext && this.peerContext.get(key)) || (ctxKey && ctxMsg ? { key: ctxKey, msgId: Number(ctxMsg) } : null);
       let bytes = null;
-      if (!entity.min) {
+      if (entity && photo && !entity.min) {
         bytes = await client.downloadProfilePhoto(entity, { isBig: big }).catch(() => null);
       }
       if ((!bytes || !bytes.length) && ctx) {
-        const via = await client.getInputEntity(ctx.peer);
-        const peer = entity instanceof Api.User
-          ? new Api.InputPeerUserFromMessage({ peer: via, msgId: ctx.msgId, userId: entity.id })
-          : new Api.InputPeerChannelFromMessage({ peer: via, msgId: ctx.msgId, channelId: entity.id });
-        bytes = await client.downloadFile(new Api.InputPeerPhotoFileLocation({ peer, photoId: entity.photo.photoId, big }), { dcId: entity.photo.dcId });
+        const via = ctx.peer ? await client.getInputEntity(ctx.peer).catch(() => null) : await this.inputPeerFor(ctx.key);
+        if (via) {
+          const isUser = entity ? entity instanceof Api.User : key[0] === 'u';
+          const id = entity ? entity.id : bigInt(key.slice(1));
+          const peer = isUser
+            ? new Api.InputPeerUserFromMessage({ peer: via, msgId: ctx.msgId, userId: id })
+            : new Api.InputPeerChannelFromMessage({ peer: via, msgId: ctx.msgId, channelId: id });
+          const pid = photo ? photo.photoId : photoId ? bigInt(photoId) : null;
+          const dc = photo ? photo.dcId : Number(dcId) || undefined;
+          if (pid) {
+            bytes = await client.downloadFile(new Api.InputPeerPhotoFileLocation({ peer, photoId: pid, big }), { dcId: dc }).catch((e) => {
+              console.warn('[TeleX] avatar via message failed', key, e && (e.errorMessage || e.message));
+              return null;
+            });
+          }
+        }
       }
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
     }
