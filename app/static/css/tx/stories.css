@@ -254,3 +254,15 @@
 }
 .tx-open-wall .icon { font-size: 22px; }
 #screen-wall:not(.is-channel) .tx-pinned { display: none !important; }
+
+/* Story like (heart) */
+.tx-story-like {
+  position: absolute; right: 12px; bottom: calc(14px + var(--tx-safe-bottom)); z-index: 2;
+  width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.28); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: opacity 0.2s ease;
+}
+.tx-story-like svg { width: 28px; height: 28px; fill: none; stroke: #fff; stroke-width: 1.8; transition: fill 0.2s ease, stroke 0.2s ease; }
+.tx-story-like.is-liked svg { fill: #ff4b5c; stroke: #ff4b5c; }
+.tx-story.is-held .tx-story-like { opacity: 0; }
+.tx-story-caption { padding-right: 72px; }

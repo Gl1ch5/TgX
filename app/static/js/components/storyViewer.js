@@ -62,6 +62,7 @@ export function openStoryViewer(peers, index, opts = {}) {
         <button class="tx-story-btn" data-act="close" title="Закрыть"><i class="icon icon-close"></i></button>
       </div>
       <div class="tx-story-caption post-text"></div>
+      <button class="tx-story-like" data-act="like" title="Нравится"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6l-1.4-1.3C5.6 14.8 2.4 11.9 2.4 8.3 2.4 5.4 4.7 3.1 7.6 3.1c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.9 0 5.2 2.3 5.2 5.2 0 3.6-3.2 6.5-8.2 11l-1.4 1.3z"/></svg></button>
       <div class="tx-story-spinner tx-hidden"><span class="animate-spin"><i class="icon icon-reload"></i></span></div>
     </div>`;
   document.body.appendChild(el);
@@ -189,6 +190,9 @@ async function show() {
     media.replaceChildren(img);
   }
   updateMuteIcon();
+  const like = el.querySelector('.tx-story-like');
+  like.classList.toggle('is-liked', !!s.liked);
+  like.classList.toggle('tx-hidden', !!p.is_self);
   markRead(p, s);
   preloadNext();
 }
@@ -215,6 +219,25 @@ function preloadNext() {
   if (nextStory && !nextStory.skipped) {
     const img = new Image();
     img.src = nextStory.type === 'video' ? nextStory.thumb_url || '' : nextStory.url;
+  }
+}
+
+async function toggleLike(btn) {
+  const p = peer();
+  const s = story();
+  if (!s || s.skipped) return;
+  const next = !s.liked;
+  s.liked = next;
+  btn.classList.toggle('is-liked', next);
+  if (next && !reduceMotion()) {
+    btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(0.92)' }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  }
+  try {
+    await api.likeStory(p.key, s.id, next);
+  } catch (e) {
+    console.warn('[TeleX] story like', e);
+    s.liked = !next;
+    btn.classList.toggle('is-liked', !next);
   }
 }
 
@@ -322,6 +345,7 @@ function bind(el) {
     if (!btn) return;
     e.stopPropagation();
     if (btn.dataset.act === 'close') history.back();
+    if (btn.dataset.act === 'like') toggleLike(btn);
     if (btn.dataset.act === 'mute') {
       sv.muted = !sv.muted;
       if (sv.video) sv.video.muted = sv.muted;

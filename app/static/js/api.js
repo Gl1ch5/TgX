@@ -162,6 +162,10 @@ export const api = {
     return telegram.getStoriesById(key, ids);
   },
 
+  likeStory(key, id, like) {
+    return telegram.likeStory(key, id, like);
+  },
+
   readStories(key, maxId) {
     return telegram.readStories(key, maxId).catch((e) => console.warn('[TeleX] read stories', e));
   },

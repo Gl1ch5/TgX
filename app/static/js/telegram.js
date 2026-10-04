@@ -1510,6 +1510,7 @@ class TelegramService {
       caption_html: s.caption ? toHtml(s.caption, s.entities) : '',
       views: s.views ? s.views.viewsCount || 0 : null,
       close_friends: !!s.closeFriends,
+      liked: !!(s.sentReaction && s.sentReaction instanceof Api.ReactionEmoji),
     };
   }
 
@@ -1568,6 +1569,20 @@ class TelegramService {
       peer.max_read_id = Math.max(peer.max_read_id, maxId);
       peer.unread = peer.stories.some((x) => x.id > peer.max_read_id);
     }
+  }
+
+  /** Like / unlike a story (the heart in the viewer). */
+  async likeStory(key, id, like) {
+    const client = await this.getClient();
+    const entity = this.entities.get(key);
+    if (!entity) throw new Error('peer unknown');
+    await client.invoke(new Api.stories.SendReaction({
+      peer: entity,
+      storyId: Number(id),
+      reaction: like ? new Api.ReactionEmoji({ emoticon: '❤' }) : new Api.ReactionEmpty(),
+      addToRecent: true,
+    }));
+    return like;
   }
 
   async storyItem(key, id) {

@@ -178,7 +178,7 @@ export function setupStoriesBar() {
   window.addEventListener('touchmove', (e) => {
     if (startY == null) return;
     const dy = e.touches[0].clientY - startY;
-    const hasStories = top.classList.contains('has-stories');
+    const hasStories = top.classList.contains('has-stories') && !state.activeChannelId;
     if (!expanded && hasStories && dy > 56) {
       startY = null;
       haptic();
@@ -191,7 +191,7 @@ export function setupStoriesBar() {
   }, { passive: true });
   let wheelPull = 0;
   window.addEventListener('wheel', (e) => {
-    if (expanded || window.scrollY > 0 || document.getElementById('app').dataset.view !== 'wall') {
+    if (expanded || state.activeChannelId || window.scrollY > 0 || document.getElementById('app').dataset.view !== 'wall') {
       wheelPull = 0;
       return;
     }
