@@ -10,7 +10,6 @@
   min-width: 0;
   background: var(--tx-bubble);
   border-radius: var(--tx-bubble-radius);
-  border-bottom-left-radius: var(--tx-bubble-radius-small);
   overflow: hidden;
   position: relative;
   box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.3);
@@ -18,19 +17,20 @@
 .tx-bubble.is-out { background: var(--tx-bubble-out); border-bottom-left-radius: var(--tx-bubble-radius); border-bottom-right-radius: var(--tx-bubble-radius-small); }
 
 .tx-bubble-name {
-  display: flex; align-items: center; gap: 4px;
-  padding: 8px 12px 0;
-  font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px 1px 9px;
+  font-size: 15.5px; font-weight: 600;
   cursor: pointer;
   white-space: nowrap; overflow: hidden;
 }
 .tx-bubble-name > span { overflow: hidden; text-overflow: ellipsis; }
-.tx-bubble-name .VerifiedIcon { width: 16px; height: 16px; margin: 0; }
+.tx-bubble-name .VerifiedIcon { width: 17px; height: 17px; margin: 0 0 0 -4px; flex-shrink: 0; }
+.tx-bubble-name .tx-avatar { width: 26px; height: 26px; font-size: 11px; }
 
 /* Media inside the bubble: 2px inset like Telegram */
 .tx-media { position: relative; margin: 6px 2px 0; border-radius: 6px; overflow: hidden; background: #111; }
 .tx-media:first-child { margin-top: 2px; border-radius: calc(var(--tx-bubble-radius) - 2px) calc(var(--tx-bubble-radius) - 2px) 6px 6px; }
-.tx-media.is-last { margin-bottom: 2px; border-bottom-left-radius: calc(var(--tx-bubble-radius-small) - 1px); border-bottom-right-radius: calc(var(--tx-bubble-radius) - 2px); }
+.tx-media.is-last { margin-bottom: 2px; border-bottom-left-radius: calc(var(--tx-bubble-radius) - 2px); border-bottom-right-radius: calc(var(--tx-bubble-radius) - 2px); }
 .tx-media img, .tx-media video { display: block; width: 100%; max-height: 520px; object-fit: cover; }
 .tx-media .tx-grid { display: grid; gap: 2px; }
 .tx-media .tx-grid > * { position: relative; overflow: hidden; background: #0d0d0d; min-height: 0; }
@@ -76,13 +76,14 @@
 .tx-webpage img { width: 100%; max-height: 240px; object-fit: cover; border-radius: 6px; margin-top: 6px; display: block; }
 
 /* Reactions: Telegram pills */
-.tx-reactions { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 10px 2px; }
+.tx-reactions { display: flex; flex-wrap: wrap; gap: 5px; padding: 6px 10px 0; }
 .tx-reaction {
-  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px 0 7px;
+  display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 6px;
   border-radius: 999px; background: var(--tx-reaction); color: #fff;
-  font-size: 15px; font-weight: 600; transition: transform 0.15s ease, background 0.15s ease;
+  font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
-.tx-reaction .emoji { width: 22px !important; height: 22px !important; }
+.tx-reaction .emoji { width: 21px !important; height: 21px !important; margin: 0 !important; vertical-align: 0 !important; }
 .tx-reaction:active { transform: scale(0.92); }
 .tx-reaction.is-chosen { background: var(--tx-accent-fill); }
 
@@ -98,14 +99,16 @@
 }
 
 .tx-comments-row {
-  display: flex; align-items: center; gap: 10px; width: 100%;
+  display: flex; align-items: center; gap: 12px; width: 100%; white-space: nowrap;
   min-height: 46px; padding: 6px 12px 6px 10px; box-sizing: border-box;
   border-top: 1px solid var(--tx-separator) !important;
   color: var(--tx-link) !important; font-size: 16px; font-weight: 500; text-align: left;
 }
 .tx-comments-row:active { background: rgba(255, 255, 255, 0.04); }
 .tx-comments-row > .icon { font-size: 24px; }
-.tx-comments-row .tx-chevron { margin-left: auto; font-size: 18px; }
+.tx-comments-row > span:not(.tx-avatars) { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tx-comments-row .tx-chevron { margin-left: auto; font-size: 18px; flex-shrink: 0; }
+.tx-comments-row .tx-avatars { flex-shrink: 0; }
 .tx-comments-row .tx-avatars .tx-avatar { width: 26px; height: 26px; font-size: 11px; }
 
 .tx-side-btn {
@@ -184,3 +187,7 @@
   background: var(--tx-accent-fill) !important; color: #fff; padding: 8px 16px; font-size: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); animation: tx-pop 0.2s ease-out;
 }
+
+/* New posts slide in */
+.tx-appear { animation: tx-appear 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes tx-appear { from { opacity: 0; transform: translateY(-12px) scale(0.98); } }

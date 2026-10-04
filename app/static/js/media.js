@@ -24,7 +24,7 @@ export async function initMediaBridge() {
         return;
       }
       const buf = res.bytes.buffer.slice(res.bytes.byteOffset, res.bytes.byteOffset + res.bytes.byteLength);
-      port.postMessage({ ok: true, body: buf, mime: res.mime, size: res.size, offset: res.offset }, [buf]);
+      port.postMessage({ ok: true, body: buf, mime: res.mime, size: res.size, offset: res.offset, full: !!res.full }, [buf]);
     } catch (e) {
       console.warn('[TeleX] media failed', msg.path, e);
       port.postMessage({ ok: false, status: 502 });
@@ -42,6 +42,9 @@ export async function initMediaBridge() {
     location.reload();
   });
   setTimeout(() => { try { sessionStorage.removeItem('telex.swReload'); } catch {} }, 10000);
+
+  // Keep the media cache from being evicted (Chrome grants this to installed/engaged sites).
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
   const reg = await navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' });
   reg.update().catch(() => {});

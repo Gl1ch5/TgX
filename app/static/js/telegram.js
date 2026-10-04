@@ -24,8 +24,12 @@ const LS = {
 };
 
 const FEED_CONCURRENCY = 5;
-const POSTS_CACHE_LIMIT = 200;
+const POSTS_CACHE_LIMIT = 600;
 const STREAM_CHUNK = 512 * 1024;
+const STREAM_READ_AHEAD = 3;
+const SMALL_FILE = 10 * 1024 * 1024;
+const LIVE_POLL_MS = 30000;
+const CHUNK_CACHE_BYTES = 384 * 1024 * 1024; // in-memory video/audio chunks
 
 // ---------------- localStorage helpers ----------------
 
@@ -971,6 +975,120 @@ class TelegramService {
     return out;
   }
 
+  // ----- live updates -----
+
+  /**
+   * Live wall: Telegram pushes new/edited posts and reaction changes over the
+   * open connection; a light poll (dialogs' top message ids) covers channels
+   * Telegram doesn't push for. Handlers: onPosts(posts), onEdit(post),
+   * onReactions(postId, reactions), onViews(postId, views).
+   */
+  async startLive(handlers) {
+    this.live = handlers;
+    if (this.liveBound) return;
+    this.liveBound = true;
+    const client = await this.getClient();
+    this.albumBuffer = new Map();
+    client.addEventHandler((u) => {
+      try { this.onUpdate(u); } catch (e) { console.warn('[TeleX] update', e); }
+    });
+    const tick = async () => {
+      if (document.visibilityState === 'visible' && this.authorized) await this.pollNew().catch(() => {});
+      this.pollTimer = setTimeout(tick, LIVE_POLL_MS);
+    };
+    this.pollTimer = setTimeout(tick, LIVE_POLL_MS);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && this.authorized) this.pollNew().catch(() => {});
+    });
+  }
+
+  emitPosts(posts) {
+    const fresh = posts.filter((p) => !this.posts.has(p.id));
+    fresh.forEach((p) => this.posts.set(p.id, p));
+    if (!fresh.length) return;
+    this.persistPosts();
+    if (this.live && this.live.onPosts) this.live.onPosts(fresh);
+  }
+
+  onUpdate(u) {
+    if (u instanceof Api.UpdateNewChannelMessage || u instanceof Api.UpdateEditChannelMessage) {
+      const m = u.message;
+      if (!(m instanceof Api.Message) || (!m.message && !m.media)) return;
+      const chId = Number(m.peerId.channelId);
+      const ch = this.channels.get(chId);
+      if (!ch) return;
+      this.messages.set(`${chId}_${m.id}`, m);
+      if (u instanceof Api.UpdateEditChannelMessage) {
+        const id = `${chId}_${m.id}`;
+        if (!this.posts.has(id)) return;
+        const post = { ...this.formatGroup([m], ch), recent_repliers: this.posts.get(id).recent_repliers || [] };
+        this.posts.set(id, post);
+        if (this.live && this.live.onEdit) this.live.onEdit(post);
+        return;
+      }
+      if (!m.out) ch.unread_count = (ch.unread_count || 0) + 1;
+      ch.top_id = Math.max(ch.top_id || 0, m.id);
+      ch.last_text = this.previewOf(m);
+      ch.last_date = m.date;
+      if (m.groupedId) {
+        const gid = m.groupedId.toString();
+        const entry = this.albumBuffer.get(gid) || { msgs: [], timer: null };
+        entry.msgs.push(m);
+        clearTimeout(entry.timer);
+        entry.timer = setTimeout(() => {
+          this.albumBuffer.delete(gid);
+          this.emitPosts([this.formatGroup(entry.msgs.sort((a, b) => a.id - b.id), ch)]);
+        }, 800);
+        this.albumBuffer.set(gid, entry);
+      } else {
+        this.emitPosts([this.formatGroup([m], ch)]);
+      }
+      return;
+    }
+    if (u instanceof Api.UpdateMessageReactions && u.peer instanceof Api.PeerChannel) {
+      const id = `${Number(u.peer.channelId)}_${u.msgId}`;
+      const post = this.posts.get(id);
+      const reactions = this.reactionsOf({ reactions: u.reactions });
+      if (post) post.reactions = reactions;
+      if (this.live && this.live.onReactions) this.live.onReactions(id, reactions);
+      return;
+    }
+    if (u instanceof Api.UpdateChannelMessageViews) {
+      const id = `${Number(u.channelId)}_${u.id}`;
+      const post = this.posts.get(id);
+      if (post) post.views = u.views;
+      if (this.live && this.live.onViews) this.live.onViews(id, u.views);
+    }
+  }
+
+  /** One getDialogs call tells which wall channels have newer posts; fetch just those. */
+  async pollNew() {
+    if (this.polling) return;
+    this.polling = true;
+    try {
+      const before = new Map([...this.channels.values()].map((c) => [c.id, c.top_id || 0]));
+      this.dialogsLoaded = null;
+      await this.loadDialogs();
+      const prefs = getPrefs();
+      const excluded = new Set(prefs.excludedChannels.map(Number));
+      const changed = [...this.channels.values()].filter((c) =>
+        (c.is_broadcast || prefs.showGroups) && !excluded.has(c.id) && before.has(c.id) && (c.top_id || 0) > before.get(c.id));
+      const posts = [];
+      for (const ch of changed.slice(0, 15)) {
+        try {
+          const latest = await this.fetchChannelPosts(ch, { limit: 10 });
+          posts.push(...latest.filter((p) => p.msg_id > before.get(ch.id)));
+        } catch (e) {
+          console.warn('[TeleX] poll', ch.title, e);
+        }
+      }
+      this.emitPosts(posts);
+      if (this.onReadChange) this.onReadChange();
+    } finally {
+      this.polling = false;
+    }
+  }
+
   // ----- read state -----
 
   /**
@@ -1066,6 +1184,45 @@ class TelegramService {
     return thumbs[thumbs.length - 1];
   }
 
+  /** One aligned chunk of a document, memoized in an LRU (shared by replays/seeks). */
+  streamChunk(doc, offset, size) {
+    this.chunks = this.chunks || new Map();
+    const key = `${doc.id}:${offset}`;
+    if (this.chunks.has(key)) {
+      const hit = this.chunks.get(key);
+      this.chunks.delete(key);
+      this.chunks.set(key, hit); // refresh LRU position
+      return hit.promise;
+    }
+    const entry = { promise: null, bytes: 0 };
+    entry.promise = (async () => {
+      const client = await this.getClient();
+      let chunk = null;
+      for await (const part of client.iterDownload({
+        file: new Api.MessageMediaDocument({ document: doc }),
+        fileSize: bigInt(size),
+        offset: bigInt(offset),
+        requestSize: STREAM_CHUNK,
+        limit: 1,
+      })) {
+        chunk = part;
+        break;
+      }
+      const bytes = chunk || new Uint8Array(0);
+      entry.bytes = bytes.length;
+      this.chunkBytes = (this.chunkBytes || 0) + bytes.length;
+      while (this.chunkBytes > CHUNK_CACHE_BYTES && this.chunks.size > 1) {
+        const [oldKey, old] = this.chunks.entries().next().value;
+        this.chunks.delete(oldKey);
+        this.chunkBytes -= old.bytes;
+      }
+      return bytes;
+    })();
+    entry.promise.catch(() => this.chunks.delete(key));
+    this.chunks.set(key, entry);
+    return entry.promise;
+  }
+
   /**
    * Resolve a media path ("photo/123/45", "avatar/c123/…", "doc/123/45") into bytes.
    * With `range` set, only one aligned chunk of a document is fetched (video/audio streaming).
@@ -1120,21 +1277,21 @@ class TelegramService {
     if (kind === 'doc') {
       const size = Number(doc.size);
       const mime = doc.mimeType || 'application/octet-stream';
+      if (range && size <= SMALL_FILE) {
+        // Small files (GIFs, short clips, stickers): one full download, cached by the SW.
+        const bytes = await client.downloadMedia(msg, {});
+        return bytes ? { bytes, mime, size: bytes.length, offset: 0, full: true } : null;
+      }
       if (range) {
         const offset = Math.floor(range.start / STREAM_CHUNK) * STREAM_CHUNK;
         if (offset >= size) return { bytes: new Uint8Array(0), mime, size, offset };
-        let chunk = null;
-        for await (const part of client.iterDownload({
-          file: doc,
-          fileSize: bigInt(size),
-          offset: bigInt(offset),
-          requestSize: STREAM_CHUNK,
-          limit: 1,
-        })) {
-          chunk = part;
-          break;
+        const bytes = await this.streamChunk(doc, offset, size);
+        // Read ahead so playback doesn't stall between chunks.
+        for (let i = 1; i <= STREAM_READ_AHEAD; i++) {
+          const next = offset + i * STREAM_CHUNK;
+          if (next < size) this.streamChunk(doc, next, size).catch(() => {});
         }
-        return { bytes: chunk || new Uint8Array(0), mime, size, offset };
+        return { bytes, mime, size, offset };
       }
       const bytes = await client.downloadMedia(msg, {});
       return bytes ? { bytes, mime, size } : null;

@@ -57,7 +57,7 @@ function onLoggedIn(user, message) {
   window.TelegramX.updateSettingsView();
   closeAuthModal();
   showToast(message);
-  window.TelegramX.refreshFeed();
+  window.TelegramX.refreshFeed().then(() => window.TelegramX.startLive());
 }
 
 function showError(id, text) {

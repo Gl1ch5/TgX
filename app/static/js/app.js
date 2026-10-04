@@ -100,6 +100,7 @@ window.TelegramX = {
   WALLPAPERS,
 
   // Auth
+  startLive,
   logoutTelegram,
   updateAuthUI,
   updateSettingsView: updateAuthUI,
@@ -154,7 +155,7 @@ async function initApp() {
 
   wall.setupInfiniteScroll();
   setupKeyboard();
-  api.onReadChange(() => wall.renderUnread());
+  api.onReadChange(() => wall.loadChannels());
 
   try {
     await initMediaBridge();
@@ -180,7 +181,19 @@ async function initApp() {
   }
   updateAuthUI();
   await wall.loadFeed();
-  if (state.isAuth) await wall.loadChannels();
+  if (state.isAuth) {
+    await wall.loadChannels();
+    startLive();
+  }
+}
+
+function startLive() {
+  api.startLive({
+    onPosts: wall.onLivePosts,
+    onEdit: wall.onLiveEdit,
+    onReactions: wall.onLiveReactions,
+    onViews: wall.onLiveViews,
+  });
 }
 
 function setupKeyboard() {

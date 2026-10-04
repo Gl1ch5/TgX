@@ -151,7 +151,7 @@ function commentsRow(post) {
 function metaHtml(post) {
   return `
     <i class="icon icon-star ${post.is_favorite ? '' : 'tx-hidden'}" id="fav-mark-${post.id}" style="color:#f5b72f"></i>
-    ${post.views != null ? `<i class="icon icon-channelviews"></i><span>${formatNumber(post.views)}</span>` : ''}
+    ${post.views != null ? `<i class="icon icon-channelviews"></i><span class="tx-views">${formatNumber(post.views)}</span>` : ''}
     ${post.post_author ? `<span class="tx-meta-author">&nbsp;${escapeHtml(post.post_author)},</span>` : ''}
     <span>&nbsp;${post.edited ? 'изменено ' : ''}${timeOf(post)}</span>`;
 }
@@ -173,12 +173,11 @@ export function createPostCardElement(post) {
   card.dataset.msg = post.msg_id;
 
   card.innerHTML = `
-    <span class="tx-post-avatar" onclick="window.TelegramX.filterByChannel(${post.channel_id}, '${escapeQuotes(ch.title)}')">${avatarHtml(ch, 'md')}</span>
     <div class="tx-post-col">
       <div class="tx-bubble ${isSticker ? 'is-sticker' : ''} ${mediaOnly ? 'tx-media-only' : ''}"
            onclick="window.TelegramX.openPostMenu('${post.id}', event)"
            ondblclick="window.TelegramX.quickReact('${post.id}', event)">
-        ${isSticker ? '' : `<div class="tx-bubble-name tx-peer-${peerColor(post.channel_id)} tx-peer-name" onclick="event.stopPropagation(); window.TelegramX.filterByChannel(${post.channel_id}, '${escapeQuotes(ch.title)}')"><span>${parseEmojis(ch.title || 'Канал')}</span>${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>`}
+        ${isSticker ? '' : `<div class="tx-bubble-name tx-peer-${peerColor(post.channel_id)} tx-peer-name" onclick="event.stopPropagation(); window.TelegramX.filterByChannel(${post.channel_id}, '${escapeQuotes(ch.title)}')">${avatarHtml(ch, 'xs')}<span>${parseEmojis(ch.title || 'Канал')}</span>${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>`}
         ${media}
         ${body ? `<div class="post-text tx-text">${body}</div>` : ''}
         ${webpageHtml(post)}

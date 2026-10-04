@@ -5,7 +5,7 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
-const SW_VERSION = '3.1.1';
+const SW_VERSION = '3.2.0';
 const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb']);
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -75,8 +75,22 @@ async function serveMedia(event, path) {
     return response;
   }
 
-  const res = await askPage(event, path, range);
-  if (!res.ok) return new Response(null, { status: res.status || 404 });
+  // Small documents are cached whole; serve any range from the cached copy.
+  const cache = await caches.open(MEDIA_CACHE);
+  let cached = await cache.match(event.request.url);
+  if (!cached) {
+    const first = await askPage(event, path, range);
+    if (!first.ok) return new Response(null, { status: first.status || 404 });
+    if (!first.full) return rangeResponse(first, range);
+    cached = new Response(first.body, { headers: { 'Content-Type': first.mime, 'Content-Length': String(first.size) } });
+    await cache.put(event.request.url, cached.clone());
+  }
+  if (!range) return cached;
+  const body = await cached.arrayBuffer();
+  return rangeResponse({ body, mime: cached.headers.get('Content-Type'), size: body.byteLength, offset: 0 }, range);
+}
+
+function rangeResponse(res, range) {
 
   if (range && res.size != null) {
     if (range.start >= res.size) {

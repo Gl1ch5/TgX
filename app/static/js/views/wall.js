@@ -334,3 +334,74 @@ export async function refreshFeed() {
   await loadFeed(true);
   showToast('Стена обновлена');
 }
+
+// ---------------- Live updates ----------------
+
+let pendingLive = [];
+
+function matchesView(p) {
+  if (state.searchQuery) return false;
+  if (state.activeChannelId && p.channel_id !== state.activeChannelId) return false;
+  if (!state.activeChannelId && isChannelExcluded(p.channel_id)) return false;
+  if (state.feedType === 'media') return ['photo', 'video', 'gif', 'album'].includes(p.media_type);
+  return state.feedType === 'all';
+}
+
+function prependPosts(posts) {
+  const container = $('posts-container');
+  if (!container) return;
+  const known = new Set(state.posts.map((p) => p.id));
+  const fresh = posts.filter((p) => !known.has(p.id)).sort((a, b) => b.timestamp - a.timestamp);
+  if (!fresh.length) return;
+  state.posts.unshift(...fresh);
+  container.querySelector('.tx-empty')?.remove();
+  const cards = fresh.map((p) => {
+    const card = createPostCardElement(p);
+    card.classList.add('tx-appear');
+    return card;
+  });
+  container.prepend(...cards);
+  cards.forEach(track);
+  hydrateStickers(container);
+}
+
+export function onLivePosts(posts) {
+  const visible = posts.filter(matchesView);
+  if (!visible.length) return;
+  const atTop = window.scrollY < 300 && document.getElementById('app').dataset.view === 'wall';
+  if (atTop && !pendingLive.length) {
+    prependPosts(visible);
+    return;
+  }
+  pendingLive.push(...visible);
+  showNewPostsPill(pendingLive.length, () => {
+    const batch = pendingLive;
+    pendingLive = [];
+    prependPosts(batch);
+  });
+}
+
+export function onLiveEdit(post) {
+  const i = state.posts.findIndex((p) => p.id === post.id);
+  if (i < 0) return;
+  state.posts[i] = { ...post, is_favorite: state.posts[i].is_favorite };
+  document.querySelectorAll(`[id="post-card-${post.id}"]`).forEach((old) => {
+    const card = createPostCardElement(state.posts[i]);
+    old.replaceWith(card);
+    hydrateStickers(card);
+  });
+}
+
+export function onLiveReactions(postId, reactions) {
+  const post = state.posts.find((p) => p.id === postId);
+  if (!post) return;
+  post.reactions = reactions;
+  import('../components/reactions.js').then((m) => m.renderReactions(post));
+}
+
+export function onLiveViews(postId, views) {
+  const post = state.posts.find((p) => p.id === postId);
+  if (!post) return;
+  post.views = views;
+  document.querySelectorAll(`[id="post-card-${postId}"] .tx-views`).forEach((el) => { el.textContent = formatNumber(views); });
+}

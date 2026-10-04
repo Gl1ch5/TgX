@@ -100,6 +100,10 @@ export const api = {
     telegram.markSeen(channelId, msgId);
   },
 
+  startLive(handlers) {
+    return telegram.startLive(handlers).catch((e) => console.warn('[TeleX] live', e));
+  },
+
   onReadChange(fn) {
     telegram.onReadChange = fn;
   },
