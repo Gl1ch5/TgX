@@ -95,6 +95,19 @@ export const api = {
     return safe(() => telegram.resetAuthorization(hash));
   },
 
+  // Own profile
+  updateProfile(fields) {
+    return safe(async () => ({ status: 'success', user: await telegram.updateProfile(fields) }));
+  },
+
+  setProfilePhoto(file) {
+    return safe(async () => ({ status: 'success', user: await telegram.setProfilePhoto(file) }));
+  },
+
+  getMyStories() {
+    return telegram.getMyStories();
+  },
+
   // Stories
   getStories() {
     return telegram.getStories();

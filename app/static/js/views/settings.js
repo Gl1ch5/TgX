@@ -66,7 +66,7 @@ function rootPage() {
       )}
 
       ${group(
-        row({ icon: 'info-filled', color: '#8e8e93', title: 'О TeleX', sub: 'Версия 3.1 · работает прямо в браузере', onclick: "window.open('https://github.com/Gl1ch5/TgX', '_blank', 'noopener')" }),
+        row({ icon: 'info-filled', color: '#8e8e93', title: 'О TeleX', sub: 'Версия 3.4 · работает прямо в браузере', onclick: "window.open('https://github.com/Gl1ch5/TgX', '_blank', 'noopener')" }),
       )}
     </div>`;
 }

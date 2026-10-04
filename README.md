@@ -171,3 +171,10 @@ TgX/
 ## 📄 Лицензия
 
 Распространяется под лицензией MIT. Подробности см. в файле [LICENSE](LICENSE).
+
+## Icons
+
+`app/static/icons/android/` holds the original Telegram for Android icons
+(from [DrKLO/Telegram](https://github.com/DrKLO/Telegram), GPLv2). They are
+regenerated with `python3 tools/icons/extract.py <path-to-Telegram-checkout>`,
+which also writes `css/tx/icons-android.css` (maps the app's icon names to them).

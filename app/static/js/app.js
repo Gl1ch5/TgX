@@ -49,6 +49,15 @@ window.TelegramX = {
   rerenderSettings: settings.rerenderSettings,
   openFavorites,
 
+  // Profile
+  openProfilePage: profile.openProfilePage,
+  openProfileMenu: profile.openProfileMenu,
+  copyText: profile.copyText,
+  pickProfilePhoto: profile.pickProfilePhoto,
+  uploadProfilePhoto: profile.uploadProfilePhoto,
+  saveProfile: profile.saveProfile,
+  openMyStory: profile.openMyStory,
+
   // Wall
   headerLeft: wall.headerLeft,
   headerPill: wall.headerPill,

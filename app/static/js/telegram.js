@@ -367,6 +367,49 @@ class TelegramService {
     };
   }
 
+  /** Change name / bio (account.updateProfile). */
+  async updateProfile({ firstName, lastName, about }) {
+    const client = await this.getClient();
+    const me = await client.invoke(new Api.account.UpdateProfile({ firstName, lastName, about }));
+    if (me) this.me = me;
+    const user = this.formatUser(me || (await client.getMe()));
+    lsSet(LS.me, user);
+    return user;
+  }
+
+  /** Upload a new profile photo from a browser File. */
+  async setProfilePhoto(file) {
+    const client = await this.getClient();
+    const uploaded = await client.uploadFile({ file, workers: 2 });
+    await client.invoke(new Api.photos.UploadProfilePhoto({ file: uploaded }));
+    const me = await client.getMe();
+    this.me = me;
+    const user = this.formatUser(me);
+    lsSet(LS.me, user);
+    return user;
+  }
+
+  /** Stories kept on the profile ("Публикации"). */
+  async getMyStories() {
+    const client = await this.getClient();
+    const me = await client.getMe();
+    this.rememberEntity(me);
+    const key = this.entityKey(me);
+    const res = await client.invoke(new Api.stories.GetPinnedStories({ peer: new Api.InputPeerSelf(), offsetId: 0, limit: 60 }));
+    const stories = (res.stories || []).map((s) => this.formatStory(key, s)).filter(Boolean).sort((a, b) => b.id - a.id);
+    return {
+      key,
+      id: Number(me.id),
+      name: 'Моя история',
+      title: utils.getDisplayName(me),
+      avatar: this.avatarUrl(me),
+      is_self: true,
+      max_read_id: Number.MAX_SAFE_INTEGER,
+      unread: false,
+      stories,
+    };
+  }
+
   /** Active sessions (account.getAuthorizations). */
   async getAuthorizations() {
     const client = await this.getClient();

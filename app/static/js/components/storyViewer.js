@@ -71,7 +71,7 @@ export function openStoryViewer(peers, index, opts = {}) {
   sv = {
     el, peers, opts,
     pi: index,
-    si: firstUnread(peers[index]),
+    si: opts.storyIndex != null ? opts.storyIndex : firstUnread(peers[index]),
     elapsed: 0,
     duration: PHOTO_MS,
     paused: false,
@@ -220,7 +220,7 @@ function preloadNext() {
 
 const readTimers = new Map();
 function markRead(p, s) {
-  if (s.id <= p.max_read_id) return;
+  if (p.is_self || s.id <= p.max_read_id) return;
   p.max_read_id = s.id;
   p.unread = p.stories.some((x) => x.id > p.max_read_id);
   clearTimeout(readTimers.get(p.key));
