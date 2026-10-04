@@ -93,6 +93,25 @@ cd native/android
 
 Адрес сайта задаётся в одном месте: `native/android/app/src/main/java/io/github/gl1ch5/telex/AppConfig.kt`.
 
+## 🖥️ Windows
+
+Приложение для Windows — это окно, которое открывает сайт TeleX (поэтому всегда свежая версия) и добавляет нативные удобства: своя иконка и окно без рамок браузера, запоминание размера и положения, сессия и кэш медиа сохраняются между запусками, внешние ссылки (`t.me` и др.) открываются в браузере по умолчанию, экран «Нет соединения» с кнопкой «Повторить».
+
+👉 **Скачать:** [github.com/Gl1ch5/TgX/releases/tag/nightly](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
+* `TeleX-Setup.exe` — установщик (ярлыки в «Пуске» и на рабочем столе);
+* `TeleX-Portable.exe` — без установки, просто запустить.
+
+> Файлы не подписаны цифровой подписью, поэтому при первом запуске Windows SmartScreen может показать «Windows защитила ваш компьютер». Нажмите **«Подробнее» → «Выполнить в любом случае»**.
+
+Сборка вручную (нужен Node.js 22+):
+```bash
+cd native/desktop
+npm ci
+npm start            # запустить окно для проверки
+npm run dist:win     # → dist/TeleX-Setup.exe и dist/TeleX-Portable.exe
+```
+Сборка в GitHub Actions: `.github/workflows/windows.yml` (push в `native/desktop/**` или вручную через *Run workflow*).
+
 ---
 
 ## 🔐 Вход

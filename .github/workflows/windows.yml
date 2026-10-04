@@ -1,0 +1,71 @@
+name: Windows (TeleX desktop)
+
+on:
+  push:
+    branches: [main, ccr-297b0b47-05qrmt]
+    paths:
+      - 'native/desktop/**'
+      - '.github/workflows/windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: native/desktop
+    env:
+      # No code signing (users see a SmartScreen prompt on first launch).
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Electron 44 + @electron/rebuild need Node >= 22.12
+          node-version: 22
+          cache: npm
+          cache-dependency-path: native/desktop/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build installer and portable exe
+        run: npx electron-builder --win nsis portable --x64 --publish never
+
+      - name: Check outputs
+        shell: pwsh
+        run: |
+          foreach ($f in 'dist/TeleX-Setup.exe', 'dist/TeleX-Portable.exe') {
+            if (-not (Test-Path $f)) { throw "missing $f" }
+            Get-Item $f | Format-Table Name, Length
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TeleX-Windows
+          path: |
+            native/desktop/dist/TeleX-Setup.exe
+            native/desktop/dist/TeleX-Portable.exe
+          if-no-files-found: error
+
+      # Shared "nightly" pre-release (the Android workflow uploads there too):
+      # only our two files are added/replaced, other assets are left alone.
+      - name: Attach to nightly release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: nightly
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: |
+            native/desktop/dist/TeleX-Setup.exe
+            native/desktop/dist/TeleX-Portable.exe

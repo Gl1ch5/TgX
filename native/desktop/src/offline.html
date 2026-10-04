@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>TeleX</title>
+<style>
+  :root { color-scheme: dark; }
+  html, body { height: 100%; margin: 0; background: #000; color: #fff;
+    font: 15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 16px; }
+  .icon { width: 72px; height: 72px; border-radius: 50%; background: #1c1c1e; margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center; }
+  h1 { font-size: 21px; font-weight: 600; margin: 0 0 8px; }
+  p { color: #8e8e93; margin: 0 0 24px; max-width: 320px; }
+  button { background: #5a83f3; color: #fff; border: 0; border-radius: 12px; padding: 12px 32px;
+    font: inherit; font-weight: 600; cursor: pointer; }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { opacity: .6; cursor: default; }
+  small { display: block; margin-top: 16px; color: #48484a; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="icon">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.58 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+    </svg>
+  </div>
+  <h1>Нет соединения</h1>
+  <p>Не удалось открыть TeleX. Проверьте подключение к интернету (или VPN) и попробуйте снова.</p>
+  <button id="retry" type="button">Повторить</button>
+  <small id="detail"></small>
+</main>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get('code')) document.getElementById('detail').textContent = (q.get('desc') || 'Ошибка') + ' (' + q.get('code') + ')';
+  const btn = document.getElementById('retry');
+  function retry() {
+    btn.disabled = true; btn.textContent = 'Подключение…';
+    if (window.telex) window.telex.retry();
+  }
+  btn.addEventListener('click', retry);
+  window.addEventListener('online', retry);
+  setTimeout(retry, 15000); // quiet auto-retry
+</script>
+</body>
+</html>
