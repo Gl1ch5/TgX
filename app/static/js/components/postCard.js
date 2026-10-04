@@ -160,7 +160,7 @@ function commentsRow(post) {
   if (!post.comments_enabled) return '';
   const avatars = (post.recent_repliers || []).map((p) => avatarHtml(p, 'xs')).join('');
   return `
-    <button class="tx-comments-row" onclick="event.stopPropagation(); window.TelegramX.openThread('${post.id}')">
+    <button class="tx-comments-row" onpointerdown="window.TelegramX.prefetchComments('${post.id}')" onclick="event.stopPropagation(); window.TelegramX.openThread('${post.id}')">
       ${avatars ? `<span class="tx-avatars">${avatars}</span>` : '<i class="icon icon-comments"></i>'}
       <span id="comments-label-${post.id}">${commentsLabel(post.replies_count)}</span>
       <i class="icon icon-next tx-chevron"></i>

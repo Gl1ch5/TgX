@@ -74,6 +74,10 @@ export const api = {
   },
 
   // Comments
+  cachedComments(channelId, msgId) {
+    return telegram.cachedComments(channelId, msgId);
+  },
+
   getComments(channelId, msgId, opts = {}) {
     return telegram.getComments(channelId, msgId, opts);
   },

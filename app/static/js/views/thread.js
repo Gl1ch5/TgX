@@ -54,12 +54,44 @@ function subtitle() {
   return thread.total ? `${formatNumber(thread.total)} ${pluralRu(thread.total, 'комментарий', 'комментария', 'комментариев')}` : 'нет комментариев';
 }
 
+// Comments start downloading the moment the "N comments" row is touched,
+// before the screen transition; the screen then picks up the same request.
+const inflight = new Map();
+
+function fetchFresh(post) {
+  const key = post.id;
+  if (!inflight.has(key)) {
+    const p = api.getComments(post.channel_id, post.msg_id, { refresh: true });
+    inflight.set(key, p);
+    p.catch(() => {}).finally(() => setTimeout(() => { if (inflight.get(key) === p) inflight.delete(key); }, 3000));
+  }
+  return inflight.get(key);
+}
+
+export function prefetchComments(postId) {
+  const post = state.posts.find((p) => p.id === postId);
+  if (post && state.isAuth && post.comments_enabled) fetchFresh(post);
+}
+
 async function load(older = false) {
   const t = thread;
+  if (!older && t.comments === null) {
+    // Seen this discussion before: show it instantly, refresh underneath.
+    const cached = api.cachedComments(t.post.channel_id, t.post.msg_id);
+    if (cached) {
+      t.comments = cached.comments;
+      t.total = cached.total;
+      t.hasMore = cached.has_more;
+      render();
+    }
+  }
   try {
     const offsetId = older && t.comments && t.comments.length ? t.comments[0].id : 0;
-    const res = await api.getComments(t.post.channel_id, t.post.msg_id, { offsetId, refresh: !older });
+    const res = older
+      ? await api.getComments(t.post.channel_id, t.post.msg_id, { offsetId, refresh: false })
+      : await fetchFresh(t.post);
     if (thread !== t) return;
+    t.revealed = t.revealed || t.comments === null; // first real content after the skeleton
     t.comments = older ? [...res.comments, ...(t.comments || [])] : res.comments;
     t.total = res.total;
     t.hasMore = res.has_more;
@@ -119,6 +151,26 @@ function commentHtml(c, first, last) {
     </div>`;
 }
 
+/** Placeholder bubbles with a shimmer while the discussion loads (like the feed). */
+function skeletonHtml(total) {
+  const n = Math.max(3, Math.min(8, total || 5));
+  const widths = [62, 78, 46, 70, 54, 84, 40, 66];
+  let out = '<div class="tx-thread-skeleton">';
+  for (let i = 0; i < n; i++) {
+    const w = widths[i % widths.length];
+    out += `
+      <div class="tx-msg is-first is-last tx-skel-msg" style="--i:${i}">
+        <span class="tx-avatar-slot"><span class="tx-skel tx-skel-ava"></span></span>
+        <div class="tx-bubble tx-skel-bubble" style="width:${w}%">
+          <i class="tx-skel" style="width:38%;height:11px;margin-bottom:9px"></i>
+          <i class="tx-skel" style="width:92%;height:11px"></i>
+          ${i % 2 ? '<i class="tx-skel" style="width:60%;height:11px;margin-top:7px"></i>' : ''}
+        </div>
+      </div>`;
+  }
+  return out + '</div>';
+}
+
 function render() {
   if (!thread) return;
   $('thread-title').textContent = subtitle();
@@ -134,7 +186,7 @@ function render() {
 
   let html = '';
   if (thread.comments === null) {
-    html = '<div class="tx-sentinel"><span class="animate-spin"><i class="icon icon-reload"></i></span></div>';
+    html = skeletonHtml(thread.total);
   } else if (thread.error) {
     html = `<span class="tx-service" style="display:table;margin:10px auto">Не удалось загрузить комментарии: ${escapeHtml(thread.error)}</span>`;
   } else {
@@ -157,6 +209,15 @@ function render() {
   list.innerHTML = '';
   list.appendChild(root);
   list.insertAdjacentHTML('beforeend', html);
+  if (thread.revealed) {
+    // Comments replace the skeleton: they rise in one after another.
+    thread.revealed = false;
+    list.querySelectorAll('.tx-msg').forEach((m, i) => {
+      if (i > 10) return;
+      m.style.setProperty('--i', i);
+      m.classList.add('tx-enter');
+    });
+  }
   hydrateStickers(list);
   observeAutoplay(list);
   if (searchQuery) searchThread(searchQuery);

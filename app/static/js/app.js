@@ -56,6 +56,7 @@ window.TelegramX = {
   openSettingsMenu: settings.openSettingsMenu,
 
   // Thread extras
+  prefetchComments: thread.prefetchComments,
   toggleThreadSearch: thread.toggleThreadSearch,
   searchThread: thread.searchThread,
   threadJumpDown: thread.threadJumpDown,

@@ -1108,9 +1108,13 @@ class TelegramService {
     const myId = this.me ? Number(this.me.id) : null;
     const byId = new Map();
     const list = [];
-    for (const r of replies) {
+    // Authors missing from the response are resolved in parallel, not one by one.
+    const senders = await Promise.all(replies.map((r) => (r && (r.message || r.media)
+      ? (r.sender || (r.getSender ? r.getSender().catch(() => null) : null))
+      : null)));
+    for (const [i, r] of replies.entries()) {
       if (!r || (!r.message && !r.media)) continue;
-      const sender = r.sender || (r.getSender ? await r.getSender().catch(() => null) : null);
+      const sender = senders[i];
       const path = `${Number(r.peerId.channelId || 0)}/${r.id}`;
       this.commentMsgs.set(path, r);
       const reply = r.replyTo;
@@ -1137,6 +1141,11 @@ class TelegramService {
     const result = { comments: list, total: replies.total ?? list.length, has_more: replies.length >= limit };
     if (!offsetId) this.comments.set(key, result);
     return result;
+  }
+
+  /** Comments already loaded this session (shown instantly while refreshing). */
+  cachedComments(channelId, msgId) {
+    return this.comments.get(`${channelId}_${msgId}`) || null;
   }
 
   async sendComment(channelId, msgId, text, replyToCommentId = null) {
