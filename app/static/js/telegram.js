@@ -867,6 +867,7 @@ class TelegramService {
       edited: !!(primary.editDate && !primary.editHide),
       reactions: this.reactionsOf(primary),
       tg_url: tgUrl,
+      buttons: this.buttonsOf(primary),
       is_pinned: !!primary.pinned,
       is_favorite: this.favorites.has(id),
     };
@@ -1057,6 +1058,7 @@ class TelegramService {
         id: r.id,
         text: r.message || '',
         text_html: toHtml(r.message || '', r.entities),
+        buttons: this.buttonsOf(r),
         date: new Date(r.date * 1000).toISOString(),
         timestamp: r.date,
         sender_id: sender ? Number(sender.id) : null,
@@ -1324,6 +1326,120 @@ class TelegramService {
 
   rememberPost(post) {
     if (post && post.id && !this.posts.has(post.id)) this.posts.set(post.id, post);
+  }
+
+  // ----- channel page -----
+
+  channelInfoOf(channelId) {
+    const ch = this.channels && this.channels.get(Number(channelId));
+    if (ch) return ch;
+    const e = this.entities.get(`c${channelId}`);
+    return e ? { id: Number(e.id), title: e.title, username: e.username || '', is_broadcast: !!e.broadcast, avatar: this.avatarUrl(e) } : { id: Number(channelId), title: 'Канал', username: '' };
+  }
+
+  /** Everything the channel page shows (channels.getFullChannel). */
+  async getChannelFull(channelId) {
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    const res = await client.invoke(new Api.channels.GetFullChannel({ channel: entity }));
+    [...(res.users || []), ...(res.chats || [])].forEach((e) => this.rememberEntity(e));
+    const full = res.fullChat;
+    const linked = full.linkedChatId ? (res.chats || []).find((c) => Number(c.id) === Number(full.linkedChatId)) : null;
+    let pinned = null;
+    if (full.pinnedMsgId) {
+      try {
+        const m = await this.getMessage(Number(channelId), full.pinnedMsgId);
+        if (m) {
+          const media = this.mediaOf(m, Number(channelId));
+          const first = media.items[0];
+          pinned = {
+            msg_id: m.id,
+            text: (m.message || '').replace(/\s+/g, ' ').trim(),
+            kind: media.type === 'video' ? 'Видео' : media.type === 'photo' || media.type === 'album' ? 'Фотография' : media.type ? 'Медиа' : '',
+            thumb: first ? first.thumb_url || (first.type === 'photo' ? first.url : null) : null,
+          };
+        }
+      } catch (e) {
+        console.warn('[TeleX] pinned', e);
+      }
+    }
+    const ch = this.channelInfoOf(channelId);
+    return {
+      id: Number(channelId),
+      title: entity.title,
+      username: entity.username || (entity.usernames && entity.usernames[0] && entity.usernames[0].username) || '',
+      about: full.about || '',
+      participants_count: full.participantsCount || entity.participantsCount || null,
+      avatar: this.avatarUrl(entity),
+      avatar_big: this.avatarUrl(entity, true),
+      verified: !!entity.verified,
+      linked: linked ? { id: Number(linked.id), title: linked.title, username: linked.username || '' } : null,
+      pinned,
+      muted: !!ch.muted,
+      can_leave: !entity.left,
+    };
+  }
+
+  async setChannelMuted(channelId, mute) {
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    await client.invoke(new Api.account.UpdateNotifySettings({
+      peer: new Api.InputNotifyPeer({ peer: entity }),
+      settings: new Api.InputPeerNotifySettings({ muteUntil: mute ? 2147483647 : 0 }),
+    }));
+    const ch = this.channels && this.channels.get(Number(channelId));
+    if (ch) {
+      ch.muted = !!mute;
+      lsSet(LS.channels, Object.fromEntries(this.channels));
+    }
+    return !!mute;
+  }
+
+  async leaveChannel(channelId) {
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    await client.invoke(new Api.channels.LeaveChannel({ channel: entity }));
+    if (this.channels) {
+      this.channels.delete(Number(channelId));
+      lsSet(LS.channels, Object.fromEntries(this.channels));
+    }
+  }
+
+  /** Photos and videos of a channel, newest first (messages.search, photo/video filter). */
+  async getChannelMedia(channelId, offsetId = 0, limit = 30) {
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    const res = await client.invoke(new Api.messages.Search({
+      peer: entity, q: '', filter: new Api.InputMessagesFilterPhotoVideo(),
+      minDate: 0, maxDate: 0, offsetId, addOffset: 0, limit, maxId: 0, minId: 0, hash: bigInt.zero,
+    }));
+    const ch = this.channelInfoOf(channelId);
+    const posts = (res.messages || [])
+      .filter((m) => m instanceof Api.Message && m.media)
+      .map((m) => this.formatGroup([m], ch))
+      .filter((p) => p.media_items.length);
+    posts.forEach((p) => this.rememberPost(p));
+    return { posts, has_more: posts.length >= limit, next_offset: posts.length ? posts[posts.length - 1].msg_id : 0 };
+  }
+
+  /** Stories a channel keeps on its page ("Публикации"). */
+  async getChannelStories(channelId) {
+    const client = await this.getClient();
+    const entity = await this.channelEntity(channelId);
+    const key = `c${channelId}`;
+    const res = await client.invoke(new Api.stories.GetPinnedStories({ peer: entity, offsetId: 0, limit: 60 }));
+    const stories = (res.stories || []).map((x) => this.formatStory(key, x)).filter(Boolean).sort((a, b) => b.id - a.id);
+    return { key, id: Number(channelId), name: entity.title, title: entity.title, avatar: this.avatarUrl(entity), is_channel: true, max_read_id: Number.MAX_SAFE_INTEGER, unread: false, stories };
+  }
+
+  /** Inline URL buttons under a post or comment. */
+  buttonsOf(msg) {
+    const markup = msg && msg.replyMarkup;
+    if (!(markup instanceof Api.ReplyInlineMarkup)) return [];
+    return markup.rows.map((row) => row.buttons
+      .map((b) => (b.url ? { text: b.text || '', url: safeUrl(b.url) } : null))
+      .filter((b) => b && b.url))
+      .filter((row) => row.length);
   }
 
   // ----- stories -----

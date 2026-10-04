@@ -31,7 +31,7 @@ function dateLabel(iso) {
 }
 
 export function openViewer(postId, index = 0) {
-  const post = state.posts.find((p) => p.id === postId) || (state.threadPost && state.threadPost.id === postId ? state.threadPost : null);
+  const post = state.posts.find((p) => p.id === postId) || (state.extraPosts || []).find((p) => p.id === postId) || (state.threadPost && state.threadPost.id === postId ? state.threadPost : null);
   if (!post) return;
   const items = galleryOf(post);
   if (!items.length) return;

@@ -20,7 +20,8 @@ export function currentScreen() {
 const TABS = ['wall', 'settings', 'profile'];
 
 function depth(view, params) {
-  if (view === 'thread') return 1;
+  if (view === 'thread' || view === 'channel') return 1;
+  if (view === 'wall' && params && params.channel) return 1;
   if (params && params.page && params.page !== 'root') return 1;
   return 0;
 }
@@ -68,7 +69,7 @@ function apply(view, params = {}) {
  * nested screens (thread, settings subpages) push one so "back" returns.
  */
 export function go(view, params = {}, { push } = {}) {
-  const nested = push ?? (view === 'thread' || !!params.page);
+  const nested = push ?? (view === 'thread' || view === 'channel' || !!params.page);
   const entry = { view, ...params };
   if (nested) history.pushState(entry, '');
   else history.replaceState(entry, '');
@@ -76,7 +77,7 @@ export function go(view, params = {}, { push } = {}) {
 }
 
 export function back() {
-  if (history.state && (history.state.view === 'thread' || history.state.page || history.state.viewer)) history.back();
+  if (history.state && (history.state.view === 'thread' || history.state.view === 'channel' || history.state.page || history.state.viewer)) history.back();
   else go('wall');
 }
 

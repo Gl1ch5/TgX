@@ -100,10 +100,11 @@
               <span class="tx-pill-sub" id="header-sub-title">все ваши каналы</span>
             </div>
           </div>
-          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleHeaderSearch(true)" title="Поиск">
-            <i class="icon icon-search"></i>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.openChannelMenu(event)" title="Ещё">
+            <i class="icon icon-more"></i>
           </button>
         </header>
+        <button id="channel-pinned" class="tx-pinned tx-glass tx-hidden" onclick="window.TelegramX.jumpToPinned()"></button>
 
         <label id="header-search-bar" class="tx-search tx-search-main">
           <i class="icon icon-search"></i>
@@ -137,11 +138,24 @@
 
         <div id="posts-container" class="tx-feed"></div>
 
+        <div class="tx-chbar" id="channel-bar">
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleHeaderSearch(true)" title="Поиск"><i class="icon icon-search"></i></button>
+          <button class="tx-chbar-main tx-glass" id="channel-mute-btn" onclick="window.TelegramX.toggleWallChannelMute()">Убрать звук</button>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.copyChannelLink(window.TelegramX.activeChannel())" title="Ссылка"><i class="icon icon-share-filled"></i></button>
+        </div>
+
         <div id="feed-sentinel" class="tx-sentinel">
           <span class="animate-spin tx-hidden" id="sentinel-spinner"><i class="icon icon-reload"></i></span>
           <span id="sentinel-text" class="tx-service tx-hidden"></span>
         </div>
       </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- CHANNEL PAGE                                                      -->
+    <!-- ================================================================ -->
+    <section id="screen-channel" class="tx-screen">
+      <div class="tx-column" id="channel-root"></div>
     </section>
 
     <!-- ================================================================ -->

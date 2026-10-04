@@ -29,6 +29,7 @@ import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import * as profile from './views/profile.js';
+import * as channel from './views/channel.js';
 import { captureLogs, initDevtools } from './core/devtools.js';
 
 captureLogs();
@@ -51,6 +52,21 @@ window.TelegramX = {
   openSettingsPage: settings.openSettingsPage,
   rerenderSettings: settings.rerenderSettings,
   openFavorites,
+
+  // Channel
+  openChannelPage: channel.openChannelPage,
+  openChannelPageMenu: channel.openChannelPageMenu,
+  switchChannelTab: channel.switchChannelTab,
+  toggleChannelMute: () => channel.toggleChannelMute(),
+  copyChannelLink: (id) => channel.copyChannelLink(id),
+  openChannelDiscussion: channel.openChannelDiscussion,
+  leaveChannelConfirm: () => channel.leaveChannelConfirm(),
+  openChannelStory: channel.openChannelStory,
+  openChannelMedia: channel.openChannelMedia,
+  openChannelMenu: wall.openChannelMenu,
+  jumpToPinned: wall.jumpToPinned,
+  toggleWallChannelMute: wall.toggleWallChannelMute,
+  activeChannel: wall.activeChannel,
 
   // Developer / about
   devPing: settings.devPing,
@@ -160,7 +176,8 @@ async function initApp() {
   });
 
   registerView('wall', {
-    enter: () => {
+    enter: (params) => {
+      if (wall.syncChannelMode(params)) return;
       if (wallDirty) {
         wallDirty = false;
         wall.updateHeader();
@@ -175,6 +192,7 @@ async function initApp() {
   registerView('thread', { enter: thread.enterThread });
   registerView('settings', { enter: settings.enterSettings });
   registerView('profile', { enter: profile.enterProfile });
+  registerView('channel', { enter: channel.enterChannel });
 
   initNav(() => {
     closeMenus();

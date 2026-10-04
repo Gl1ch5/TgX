@@ -10,6 +10,8 @@ import { showToast, formatNumber, escapeHtml, pluralRu } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs, isChannelExcluded } from '../core/prefs.js';
 import { go } from '../core/nav.js';
+import { channelFull, cachedChannelFull, openChannelPage, toggleChannelMute, copyChannelLink, leaveChannelConfirm } from './channel.js';
+import { openPopup } from '../components/postMenu.js';
 import { createPostCardElement, VERIFIED_BADGE_SVG } from '../components/postCard.js';
 import { avatarHtml } from '../components/avatar.js';
 import { hydrateStickers } from '../components/sticker.js';
@@ -39,6 +41,70 @@ export function updateHeader() {
   $('header-sub-title').textContent = n
     ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}`
     : ch && ch.username ? `@${ch.username}` : 'канал';
+  renderChannelExtras();
+  const id = state.activeChannelId;
+  if (!cachedChannelFull(id) && state.isAuth) channelFull(id).then(() => { if (state.activeChannelId === id) renderChannelExtras(); }).catch(() => {});
+}
+
+/** Pinned message bar and the bottom "mute" pill of the channel view. */
+function renderChannelExtras() {
+  const id = state.activeChannelId;
+  const full = cachedChannelFull(id);
+  const ch = state.channels.find((c) => c.id === id) || full || {};
+  const bar = $('channel-pinned');
+  const pin = full && full.pinned;
+  if (pin) {
+    bar.innerHTML = `
+      <span class="tx-pinned-line"></span>
+      ${pin.thumb ? `<img class="tx-pinned-thumb" src="${escapeHtml(pin.thumb)}" alt="" />` : ''}
+      <span class="tx-pinned-body"><b>Закреплённое сообщение</b><span>${pin.kind ? `<em>${pin.kind}</em> ` : ''}${parseEmojis(pin.text || '')}</span></span>
+      <i class="icon icon-pin tx-pinned-icon"></i>`;
+  }
+  show(bar, !!pin);
+  const muted = full ? full.muted : ch.muted;
+  $('channel-mute-btn').textContent = muted ? 'Включить звук' : 'Убрать звук';
+}
+
+export function activeChannel() {
+  return state.activeChannelId;
+}
+
+export async function toggleWallChannelMute() {
+  await toggleChannelMute(state.activeChannelId);
+  renderChannelExtras();
+}
+
+export function jumpToPinned() {
+  const full = cachedChannelFull(state.activeChannelId);
+  if (!full || !full.pinned) return;
+  const card = $(`post-card-${state.activeChannelId}_${full.pinned.msg_id}`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const b = card.querySelector('.tx-bubble');
+    b.classList.remove('is-highlight');
+    void b.offsetWidth;
+    b.classList.add('is-highlight');
+    return;
+  }
+  const ch = state.channels.find((c) => c.id === state.activeChannelId) || full;
+  window.open(ch.username ? `https://t.me/${ch.username}/${full.pinned.msg_id}` : `https://t.me/c/${state.activeChannelId}/${full.pinned.msg_id}`, '_blank', 'noopener');
+}
+
+export function openChannelMenu(event) {
+  const id = state.activeChannelId;
+  const ch = state.channels.find((c) => c.id === id) || {};
+  const full = cachedChannelFull(id);
+  const muted = full ? full.muted : ch.muted;
+  openPopup(event.currentTarget, {
+    items: [
+      { icon: muted ? 'unmute' : 'mute', label: muted ? 'Включить уведомления' : 'Выключить уведомления', run: toggleWallChannelMute },
+      { icon: 'search', label: 'Поиск', run: () => toggleHeaderSearch(true) },
+      { icon: 'info-filled', label: 'Информация о канале', run: () => openChannelPage(id) },
+      { icon: 'link', label: 'Копировать ссылку', run: () => copyChannelLink(id) },
+      { icon: 'open-in-new-tab', label: 'Открыть в Telegram', run: () => window.open(ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${id}`, '_blank', 'noopener') },
+      { icon: 'logout', label: 'Покинуть канал', danger: true, run: () => leaveChannelConfirm(id) },
+    ],
+  });
 }
 
 export function headerLeft() {
@@ -47,8 +113,7 @@ export function headerLeft() {
 
 export function headerPill() {
   if (state.activeChannelId) {
-    const ch = state.channels.find((c) => c.id === state.activeChannelId);
-    if (ch && ch.username) window.open(`https://t.me/${ch.username}`, '_blank', 'noopener');
+    openChannelPage(state.activeChannelId);
     return;
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -302,16 +367,33 @@ export function switchFeedType(type) {
 }
 
 export function filterByChannel(channelId) {
-  state.activeChannelId = Number(channelId);
+  const id = Number(channelId);
+  const already = history.state && history.state.view === 'wall' && Number(history.state.channel) === id;
+  go('wall', { channel: id }, { push: !already });
+}
+
+/** Wall screen entered (also via Back): switch channel mode on/off to match the history entry. */
+export function syncChannelMode(params = {}) {
+  const id = params.channel ? Number(params.channel) : null;
+  if (id === state.activeChannelId) return false;
+  state.activeChannelId = id;
   state.feedType = 'all';
+  state.searchQuery = '';
+  const input = $('search-input');
+  if (input) input.value = '';
+  $('screen-wall').classList.remove('is-searching');
   updateTabs();
   updateHeader();
-  go('wall');
   window.scrollTo({ top: 0 });
   loadFeed();
+  return true;
 }
 
 export function clearChannelFilter() {
+  if (history.state && history.state.channel) {
+    history.back();
+    return;
+  }
   state.activeChannelId = null;
   updateHeader();
   window.scrollTo({ top: 0 });

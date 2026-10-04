@@ -10,7 +10,7 @@ import { showToast, escapeHtml, formatPostText, pluralRu, formatNumber } from '.
 import { parseEmojis, renderEmoji } from '../emoji.js';
 import { go } from '../core/nav.js';
 import { avatarHtml, peerColor } from '../components/avatar.js';
-import { createPostCardElement, commentsLabel } from '../components/postCard.js';
+import { createPostCardElement, commentsLabel, buttonsHtml } from '../components/postCard.js';
 import { stickerHtml, hydrateStickers } from '../components/sticker.js';
 import { observeAutoplay } from '../components/autoplay.js';
 import { reactionIcon } from '../components/reactions.js';
@@ -105,12 +105,15 @@ function commentHtml(c, first, last) {
   return `
     <div class="tx-msg ${c.is_out ? 'is-out' : ''} ${first ? 'is-first' : ''} ${last ? 'is-last' : ''}" id="comment-${c.id}">
       <span class="tx-avatar-slot">${last && !c.is_out ? avatarHtml(peer, 'sm') : ''}</span>
+      <div class="tx-msg-stack">
       <div class="tx-bubble ${c.is_out ? 'is-out' : ''} ${sticker ? 'is-sticker' : ''}" onclick="window.TelegramX.openCommentMenu(${c.id}, event)">
         ${first && !c.is_out && !sticker ? `<div class="tx-msg-name tx-peer-${peerColor(c.sender_id)} tx-peer-name">${parseEmojis(c.sender_name)}</div>` : ''}
         ${replyQuote(c)}
         ${media}
         ${c.text || !sticker ? `<div class="tx-msg-body post-text">${formatPostText(c.text, c.text_html)}<span class="tx-msg-time">${time}</span></div>` : `<div class="tx-meta"><span class="tx-msg-time">${time}</span></div>`}
         ${reactions}
+      </div>
+      ${buttonsHtml(c.buttons)}
       </div>
     </div>`;
 }

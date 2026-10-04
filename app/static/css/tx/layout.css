@@ -5,9 +5,12 @@
 .tx-app[data-view="wall"] #screen-wall,
 .tx-app[data-view="settings"] #screen-settings,
 .tx-app[data-view="profile"] #screen-profile,
-.tx-app[data-view="thread"] #screen-thread { display: block; }
+.tx-app[data-view="thread"] #screen-thread,
+.tx-app[data-view="channel"] #screen-channel { display: block; }
 
-.tx-app[data-view="settings"], .tx-app[data-view="profile"] { background: var(--tx-bg); }
+.tx-app[data-view="settings"], .tx-app[data-view="profile"], .tx-app[data-view="channel"] { background: var(--tx-bg); }
+.tx-app[data-view="channel"] .tx-dock, .tx-app[data-view="channel"] .tx-dock-fade { display: none; }
+.tx-app[data-view="channel"] #screen-channel { padding-bottom: calc(24px + var(--tx-safe-bottom)); }
 .tx-app[data-view="thread"] .tx-dock { display: none; }
 .tx-app[data-view="thread"] #screen-thread { padding-bottom: calc(76px + var(--tx-safe-bottom)); }
 

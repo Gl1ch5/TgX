@@ -167,6 +167,13 @@ function metaHtml(post) {
     <span>&nbsp;${post.edited ? 'изменено ' : ''}${timeOf(post)}</span>`;
 }
 
+/** Inline URL buttons under a message, like Telegram's bot keyboards. */
+export function buttonsHtml(rows) {
+  if (!rows || !rows.length) return '';
+  return `<div class="tx-kb">${rows.map((row) => `<div class="tx-kb-row">${row.map((b) =>
+    `<a class="tx-kb-btn" href="${escapeHtml(b.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"><span>${parseEmojis(b.text)}</span><i class="tx-kb-arrow" aria-hidden="true"></i></a>`).join('')}</div>`).join('')}</div>`;
+}
+
 export function createPostCardElement(post) {
   const ch = post.channel || {};
   const media = mediaBlock(post);
@@ -185,6 +192,7 @@ export function createPostCardElement(post) {
 
   card.innerHTML = `
     <div class="tx-post-col">
+      <div class="tx-post-stack">
       <div class="tx-bubble ${isSticker ? 'is-sticker' : ''} ${mediaOnly ? 'tx-media-only' : ''}"
            onclick="window.TelegramX.openPostMenu('${post.id}', event)"
            ondblclick="window.TelegramX.quickReact('${post.id}', event)">
@@ -195,6 +203,8 @@ export function createPostCardElement(post) {
         <div class="tx-reactions ${hasReactions ? '' : 'tx-hidden'}" id="reactions-wrap-${post.id}">${reactionsHtml(post)}</div>
         <div class="tx-meta">${metaHtml(post)}</div>
         ${commentsRow(post)}
+      </div>
+      ${buttonsHtml(post.buttons)}
       </div>
       <button class="tx-side-btn tx-glass" onclick="window.TelegramX.sharePost('${post.id}')" title="Поделиться">
         <i class="icon icon-share-filled"></i>

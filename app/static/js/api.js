@@ -129,6 +129,30 @@ export const api = {
     return telegram.getMyStories();
   },
 
+  // Channel page
+  getChannelFull(channelId) {
+    return telegram.getChannelFull(channelId);
+  },
+
+  setChannelMuted(channelId, mute) {
+    return safe(async () => ({ status: 'success', muted: await telegram.setChannelMuted(channelId, mute) }));
+  },
+
+  leaveChannel(channelId) {
+    return safe(async () => {
+      await telegram.leaveChannel(channelId);
+      return { status: 'success' };
+    });
+  },
+
+  getChannelMedia(channelId, offsetId) {
+    return telegram.getChannelMedia(channelId, offsetId);
+  },
+
+  getChannelStories(channelId) {
+    return telegram.getChannelStories(channelId);
+  },
+
   // Stories
   getStories() {
     return telegram.getStories();

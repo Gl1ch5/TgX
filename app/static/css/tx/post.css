@@ -201,3 +201,32 @@
 /* Bubbles appear when the feed renders / comments load */
 .tx-msg { animation: tx-msg-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
 @keyframes tx-msg-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+
+/* Inline URL buttons (reply markup) under posts and comments */
+.tx-post-stack { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.tx-kb { display: flex; flex-direction: column; gap: 3px; }
+.tx-kb-row { display: flex; gap: 3px; }
+.tx-kb-btn {
+  position: relative; flex: 1; min-width: 0; min-height: 40px; padding: 8px 18px;
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  border-radius: 10px; text-decoration: none; text-align: center;
+  font-size: 15px; font-weight: 600; color: #fff !important;
+  background: rgba(30, 32, 40, 0.62);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+.tx-kb-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-kb-btn:active { transform: scale(0.98); background: rgba(50, 54, 66, 0.7); }
+.tx-kb-row:last-child .tx-kb-btn:first-child { border-bottom-left-radius: var(--tx-bubble-radius); }
+.tx-kb-row:last-child .tx-kb-btn:last-child { border-bottom-right-radius: var(--tx-bubble-radius); }
+.tx-kb-arrow {
+  position: absolute; top: 5px; right: 6px; width: 9px; height: 9px;
+  border-top: 2px solid currentColor; border-right: 2px solid currentColor; opacity: 0.9;
+}
+.tx-kb-arrow::after {
+  content: ''; position: absolute; top: -1px; right: 0; width: 12px; height: 2px;
+  background: currentColor; transform-origin: right center; transform: rotate(-45deg);
+}
+.tx-msg-stack { flex: 0 1 auto; min-width: 0; max-width: min(84%, 520px); display: flex; flex-direction: column; gap: 3px; }
+.tx-msg .tx-msg-stack > .tx-bubble { max-width: 100%; }
+.tx-msg.is-out .tx-msg-stack { align-items: flex-end; }
