@@ -14,7 +14,7 @@ const TGS = 'application/x-tgsticker';
 const lottieCache = new Map(); // url -> Promise<animationData>
 let lottieLoader = null;
 
-function loadLottie() {
+export function loadLottie() {
   if (window.lottie) return Promise.resolve(window.lottie);
   if (!lottieLoader) {
     lottieLoader = new Promise((resolve, reject) => {

@@ -12,6 +12,7 @@ import { initMediaBridge } from './media.js';
 import { getPrefs, setPref, onPrefsChange, applyAppearance } from './core/prefs.js';
 import { initNav, registerView, go, back } from './core/nav.js';
 import { avatarHtml } from './components/avatar.js';
+import { initDock, setDockActive } from './components/dock.js';
 import { loadPhoto } from './components/postCard.js';
 import { tapReaction, sendReaction } from './components/reactions.js';
 import { openPostMenu, quickReact, pickReaction, closeMenus, copyPostLink, sharePost, forwardToSaved, togglePostFavorite } from './components/postMenu.js';
@@ -119,6 +120,9 @@ window.TelegramX = {
 async function initApp() {
   applyAppearance();
   initWallpaperEngine();
+  api.warmUp();
+  initDock();
+  window.addEventListener('tx:view', (e) => setDockActive(e.detail.view, e.detail.prev));
 
   onPrefsChange((p, key) => {
     applyAppearance(p);

@@ -52,6 +52,10 @@ export const api = {
     return safe(() => telegram.logout());
   },
 
+  warmUp() {
+    telegram.warmUp();
+  },
+
   cachedUser() {
     return telegram.hasSession() ? telegram.cachedMe() : null;
   },

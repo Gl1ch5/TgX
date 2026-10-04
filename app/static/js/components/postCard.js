@@ -30,7 +30,7 @@ function aspect(item) {
 }
 
 function openAttr(post, idx) {
-  return `onclick="event.stopPropagation(); window.TelegramX.openViewer('${post.id}', ${idx})"`;
+  return `data-viewer="${post.id}:${idx}" onclick="event.stopPropagation(); window.TelegramX.openViewer('${post.id}', ${idx})"`;
 }
 
 function photoTile(post, item, idx, fill = false) {

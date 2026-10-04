@@ -129,20 +129,45 @@ export function appendPosts(posts) {
   observeAutoplay(container);
 }
 
-function showNewPostsPill(count, apply) {
-  let pill = $('new-posts-pill');
-  if (!pill) {
-    pill = document.createElement('button');
-    pill.id = 'new-posts-pill';
-    pill.className = 'tx-service tx-new-pill';
-    document.body.appendChild(pill);
+// Telegram-style floating "jump" button (like the chat page-down button):
+// glass circle with an arrow and an accent counter of new posts.
+let jumpApply = null;
+let jumpCount = 0;
+
+function jumpButton() {
+  let btn = $('tx-jump');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'tx-jump';
+    btn.className = 'tx-jump tx-glass';
+    btn.title = 'Наверх';
+    btn.innerHTML = '<i class="icon icon-arrow-left"></i><span class="tx-badge tx-hidden"></span>';
+    btn.onclick = () => {
+      const apply = jumpApply;
+      jumpApply = null;
+      jumpCount = 0;
+      if (apply) apply();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateJump();
+    };
+    document.getElementById('app').appendChild(btn);
+    window.addEventListener('scroll', updateJump, { passive: true });
   }
-  pill.innerHTML = `<i class="icon icon-up"></i> ${count} ${pluralRu(count, 'новая публикация', 'новые публикации', 'новых публикаций')}`;
-  pill.onclick = () => {
-    pill.remove();
-    apply();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  return btn;
+}
+
+function updateJump() {
+  const btn = jumpButton();
+  const badge = btn.querySelector('.tx-badge');
+  badge.textContent = jumpCount > 99 ? '99+' : String(jumpCount);
+  show(badge, jumpCount > 0);
+  btn.classList.toggle('is-visible', jumpCount > 0 || window.scrollY > 1200);
+}
+
+function showNewPostsPill(count, apply) {
+  jumpCount = count;
+  jumpApply = apply;
+  updateJump();
 }
 
 export async function loadFeed(forceRefresh = false) {
@@ -211,6 +236,7 @@ function renderFeed() {
     return;
   }
   renderPosts();
+  container.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
   if (sentinelText) {
     sentinelText.textContent = state.hasMore ? '' : 'Вы всё прочитали';
     show(sentinelText, !state.hasMore);

@@ -40,6 +40,7 @@ export function openViewer(postId, index = 0) {
   const el = document.createElement('div');
   el.className = 'tx-viewer';
   el.innerHTML = `
+    <div class="tx-viewer-bg"></div>
     <div class="tx-viewer-top">
       <button class="tx-icon-btn" data-act="close" title="Назад"><i class="icon icon-arrow-left"></i></button>
       <div class="tx-viewer-title"><b></b><span>${escapeHtml(dateLabel(post.date))}</span></div>
@@ -67,12 +68,139 @@ export function openViewer(postId, index = 0) {
   pauseAll();
   bind(el);
   show(index);
+  openFrom(sourceFor(post.id, index), items[index]);
   history.pushState({ ...(history.state || {}), viewer: true }, '');
 }
 
-function show(index) {
+// ---------------- Telegram-style open/close morph ----------------
+
+const EASE_OPEN = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
+const EASE_CLOSE = 'cubic-bezier(0.4, 0, 0.2, 1)';
+
+function reduceMotion() {
+  return document.body.classList.contains('tx-reduce-motion');
+}
+
+/** The on-screen tile the media was opened from (feed or discussion). */
+function sourceFor(postId, idx) {
+  const nodes = document.querySelectorAll(`[data-viewer="${CSS.escape(`${postId}:${idx}`)}"]`);
+  for (const n of nodes) {
+    const r = n.getBoundingClientRect();
+    if (r.width && r.height && r.bottom > 0 && r.top < innerHeight) return n;
+  }
+  return null;
+}
+
+function rectOf(r) {
+  return { left: r.left, top: r.top, width: r.width, height: r.height };
+}
+
+function fitRect(aspect) {
+  const W = innerWidth;
+  const H = innerHeight;
+  let w = W;
+  let h = W / aspect;
+  if (h > H) { h = H; w = H * aspect; }
+  return { left: (W - w) / 2, top: (H - h) / 2, width: w, height: h };
+}
+
+function ghostSrc(node) {
+  if (!node) return '';
+  const img = node.tagName === 'IMG' ? node : node.querySelector('img');
+  if (img && img.currentSrc) return img.currentSrc;
+  const v = node.tagName === 'VIDEO' ? node : node.querySelector('video');
+  if (v && v.videoWidth) {
+    try {
+      const c = document.createElement('canvas');
+      c.width = v.videoWidth;
+      c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0);
+      return c.toDataURL('image/jpeg', 0.85);
+    } catch {}
+  }
+  return (v && v.poster) || '';
+}
+
+function makeGhost(src, rect, radius) {
+  const g = document.createElement('div');
+  g.className = 'tx-viewer-ghost';
+  Object.assign(g.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px`, borderRadius: `${radius}px` });
+  g.innerHTML = `<img src="${escapeHtml(src)}" alt="" />`;
+  document.body.appendChild(g);
+  return g;
+}
+
+function frames(from, to, rFrom, rTo) {
+  const f = (r, rad) => ({ left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`, borderRadius: `${rad}px` });
+  return [f(from, rFrom), f(to, rTo)];
+}
+
+function openFrom(source, item) {
+  const el = view.el;
+  const bg = el.querySelector('.tx-viewer-bg');
+  const src = ghostSrc(source);
+  if (reduceMotion() || !source || !src) {
+    bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 180, easing: 'ease-out' });
+    el.querySelector('.tx-viewer-stage').animate([{ opacity: 0, transform: 'scale(0.94)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: EASE_OPEN });
+    return;
+  }
+  const from = rectOf(source.getBoundingClientRect());
+  const aspect = item.width && item.height ? item.width / item.height : from.width / from.height;
+  const to = fitRect(aspect);
+  const ghost = makeGhost(src, from, 6);
+  el.classList.add('is-morphing');
+  const dur = 280;
+  bg.animate([{ opacity: 0 }, { opacity: 1 }], { duration: dur, easing: 'ease-out' });
+  el.querySelectorAll('.tx-viewer-top, .tx-viewer-bottom, .tx-viewer-counter').forEach((n) => n.animate([{ opacity: 0 }, { opacity: 1 }], { duration: dur, easing: 'ease-out' }));
+  const a = ghost.animate(frames(from, to, 6, 0), { duration: dur, easing: EASE_OPEN, fill: 'forwards' });
+  a.finished.then(() => {
+    el.classList.remove('is-morphing');
+    requestAnimationFrame(() => ghost.remove());
+  });
+}
+
+/** Animate back into the tile (or fade/scale out if it's off-screen), then remove. */
+function closeAnimated(done) {
+  const el = view.el;
+  const media = el.querySelector('.tx-viewer-stage img, .tx-viewer-stage video');
+  const source = sourceFor(view.post.id, view.index);
+  const bg = el.querySelector('.tx-viewer-bg');
+  const chrome = el.querySelectorAll('.tx-viewer-top, .tx-viewer-bottom, .tx-viewer-counter, .tx-viewer-nav');
+  chrome.forEach((n) => n.animate([{ opacity: getComputedStyle(n).opacity }, { opacity: 0 }], { duration: 160, fill: 'forwards' }));
+  const bgFrom = getComputedStyle(bg).opacity;
+
+  if (reduceMotion() || !media) {
+    el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 }).finished.then(done);
+    return;
+  }
+  const from = rectOf(media.getBoundingClientRect());
+  const src = ghostSrc(media);
+  if (!source || !src) {
+    bg.animate([{ opacity: bgFrom }, { opacity: 0 }], { duration: 220, fill: 'forwards' });
+    media.animate([{ transform: media.style.transform || 'none', opacity: 1 }, { transform: 'scale(0.85)', opacity: 0 }], { duration: 220, easing: EASE_CLOSE, fill: 'forwards' })
+      .finished.then(done);
+    return;
+  }
+  const to = rectOf(source.getBoundingClientRect());
+  const ghost = makeGhost(src, from, 0);
+  media.style.visibility = 'hidden';
+  bg.animate([{ opacity: bgFrom }, { opacity: 0 }], { duration: 260, easing: 'ease-in', fill: 'forwards' });
+  ghost.animate(frames(from, to, 0, 6), { duration: 260, easing: EASE_CLOSE, fill: 'forwards' }).finished.then(() => {
+    done();
+    requestAnimationFrame(() => ghost.remove());
+  });
+}
+
+function show(index, dir = 0) {
   if (!view) return;
   const { items, el } = view;
+  if (dir) {
+    const stageEl = el.querySelector('.tx-viewer-stage');
+    requestAnimationFrame(() => stageEl.animate(
+      [{ transform: `translateX(${dir * 28}%)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: 260, easing: EASE_OPEN },
+    ));
+  }
   view.index = (index + items.length) % items.length;
   const item = items[view.index];
   const stage = el.querySelector('.tx-viewer-stage');
@@ -141,8 +269,8 @@ function bind(el) {
   el.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'close') return back();
-    if (act === 'prev') return show(view.index - 1);
-    if (act === 'next') return show(view.index + 1);
+    if (act === 'prev') return show(view.index - 1, -1);
+    if (act === 'next') return show(view.index + 1, 1);
     if (act === 'toggle') return togglePlay();
     if (act === 'share') return window.TelegramX.sharePost(view.post.id);
     if (act === 'download') return;
@@ -167,18 +295,53 @@ function bind(el) {
     seek.addEventListener('pointerup', () => seek.removeEventListener('pointermove', move), { once: true });
   });
 
-  // Swipe: left/right = next/prev, down = close
+  // Swipe: left/right = next/prev; drag down to dismiss (follows the finger)
   let start = null;
   const stage = el.querySelector('.tx-viewer-stage');
-  stage.addEventListener('pointerdown', (e) => { start = { x: e.clientX, y: e.clientY }; });
-  stage.addEventListener('pointerup', (e) => {
+  const bg = el.querySelector('.tx-viewer-bg');
+  stage.addEventListener('pointerdown', (e) => {
+    start = { x: e.clientX, y: e.clientY, axis: null };
+  });
+  stage.addEventListener('pointermove', (e) => {
     if (!start) return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
-    start = null;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) show(view.index + (dx < 0 ? 1 : -1));
-    else if (dy > 90) back();
+    if (!start.axis && Math.hypot(dx, dy) > 8) start.axis = Math.abs(dy) > Math.abs(dx) ? 'y' : 'x';
+    if (start.axis === 'y') {
+      const k = Math.min(1, Math.abs(dy) / 500);
+      stage.style.transform = `translate(${dx * 0.4}px, ${dy}px) scale(${1 - k * 0.25})`;
+      bg.style.opacity = String(1 - k);
+      el.classList.add('is-chrome-hidden');
+    } else if (start.axis === 'x') {
+      stage.style.transform = `translateX(${dx}px)`;
+    }
   });
+  const end = (e) => {
+    if (!start) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    const axis = start.axis;
+    start = null;
+    if (axis === 'y' && Math.abs(dy) > 110) {
+      back();
+      return;
+    }
+    if (axis === 'x' && Math.abs(dx) > 60 && view.items.length > 1) {
+      stage.style.transform = '';
+      show(view.index + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+      return;
+    }
+    if (axis) {
+      const current = stage.style.transform;
+      stage.style.transform = '';
+      stage.animate([{ transform: current }, { transform: 'none' }], { duration: 220, easing: EASE_OPEN });
+      bg.animate([{ opacity: bg.style.opacity || 1 }, { opacity: 1 }], { duration: 220 });
+      bg.style.opacity = '';
+      el.classList.remove('is-chrome-hidden');
+    }
+  };
+  stage.addEventListener('pointerup', end);
+  stage.addEventListener('pointercancel', end);
 }
 
 function back() {
@@ -187,12 +350,21 @@ function back() {
 }
 
 export function closeViewer() {
-  if (!view) return;
-  if (view.video) view.video.pause();
-  view.el.remove();
-  view = null;
-  document.body.style.overflow = '';
-  resumeVisible();
+  if (!view || view.closing) return;
+  const v = view;
+  v.closing = true;
+  if (v.video) v.video.pause();
+  const finish = () => {
+    v.el.remove();
+    if (view === v) view = null;
+    document.body.style.overflow = '';
+    resumeVisible();
+  };
+  try {
+    closeAnimated(finish);
+  } catch {
+    finish();
+  }
 }
 
 export function isViewerOpen() {
@@ -202,8 +374,8 @@ export function isViewerOpen() {
 export function viewerKey(e) {
   if (!view) return false;
   if (e.key === 'Escape') back();
-  else if (e.key === 'ArrowLeft') show(view.index - 1);
-  else if (e.key === 'ArrowRight') show(view.index + 1);
+  else if (e.key === 'ArrowLeft') show(view.index - 1, -1);
+  else if (e.key === 'ArrowRight') show(view.index + 1, 1);
   else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
   else return false;
   return true;

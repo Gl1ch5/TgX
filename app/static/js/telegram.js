@@ -17,13 +17,14 @@ const API_HASH = '1462d961e4a7bf6b5139309255f09fd6';
 
 const LS = {
   session: 'telex.session',
+  seen: 'telex.seen',
   me: 'telex.me',
   channels: 'telex.channels',
   posts: 'telex.posts',
   favorites: 'telex.favorites',
 };
 
-const FEED_CONCURRENCY = 5;
+const FEED_CONCURRENCY = 8;
 const POSTS_CACHE_LIMIT = 600;
 const STREAM_CHUNK = 512 * 1024;
 const STREAM_READ_AHEAD = 6;
@@ -176,6 +177,11 @@ class TelegramService {
     this.channels = new Map(Object.entries(lsGet(LS.channels, {})).map(([k, v]) => [Number(k), v]));
     this.posts = new Map(Object.entries(lsGet(LS.posts, {})));
     this.favorites = new Map(Object.entries(lsGet(LS.favorites, {})));
+    // Newest post id the user has seen per channel; "new" = posts above it.
+    this.seen = lsGet(LS.seen, {});
+    for (const ch of this.channels.values()) {
+      ch.unread_count = this.seen[ch.id] == null ? 0 : Math.max(0, (ch.top_id || 0) - this.seen[ch.id]);
+    }
     this.comments = new Map();
     this.commentMsgs = new Map(); // "chatId/msgId" -> Api.Message (comment media)
     this.discussions = new Map();
@@ -213,6 +219,11 @@ class TelegramService {
     } finally {
       this.connecting = null;
     }
+  }
+
+  /** Open the MTProto connection early (in parallel with UI start-up). */
+  warmUp() {
+    if (this.hasSession()) this.getClient().catch(() => {});
   }
 
   hasSession() {
@@ -499,6 +510,7 @@ class TelegramService {
     this.favorites.clear();
     this.dialogsLoaded = null;
     Object.values(LS).forEach(lsDel);
+    this.seen = {};
     try { await caches.delete('telex-media-v1'); } catch {}
     return { status: 'logged_out' };
   }
@@ -562,6 +574,12 @@ class TelegramService {
         read_max: d.dialog ? d.dialog.readInboxMaxId : 0,
       });
     }
+    // First time we meet a channel: everything already there counts as seen.
+    for (const ch of fresh.values()) {
+      if (this.seen[ch.id] == null) this.seen[ch.id] = ch.top_id || 0;
+      ch.unread_count = Math.max(0, (ch.top_id || 0) - this.seen[ch.id]);
+    }
+    lsSet(LS.seen, this.seen);
     this.channels = fresh;
     lsSet(LS.channels, Object.fromEntries(fresh));
     return this.sortChannels([...fresh.values()]);
@@ -1040,8 +1058,8 @@ class TelegramService {
         if (this.live && this.live.onEdit) this.live.onEdit(post);
         return;
       }
-      if (!m.out) ch.unread_count = (ch.unread_count || 0) + 1;
       ch.top_id = Math.max(ch.top_id || 0, m.id);
+      ch.unread_count = Math.max(0, ch.top_id - (this.seen[ch.id] || 0));
       ch.last_text = this.previewOf(m);
       ch.last_date = m.date;
       if (m.groupedId) {
@@ -1114,7 +1132,7 @@ class TelegramService {
     if (!ch) return;
     this.readQueue = this.readQueue || new Map();
     const prev = this.readQueue.get(ch.id) || 0;
-    if (msgId <= prev || msgId <= (ch.read_max || 0)) return;
+    if (msgId <= prev || msgId <= (this.seen[ch.id] || 0)) return;
     this.readQueue.set(ch.id, msgId);
     clearTimeout(this.readTimer);
     this.readTimer = setTimeout(() => this.flushReads(), 1500);
@@ -1129,7 +1147,8 @@ class TelegramService {
       const ch = this.channels.get(id);
       if (!ch) continue;
       ch.read_max = Math.max(ch.read_max || 0, maxId);
-      if (ch.top_id) ch.unread_count = Math.max(0, Math.min(ch.unread_count, ch.top_id - maxId));
+      this.seen[id] = Math.max(this.seen[id] || 0, maxId);
+      ch.unread_count = Math.max(0, (ch.top_id || 0) - this.seen[id]);
       if (!client || !getPrefs().syncRead) continue;
       try {
         await client.invoke(new Api.channels.ReadHistory({ channel: await this.channelEntity(id), maxId }));
@@ -1138,6 +1157,7 @@ class TelegramService {
       }
     }
     lsSet(LS.channels, Object.fromEntries(this.channels));
+    lsSet(LS.seen, this.seen);
     if (this.onReadChange) this.onReadChange();
   }
 

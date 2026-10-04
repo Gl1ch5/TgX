@@ -17,18 +17,50 @@ export function currentScreen() {
   return currentView;
 }
 
-function apply(view, params = {}) {
+const TABS = ['wall', 'settings', 'profile'];
+
+function depth(view, params) {
+  if (view === 'thread') return 1;
+  if (params && params.page && params.page !== 'root') return 1;
+  return 0;
+}
+
+let current = { view: 'wall', params: {} };
+
+function swap(view, params) {
   const app = document.getElementById('app');
-  if (!app) return;
   const prev = currentView;
   if (prev !== view) scrollMemory[prev] = window.scrollY;
   handlers.get(prev)?.leave?.(view);
   currentView = view;
   app.dataset.view = view;
   document.querySelectorAll('.tx-dock-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === view));
+  window.dispatchEvent(new CustomEvent('tx:view', { detail: { view, prev } }));
   handlers.get(view)?.enter?.(params);
   const restore = params.page ? 0 : scrollMemory[view] || 0;
-  requestAnimationFrame(() => window.scrollTo({ top: prev === view && !params.page ? window.scrollY : restore }));
+  window.scrollTo({ top: prev === view && !params.page ? window.scrollY : restore });
+}
+
+/**
+ * Telegram-like transitions via the View Transitions API: nested screens
+ * slide in from the right (and out to the right on back), tab switches
+ * cross-fade. Browsers without the API just switch instantly.
+ */
+function apply(view, params = {}) {
+  if (!document.getElementById('app')) return;
+  const from = current;
+  current = { view, params };
+  const d = depth(view, params) - depth(from.view, from.params);
+  const kind = d > 0 ? 'push' : d < 0 ? 'pop' : (TABS.includes(view) && view !== from.view ? 'tab' : 'none');
+  const reduce = document.body.classList.contains('tx-reduce-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!document.startViewTransition || kind === 'none' || reduce) {
+    swap(view, params);
+    return;
+  }
+  document.documentElement.dataset.nav = kind;
+  const t = document.startViewTransition(() => swap(view, params));
+  t.finished.finally(() => { delete document.documentElement.dataset.nav; });
 }
 
 /**

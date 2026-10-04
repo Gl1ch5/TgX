@@ -175,19 +175,20 @@
     <!-- ================================================================ -->
     <!-- FLOATING TAB BAR                                                 -->
     <!-- ================================================================ -->
+    <div class="tx-dock-fade"></div>
     <nav class="tx-dock" id="dock">
-      <button class="tx-dock-tab is-active" data-view="wall" onclick="window.TelegramX.setView('wall')">
-        <i class="icon icon-message is-off"></i><i class="icon icon-folder-tabs-chats is-on"></i>
-        <span>Стена</span>
+      <button class="tx-dock-tab is-active" data-view="wall" data-icon="chats" onclick="window.TelegramX.setView('wall')">
+        <span class="tx-tab-icon"><i class="icon icon-folder-tabs-chats"></i></span>
+        <span class="tx-tab-label">Стена</span>
         <span class="tx-badge tx-hidden" id="dock-unread-badge"></span>
       </button>
-      <button class="tx-dock-tab" data-view="settings" onclick="window.TelegramX.setView('settings')">
-        <i class="icon icon-settings is-off"></i><i class="icon icon-settings-filled is-on"></i>
-        <span>Настройки</span>
+      <button class="tx-dock-tab" data-view="settings" data-icon="settings" onclick="window.TelegramX.setView('settings')">
+        <span class="tx-tab-icon"><i class="icon icon-settings"></i></span>
+        <span class="tx-tab-label">Настройки</span>
       </button>
       <button class="tx-dock-tab" data-view="profile" onclick="window.TelegramX.setView('profile')">
-        <span id="dock-user-avatar" class="tx-avatar tx-peer-5"><i class="icon icon-user" style="font-size:15px"></i></span>
-        <span>Профиль</span>
+        <span class="tx-tab-icon"><span id="dock-user-avatar" class="tx-avatar tx-peer-5"><i class="icon icon-user" style="font-size:13px"></i></span></span>
+        <span class="tx-tab-label">Профиль</span>
       </button>
     </nav>
   </div>

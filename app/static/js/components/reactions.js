@@ -28,9 +28,10 @@ export function reactionsHtml(post, { scope = 'post' } = {}) {
     </button>`).join('');
 }
 
-export function renderReactions(post) {
+export function renderReactions(post, popIndex = -1) {
   document.querySelectorAll(`[id="reactions-wrap-${post.id}"]`).forEach((wrap) => {
     wrap.innerHTML = reactionsHtml(post);
+    if (popIndex >= 0) wrap.children[popIndex]?.classList.add('tx-pop');
     wrap.classList.toggle('tx-hidden', !(post.reactions || []).length);
     hydrateStickers(wrap);
   });
@@ -61,7 +62,7 @@ export async function sendReaction(channelId, msgId, emoji, postId, customId = n
       }
     }
     post.reactions = post.reactions.filter((r) => r.count > 0);
-    renderReactions(post);
+    renderReactions(post, post.reactions.findIndex((r) => r.chosen));
   }
 
   const res = await api.sendReaction(channelId, msgId, send.emoji, send.customId);

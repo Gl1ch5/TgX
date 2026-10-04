@@ -191,3 +191,13 @@
 /* New posts slide in */
 .tx-appear { animation: tx-appear 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes tx-appear { from { opacity: 0; transform: translateY(-12px) scale(0.98); } }
+
+/* Reaction tap: Telegram-like springy pop */
+.tx-reaction.tx-pop { animation: tx-react-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.tx-reaction.tx-pop .emoji, .tx-reaction.tx-pop .tx-cemoji { animation: tx-react-emoji 0.55s cubic-bezier(0.3, 1.8, 0.5, 1); }
+@keyframes tx-react-pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.08); } 100% { transform: none; } }
+@keyframes tx-react-emoji { 0% { transform: scale(0.4) rotate(-12deg); } 55% { transform: scale(1.45) rotate(6deg); } 100% { transform: none; } }
+
+/* Bubbles appear when the feed renders / comments load */
+.tx-msg { animation: tx-msg-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@keyframes tx-msg-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }

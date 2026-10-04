@@ -139,3 +139,38 @@
   font-size: 15px !important;
   bottom: calc(var(--tx-dock-h) + 28px) !important;
 }
+
+/* Floating jump-to-top button with new-posts counter (Telegram page-down style) */
+.tx-jump {
+  position: fixed; z-index: 38; right: max(14px, calc(50% - var(--tx-column-w) / 2 + 14px));
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  opacity: 0; transform: translateY(12px) scale(0.85); pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.tx-jump.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.tx-jump .icon { font-size: 26px; transform: rotate(90deg); }
+.tx-jump .tx-badge { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); height: 20px; min-width: 20px; font-size: 12px; padding: 0 6px; }
+.tx-app:not([data-view="wall"]) .tx-jump { display: none; }
+
+/* ---------- Screen transitions (View Transitions API) ---------- */
+.tx-dock { view-transition-name: tx-dock; }
+.tx-dock-fade { view-transition-name: tx-dock-fade; }
+::view-transition-group(tx-dock), ::view-transition-group(tx-dock-fade) { animation: none; }
+::view-transition-old(tx-dock), ::view-transition-new(tx-dock) { animation: none; }
+
+/* push: new screen slides in from the right over the old one (Telegram Android) */
+html[data-nav="push"]::view-transition-old(root) { animation: tx-push-out 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+html[data-nav="push"]::view-transition-new(root) { animation: tx-push-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+html[data-nav="pop"]::view-transition-old(root) { animation: tx-pop-out 0.26s cubic-bezier(0.4, 0, 0.6, 1) both; z-index: 2; }
+html[data-nav="pop"]::view-transition-new(root) { animation: tx-pop-in 0.26s cubic-bezier(0.4, 0, 0.6, 1) both; }
+html[data-nav="tab"]::view-transition-old(root) { animation: tx-fade-out 0.18s ease both; }
+html[data-nav="tab"]::view-transition-new(root) { animation: tx-tab-in 0.24s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+
+@keyframes tx-push-in { from { transform: translateX(100%); box-shadow: -8px 0 24px rgba(0, 0, 0, 0.5); } to { transform: none; } }
+@keyframes tx-push-out { to { transform: translateX(-22%); filter: brightness(0.6); } }
+@keyframes tx-pop-out { to { transform: translateX(100%); } }
+@keyframes tx-pop-in { from { transform: translateX(-22%); filter: brightness(0.6); } to { transform: none; } }
+@keyframes tx-fade-out { to { opacity: 0; } }
+@keyframes tx-tab-in { from { opacity: 0; transform: scale(0.985) translateY(6px); } }

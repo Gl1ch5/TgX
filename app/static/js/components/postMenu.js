@@ -14,7 +14,13 @@ const QUICK_REACTION = '👍';
 let lastTap = 0;
 
 export function closeMenus() {
-  document.querySelectorAll('.tx-ctx, .tx-ctx-backdrop').forEach((m) => m.remove());
+  document.querySelectorAll('.tx-ctx, .tx-ctx-backdrop').forEach((m) => {
+    if (m.dataset.closing) return;
+    m.dataset.closing = '1';
+    m.style.pointerEvents = 'none';
+    const a = m.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: m.classList.contains('tx-ctx') ? 'scale(0.96)' : 'none' }], { duration: 140, easing: 'ease-in' });
+    a.finished.then(() => m.remove(), () => m.remove());
+  });
 }
 
 function findPost(postId) {
@@ -49,6 +55,7 @@ export function openPopup(anchor, { reactionsHtml = '', items = [] }) {
   if (top + h > window.innerHeight - 12) top = Math.max(8, window.innerHeight - h - 12);
   ctx.style.left = `${left}px`;
   ctx.style.top = `${top}px`;
+  ctx.style.transformOrigin = `${Math.max(0, r.left + 24 - left)}px ${top < r.top ? 'top' : 'bottom'}`;
   return ctx;
 }
 
