@@ -25,6 +25,8 @@ const DEFAULTS = {
   reduceMotion: false,
   autoplayGifs: true,
   autoloadPhotos: true,
+  syncRead: true,         // mark posts read in Telegram when seen on the wall
+  bubbleRadius: 17,       // Telegram default message corner radius
 };
 
 let prefs = load();
@@ -79,6 +81,8 @@ export function applyAppearance(p = prefs) {
   root.style.setProperty('--tx-link', accent.text);
   root.style.setProperty('--tx-accent-soft', hexAlpha(accent.text, 0.16));
   root.style.setProperty('--tx-text-size', `${p.textSize}px`);
+  root.style.setProperty('--tx-bubble-radius', `${p.bubbleRadius}px`);
+  root.style.setProperty('--tx-bubble-radius-small', `${Math.min(6, p.bubbleRadius)}px`);
   document.body.classList.toggle('tx-reduce-motion', !!p.reduceMotion);
 }
 

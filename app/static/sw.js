@@ -5,7 +5,7 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
-const CACHEABLE = new Set(['avatar', 'photo', 'thumb', 'webpage']);
+const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb']);
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));

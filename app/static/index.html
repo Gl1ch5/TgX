@@ -18,7 +18,6 @@
   
   <!-- Modular CSS Design System -->
   <link rel="stylesheet" href="css/telegram-icons.css">
-  <link rel="stylesheet" href="css/liquid-glass.css">
   <link rel="stylesheet" href="css/telegram-theme.css">
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/telex.css">
@@ -68,158 +67,36 @@
   <div id="app" class="tx-app" data-view="wall">
 
     <!-- ================================================================ -->
-    <!-- SIDEBAR: channel list / settings / profile                      -->
-    <!-- (desktop: left column, mobile: tabs «Каналы», «Настройки», «Профиль») -->
+    <!-- WALL                                                              -->
     <!-- ================================================================ -->
-    <aside class="tx-sidebar tx-scroll">
-
-      <!-- CHANNELS -->
-      <section id="pane-channels" class="tx-pane">
-        <div class="tx-topbar">
-          <div class="tx-topbar-row">
-            <div class="tx-title-block" onclick="window.TelegramX.resetFeed()">
-              <span class="tx-title">TeleX</span>
-            </div>
-            <button class="tx-icon-btn" onclick="window.TelegramX.refreshFeed()" title="Обновить">
-              <i class="icon icon-reload" id="refresh-icon"></i>
-            </button>
-          </div>
-          <label class="tx-search">
-            <i class="icon icon-search"></i>
-            <input type="search" id="channels-search-input" placeholder="Поиск каналов" autocomplete="off"
-                   oninput="window.TelegramX.filterChannelsList(this.value)" />
-          </label>
-        </div>
-        <div id="channels-list"></div>
-      </section>
-
-      <!-- SETTINGS -->
-      <section id="pane-settings" class="tx-pane">
-        <div class="tx-page">
-          <div class="tx-page-head">
-            <span class="tx-title">Настройки</span>
-          </div>
-
-          <div class="tx-hero">
-            <div id="settings-avatar" class="tx-avatar xl tx-peer-5"><i class="icon icon-user"></i></div>
-            <div class="tx-hero-name" id="settings-name">Гость</div>
-            <div class="tx-hero-sub" id="settings-sub">Войдите в Telegram</div>
-          </div>
-
-          <div class="tx-group">
-            <button class="tx-row" onclick="window.TelegramX.openWallpaperModal()">
-              <span class="tx-row-icon" style="--c:#f3963e"><i class="icon icon-brush"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">Обои</span><span class="tx-row-sub block" id="settings-wallpaper-name">Узоры Telegram</span></span>
-            </button>
-            <button class="tx-row" onclick="window.TelegramX.setView('channels')">
-              <span class="tx-row-icon" style="--c:#3e88f7"><i class="icon icon-channel-filled"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">Каналы</span><span class="tx-row-sub block" id="settings-channels-count">Ваши подписки</span></span>
-            </button>
-            <button class="tx-row" onclick="window.TelegramX.openFavorites()">
-              <span class="tx-row-icon" style="--c:#f5b72f"><i class="icon icon-star"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">Избранное</span><span class="tx-row-sub block">Посты, отмеченные звёздочкой</span></span>
-            </button>
-          </div>
-
-          <div class="tx-group">
-            <button class="tx-row" onclick="window.TelegramX.clearMediaCache()">
-              <span class="tx-row-icon" style="--c:#5a83f3"><i class="icon icon-piechart-filled"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">Данные и память</span><span class="tx-row-sub block">Очистить кэш медиа и ленты</span></span>
-            </button>
-          </div>
-
-          <div class="tx-group">
-            <button class="tx-row" onclick="window.open('https://github.com/Gl1ch5/TgX', '_blank', 'noopener')">
-              <span class="tx-row-icon" style="--c:#8e8e93"><i class="icon icon-info-filled"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">О TeleX</span><span class="tx-row-sub block">Версия 3.0 · работает прямо в браузере</span></span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- PROFILE -->
-      <section id="pane-profile" class="tx-pane">
-        <div class="tx-page">
-          <div class="tx-page-head">
-            <span class="tx-title">Профиль</span>
-          </div>
-          <div class="tx-hero">
-            <div id="profile-avatar" class="tx-avatar xl tx-peer-5"><i class="icon icon-user"></i></div>
-            <div class="tx-hero-name" id="profile-name">Гость</div>
-            <div class="tx-hero-sub" id="profile-sub">Войдите, чтобы читать свои каналы</div>
-          </div>
-
-          <div id="profile-guest" class="tx-group">
-            <button class="tx-row" onclick="window.TelegramX.openAuthModal()">
-              <span class="tx-row-icon" style="--c:#5a83f3"><i class="icon icon-user-filled"></i></span>
-              <span class="tx-row-body"><span class="tx-row-title">Войти в Telegram</span><span class="tx-row-sub block">QR-код или номер телефона</span></span>
-            </button>
-          </div>
-
-          <div id="profile-account" class="tx-hidden">
-            <div class="tx-group">
-              <div class="tx-group-title">Аккаунт</div>
-              <div class="tx-row">
-                <span class="tx-row-body"><span class="tx-row-title" id="profile-phone">—</span><span class="tx-row-sub block">Телефон</span></span>
-              </div>
-              <div class="tx-row">
-                <span class="tx-row-body"><span class="tx-row-title" id="profile-username">—</span><span class="tx-row-sub block">Имя пользователя</span></span>
-              </div>
-            </div>
-            <div class="tx-group">
-              <button class="tx-row" onclick="window.TelegramX.openFavorites()">
-                <span class="tx-row-icon" style="--c:#f5b72f"><i class="icon icon-star"></i></span>
-                <span class="tx-row-body"><span class="tx-row-title">Избранное</span></span>
-                <span class="tx-row-value" id="profile-fav-count"></span>
-              </button>
-              <button class="tx-row is-danger" onclick="window.TelegramX.logoutTelegram()">
-                <span class="tx-row-icon" style="--c:#ff5b5b"><i class="icon icon-logout"></i></span>
-                <span class="tx-row-body"><span class="tx-row-title">Выйти</span></span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-    </aside>
-
-    <!-- ================================================================ -->
-    <!-- MAIN: the channel wall                                           -->
-    <!-- ================================================================ -->
-    <main class="tx-main tx-scroll" id="main-scroll">
+    <section id="screen-wall" class="tx-screen">
       <div class="tx-column">
-
-        <div class="tx-topbar">
-          <div class="tx-topbar-row">
-            <button id="header-back-btn" class="tx-icon-btn tx-hidden" onclick="window.TelegramX.clearChannelFilter()" title="Назад">
-              <i class="icon icon-arrow-left"></i>
-            </button>
-            <div id="header-stack" class="tx-stack tx-mobile-only" onclick="window.TelegramX.openStoriesFromHeader()"></div>
-            <div id="header-avatar" class="tx-hidden"></div>
-            <div class="tx-title-block" id="header-title-block" onclick="window.TelegramX.scrollWallTop()">
-              <span class="tx-title flex items-center gap-1.5">
-                <span id="header-main-title" class="truncate">Стена</span>
-                <span id="header-verified-badge" class="tx-hidden shrink-0"></span>
-              </span>
-              <span id="header-sub-title" class="tx-subtitle tx-hidden"></span>
+        <header class="tx-header">
+          <button id="header-left-btn" class="tx-circle tx-glass" onclick="window.TelegramX.headerLeft()" title="Поиск">
+            <i class="icon icon-search" id="header-left-icon"></i>
+          </button>
+          <div class="tx-pill tx-glass" onclick="window.TelegramX.headerPill()">
+            <div id="header-stack" class="tx-stack"></div>
+            <div class="tx-pill-text">
+              <span class="tx-pill-title"><span id="header-main-title">Стена</span><span id="header-verified-badge"></span></span>
+              <span class="tx-pill-sub" id="header-sub-title">все ваши каналы</span>
             </div>
-            <button class="tx-icon-btn" onclick="window.TelegramX.toggleHeaderSearch(true)" title="Поиск">
-              <i class="icon icon-search"></i>
-            </button>
-            <button class="tx-icon-btn" onclick="window.TelegramX.openMainMenu(event)" title="Меню">
-              <i class="icon icon-more"></i>
-            </button>
           </div>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.openMainMenu(event)" title="Меню">
+            <i class="icon icon-more"></i>
+          </button>
+        </header>
 
-          <label id="header-search-bar" class="tx-search tx-hidden">
+        <div class="tx-subbar">
+          <label id="header-search-bar" class="tx-search tx-glass tx-hidden">
             <i class="icon icon-search"></i>
             <input type="search" id="search-input" placeholder="Поиск публикаций" autocomplete="off"
                    onkeydown="if(event.key==='Enter') window.TelegramX.doSearch()" />
-            <button onclick="window.TelegramX.toggleHeaderSearch(false)" id="clear-search-btn" class="tx-icon-btn" style="width:32px;height:32px" title="Закрыть поиск">
-              <i class="icon icon-close" style="font-size:18px"></i>
+            <button class="tx-icon-btn" onclick="window.TelegramX.toggleHeaderSearch(false)" title="Закрыть поиск">
+              <i class="icon icon-close" style="font-size:20px"></i>
             </button>
           </label>
-
-          <nav class="tx-tabs" id="feed-tabs">
+          <nav class="tx-tabs tx-glass" id="feed-tabs">
             <button class="tx-tab is-active" data-feed="all" onclick="window.TelegramX.switchFeedType('all')">Все <span class="tx-badge tx-hidden" id="tab-unread-badge"></span></button>
             <button class="tx-tab" data-feed="media" onclick="window.TelegramX.switchFeedType('media')">Медиа</button>
             <button class="tx-tab" data-feed="popular" onclick="window.TelegramX.switchFeedType('popular')">Популярное</button>
@@ -227,42 +104,82 @@
           </nav>
         </div>
 
-        <!-- Loading skeleton -->
         <div id="feed-loader" class="tx-feed tx-hidden">
           <div class="tx-skeleton"><i style="width:40%;height:14px"></i><i style="height:180px;margin-top:12px"></i><i style="width:80%;height:12px;margin-top:12px"></i></div>
-          <div class="tx-skeleton"><i style="width:30%;height:14px"></i><i style="width:90%;height:12px;margin-top:12px"></i><i style="width:60%;height:12px;margin-top:8px"></i></div>
+          <div class="tx-skeleton"><i style="width:30%;height:14px"></i><i style="width:90%;height:12px;margin-top:12px"></i></div>
         </div>
 
-        <!-- Logged-out state -->
-        <div id="feed-empty-state" class="tx-empty tx-hidden">
+        <div id="feed-empty-state" class="tx-empty tx-empty-card tx-glass tx-hidden">
           <div class="tx-empty-icon"><i class="icon icon-channel-filled"></i></div>
           <h2>Все каналы — одной лентой</h2>
           <p>Войдите в Telegram, и публикации всех ваших каналов соберутся на одной стене. Сессия хранится только в этом браузере.</p>
           <button class="tx-btn" onclick="window.TelegramX.openAuthModal()">Войти в Telegram</button>
         </div>
 
-        <!-- Posts -->
         <div id="posts-container" class="tx-feed"></div>
 
         <div id="feed-sentinel" class="tx-sentinel">
           <span class="animate-spin tx-hidden" id="sentinel-spinner"><i class="icon icon-reload"></i></span>
-          <span id="sentinel-text"></span>
+          <span id="sentinel-text" class="tx-service tx-hidden"></span>
         </div>
       </div>
-    </main>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- DISCUSSION (comments)                                             -->
+    <!-- ================================================================ -->
+    <section id="screen-thread" class="tx-screen">
+      <div class="tx-column">
+        <header class="tx-header">
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.back()" title="Назад"><i class="icon icon-arrow-left"></i></button>
+          <div class="tx-pill tx-glass" style="padding-left:16px">
+            <div class="tx-pill-text">
+              <span class="tx-pill-title"><span id="thread-title">Комментарии</span></span>
+              <span class="tx-pill-sub" id="thread-sub"></span>
+            </div>
+          </div>
+        </header>
+        <div id="thread-list" class="tx-thread-list"></div>
+      </div>
+      <div class="tx-composer">
+        <div class="tx-composer-inner">
+          <div id="thread-emoji" class="tx-emoji-pop tx-glass tx-hidden"></div>
+          <div id="thread-reply-bar" class="tx-reply-bar tx-glass tx-hidden"></div>
+          <div class="tx-composer-row">
+            <div class="tx-composer-field tx-glass">
+              <button class="tx-icon-btn" onclick="window.TelegramX.toggleThreadEmoji()" title="Эмодзи"><i class="icon icon-smile"></i></button>
+              <textarea id="thread-input" rows="1" placeholder="Комментарий"
+                oninput="window.TelegramX.autosizeComposer(this)"
+                onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); window.TelegramX.sendThreadComment();}"></textarea>
+            </div>
+            <button class="tx-send-btn" id="thread-send" onclick="window.TelegramX.sendThreadComment()" title="Отправить"><i class="icon icon-send"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- SETTINGS (rendered by views/settings.js)                          -->
+    <!-- ================================================================ -->
+    <section id="screen-settings" class="tx-screen">
+      <div class="tx-column" id="settings-root"></div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- PROFILE (rendered by views/profile.js)                            -->
+    <!-- ================================================================ -->
+    <section id="screen-profile" class="tx-screen">
+      <div class="tx-column" id="profile-root"></div>
+    </section>
 
     <!-- ================================================================ -->
     <!-- FLOATING TAB BAR                                                 -->
     <!-- ================================================================ -->
     <nav class="tx-dock" id="dock">
-      <button class="tx-dock-tab is-active tx-mobile-only" data-view="wall" onclick="window.TelegramX.setView('wall')">
+      <button class="tx-dock-tab is-active" data-view="wall" onclick="window.TelegramX.setView('wall')">
         <i class="icon icon-message is-off"></i><i class="icon icon-folder-tabs-chats is-on"></i>
         <span>Стена</span>
         <span class="tx-badge tx-hidden" id="dock-unread-badge"></span>
-      </button>
-      <button class="tx-dock-tab" data-view="channels" onclick="window.TelegramX.setView('channels')">
-        <i class="icon icon-channel is-off"></i><i class="icon icon-channel-filled is-on"></i>
-        <span>Каналы</span>
       </button>
       <button class="tx-dock-tab" data-view="settings" onclick="window.TelegramX.setView('settings')">
         <i class="icon icon-settings is-off"></i><i class="icon icon-settings-filled is-on"></i>
@@ -418,94 +335,8 @@
     </div>
   </div>
 
-  <!-- TELEGRAM STORIES VIEWER MODAL -->
-  <div id="story-viewer-modal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 hidden flex items-center justify-center p-0 sm:p-4 select-none">
-    <div class="relative w-full max-w-md h-full sm:h-[88vh] bg-[#121216] sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/10" onmousedown="window.TelegramX.pauseStory(true)" onmouseup="window.TelegramX.pauseStory(false)" ontouchstart="window.TelegramX.pauseStory(true)" ontouchend="window.TelegramX.pauseStory(false)">
-      
-      <!-- Top Story Bar (Progress segments + Channel Header) -->
-      <div class="absolute top-0 inset-x-0 z-30 p-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex flex-col gap-2.5">
-        <!-- Progress Bars -->
-        <div id="story-progress-bars" class="flex items-center gap-1.5 w-full"></div>
-
-        <!-- Channel Info & Close -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 shrink-0">
-              <img id="story-channel-avatar" class="w-full h-full object-cover" />
-            </div>
-            <div class="flex flex-col min-w-0">
-              <div class="flex items-center gap-1">
-                <span id="story-channel-title" class="text-xs font-semibold text-white truncate max-w-[180px]">Канал</span>
-                <span id="story-verified-badge"></span>
-              </div>
-              <span id="story-time" class="text-[10px] text-slate-300 font-mono">только что</span>
-            </div>
-          </div>
-
-          <button onclick="window.TelegramX.closeStoryViewer()" class="w-8 h-8 rounded-full bg-black/40 hover:bg-white/20 text-white flex items-center justify-center transition">
-            <i class="icon icon-close text-lg"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Story Media Content -->
-      <div id="story-media-box" class="relative w-full h-full flex items-center justify-center z-10 overflow-hidden">
-        <!-- Media rendered dynamically -->
-      </div>
-
-      <!-- Navigation Tap Overlays (Left/Right) -->
-      <div class="absolute inset-0 z-20 flex">
-        <div class="w-1/3 h-full cursor-pointer" onclick="window.TelegramX.prevStory()"></div>
-        <div class="w-2/3 h-full cursor-pointer" onclick="window.TelegramX.nextStory()"></div>
-      </div>
-
-      <!-- Bottom Caption & Quick Reaction -->
-      <div class="absolute bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col gap-2 pointer-events-auto">
-        <p id="story-caption" class="text-xs text-white leading-relaxed line-clamp-3 post-text"></p>
-        
-        <div class="flex items-center gap-2 pt-1">
-          <button onclick="window.TelegramX.sendStoryQuickReaction('🔥')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>🔥</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('❤️')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>❤️</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('👍')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>👍</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('🎉')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>🎉</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- FULLSCREEN LIGHTBOX MODAL -->
-  <div id="lightbox-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 hidden flex items-center justify-center p-2 sm:p-4 select-none" onclick="window.TelegramX.closeLightbox()">
-    <button onclick="window.TelegramX.closeLightbox()" class="absolute top-4 right-4 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 transition flex items-center justify-center">
-      <i class="icon icon-close text-2xl"></i>
-    </button>
-    <a id="lightbox-download-btn" href="" download target="_blank" class="absolute top-4 right-16 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 transition flex items-center justify-center" onclick="event.stopPropagation()">
-      <i class="icon icon-download text-2xl"></i>
-    </a>
-    <span id="lightbox-counter" class="absolute top-6 left-6 text-xs text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full hidden"></span>
-
-    <button id="lightbox-prev-btn" onclick="window.TelegramX.prevLightboxImage(event)" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 hidden transition flex items-center justify-center">
-      <i class="icon icon-arrow-left text-3xl"></i>
-    </button>
-    <button id="lightbox-next-btn" onclick="window.TelegramX.nextLightboxImage(event)" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 hidden transition flex items-center justify-center">
-      <i class="icon icon-arrow-right text-3xl"></i>
-    </button>
-
-    <div class="max-w-5xl max-h-[90vh] flex items-center justify-center relative z-40" onclick="event.stopPropagation()">
-      <img id="lightbox-img" src="" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" />
-    </div>
-  </div>
-
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 liquid-glass border border-white/15 px-4 py-2 rounded-full text-xs font-medium text-white shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+  <div id="toast" class="tx-toast fixed bottom-20 left-1/2 -translate-x-1/2 liquid-glass border border-white/15 px-4 py-2 rounded-full text-xs font-medium text-white shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
     <i class="icon icon-check-bold text-sm text-[#4fae4e]"></i>
     <span id="toast-msg">Готово</span>
   </div>

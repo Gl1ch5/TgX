@@ -1,0 +1,336 @@
+/**
+ * ====================================================================
+ * VIEW: WALL — the channel feed, its header, tabs and search
+ * ====================================================================
+ */
+
+import { state } from '../state.js';
+import { api } from '../api.js';
+import { showToast, formatNumber, escapeHtml, pluralRu } from '../utils.js';
+import { parseEmojis } from '../emoji.js';
+import { getPrefs, isChannelExcluded } from '../core/prefs.js';
+import { go } from '../core/nav.js';
+import { createPostCardElement, VERIFIED_BADGE_SVG } from '../components/postCard.js';
+import { avatarHtml } from '../components/avatar.js';
+import { hydrateStickers } from '../components/sticker.js';
+
+const $ = (id) => document.getElementById(id);
+const show = (el, on) => el && el.classList.toggle('tx-hidden', !on);
+
+// ---------------- Header ----------------
+
+function wallChannels() {
+  const p = getPrefs();
+  return state.channels.filter((c) => (c.is_broadcast || p.showGroups) && !isChannelExcluded(c.id));
+}
+
+export function updateHeader() {
+  const ch = state.activeChannelId ? state.channels.find((c) => c.id === state.activeChannelId) : null;
+  const stack = $('header-stack');
+  const leftIcon = $('header-left-icon');
+
+  if (state.activeChannelId) {
+    leftIcon.className = 'icon icon-arrow-left';
+    stack.innerHTML = avatarHtml(ch || { id: state.activeChannelId }, 'md');
+    stack.querySelector('.tx-avatar').style.boxShadow = 'none';
+    $('header-main-title').innerHTML = parseEmojis(ch ? ch.title : 'Канал');
+    $('header-verified-badge').innerHTML = ch && ch.verified ? VERIFIED_BADGE_SVG : '';
+    const n = ch && ch.participants_count;
+    $('header-sub-title').textContent = n
+      ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}`
+      : ch && ch.username ? `@${ch.username}` : 'канал';
+  } else {
+    leftIcon.className = 'icon icon-search';
+    const list = wallChannels();
+    stack.innerHTML = list.slice(0, 3).map((c) => avatarHtml(c)).join('');
+    $('header-main-title').textContent = 'Стена';
+    $('header-verified-badge').innerHTML = '';
+    $('header-sub-title').textContent = state.isAuth
+      ? (list.length ? `${list.length} ${pluralRu(list.length, 'канал', 'канала', 'каналов')}` : 'загрузка каналов…')
+      : 'все ваши каналы';
+  }
+}
+
+export function headerLeft() {
+  if (state.activeChannelId) clearChannelFilter();
+  else toggleHeaderSearch($('header-search-bar').classList.contains('tx-hidden'));
+}
+
+export function headerPill() {
+  if (state.activeChannelId) {
+    const ch = state.channels.find((c) => c.id === state.activeChannelId);
+    if (ch && ch.username) window.open(`https://t.me/${ch.username}`, '_blank', 'noopener');
+    return;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+export function renderUnread() {
+  const total = wallChannels().filter((c) => !c.muted).reduce((n, c) => n + (c.unread_count || 0), 0);
+  const label = total > 999 ? '999+' : String(total);
+  ['dock-unread-badge', 'tab-unread-badge'].forEach((id) => {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = label;
+    show(el, total > 0);
+  });
+}
+
+function updateTabs() {
+  document.querySelectorAll('#feed-tabs .tx-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.feed === state.feedType));
+}
+
+// ---------------- Seen tracking (marks posts read in Telegram) ----------------
+
+const seenTimers = new Map();
+const seenObserver = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    const el = e.target;
+    if (e.isIntersecting) {
+      if (!seenTimers.has(el)) {
+        seenTimers.set(el, setTimeout(() => {
+          seenObserver.unobserve(el);
+          seenTimers.delete(el);
+          api.markSeen(Number(el.dataset.channel), Number(el.dataset.msg));
+        }, 900));
+      }
+    } else if (seenTimers.has(el)) {
+      clearTimeout(seenTimers.get(el));
+      seenTimers.delete(el);
+    }
+  }
+}, { threshold: 0.5 });
+
+function track(card) {
+  if (state.isAuth) seenObserver.observe(card);
+}
+
+// ---------------- Feed ----------------
+
+export function renderPosts() {
+  const container = $('posts-container');
+  if (!container) return;
+  container.innerHTML = '';
+  seenTimers.forEach(clearTimeout);
+  seenTimers.clear();
+  appendPosts(state.posts);
+}
+
+export function appendPosts(posts) {
+  const container = $('posts-container');
+  if (!container) return;
+  const frag = document.createDocumentFragment();
+  const cards = posts.map((p) => createPostCardElement(p));
+  cards.forEach((c) => frag.appendChild(c));
+  container.appendChild(frag);
+  cards.forEach(track);
+  hydrateStickers(container);
+}
+
+function showNewPostsPill(count, apply) {
+  let pill = $('new-posts-pill');
+  if (!pill) {
+    pill = document.createElement('button');
+    pill.id = 'new-posts-pill';
+    pill.className = 'tx-service tx-new-pill';
+    document.body.appendChild(pill);
+  }
+  pill.innerHTML = `<i class="icon icon-up"></i> ${count} ${pluralRu(count, 'новая публикация', 'новые публикации', 'новых публикаций')}`;
+  pill.onclick = () => {
+    pill.remove();
+    apply();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+}
+
+export async function loadFeed(forceRefresh = false) {
+  if (state.isLoadingFeed) return;
+  state.isLoadingFeed = true;
+  let refreshAfterCache = false;
+
+  const loader = $('feed-loader');
+  const sentinelText = $('sentinel-text');
+  if (state.posts.length === 0 && state.isAuth) show(loader, true);
+  show(sentinelText, false);
+
+  try {
+    const data = await api.getFeed({
+      feedType: state.feedType,
+      channelId: state.activeChannelId,
+      searchQuery: state.searchQuery,
+      limit: 40,
+      refresh: forceRefresh,
+    });
+    const posts = data.posts || [];
+    const apply = () => {
+      state.posts = posts;
+      state.hasMore = data.has_more || false;
+      state.nextOffset = data.next_offset || null;
+      renderFeed();
+    };
+
+    // Background refresh while the user is reading: offer instead of jumping.
+    const prevTop = state.posts[0];
+    const fresh = prevTop ? posts.filter((p) => p.timestamp > prevTop.timestamp).length : 0;
+    if (forceRefresh && fresh > 0 && window.scrollY > 300 && state.feedType === 'all') {
+      showNewPostsPill(fresh, apply);
+    } else {
+      apply();
+    }
+
+    if (data.from_cache && state.isAuth) refreshAfterCache = true;
+    if (data.channels && data.channels.length) {
+      state.channels = data.channels;
+      updateHeader();
+      renderUnread();
+    }
+  } catch (e) {
+    console.error('Feed loading error', e);
+  } finally {
+    show(loader, false);
+    state.isLoadingFeed = false;
+  }
+
+  if (refreshAfterCache) loadFeed(true);
+}
+
+function renderFeed() {
+  const container = $('posts-container');
+  const sentinelText = $('sentinel-text');
+  show($('feed-empty-state'), !state.isAuth && state.posts.length === 0 && state.feedType !== 'favorites');
+
+  if (state.posts.length === 0) {
+    const text = state.feedType === 'favorites'
+      ? 'Нажмите на пост и выберите «В закладки» — он появится здесь'
+      : state.searchQuery ? 'По запросу ничего не найдено' : 'Публикаций пока нет';
+    container.innerHTML = state.isAuth || state.feedType === 'favorites'
+      ? `<div class="tx-empty"><span class="tx-service">${escapeHtml(text)}</span></div>`
+      : '';
+    return;
+  }
+  renderPosts();
+  if (sentinelText) {
+    sentinelText.textContent = state.hasMore ? '' : 'Вы всё прочитали';
+    show(sentinelText, !state.hasMore);
+  }
+}
+
+export async function loadMorePosts() {
+  if (state.isLoadingFeed || !state.hasMore || !state.nextOffset) return;
+  state.isLoadingFeed = true;
+  const spinner = $('sentinel-spinner');
+  show(spinner, true);
+  try {
+    const data = await api.getFeed({
+      feedType: state.feedType,
+      channelId: state.activeChannelId,
+      searchQuery: state.searchQuery,
+      offsetDate: state.nextOffset,
+      limit: 30,
+    });
+    const known = new Set(state.posts.map((p) => p.id));
+    const fresh = (data.posts || []).filter((p) => !known.has(p.id));
+    if (fresh.length) {
+      state.posts.push(...fresh);
+      state.hasMore = data.has_more;
+      state.nextOffset = data.next_offset;
+      appendPosts(fresh);
+    } else {
+      state.hasMore = false;
+    }
+    const t = $('sentinel-text');
+    t.textContent = 'Вы всё прочитали';
+    show(t, !state.hasMore);
+  } catch (e) {
+    console.error('Load more error', e);
+  } finally {
+    show(spinner, false);
+    state.isLoadingFeed = false;
+  }
+}
+
+export function setupInfiniteScroll() {
+  const sentinel = $('feed-sentinel');
+  if (!sentinel) return;
+  new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting) && !state.isLoadingFeed && state.hasMore && state.posts.length) loadMorePosts();
+  }, { rootMargin: '800px' }).observe(sentinel);
+}
+
+export async function loadChannels(forceRefresh = false) {
+  try {
+    const data = await api.getChannels(forceRefresh);
+    if (data.channels) {
+      state.channels = data.channels;
+      updateHeader();
+      renderUnread();
+    }
+  } catch (e) {
+    console.error('Channels load error', e);
+  }
+}
+
+// ---------------- Filters ----------------
+
+export function switchFeedType(type) {
+  state.feedType = type;
+  updateTabs();
+  window.scrollTo({ top: 0 });
+  loadFeed();
+}
+
+export function filterByChannel(channelId) {
+  state.activeChannelId = Number(channelId);
+  state.feedType = 'all';
+  updateTabs();
+  updateHeader();
+  go('wall');
+  window.scrollTo({ top: 0 });
+  loadFeed();
+}
+
+export function clearChannelFilter() {
+  state.activeChannelId = null;
+  updateHeader();
+  window.scrollTo({ top: 0 });
+  loadFeed();
+}
+
+export function toggleHeaderSearch(on) {
+  show($('header-search-bar'), on);
+  if (on) $('search-input').focus();
+  else if (state.searchQuery) clearSearch();
+}
+
+export function filterByTag(tag) {
+  toggleHeaderSearch(true);
+  $('search-input').value = '#' + tag;
+  doSearch();
+}
+
+export function doSearch() {
+  state.searchQuery = $('search-input').value.trim();
+  loadFeed();
+}
+
+export function clearSearch() {
+  $('search-input').value = '';
+  state.searchQuery = '';
+  loadFeed();
+}
+
+export function resetFeed() {
+  state.feedType = 'all';
+  state.searchQuery = '';
+  state.activeChannelId = null;
+  updateTabs();
+  toggleHeaderSearch(false);
+  updateHeader();
+  loadFeed();
+}
+
+export async function refreshFeed() {
+  await loadChannels(true);
+  await loadFeed(true);
+  showToast('Стена обновлена');
+}

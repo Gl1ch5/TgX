@@ -88,8 +88,20 @@ export const api = {
   },
 
   // Reactions & Actions
-  sendReaction(channelId, msgId, emoji) {
-    return safe(() => telegram.sendReaction(channelId, msgId, emoji));
+  sendReaction(channelId, msgId, emoji, customId = null) {
+    return safe(() => telegram.sendReaction(channelId, msgId, emoji, customId));
+  },
+
+  getCustomEmoji(ids) {
+    return telegram.getCustomEmoji(ids);
+  },
+
+  markSeen(channelId, msgId) {
+    telegram.markSeen(channelId, msgId);
+  },
+
+  onReadChange(fn) {
+    telegram.onReadChange = fn;
   },
 
   forwardToSaved(channelId, msgId) {

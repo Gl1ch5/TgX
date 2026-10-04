@@ -82,6 +82,20 @@ export function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/** Telegram voice waveform: 5-bit packed samples -> ~40 bars (0..31). */
+function decodeWaveform(bytes) {
+  const count = Math.floor((bytes.length * 8) / 5);
+  const raw = [];
+  for (let i = 0; i < count; i++) {
+    const byte = Math.floor((i * 5) / 8);
+    const shift = (i * 5) % 8;
+    raw.push(((bytes[byte] | ((bytes[byte + 1] || 0) << 8)) >> shift) & 31);
+  }
+  const bars = 40;
+  if (raw.length <= bars) return raw;
+  return Array.from({ length: bars }, (_, i) => raw[Math.floor((i * raw.length) / bars)]);
+}
+
 function safeUrl(url) {
   const u = String(url || '').trim();
   if (/^(https?:|tg:|mailto:)/i.test(u)) return u;
@@ -113,6 +127,7 @@ function entityTags(e, text) {
   if (e instanceof Api.MessageEntityTextUrl) return link(e.url);
   if (e instanceof Api.MessageEntityEmail) return [`<a href="mailto:${escapeHtml(text)}">`, '</a>'];
   if (e instanceof Api.MessageEntityMentionName) return [`<a href="tg://user?id=${Number(e.userId)}">`, '</a>'];
+  if (e instanceof Api.MessageEntityCustomEmoji) return [`<span class="tx-cemoji" data-id="${String(e.documentId).replace(/\D/g, '')}">`, '</span>'];
   return null;
 }
 
@@ -530,6 +545,8 @@ class TelegramService {
         muted: this.isMuted(d),
         last_text: this.previewOf(d.message),
         last_date: d.message ? d.message.date : 0,
+        top_id: d.dialog ? d.dialog.topMessage : 0,
+        read_max: d.dialog ? d.dialog.readInboxMaxId : 0,
       });
     }
     this.channels = fresh;
@@ -574,11 +591,13 @@ class TelegramService {
 
   reactionsOf(msg) {
     const results = (msg.reactions && msg.reactions.results) || [];
-    return results.map((r) => ({
-      emoji: r.reaction instanceof Api.ReactionEmoji ? r.reaction.emoticon : '⭐',
-      count: r.count,
-      chosen: r.chosenOrder != null,
-    }));
+    return results.map((r) => {
+      const base = { count: r.count, chosen: r.chosenOrder != null };
+      if (r.reaction instanceof Api.ReactionEmoji) return { ...base, emoji: r.reaction.emoticon };
+      if (r.reaction instanceof Api.ReactionCustomEmoji) return { ...base, emoji: '', custom_id: r.reaction.documentId.toString() };
+      if (r.reaction instanceof Api.ReactionPaid) return { ...base, emoji: '⭐', paid: true };
+      return null;
+    }).filter(Boolean).sort((a, b) => (b.paid - a.paid) || (b.count - a.count));
   }
 
   mediaOf(msg, channelId) {
@@ -601,12 +620,12 @@ class TelegramService {
       const info = { video: false, audio: false, voice: false, gif: false, sticker: false, round: false, duration: 0, w: null, h: null, fileName: '', performer: '', title: '' };
       for (const a of doc.attributes || []) {
         if (a instanceof Api.DocumentAttributeVideo) Object.assign(info, { video: true, round: !!a.roundMessage, duration: a.duration || 0, w: a.w, h: a.h });
-        else if (a instanceof Api.DocumentAttributeAudio) Object.assign(info, { audio: true, voice: !!a.voice, duration: a.duration || 0, performer: a.performer || '', title: a.title || '' });
+        else if (a instanceof Api.DocumentAttributeAudio) Object.assign(info, { audio: true, voice: !!a.voice, duration: a.duration || 0, performer: a.performer || '', title: a.title || '', waveform: a.waveform ? decodeWaveform(a.waveform) : null });
         else if (a instanceof Api.DocumentAttributeAnimated) info.gif = true;
         else if (a instanceof Api.DocumentAttributeSticker) info.sticker = true;
         else if (a instanceof Api.DocumentAttributeFilename) info.fileName = a.fileName || '';
       }
-      const type = info.gif ? 'gif' : info.video ? 'video' : info.audio ? 'audio' : info.sticker ? 'photo' : 'document';
+      const type = info.sticker ? 'sticker' : info.gif ? 'gif' : info.video ? 'video' : info.audio ? 'audio' : 'document';
       const hasThumb = (doc.thumbs || []).some((t) => t instanceof Api.PhotoSize || t instanceof Api.PhotoSizeProgressive);
       const item = {
         type,
@@ -622,13 +641,9 @@ class TelegramService {
         filename: info.fileName,
         performer: info.performer,
         title: info.title,
+        round: info.round,
+        waveform: info.waveform || null,
       };
-      if (info.sticker && doc.mimeType !== 'image/webp') {
-        // animated (tgs/webm) stickers: show the static thumbnail
-        item.type = 'photo';
-        item.url = item.thumb_url || '';
-        if (!item.url) return { type: null, items: [], webpage: null };
-      }
       return { type: item.type, items: [item], webpage: null };
     }
 
@@ -653,7 +668,7 @@ class TelegramService {
     return { type: null, items: [], webpage: null };
   }
 
-  formatGroup(group, ch) {
+  formatGroup(group, ch, people = null) {
     const primary = group.find((m) => m.message) || group[0];
     const channelId = ch.id;
     const id = `${channelId}_${primary.id}`;
@@ -691,6 +706,9 @@ class TelegramService {
       forwards: primary.forwards || 0,
       replies_count: (primary.replies && primary.replies.replies) || 0,
       comments_enabled: !!(primary.replies && primary.replies.comments),
+      recent_repliers: this.repliersOf(primary, people),
+      post_author: primary.postAuthor || '',
+      edited: !!(primary.editDate && !primary.editHide),
       reactions: this.reactionsOf(primary),
       tg_url: tgUrl,
       is_pinned: !!primary.pinned,
@@ -701,26 +719,38 @@ class TelegramService {
   async fetchChannelPosts(ch, { limit, offsetDate, search }) {
     const client = await this.getClient();
     const entity = await this.channelEntity(ch.id);
-    const msgs = await client.getMessages(entity, {
-      limit,
-      offsetDate: offsetDate || undefined,
-      search: search || undefined,
-    });
+    const common = { peer: entity, offsetId: 0, addOffset: 0, limit, maxId: 0, minId: 0, hash: bigInt.zero };
+    const res = await client.invoke(search
+      ? new Api.messages.Search({ ...common, q: search, filter: new Api.InputMessagesFilterEmpty(), minDate: 0, maxDate: offsetDate || 0 })
+      : new Api.messages.GetHistory({ ...common, offsetDate: offsetDate || 0 }));
+
+    const people = new Map();
+    for (const u of res.users || []) people.set(`u${u.id}`, u);
+    for (const c of res.chats || []) people.set(`c${c.id}`, c);
 
     const groups = new Map();
     const out = [];
-    for (const m of msgs) {
-      if (!m || (!m.message && !m.media)) continue;
+    for (const m of res.messages || []) {
+      if (!(m instanceof Api.Message) || (!m.message && !m.media)) continue;
       if (m.groupedId) {
         const gid = m.groupedId.toString();
         if (!groups.has(gid)) groups.set(gid, []);
         groups.get(gid).push(m);
       } else {
-        out.push(this.formatGroup([m], ch));
+        out.push(this.formatGroup([m], ch, people));
       }
     }
-    for (const g of groups.values()) out.push(this.formatGroup(g.sort((a, b) => a.id - b.id), ch));
+    for (const g of groups.values()) out.push(this.formatGroup(g.sort((x, y) => x.id - y.id), ch, people));
     return out;
+  }
+
+  repliersOf(msg, people) {
+    const peers = (msg.replies && msg.replies.recentRepliers) || [];
+    return peers.slice(0, 3).map((p) => {
+      const key = p.userId != null ? `u${p.userId}` : `c${p.channelId || p.chatId}`;
+      const e = people && people.get(key);
+      return e ? { id: Number(e.id), name: e.title || utils.getDisplayName(e), avatar: this.avatarUrl(e) } : null;
+    }).filter(Boolean);
   }
 
   filterFeed(posts, feedType) {
@@ -836,7 +866,7 @@ class TelegramService {
       const attrs = doc.attributes || [];
       const sticker = attrs.some((x) => x instanceof Api.DocumentAttributeSticker);
       const thumb = this.bestThumb(doc);
-      if (sticker && doc.mimeType === 'image/webp') return { type: 'sticker', url: `media/cmedia/${path}` };
+      if (sticker) return { type: 'sticker', url: `media/cmedia/${path}`, mime: doc.mimeType };
       if (thumb) return { type: sticker ? 'sticker' : 'photo', url: `media/cthumb/${path}` };
     }
     return null;
@@ -921,16 +951,73 @@ class TelegramService {
     return { status: 'success', comment };
   }
 
+  // ----- custom emoji (premium reactions & emoji in text) -----
+
+  /** Fetches custom emoji documents; returns { id: { mime, url } }. */
+  async getCustomEmoji(ids) {
+    this.customEmoji = this.customEmoji || new Map();
+    const missing = [...new Set(ids)].filter((id) => !this.customEmoji.has(id));
+    const client = await this.getClient();
+    for (let i = 0; i < missing.length; i += 100) {
+      const chunk = missing.slice(i, i + 100);
+      const docs = await client.invoke(new Api.messages.GetCustomEmojiDocuments({ documentId: chunk.map((id) => bigInt(id)) }));
+      for (const d of docs) if (d instanceof Api.Document) this.customEmoji.set(d.id.toString(), d);
+    }
+    const out = {};
+    for (const id of ids) {
+      const d = this.customEmoji.get(id);
+      if (d) out[id] = { mime: d.mimeType, url: `media/cemoji/${id}/0` };
+    }
+    return out;
+  }
+
+  // ----- read state -----
+
+  /**
+   * Marks channel posts as read in Telegram (like scrolling a channel in the app)
+   * and lowers the local unread counters. Batched per channel.
+   */
+  markSeen(channelId, msgId) {
+    const ch = this.channels.get(Number(channelId));
+    if (!ch) return;
+    this.readQueue = this.readQueue || new Map();
+    const prev = this.readQueue.get(ch.id) || 0;
+    if (msgId <= prev || msgId <= (ch.read_max || 0)) return;
+    this.readQueue.set(ch.id, msgId);
+    clearTimeout(this.readTimer);
+    this.readTimer = setTimeout(() => this.flushReads(), 1500);
+  }
+
+  async flushReads() {
+    const queue = this.readQueue;
+    this.readQueue = new Map();
+    if (!queue || !queue.size) return;
+    const client = await this.getClient().catch(() => null);
+    for (const [id, maxId] of queue) {
+      const ch = this.channels.get(id);
+      if (!ch) continue;
+      ch.read_max = Math.max(ch.read_max || 0, maxId);
+      if (ch.top_id) ch.unread_count = Math.max(0, Math.min(ch.unread_count, ch.top_id - maxId));
+      if (!client || !getPrefs().syncRead) continue;
+      try {
+        await client.invoke(new Api.channels.ReadHistory({ channel: await this.channelEntity(id), maxId }));
+      } catch (e) {
+        console.warn('[TeleX] readHistory', e);
+      }
+    }
+    lsSet(LS.channels, Object.fromEntries(this.channels));
+    if (this.onReadChange) this.onReadChange();
+  }
+
   // ----- actions -----
 
-  async sendReaction(channelId, msgId, emoji) {
+  async sendReaction(channelId, msgId, emoji, customId = null) {
     const client = await this.getClient();
     const entity = await this.channelEntity(channelId);
-    await client.invoke(new Api.messages.SendReaction({
-      peer: entity,
-      msgId,
-      reaction: emoji ? [new Api.ReactionEmoji({ emoticon: emoji })] : [],
-    }));
+    let reaction = [];
+    if (customId) reaction = [new Api.ReactionCustomEmoji({ documentId: bigInt(customId) })];
+    else if (emoji) reaction = [new Api.ReactionEmoji({ emoticon: emoji })];
+    await client.invoke(new Api.messages.SendReaction({ peer: entity, msgId, reaction }));
     return { status: 'success', emoji };
   }
 
@@ -993,6 +1080,13 @@ class TelegramService {
       if (!entity) return null;
       const bytes = await client.downloadProfilePhoto(entity, { isBig: kind === 'avatarbig' });
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
+    }
+
+    if (kind === 'cemoji') {
+      const doc = this.customEmoji && this.customEmoji.get(a);
+      if (!doc) return null;
+      const bytes = await client.downloadMedia(new Api.MessageMediaDocument({ document: doc }), {});
+      return bytes && bytes.length ? { bytes, mime: doc.mimeType } : null;
     }
 
     if (kind === 'cmedia' || kind === 'cthumb') {
