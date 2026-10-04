@@ -5,16 +5,31 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
+const SW_VERSION = '3.1.1';
 const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb']);
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
+// App code (HTML/CSS/JS) is always revalidated with the server, so a new
+// release never mixes with stale cached modules. Stable assets (emoji,
+// wallpapers, vendor bundles) keep using the normal HTTP cache.
+const STABLE = /\/(emoji|wallpapers|js\/vendor)\//;
+const APP_CODE = /(\.(js|css|html)$|\/$)/;
+
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const scope = new URL(self.registration.scope);
-  if (url.origin !== scope.origin || !url.pathname.startsWith(scope.pathname + 'media/')) return;
-  event.respondWith(serveMedia(event, url.pathname.slice(scope.pathname.length + 'media/'.length)));
+  if (url.origin !== scope.origin || event.request.method !== 'GET') return;
+
+  if (url.pathname.startsWith(scope.pathname + 'media/')) {
+    event.respondWith(serveMedia(event, url.pathname.slice(scope.pathname.length + 'media/'.length)));
+    return;
+  }
+
+  if (APP_CODE.test(url.pathname) && !STABLE.test(url.pathname)) {
+    event.respondWith(fetch(event.request, { cache: 'no-cache' }).catch(() => caches.match(event.request)));
+  }
 });
 
 async function pageClient(event) {

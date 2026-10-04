@@ -31,7 +31,20 @@ export async function initMediaBridge() {
     }
   });
 
-  await navigator.serviceWorker.register('sw.js', { scope: './' });
+  // A new release activated its service worker: reload once to run fresh code.
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    try {
+      if (sessionStorage.getItem('telex.swReload')) return;
+      sessionStorage.setItem('telex.swReload', '1');
+    } catch {}
+    location.reload();
+  });
+  setTimeout(() => { try { sessionStorage.removeItem('telex.swReload'); } catch {} }, 10000);
+
+  const reg = await navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' });
+  reg.update().catch(() => {});
   await navigator.serviceWorker.ready;
 
   // First visit: the page loaded before the worker existed — wait until it takes control.
