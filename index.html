@@ -2,14 +2,157 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>TeleX</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="refresh" content="0; url=app/static/" />
-  <style>html,body{background:#000;color:#a2a2a8;font:16px -apple-system,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;height:100%;margin:0}a{color:#7595ff}</style>
-  <script>location.replace('app/static/' + location.search + location.hash);</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>TeleX — все каналы одной стеной</title>
+  <meta name="description" content="TeleX — бесплатный неофициальный клиент Telegram: публикации всех ваших каналов одной лентой, истории, комментарии и реакции. Работает в браузере, на Android и Windows." />
+  <meta name="theme-color" content="#0b0b0f" />
+  <meta property="og:title" content="TeleX — все каналы одной стеной" />
+  <meta property="og:description" content="Неофициальный клиент Telegram: каналы одной лентой, истории, комментарии, реакции. Браузер, Android, Windows." />
+  <meta property="og:image" content="site/shots/wall.jpg" />
+  <link rel="icon" href="app/static/icons/telex.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site/landing.css?v=1" />
+  <script>
+    // Old links to the site root with app state (#tgWebAuth…, ?…) still open the app.
+    if (/^#(tg|auth)/i.test(location.hash) || /[?&](start|tgaddr)=/.test(location.search)) {
+      location.replace('app/static/' + location.search + location.hash);
+    }
+  </script>
 </head>
 <body>
-  <!-- GitHub Pages "Deploy from a branch" serves the repo root; the app lives in app/static/ -->
-  <a href="app/static/">Открыть TeleX</a>
+  <div class="bg" aria-hidden="true"><span class="glow g1"></span><span class="glow g2"></span><span class="glow g3"></span></div>
+
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="#top"><img src="app/static/icons/telex.svg" alt="" width="32" height="32" />TeleX</a>
+      <nav class="links">
+        <a href="#features">Возможности</a>
+        <a href="#shots">Скриншоты</a>
+        <a href="#download">Скачать</a>
+        <a href="#faq">Вопросы</a>
+      </nav>
+      <a class="btn btn-sm" href="app/static/">Открыть</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero wrap">
+      <div class="hero-text reveal">
+        <span class="pill"><i class="dot"></i> Неофициальный клиент Telegram</span>
+        <h1>Все каналы —<br /><span class="grad">одной стеной</span></h1>
+        <p class="lead">TeleX собирает публикации всех ваших каналов в одну ленту, как в Telegram: истории, комментарии, реакции и премиум-эмодзи. Без лишних чатов — только то, что вы читаете.</p>
+        <div class="cta">
+          <a class="btn" href="app/static/"><span class="ico" style="--i:url(../app/static/icons/android/settings_language.svg)"></span>Открыть в браузере</a>
+          <a class="btn btn-ghost" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk"><span class="ico" style="--i:url(phone.svg)"></span>Android</a>
+          <a class="btn btn-ghost" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-Setup.exe"><span class="ico" style="--i:url(../app/static/icons/android/settings_devices.svg)"></span>Windows</a>
+        </div>
+        <p class="fine">Бесплатно · открытый код · вход хранится только на вашем устройстве</p>
+      </div>
+      <div class="hero-phones reveal" aria-hidden="true">
+        <figure class="phone back"><img src="site/shots/stories.jpg" alt="" loading="eager" /></figure>
+        <figure class="phone front"><img src="site/shots/wall.jpg" alt="" loading="eager" /></figure>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="wrap section">
+      <div class="head reveal">
+        <h2>Как Telegram. Только про каналы.</h2>
+        <p>Знакомый интерфейс Telegram для Android — те же иконки, жесты и анимации.</p>
+      </div>
+      <div class="grid">
+        <article class="card reveal"><span class="sq" style="--a:#4F85F6;--b:#3568E8;--i:url(../app/static/icons/android/settings_channel.svg)"></span><h3>Стена каналов</h3><p>Новые публикации из всех подписок в одной ленте. Скрывайте лишние каналы в настройках.</p></article>
+        <article class="card reveal"><span class="sq" style="--a:#55CA47;--b:#27B434;--i:url(../app/static/icons/android/msg_stories_saved.webp)"></span><h3>Истории</h3><p>Ряд историй как в Telegram: кольца непросмотренных, жесты, видео со звуком.</p></article>
+        <article class="card reveal"><span class="sq" style="--a:#F09F1B;--b:#E18A11;--i:url(../app/static/icons/android/settings_chat.svg)"></span><h3>Комментарии</h3><p>Обсуждения под постами, ответы, поиск по комментариям и отправка своих.</p></article>
+        <article class="card reveal"><span class="sq" style="--a:#C46EF4;--b:#9F55DF;--i:url(../app/static/icons/android/settings_stars.svg)"></span><h3>Реакции и эмодзи</h3><p>Обычные и премиум-реакции, анимированные стикеры и эмодзи из наборов.</p></article>
+        <article class="card reveal"><span class="sq" style="--a:#F28B31;--b:#E26314;--i:url(../app/static/icons/android/settings_power.svg)"></span><h3>Быстро и плавно</h3><p>Мгновенные превью, умная очередь загрузки, видео начинается без ожидания.</p></article>
+        <article class="card reveal"><span class="sq" style="--a:#1CA5ED;--b:#1488E1;--i:url(../app/static/icons/android/settings_privacy.svg)"></span><h3>Приватно</h3><p>Работает напрямую с серверами Telegram. Никаких своих серверов и сбора данных.</p></article>
+      </div>
+    </section>
+
+    <!-- Screenshots -->
+    <section id="shots" class="section">
+      <div class="wrap head reveal">
+        <h2>Посмотрите сами</h2>
+        <p>Тёмная тема, стеклянные панели и обои — всё как вы привыкли.</p>
+      </div>
+      <div class="shots" tabindex="0" aria-label="Скриншоты">
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/wall.jpg" alt="Стена каналов" loading="lazy" /></div><figcaption>Стена</figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/stories.jpg" alt="Истории" loading="lazy" /></div><figcaption>Истории</figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/story.jpg" alt="Просмотр истории" loading="lazy" /></div><figcaption>Просмотр историй</figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/comments.jpg" alt="Комментарии" loading="lazy" /></div><figcaption>Комментарии</figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/channel.jpg" alt="Страница канала" loading="lazy" /></div><figcaption>Страница канала</figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="site/shots/settings.jpg" alt="Настройки" loading="lazy" /></div><figcaption>Настройки</figcaption></figure>
+      </div>
+    </section>
+
+    <!-- How -->
+    <section class="wrap section">
+      <div class="head reveal"><h2>Три шага</h2></div>
+      <ol class="steps">
+        <li class="reveal"><b>1</b><h3>Откройте TeleX</h3><p>В браузере, на Android или Windows — установка не обязательна.</p></li>
+        <li class="reveal"><b>2</b><h3>Войдите в Telegram</h3><p>По QR-коду из приложения Telegram или по номеру телефона.</p></li>
+        <li class="reveal"><b>3</b><h3>Читайте</h3><p>Каналы соберутся в ленту, новые посты появятся сами.</p></li>
+      </ol>
+    </section>
+
+    <!-- Download -->
+    <section id="download" class="wrap section">
+      <div class="head reveal"><h2>Скачать</h2><p>Все версии бесплатные и обновляются автоматически.</p></div>
+      <div class="dl">
+        <a class="dl-card reveal" href="app/static/">
+          <span class="sq" style="--a:#1CA5ED;--b:#1488E1;--i:url(../app/static/icons/android/settings_language.svg)"></span>
+          <span><b>Веб-версия</b><small>Chrome, Edge, Safari, Firefox</small></span><i class="arrow"></i>
+        </a>
+        <a class="dl-card reveal" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk">
+          <span class="sq" style="--a:#55CA47;--b:#27B434;--i:url(phone.svg)"></span>
+          <span><b>Android</b><small>APK · Android 7+ · автообновление</small></span><i class="arrow"></i>
+        </a>
+        <a class="dl-card reveal" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-Setup.exe">
+          <span class="sq" style="--a:#4F85F6;--b:#3568E8;--i:url(../app/static/icons/android/settings_devices.svg)"></span>
+          <span><b>Windows</b><small>Установщик · есть портативная версия</small></span><i class="arrow"></i>
+        </a>
+      </div>
+      <p class="fine center">Android может попросить разрешить установку из неизвестных источников — это нормально для приложений не из Google Play.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="wrap section narrow">
+      <div class="head reveal"><h2>Вопросы</h2></div>
+      <details class="reveal"><summary>Это официальное приложение Telegram?</summary><p>Нет. TeleX — независимый проект с открытым кодом. Он подключается к Telegram через официальный API, так же как другие сторонние клиенты.</p></details>
+      <details class="reveal"><summary>Это безопасно?</summary><p>TeleX работает напрямую с серверами Telegram, без посредников. Данные входа хранятся только на вашем устройстве. Сеанс можно завершить в любой момент: в TeleX («Настройки → Устройства») или в самом Telegram.</p></details>
+      <details class="reveal"><summary>Можно ли писать в личные сообщения?</summary><p>Нет, TeleX сделан для чтения каналов: лента, истории, комментарии и реакции. Личные чаты остаются в Telegram.</p></details>
+      <details class="reveal"><summary>Как обновить приложение?</summary><p>Веб-версия всегда свежая. Android-приложение само проверяет обновления и предлагает установить новую версию.</p></details>
+      <details class="reveal"><summary>Нашёл ошибку или есть идея</summary><p>Напишите автору в Telegram — <a href="https://t.me/grzxk">@grzxk</a> — или откройте issue на <a href="https://github.com/Gl1ch5/TgX">GitHub</a>.</p></details>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <a class="brand" href="#top"><img src="app/static/icons/telex.svg" alt="" width="28" height="28" />TeleX</a>
+      <p>Неофициальный клиент. Не связан с Telegram FZ-LLC. Иконки интерфейса — из открытых исходников Telegram для Android (GPLv2).</p>
+      <p class="by">Автор <a href="https://t.me/grzxk">@grzxk</a> · <a href="https://github.com/Gl1ch5/TgX">GitHub</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Reveal on scroll (skipped when the user prefers less motion)
+    (function () {
+      var els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        els.forEach(function (e) { e.classList.add('in'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px' });
+      els.forEach(function (e, i) { e.style.setProperty('--d', (i % 6) * 60 + 'ms'); io.observe(e); });
+    })();
+  </script>
 </body>
 </html>
