@@ -213,7 +213,7 @@ class TelegramService {
           langCode: 'ru',
           systemLangCode: 'ru-RU',
         });
-        this.client.setLogLevel('error');
+        this.client.setLogLevel(this.verbose ? 'debug' : 'error');
       }
       await this.client.connect();
       return this.client;
@@ -251,6 +251,56 @@ class TelegramService {
       }
     })();
     return this.reviving;
+  }
+
+  // ----- developer tools -----
+
+  /** The stored StringSession (full access to the account — handle with care). */
+  exportSession() {
+    return lsGet(LS.session, '');
+  }
+
+  /** Log in with a StringSession exported from another TeleX. Caller reloads the page. */
+  async importSession(value) {
+    const str = String(value || '').trim();
+    if (str.length < 100) throw new Error('Это не похоже на сессию TeleX');
+    try {
+      new StringSession(str); // throws on garbage
+    } catch {
+      throw new Error('Строка сессии повреждена');
+    }
+    if (this.client) {
+      this.client.session.disabled = true;
+      try { await withTimeout(this.client.disconnect(), 3000); } catch {}
+    }
+    this.client = null;
+    this.authorized = false;
+    [LS.me, LS.channels, LS.posts, LS.seen].forEach(lsDel);
+    lsSet(LS.session, str);
+  }
+
+  /** Round-trip time of an MTProto ping, in ms. */
+  async ping() {
+    const client = await this.getClient();
+    const t = performance.now();
+    await withTimeout(client.invoke(new Api.Ping({ pingId: bigInt(Date.now()) })), 8000);
+    return Math.round(performance.now() - t);
+  }
+
+  connectionInfo() {
+    const c = this.client;
+    return {
+      connected: !!(c && c.connected),
+      dc: c && c.session ? c.session.dcId : null,
+      server: c && c.session ? c.session.serverAddress : null,
+      hasSession: this.hasSession(),
+      authorized: this.authorized,
+    };
+  }
+
+  setVerbose(on) {
+    this.verbose = !!on;
+    if (this.client) this.client.setLogLevel(on ? 'debug' : 'error');
   }
 
   /** Open the MTProto connection early (in parallel with UI start-up). */

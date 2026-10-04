@@ -29,6 +29,9 @@ import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import * as profile from './views/profile.js';
+import { captureLogs, initDevtools } from './core/devtools.js';
+
+captureLogs();
 
 state.EMOJI_PICKER_LIST = EMOJI_PICKER_LIST;
 
@@ -48,6 +51,18 @@ window.TelegramX = {
   openSettingsPage: settings.openSettingsPage,
   rerenderSettings: settings.rerenderSettings,
   openFavorites,
+
+  // Developer / about
+  devPing: settings.devPing,
+  devReconnect: settings.devReconnect,
+  devExportLogs: settings.devExportLogs,
+  devCopyDiagnostics: settings.devCopyDiagnostics,
+  devClearLogs: settings.devClearLogs,
+  devExportSession: settings.devExportSession,
+  devToggleImport: settings.devToggleImport,
+  devImportSession: settings.devImportSession,
+  devHardReload: settings.devHardReload,
+  checkAppUpdate: settings.checkAppUpdate,
 
   // Profile
   openProfilePage: profile.openProfilePage,
@@ -176,6 +191,7 @@ async function initApp() {
 
   wall.setupInfiniteScroll();
   setupStoriesBar();
+  initDevtools();
   setupKeyboard();
   setupResilience();
   api.onReadChange(() => wall.loadChannels());

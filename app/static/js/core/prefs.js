@@ -28,6 +28,8 @@ const DEFAULTS = {
   autoloadPhotos: true,
   syncRead: true,         // mark posts read in Telegram when seen on the wall
   bubbleRadius: 17,       // Telegram default message corner radius
+  devOverlay: false,      // developer: connection/ping badge
+  devVerbose: false,      // developer: GramJS debug logging
 };
 
 let prefs = load();

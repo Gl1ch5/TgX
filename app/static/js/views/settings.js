@@ -14,6 +14,8 @@ import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
 import { titleBar, group, row, switchRow, slider, segments } from '../components/ui.js';
 import { WALLPAPERS } from '../components/wallpaperTheme.js';
+import { APP_VERSION, AUTHOR, REPO_URL } from '../version.js';
+import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -31,10 +33,11 @@ export function openSettingsPage(name) {
 function render() {
   const el = root();
   if (!el) return;
-  const pages = { root: rootPage, wall: wallPage, appearance: appearancePage, data: dataPage, devices: devicesPage };
+  const pages = { root: rootPage, wall: wallPage, appearance: appearancePage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage };
   el.innerHTML = (pages[page] || rootPage)();
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
+  if (page === 'developer') loadDevInfo();
 }
 
 function rootPage() {
@@ -66,7 +69,69 @@ function rootPage() {
       )}
 
       ${group(
-        row({ icon: 'info-filled', color: '#8e8e93', title: 'О TeleX', sub: 'Версия 3.4 · работает прямо в браузере', onclick: "window.open('https://github.com/Gl1ch5/TgX', '_blank', 'noopener')" }),
+        row({ icon: 'info-filled', color: '#8e8e93', title: 'О TeleX', sub: `Версия ${APP_VERSION}`, onclick: "window.TelegramX.openSettingsPage('about')" }) +
+        row({ icon: 'code', color: '#6c6c70', title: 'Для разработчиков', sub: 'Сессия, диагностика, логи', onclick: "window.TelegramX.openSettingsPage('developer')" }),
+      )}
+      <div class="tx-settings-foot">TeleX ${APP_VERSION} · автор <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
+    </div>`;
+}
+
+function aboutPage() {
+  const native = nativeVersion();
+  return `
+    ${titleBar('О TeleX', { back: true })}
+    <div class="tx-page">
+      <div class="tx-hero">
+        <img class="tx-about-logo" src="icons/telex.svg" alt="" />
+        <div class="tx-hero-name">TeleX</div>
+        <div class="tx-hero-sub">Все ваши каналы — одной стеной</div>
+      </div>
+      ${group(
+        row({ title: APP_VERSION, sub: 'Версия' }) +
+        (native ? row({ title: escapeHtml(native), sub: 'Приложение' }) : '') +
+        (isAndroidApp() ? row({ icon: 'reload', color: '#4fae4e', title: 'Проверить обновления', onclick: 'window.TelegramX.checkAppUpdate()' }) : ''),
+      )}
+      ${group(
+        row({ icon: 'user', color: '#3e88f7', title: '@' + AUTHOR.telegram, sub: 'Автор · Telegram', onclick: `window.open('https://t.me/${AUTHOR.telegram}', '_blank', 'noopener')` }) +
+        row({ icon: 'code', color: '#24292f', title: 'github.com/' + AUTHOR.github, sub: 'Исходный код', onclick: `window.open('${REPO_URL}', '_blank', 'noopener')` }),
+        { hint: 'TeleX — неофициальный клиент. Работает напрямую с серверами Telegram, сессия хранится только на вашем устройстве.' },
+      )}
+    </div>`;
+}
+
+function developerPage() {
+  const p = getPrefs();
+  return `
+    ${titleBar('Для разработчиков', { back: true })}
+    <div class="tx-page">
+      ${group(
+        row({ title: '<span id="dev-conn">…</span>', sub: 'Соединение с Telegram' }) +
+        row({ icon: 'reload', color: '#4fae4e', title: 'Проверить соединение', sub: '<span id="dev-ping">Пинг MTProto</span>', onclick: 'window.TelegramX.devPing()' }) +
+        row({ icon: 'reload-arrows', color: '#3e88f7', title: 'Переподключиться', onclick: 'window.TelegramX.devReconnect()' }),
+        { title: 'Диагностика' },
+      )}
+      ${group(
+        switchRow({ icon: 'info-filled', color: '#8774e1', title: 'Индикатор соединения', sub: 'Дата-центр и пинг поверх экрана', checked: p.devOverlay, onchange: "window.TelegramX.setPref('devOverlay', this.checked)" }) +
+        switchRow({ icon: 'data', color: '#6c6c70', title: 'Подробные логи MTProto', sub: 'Пишет в консоль всё, что делает GramJS', checked: p.devVerbose, onchange: "window.TelegramX.setPref('devVerbose', this.checked)" }),
+        { title: 'Отладка' },
+      )}
+      ${group(
+        row({ icon: 'download', color: '#3e88f7', title: 'Экспорт логов', sub: `<span id="dev-logs">${logCount()}</span> записей + сведения об устройстве`, onclick: 'window.TelegramX.devExportLogs()' }) +
+        row({ icon: 'copy', color: '#5a83f3', title: 'Скопировать диагностику', onclick: 'window.TelegramX.devCopyDiagnostics()' }) +
+        row({ icon: 'delete', color: '#8e8e93', title: 'Очистить логи', onclick: 'window.TelegramX.devClearLogs()' }),
+        { title: 'Логи' },
+      )}
+      ${group(
+        row({ icon: 'link', color: '#f19d39', title: 'Экспорт сессии', sub: 'Скопировать строку входа', onclick: 'window.TelegramX.devExportSession()' }) +
+        row({ icon: 'add', color: '#4fae4e', title: 'Импорт сессии', sub: 'Войти по строке из другого TeleX', onclick: 'window.TelegramX.devToggleImport()' }) +
+        `<div id="dev-import" class="tx-hidden">
+          <label class="tx-field"><textarea id="dev-import-text" rows="3" placeholder="Вставьте строку сессии" autocomplete="off" spellcheck="false"></textarea></label>
+          <div style="padding:0 16px 14px"><button class="tx-btn" style="width:100%" onclick="window.TelegramX.devImportSession()">Войти</button></div>
+        </div>`,
+        { title: 'Сессия', hint: 'Строка сессии — это полный доступ к аккаунту. Никому её не отправляйте: с ней можно читать и писать от вашего имени. Отозвать её можно в «Устройствах».' },
+      )}
+      ${group(
+        row({ icon: 'reload', color: '#ff5b5b', title: 'Перезагрузить приложение начисто', sub: 'Сбросить Service Worker и кэш кода (вход сохранится)', onclick: 'window.TelegramX.devHardReload()' }),
       )}
     </div>`;
 }
@@ -236,4 +301,81 @@ export async function terminateSession(hash) {
   const res = await api.terminateSession(hash);
   showToast(res.status === 'success' ? 'Сеанс завершён' : 'Ошибка: ' + (res.message || ''));
   loadSessions();
+}
+
+// ---------------- About / developer actions ----------------
+
+function loadDevInfo() {
+  const el = document.getElementById('dev-conn');
+  if (!el) return;
+  const info = api.connectionInfo();
+  el.textContent = `${info.connected ? 'Подключено' : 'Нет соединения'} · DC ${info.dc ?? '—'}${info.hasSession ? '' : ' · без сессии'}`;
+}
+
+export async function devPing() {
+  const el = document.getElementById('dev-ping');
+  if (el) el.textContent = 'Пинг…';
+  try {
+    const ms = await api.ping();
+    if (el) el.textContent = `${ms} мс`;
+  } catch (e) {
+    if (el) el.textContent = 'Нет ответа: ' + escapeHtml(e.message || String(e));
+  }
+  loadDevInfo();
+}
+
+export async function devReconnect() {
+  showToast('Переподключение…');
+  const re = await api.ensureAlive();
+  loadDevInfo();
+  showToast(re ? 'Соединение восстановлено' : 'Соединение в порядке');
+}
+
+export function devExportLogs() {
+  exportLogs();
+}
+
+export function devCopyDiagnostics() {
+  navigator.clipboard.writeText(diagnostics()).then(() => showToast('Диагностика скопирована')).catch(() => showToast('Не удалось скопировать'));
+}
+
+export function devClearLogs() {
+  clearLogs();
+  const el = document.getElementById('dev-logs');
+  if (el) el.textContent = '0';
+  showToast('Логи очищены');
+}
+
+export function devExportSession() {
+  const value = api.exportSession();
+  if (!value) {
+    showToast('Вы не вошли в Telegram');
+    return;
+  }
+  if (!confirm('Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её?')) return;
+  navigator.clipboard.writeText(value).then(() => showToast('Сессия скопирована. Храните её в секрете')).catch(() => showToast('Не удалось скопировать'));
+}
+
+export function devToggleImport() {
+  document.getElementById('dev-import')?.classList.toggle('tx-hidden');
+}
+
+export async function devImportSession() {
+  const value = document.getElementById('dev-import-text').value;
+  try {
+    await api.importSession(value);
+    showToast('Сессия загружена, перезапуск…');
+    setTimeout(() => location.reload(), 600);
+  } catch (e) {
+    showToast(e.message || 'Не удалось импортировать');
+  }
+}
+
+export function devHardReload() {
+  hardReload();
+}
+
+export function checkAppUpdate() {
+  if (!postNative('checkUpdate')) showToast('Доступно только в приложении для Android');
+  else showToast('Проверяем обновления…');
 }

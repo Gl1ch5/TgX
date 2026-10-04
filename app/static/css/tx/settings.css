@@ -60,3 +60,15 @@ label.tx-row { cursor: pointer; }
 /* Live preview bubble (text size / corners) */
 .tx-preview { padding: 14px 16px; border-radius: 22px; margin: 4px 0 14px; overflow: hidden; position: relative; background: #0d0d14; }
 .tx-preview .tx-msg { position: relative; z-index: 1; }
+
+/* About / developer */
+.tx-about-logo { width: 96px; height: 96px; margin-bottom: 14px; border-radius: 50%; box-shadow: 0 8px 30px rgba(90, 95, 240, 0.35); }
+.tx-settings-foot { text-align: center; font-size: 13px; color: var(--tx-hint); padding: 4px 0 18px; }
+.tx-settings-foot a { color: var(--tx-text-2); text-decoration: none; }
+.tx-dev-overlay {
+  position: fixed; z-index: 400; top: calc(var(--tx-safe-top) + 4px); left: 50%; transform: translateX(-50%);
+  padding: 3px 10px; border-radius: 999px; pointer-events: none;
+  font: 600 11px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #9df29d;
+  background: rgba(0, 0, 0, 0.72); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+.tx-dev-overlay.is-bad { color: #ff8a80; }

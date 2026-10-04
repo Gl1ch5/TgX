@@ -95,6 +95,27 @@ export const api = {
     return safe(() => telegram.resetAuthorization(hash));
   },
 
+  // Developer tools
+  exportSession() {
+    return telegram.exportSession();
+  },
+
+  importSession(value) {
+    return telegram.importSession(value);
+  },
+
+  ping() {
+    return telegram.ping();
+  },
+
+  connectionInfo() {
+    return telegram.connectionInfo();
+  },
+
+  setVerbose(on) {
+    telegram.setVerbose(on);
+  },
+
   // Own profile
   updateProfile(fields) {
     return safe(async () => ({ status: 'success', user: await telegram.updateProfile(fields) }));
