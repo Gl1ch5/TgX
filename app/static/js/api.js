@@ -44,6 +44,10 @@ export const api = {
     return safe(() => telegram.signInWithPassword(password));
   },
 
+  clearCache() {
+    return telegram.clearCaches();
+  },
+
   logout() {
     return safe(() => telegram.logout());
   },

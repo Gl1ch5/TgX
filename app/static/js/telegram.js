@@ -381,6 +381,13 @@ class TelegramService {
     return { status: 'logged_out' };
   }
 
+  async clearCaches() {
+    this.posts.clear();
+    this.comments.clear();
+    lsDel(LS.posts);
+    try { await caches.delete('telex-media-v1'); } catch {}
+  }
+
   // ----- channels -----
 
   sortChannels(list) {
@@ -424,11 +431,38 @@ class TelegramService {
         avatar: this.avatarUrl(e),
         type: e.broadcast ? 'channel' : 'group',
         pinned: !!d.pinned,
+        muted: this.isMuted(d),
+        last_text: this.previewOf(d.message),
+        last_date: d.message ? d.message.date : 0,
       });
     }
     this.channels = fresh;
     lsSet(LS.channels, Object.fromEntries(fresh));
     return this.sortChannels([...fresh.values()]);
+  }
+
+  isMuted(dialog) {
+    const settings = dialog.dialog && dialog.dialog.notifySettings;
+    return !!(settings && settings.muteUntil && settings.muteUntil > Date.now() / 1000);
+  }
+
+  previewOf(msg) {
+    if (!msg) return '';
+    const text = (msg.message || '').replace(/\s+/g, ' ').trim();
+    const media = msg.media;
+    let label = '';
+    if (media instanceof Api.MessageMediaPhoto) label = 'Фото';
+    else if (media instanceof Api.MessageMediaDocument && media.document instanceof Api.Document) {
+      const attrs = media.document.attributes || [];
+      if (attrs.some((a) => a instanceof Api.DocumentAttributeSticker)) label = 'Стикер';
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAnimated)) label = 'GIF';
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeVideo)) label = 'Видео';
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio && a.voice)) label = 'Голосовое сообщение';
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio)) label = 'Аудио';
+      else label = 'Файл';
+    } else if (media instanceof Api.MessageMediaPoll) label = 'Опрос';
+    if (label && text) return `${label}, ${text}`.slice(0, 140);
+    return (label || text).slice(0, 140);
   }
 
   async getChannels(forceRefresh = false) {
@@ -687,6 +721,7 @@ class TelegramService {
         text_html: toHtml(r.message, r.entities),
         date: new Date(r.date * 1000).toISOString(),
         timestamp: r.date,
+        sender_id: sender ? Number(sender.id) : null,
         sender_name: sender ? utils.getDisplayName(sender) || 'Пользователь' : 'Пользователь',
         sender_avatar: this.avatarUrl(sender),
         reactions: this.reactionsOf(r),

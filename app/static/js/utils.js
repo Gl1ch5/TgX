@@ -105,3 +105,46 @@ export function formatPostText(rawText, htmlText) {
   if (!rawText) return '';
   return emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
 }
+
+const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+
+/** Chat-list style time: 21:15 today, «ср» this week, «10 сент.» earlier. */
+export function formatChatTime(unixSeconds) {
+  if (!unixSeconds) return '';
+  const date = new Date(unixSeconds * 1000);
+  const now = new Date();
+  if (date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  }
+  if (now - date < 6 * 86400000) return WEEKDAYS[date.getDay()];
+  const opts = { day: 'numeric', month: 'short' };
+  if (date.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+  return date.toLocaleDateString('ru-RU', opts);
+}
+
+/** Message footer time: «13:10» today, «10 сент., 13:10» otherwise. */
+export function formatPostTime(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  if (date.toDateString() === new Date().toDateString()) return time;
+  return `${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}, ${time}`;
+}
+
+export function pluralRu(n, one, few, many) {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return one;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+  return many;
+}
+
+/** +79991234567 -> +7 999 123 45 67 (other countries: digits grouped by 3). */
+export function formatPhone(raw) {
+  const digits = String(raw || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 11 && digits[0] === '7') {
+    return `+7 ${digits.slice(1, 4)} ${digits.slice(4, 7)} ${digits.slice(7, 9)} ${digits.slice(9)}`;
+  }
+  return '+' + digits.replace(/(\d{3})(?=\d)/g, '$1 ');
+}

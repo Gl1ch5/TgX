@@ -1,16 +1,17 @@
 /**
  * ====================================================================
- * MAIN APPLICATION ENTRYPOINT & CONTROLLER (Telegram Native)
+ * MAIN APPLICATION ENTRYPOINT & CONTROLLER
  * ====================================================================
  */
 
 import { state, EMOJI_PICKER_LIST } from './state.js';
 import { api } from './api.js';
-import { showToast, formatNumber } from './utils.js';
+import { showToast, formatNumber, escapeHtml, pluralRu } from './utils.js';
 import { parseEmojis } from './emoji.js';
 import { initMediaBridge } from './media.js';
-import { createPostCardElement, playInlineVideo } from './components/postCard.js';
-import { renderChannelsBar } from './components/storiesBar.js';
+import { createPostCardElement, playInlineVideo, openPostMenu, VERIFIED_BADGE_SVG } from './components/postCard.js';
+import { renderChannelsList, filterChannelsList } from './components/channelsList.js';
+import { avatarHtml } from './components/avatar.js';
 import {
   toggleInlineComments,
   insertCommentEmoji,
@@ -39,11 +40,6 @@ import {
   submitPhonePassword,
 } from './components/authModal.js';
 import {
-  openChannelsModal,
-  closeChannelsModal,
-  filterChannelsModalList,
-} from './components/channelsModal.js';
-import {
   openSettingsModal,
   closeSettingsModal,
   updateSettingsView,
@@ -63,12 +59,22 @@ import {
   pauseStory,
 } from './components/storiesViewer.js';
 
+const desktop = window.matchMedia('(min-width: 1024px)');
+
 // Setup Global Interface
 window.TelegramX = {
   state,
   api,
   showToast,
-  
+
+  // Navigation
+  setView,
+  openMainMenu,
+  openFavorites,
+  scrollWallTop,
+  openStoriesFromHeader,
+  clearMediaCache,
+
   // Feed Controls
   switchFeedType,
   filterByChannel,
@@ -81,11 +87,14 @@ window.TelegramX = {
   refreshFeed,
   loadFeed,
   loadChannels,
+  filterChannelsList,
   copyPostLink,
+  sharePost,
   forwardToSaved,
   togglePostFavorite,
   playInlineVideo,
-  
+  openPostMenu,
+
   // Comments
   toggleInlineComments,
   insertCommentEmoji,
@@ -98,7 +107,7 @@ window.TelegramX = {
 
   // Wallpaper Engine
   initWallpaperEngine,
-  applyWallpaper,
+  applyWallpaper: (id, feedback) => { applyWallpaper(id, feedback); updateSettingsView(); },
   openWallpaperModal,
   closeWallpaperModal,
   WALLPAPERS,
@@ -110,11 +119,10 @@ window.TelegramX = {
   prevStory,
   pauseStory,
   sendStoryQuickReaction: (emoji) => {
-    showToast(`Реакция на историю ${emoji} отправлена ✨`);
+    showToast(`Реакция ${emoji} отправлена`);
   },
 
   // Modals & UI
-  toggleUserMenu,
   logoutTelegram,
   updateAuthUI,
   openAuthModal,
@@ -125,9 +133,8 @@ window.TelegramX = {
   sendPhoneCode,
   submitPhoneCode,
   submitPhonePassword,
-  openChannelsModal,
-  closeChannelsModal,
-  filterChannelsModalList,
+  openChannelsModal: () => setView('channels'),
+  closeChannelsModal: () => {},
   openSettingsModal,
   closeSettingsModal,
   updateSettingsView,
@@ -140,15 +147,16 @@ window.TelegramX = {
   closeLightbox,
 };
 
-// Expose state constant for post cards
 state.EMOJI_PICKER_LIST = EMOJI_PICKER_LIST;
 
-export async function initApp() {
-  // Initialize Wallpaper Engine
-  initWallpaperEngine();
+const $ = (id) => document.getElementById(id);
+const show = (el, on) => el && el.classList.toggle('tx-hidden', !on);
 
+export async function initApp() {
+  initWallpaperEngine();
   setupInfiniteScroll();
   setupKeyboardShortcuts();
+  desktop.addEventListener('change', () => setView($('app').dataset.view));
 
   try {
     await initMediaBridge();
@@ -157,46 +165,104 @@ export async function initApp() {
   }
 
   await checkAuthStatus();
+  renderChannelsList();
   await loadFeed();
   if (state.isAuth) loadChannels();
 }
 
+// ---------------- Navigation ----------------
+
+export function setView(view) {
+  const app = $('app');
+  if (!app) return;
+  app.dataset.view = view;
+  const active = desktop.matches && view === 'wall' ? 'channels' : view;
+  document.querySelectorAll('.tx-dock-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.view === active));
+  if (view === 'settings' || view === 'profile') updateSettingsView();
+  if (!desktop.matches) window.scrollTo({ top: 0 });
+}
+
+export function scrollWallTop() {
+  const main = $('main-scroll');
+  if (desktop.matches && main) main.scrollTo({ top: 0, behavior: 'smooth' });
+  else window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+export function openFavorites() {
+  setView('wall');
+  if (state.activeChannelId) clearChannelFilter(false);
+  switchFeedType('favorites');
+}
+
+export function openStoriesFromHeader() {
+  const ch = state.channels.find((c) => state.posts.some((p) => p.channel_id === c.id && p.media_items?.length));
+  if (ch) openStoryViewer(ch.id);
+}
+
+function closeMenus() {
+  document.querySelectorAll('.tx-menu').forEach((m) => m.remove());
+}
+
+export function openMainMenu(event) {
+  if (event) event.stopPropagation();
+  closeMenus();
+  const items = [
+    ['reload', 'Обновить стену', () => refreshFeed()],
+    ['brush', 'Обои', () => openWallpaperModal()],
+    ['channel', 'Каналы', () => setView('channels')],
+    state.isAuth
+      ? ['logout', 'Выйти', () => logoutTelegram()]
+      : ['user', 'Войти в Telegram', () => openAuthModal()],
+  ];
+  const menu = document.createElement('div');
+  menu.className = 'tx-menu';
+  menu.innerHTML = items.map(([icon, label], i) => `<button data-i="${i}"><i class="icon icon-${icon}"></i>${label}</button>`).join('');
+  menu.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const i = e.target.closest('button')?.dataset.i;
+    closeMenus();
+    if (i != null) items[i][2]();
+  });
+  document.body.appendChild(menu);
+  const rect = event.currentTarget.getBoundingClientRect();
+  menu.style.top = `${rect.bottom + 4}px`;
+  menu.style.left = `${Math.max(8, rect.right - menu.offsetWidth)}px`;
+}
+
+// ---------------- Setup ----------------
+
 function setupKeyboardShortcuts() {
   window.addEventListener('keydown', (e) => {
-    const lightbox = document.getElementById('lightbox-modal');
+    const lightbox = $('lightbox-modal');
     if (lightbox && !lightbox.classList.contains('hidden')) {
       if (e.key === 'Escape') closeLightbox();
       if (e.key === 'ArrowLeft') prevLightboxImage(e);
       if (e.key === 'ArrowRight') nextLightboxImage(e);
     }
-    const storyModal = document.getElementById('story-viewer-modal');
+    const storyModal = $('story-viewer-modal');
     if (storyModal && !storyModal.classList.contains('hidden')) {
       if (e.key === 'Escape') closeStoryViewer();
       if (e.key === 'ArrowLeft') prevStory();
       if (e.key === 'ArrowRight') nextStory();
     }
     if (e.key === 'Escape') {
+      closeMenus();
       closeWallpaperModal();
-      closeChannelsModal();
-      closeSettingsModal();
       closeAuthModal();
-      toggleHeaderSearch(false);
     }
   });
 }
 
 function setupInfiniteScroll() {
-  const sentinel = document.getElementById('feed-sentinel');
+  const sentinel = $('feed-sentinel');
   if (!sentinel) return;
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting && !state.isLoadingFeed && state.hasMore && state.posts.length > 0) {
         loadMorePosts();
       }
     });
-  }, { rootMargin: '300px' });
-
+  }, { rootMargin: '600px' });
   observer.observe(sentinel);
 }
 
@@ -205,135 +271,126 @@ async function checkAuthStatus() {
     const data = await api.getAuthStatus();
     state.isAuth = data.is_authorized;
     state.user = data.user;
-    updateAuthUI();
-    updateSettingsView();
   } catch (e) {
     console.error('Auth check error', e);
   }
+  updateAuthUI();
 }
 
 export function updateAuthUI() {
-  const dockAvatar = document.getElementById('dock-user-avatar');
-  const feedEmptyState = document.getElementById('feed-empty-state');
+  updateSettingsView();
+  show($('feed-empty-state'), !state.isAuth && state.posts.length === 0);
+  renderChannelsList();
+}
 
-  if (state.isAuth && state.user) {
-    if (feedEmptyState) feedEmptyState.classList.add('hidden');
+// ---------------- Header ----------------
 
-    if (dockAvatar) {
-      if (state.user.avatar) {
-        dockAvatar.innerHTML = `<img src="${state.user.avatar}" class="w-full h-full object-cover" />`;
-      } else {
-        dockAvatar.innerHTML = `<div class="w-full h-full bg-[#3390ec] flex items-center justify-center text-white font-bold text-[10px]">${(state.user.name || 'U').charAt(0)}</div>`;
-      }
-    }
+function updateHeader() {
+  const ch = state.activeChannelId ? state.channels.find((c) => c.id === state.activeChannelId) : null;
+  const title = $('header-main-title');
+  const sub = $('header-sub-title');
+  const block = $('header-title-block');
+  const avatar = $('header-avatar');
+
+  show($('header-back-btn'), !!state.activeChannelId);
+  show($('header-stack'), !state.activeChannelId && state.channels.length > 0);
+  block.classList.toggle('is-channel', !!state.activeChannelId);
+
+  if (state.activeChannelId) {
+    title.innerHTML = parseEmojis(ch ? ch.title : 'Канал');
+    const n = ch && ch.participants_count;
+    sub.textContent = n ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}` : ch && ch.username ? `@${ch.username}` : 'канал';
+    show(sub, true);
+    avatar.outerHTML = `<span id="header-avatar">${avatarHtml(ch || { id: state.activeChannelId }, 'sm')}</span>`;
+    $('header-verified-badge').innerHTML = ch && ch.verified ? VERIFIED_BADGE_SVG : '';
+    show($('header-verified-badge'), !!(ch && ch.verified));
   } else {
-    if (dockAvatar) dockAvatar.innerHTML = `<i class="icon icon-user text-xs text-slate-300"></i>`;
-
-    if (state.posts.length === 0 && feedEmptyState) {
-      feedEmptyState.classList.remove('hidden');
-    }
+    title.textContent = 'Стена';
+    show(sub, false);
+    avatar.outerHTML = '<div id="header-avatar" class="tx-hidden"></div>';
+    show($('header-verified-badge'), false);
   }
 }
+
+function updateTabs() {
+  document.querySelectorAll('#feed-tabs .tx-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.feed === state.feedType));
+}
+
+// ---------------- Feed controls ----------------
 
 export function switchFeedType(type) {
   state.feedType = type;
+  updateTabs();
   loadFeed();
 }
 
-export function filterByChannel(channelId, channelTitle) {
+export function filterByChannel(channelId) {
   state.activeChannelId = channelId;
-  const ch = state.channels.find(c => c.id === channelId);
-
-  const titleEl = document.getElementById('header-main-title');
-  const subEl = document.getElementById('header-sub-title');
-  const backBtn = document.getElementById('header-back-btn');
-  const verifiedBadge = document.getElementById('header-verified-badge');
-
-  if (titleEl) titleEl.innerHTML = parseEmojis(channelTitle || (ch ? ch.title : 'Канал'));
-  if (subEl) subEl.innerText = ch && ch.username ? `@${ch.username} · канал` : 'Канал';
-  if (backBtn) backBtn.classList.remove('hidden');
-
-  if (verifiedBadge) {
-    verifiedBadge.classList.toggle('hidden', !(ch && ch.verified));
-  }
-
+  state.feedType = 'all';
+  updateTabs();
+  updateHeader();
+  renderChannelsList();
+  setView('wall');
+  scrollWallTop();
   loadFeed();
-  renderChannelsBar();
 }
 
-export function clearChannelFilter() {
+export function clearChannelFilter(reload = true) {
   state.activeChannelId = null;
-
-  const titleEl = document.getElementById('header-main-title');
-  const subEl = document.getElementById('header-sub-title');
-  const backBtn = document.getElementById('header-back-btn');
-  const verifiedBadge = document.getElementById('header-verified-badge');
-
-  if (titleEl) titleEl.innerText = 'Стена каналов';
-  if (subEl) subEl.innerText = 'Все публикации ваших каналов';
-  if (backBtn) backBtn.classList.add('hidden');
-  if (verifiedBadge) verifiedBadge.classList.add('hidden');
-
-  loadFeed();
-  renderChannelsBar();
+  updateHeader();
+  renderChannelsList();
+  if (!desktop.matches && $('app').dataset.view !== 'wall') setView('wall');
+  if (reload) loadFeed();
 }
 
-export function toggleHeaderSearch(show) {
-  const normalView = document.getElementById('header-normal-view');
-  const searchBar = document.getElementById('header-search-bar');
-  const input = document.getElementById('search-input');
-
-  if (show) {
-    if (normalView) normalView.classList.add('hidden');
-    if (searchBar) searchBar.classList.remove('hidden');
+export function toggleHeaderSearch(showSearch) {
+  const bar = $('header-search-bar');
+  const input = $('search-input');
+  if (showSearch) {
+    show(bar, true);
     if (input) input.focus();
   } else {
-    if (searchBar) searchBar.classList.add('hidden');
-    if (normalView) normalView.classList.remove('hidden');
-    clearSearch();
+    show(bar, false);
+    if (state.searchQuery) clearSearch();
   }
 }
 
 export function filterByTag(tag) {
   toggleHeaderSearch(true);
-  const input = document.getElementById('search-input');
-  if (input) input.value = tag;
+  const input = $('search-input');
+  if (input) input.value = '#' + tag;
   doSearch();
 }
 
 export function doSearch() {
-  const input = document.getElementById('search-input');
-  const q = input ? input.value.trim() : '';
-  state.searchQuery = q;
-  const clearBtn = document.getElementById('clear-search-btn');
-  if (clearBtn) clearBtn.classList.toggle('hidden', !q);
+  const input = $('search-input');
+  state.searchQuery = input ? input.value.trim() : '';
   loadFeed();
 }
 
 export function clearSearch() {
-  const input = document.getElementById('search-input');
+  const input = $('search-input');
   if (input) input.value = '';
   state.searchQuery = '';
-  const clearBtn = document.getElementById('clear-search-btn');
-  if (clearBtn) clearBtn.classList.add('hidden');
   loadFeed();
 }
 
 export function resetFeed() {
   state.feedType = 'all';
-  state.activeChannelId = null;
   state.searchQuery = '';
+  updateTabs();
   toggleHeaderSearch(false);
+  setView('wall');
   clearChannelFilter();
 }
 
 export async function refreshFeed() {
-  const icon = document.getElementById('refresh-icon');
+  const icon = $('refresh-icon');
   if (icon) icon.classList.add('animate-spin');
   await loadFeed(true);
   await loadChannels(true);
-  if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 500);
-  showToast('Стена обновлена ✨');
+  if (icon) setTimeout(() => icon.classList.remove('animate-spin'), 400);
+  showToast('Стена обновлена');
 }
 
 export async function loadFeed(forceRefresh = false) {
@@ -341,15 +398,12 @@ export async function loadFeed(forceRefresh = false) {
   state.isLoadingFeed = true;
   let refreshAfterCache = false;
 
-  const loader = document.getElementById('feed-loader');
-  const postsContainer = document.getElementById('posts-container');
-  const emptyState = document.getElementById('feed-empty-state');
-  const sentinelText = document.getElementById('sentinel-text');
+  const loader = $('feed-loader');
+  const postsContainer = $('posts-container');
+  const sentinelText = $('sentinel-text');
 
-  if (state.posts.length === 0 && loader) {
-    loader.classList.remove('hidden');
-  }
-  if (sentinelText) sentinelText.innerText = '';
+  if (state.posts.length === 0 && state.isAuth) show(loader, true);
+  if (sentinelText) sentinelText.textContent = '';
 
   try {
     const data = await api.getFeed({
@@ -364,36 +418,33 @@ export async function loadFeed(forceRefresh = false) {
     if (data.from_cache && state.isAuth) refreshAfterCache = true;
     state.hasMore = data.has_more || false;
     state.nextOffset = data.next_offset || null;
-    if (loader) loader.classList.add('hidden');
+    show(loader, false);
 
     if (state.posts.length === 0) {
-      if (!state.isAuth && emptyState) {
-        emptyState.classList.remove('hidden');
-      } else if (postsContainer) {
-        postsContainer.innerHTML = `
-          <div class="p-10 text-center text-[#8a8a90] tg-post-card rounded-2xl">
-            <i class="icon icon-channel text-3xl mb-2.5 block opacity-40 text-[#3390ec]"></i>
-            <p class="text-sm font-medium text-slate-200">Публикаций пока нет</p>
-            <p class="text-xs text-[#8a8a90] mt-1">Каналы еще не опубликовали новые посты или измените фильтр</p>
-          </div>
-        `;
+      show($('feed-empty-state'), !state.isAuth);
+      if (postsContainer) {
+        const text = state.feedType === 'favorites'
+          ? 'Отмечайте посты звёздочкой в меню ⋮ — они появятся здесь'
+          : state.searchQuery ? 'По запросу ничего не найдено' : 'Публикаций пока нет';
+        postsContainer.innerHTML = state.isAuth || state.feedType === 'favorites'
+          ? `<div class="tx-empty"><p>${escapeHtml(text)}</p></div>`
+          : '';
       }
-      if (sentinelText) sentinelText.innerText = '';
     } else {
-      if (emptyState) emptyState.classList.add('hidden');
+      show($('feed-empty-state'), false);
       renderPosts();
-      if (sentinelText) sentinelText.innerText = state.hasMore ? '' : 'Конец стены каналов';
+      if (sentinelText) sentinelText.textContent = state.hasMore ? '' : 'Вы всё прочитали';
       preloadVisibleComments();
     }
 
     if (data.channels && data.channels.length > 0) {
       state.channels = data.channels;
-      renderChannelsBar();
+      renderChannelsList();
+      updateHeader();
     }
-
   } catch (e) {
     console.error('Feed loading error', e);
-    if (loader) loader.classList.add('hidden');
+    show(loader, false);
   } finally {
     state.isLoadingFeed = false;
   }
@@ -403,10 +454,10 @@ export async function loadFeed(forceRefresh = false) {
 }
 
 function preloadVisibleComments() {
-  state.posts.slice(0, 6).forEach(p => {
+  state.posts.slice(0, 6).forEach((p) => {
     if (p.replies_count > 0 && !state.cachedComments[p.id]) {
       api.getComments(p.channel_id, p.msg_id)
-        .then(data => {
+        .then((data) => {
           if (data.comments) state.cachedComments[p.id] = data.comments;
         })
         .catch(() => {});
@@ -418,9 +469,9 @@ export async function loadMorePosts() {
   if (state.isLoadingFeed || !state.hasMore || !state.nextOffset) return;
   state.isLoadingFeed = true;
 
-  const spinner = document.getElementById('sentinel-spinner');
-  const sentinelText = document.getElementById('sentinel-text');
-  if (spinner) spinner.classList.remove('hidden');
+  const spinner = $('sentinel-spinner');
+  const sentinelText = $('sentinel-text');
+  show(spinner, true);
 
   try {
     const data = await api.getFeed({
@@ -432,10 +483,9 @@ export async function loadMorePosts() {
     });
 
     const newPosts = data.posts || [];
-
-    if (newPosts.length > 0) {
-      const existingIds = new Set(state.posts.map(p => p.id));
-      const uniqueNew = newPosts.filter(p => !existingIds.has(p.id));
+    const existingIds = new Set(state.posts.map((p) => p.id));
+    const uniqueNew = newPosts.filter((p) => !existingIds.has(p.id));
+    if (uniqueNew.length > 0) {
       state.posts.push(...uniqueNew);
       state.hasMore = data.has_more;
       state.nextOffset = data.next_offset;
@@ -443,11 +493,11 @@ export async function loadMorePosts() {
     } else {
       state.hasMore = false;
     }
-    if (sentinelText) sentinelText.innerText = state.hasMore ? '' : 'Конец стены каналов';
+    if (sentinelText) sentinelText.textContent = state.hasMore ? '' : 'Вы всё прочитали';
   } catch (e) {
     console.error('Load more error', e);
   } finally {
-    if (spinner) spinner.classList.add('hidden');
+    show(spinner, false);
     state.isLoadingFeed = false;
   }
 }
@@ -457,12 +507,8 @@ export async function loadChannels(forceRefresh = false) {
     const data = await api.getChannels(forceRefresh);
     if (data.channels) {
       state.channels = data.channels;
-      renderChannelsBar();
-      const countBadge = document.getElementById('channels-count-badge');
-      if (countBadge) {
-        countBadge.innerText = state.channels.length;
-        countBadge.classList.remove('hidden');
-      }
+      renderChannelsList();
+      updateHeader();
     }
   } catch (e) {
     console.error('Channels load error', e);
@@ -470,84 +516,84 @@ export async function loadChannels(forceRefresh = false) {
 }
 
 export function renderPosts() {
-  const container = document.getElementById('posts-container');
+  const container = $('posts-container');
   if (!container) return;
   container.innerHTML = '';
-  state.posts.forEach(post => {
-    const card = createPostCardElement(post);
-    container.appendChild(card);
-  });
+  state.posts.forEach((post) => container.appendChild(createPostCardElement(post)));
 }
 
 export function appendPosts(newPosts) {
-  const container = document.getElementById('posts-container');
+  const container = $('posts-container');
   if (!container) return;
-  newPosts.forEach(post => {
-    const card = createPostCardElement(post);
-    container.appendChild(card);
-  });
+  newPosts.forEach((post) => container.appendChild(createPostCardElement(post)));
 }
+
+// ---------------- Post actions ----------------
 
 export function copyPostLink(url) {
   navigator.clipboard.writeText(url).then(() => {
-    showToast('Ссылка скопирована в буфер обмена');
+    showToast('Ссылка скопирована');
   }).catch(() => {
     showToast('Ссылка: ' + url);
   });
 }
 
-export async function forwardToSaved(channelId, msgId) {
-  try {
-    const data = await api.forwardToSaved(channelId, msgId);
-    if (data.status === 'success') {
-      showToast('Сохранено в Избранное Telegram ✨');
-    } else {
-      showToast('Не удалось переслать: ' + (data.message || 'ошибка'));
+export async function sharePost(postId) {
+  const post = state.posts.find((p) => p.id === postId);
+  if (!post) return;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: post.channel?.title || 'Telegram', url: post.tg_url });
+      return;
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
     }
-  } catch (e) {
-    console.error(e);
+  }
+  copyPostLink(post.tg_url);
+}
+
+export async function forwardToSaved(channelId, msgId) {
+  const data = await api.forwardToSaved(channelId, msgId);
+  if (data.status === 'success') {
+    showToast('Сохранено в «Избранное» Telegram');
+  } else {
+    showToast('Не удалось переслать: ' + (data.message || 'ошибка'));
   }
 }
 
 export async function togglePostFavorite(postId) {
-  try {
-    const target = state.posts.find(p => p.id === postId);
-    const data = await api.toggleFavorite(postId, target);
-    if (target) {
-      target.is_favorite = data.is_favorite;
-      const btn = document.getElementById(`fav-btn-${postId}`);
-      if (btn) {
-        btn.innerHTML = `<i class="icon icon-star text-base ${data.is_favorite ? 'text-amber-400' : ''}"></i>`;
-      }
-    }
-    showToast(data.is_favorite ? 'Добавлено в Избранное ⭐' : 'Удалено из Избранного');
-  } catch (e) {
-    console.error(e);
+  const target = state.posts.find((p) => p.id === postId);
+  const data = await api.toggleFavorite(postId, target);
+  if (target) target.is_favorite = data.is_favorite;
+  show($(`fav-mark-${postId}`), data.is_favorite);
+  if (state.feedType === 'favorites' && !data.is_favorite) {
+    $(`post-card-${postId}`)?.remove();
+    state.posts = state.posts.filter((p) => p.id !== postId);
   }
+  showToast(data.is_favorite ? 'Добавлено в избранное' : 'Удалено из избранного');
 }
 
-export function toggleUserMenu() {
-  const popover = document.getElementById('user-menu-popover');
-  if (popover) popover.classList.toggle('hidden');
+export async function clearMediaCache() {
+  await api.clearCache();
+  state.cachedComments = {};
+  showToast('Кэш очищен');
+  loadFeed(true);
 }
 
 export async function logoutTelegram() {
-  if (!confirm('Вы уверены, что хотите выйти из Telegram?')) return;
-  try {
-    await api.logout();
-    state.isAuth = false;
-    state.user = null;
-    state.posts = [];
-    state.channels = [];
-    state.cachedComments = {};
-    updateAuthUI();
-    updateSettingsView();
-    renderPosts();
-    showToast('Сессия завершена');
-  } catch (e) {
-    console.error(e);
-  }
+  if (!confirm('Выйти из Telegram на этом устройстве?')) return;
+  await api.logout();
+  state.isAuth = false;
+  state.user = null;
+  state.posts = [];
+  state.channels = [];
+  state.cachedComments = {};
+  state.activeChannelId = null;
+  updateHeader();
+  renderPosts();
+  updateAuthUI();
+  setView('wall');
+  showToast('Вы вышли из аккаунта');
 }
 
-// Auto-start on load
 window.addEventListener('DOMContentLoaded', initApp);
