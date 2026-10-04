@@ -75,5 +75,8 @@
   height: 16px; min-width: 16px; padding: 0 4px; border-radius: 8px;
   font-size: 10px; font-weight: 700; line-height: 16px; color: #fff;
   background: var(--tx-accent-fill);
-  box-shadow: 0 0 0 1.33px rgb(37, 37, 38);
+  /* Cut-out ring in the colour of what is behind it (Telegram cuts the icon around the counter) */
+  box-shadow: 0 0 0 1.5px var(--tx-dock-cut, rgb(37, 37, 38));
 }
+.tx-dock-tab { --tx-dock-cut: rgb(37, 37, 38); }
+.tx-dock-tab.is-active { --tx-dock-cut: color-mix(in srgb, var(--tx-accent-fill) 14%, rgb(37, 37, 38)); }

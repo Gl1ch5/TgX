@@ -304,3 +304,5 @@
 /* Off-screen posts skip layout and paint entirely (smooth fast scrolling) */
 .tx-feed > .tx-post { content-visibility: auto; contain-intrinsic-size: auto 460px; }
 .has-error, .has-error::after { animation: none !important; background-image: none !important; }
+/* Photo tiles: the image always fills its tile (above the blurred preview) */
+.tx-media-tap.tx-ph > img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; max-height: none; object-fit: cover; }

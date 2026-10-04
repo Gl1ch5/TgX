@@ -21,8 +21,9 @@ function initials(title) {
 export function avatarHtml(peer, size = '', extra = '') {
   const p = peer || {};
   const title = p.title || p.name || '';
-  const inner = p.avatar
+  // Initials are always underneath: if the photo fails to load, the letters stay visible.
+  const img = p.avatar
     ? `<img src="${escapeHtml(p.avatar)}" alt="" loading="lazy" decoding="async" onerror="this.remove()" />`
     : '';
-  return `<span class="tx-avatar ${size} tx-peer-${peerColor(p.id)} ${extra}">${inner || escapeHtml(initials(title))}</span>`;
+  return `<span class="tx-avatar ${size} tx-peer-${peerColor(p.id)} ${extra}"><span class="tx-avatar-ini">${escapeHtml(initials(title))}</span>${img}</span>`;
 }

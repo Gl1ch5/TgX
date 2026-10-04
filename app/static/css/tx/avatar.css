@@ -23,3 +23,6 @@
 .tx-avatars { display: inline-flex; align-items: center; }
 .tx-avatars .tx-avatar { box-shadow: 0 0 0 2px var(--tx-bubble); }
 .tx-avatars .tx-avatar + .tx-avatar { margin-left: -9px; }
+.tx-avatar { position: relative; }
+.tx-avatar > img { position: absolute; inset: 0; }
+.tx-avatar-ini { line-height: 1; }
