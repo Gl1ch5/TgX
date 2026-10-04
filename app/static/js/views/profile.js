@@ -43,7 +43,7 @@ function guest(el) {
         <div class="tx-hero-name">Гость</div>
         <div class="tx-hero-sub">Войдите, чтобы читать свои каналы</div>
       </div>
-      ${group(row({ icon: 'user-filled', color: '#5a83f3', title: 'Войти в Telegram', sub: 'QR-код или номер телефона', onclick: 'window.TelegramX.openAuthModal()' }))}
+      ${group(row({ icon: 'user-filled', color: 'BLUE_DEEP', title: 'Войти в Telegram', sub: 'QR-код или номер телефона', onclick: 'window.TelegramX.openAuthModal()' }))}
     </div>`;
 }
 

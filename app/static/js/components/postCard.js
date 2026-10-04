@@ -13,7 +13,7 @@ import { reactionsHtml } from './reactions.js';
 import { stickerHtml } from './sticker.js';
 import { audioHtml } from './audioPlayer.js';
 
-export const VERIFIED_BADGE_SVG = `<svg class="VerifiedIcon" viewBox="0 0 24 24" aria-label="Подтверждённый"><path d="M12 1.6l2.6 1.9 3.2-.1 1 3.1 2.6 1.9-1 3.1 1 3.1-2.6 1.9-1 3.1-3.2-.1L12 22.4l-2.6-1.9-3.2.1-1-3.1-2.6-1.9 1-3.1-1-3.1 2.6-1.9 1-3.1 3.2.1z" fill="var(--tx-accent-fill)"/><path d="M10.4 15.6l-3.2-3.2 1.3-1.3 1.9 1.9 5.2-5.2 1.3 1.3-6.5 6.5z" fill="#fff"/></svg>`;
+export const VERIFIED_BADGE_SVG = '<span class="VerifiedIcon tx-verified" role="img" aria-label="Подтверждённый"></span>';
 
 const VISUAL = new Set(['photo', 'video', 'gif']);
 

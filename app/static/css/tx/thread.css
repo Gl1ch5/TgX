@@ -20,7 +20,7 @@
 .tx-msg.is-out .tx-bubble { border-bottom-left-radius: var(--tx-bubble-radius); border-bottom-right-radius: var(--tx-bubble-radius-small); }
 
 .tx-msg-name { padding: 6px 11px 0; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-msg-body { padding: 4px 11px 6px; font-size: var(--tx-text-size); line-height: 1.36; overflow-wrap: anywhere; }
+.tx-msg-body { display: flow-root; padding: 4px 11px 6px; font-size: var(--tx-text-size); line-height: 1.36; overflow-wrap: anywhere; }
 .tx-msg-body .emoji { width: 1.25em !important; height: 1.25em !important; vertical-align: -0.25em !important; }
 .tx-msg-time { float: right; margin: 7px -3px -4px 10px; font-size: 12.5px; color: var(--tx-text-2); line-height: 1; }
 .tx-msg.is-out .tx-msg-time { color: rgba(255, 255, 255, 0.6); }
@@ -72,3 +72,23 @@
 .tx-emoji-pop button { height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .tx-emoji-pop button:hover { background: rgba(255, 255, 255, 0.08); }
 .tx-emoji-pop .emoji { width: 28px !important; height: 28px !important; }
+
+/* Comments header / composer details (Telegram 12) */
+#screen-thread .tx-pill { padding-left: 5px; }
+#screen-thread .tx-pill-title { font-size: 18px; }
+#thread-search { position: sticky; top: calc(66px + var(--tx-safe-top)); z-index: 29; margin: -2px 0 8px; }
+.tx-msg.is-filtered { opacity: 0.25; filter: saturate(0.4); transition: opacity 0.2s ease; }
+.tx-composer-me { display: inline-flex; padding-left: 4px; }
+.tx-composer-me:empty { display: none; }
+.tx-composer-me .tx-avatar { width: 34px; height: 34px; font-size: 13px; }
+.tx-composer-inner { position: relative; }
+.tx-thread-jump {
+  position: absolute; right: 2px; bottom: calc(100% + 12px); width: 48px; height: 48px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; color: #fff;
+  animation: tx-jump-in 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.tx-thread-jump .icon { font-size: 26px; }
+.tx-thread-jump .tx-badge { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); }
+@keyframes tx-jump-in { from { opacity: 0; transform: scale(0.6); } }
+#thread-send { transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease; }
+.tx-composer.is-empty #thread-send { transform: scale(0.7); opacity: 0.55; }

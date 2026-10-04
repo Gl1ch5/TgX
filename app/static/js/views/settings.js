@@ -58,19 +58,19 @@ function rootPage() {
       </div>
 
       ${group(
-        row({ icon: 'channel-filled', color: '#3e88f7', title: 'Стена', sub: excluded ? `Скрыто каналов: ${excluded}` : 'Каналы на стене, прочитанное', onclick: "window.TelegramX.openSettingsPage('wall')" }) +
-        row({ icon: 'brush', color: '#f19d39', title: 'Оформление', sub: `${escapeHtml(wpName)}, текст ${p.textSize} пт`, onclick: "window.TelegramX.openSettingsPage('appearance')" }) +
-        row({ icon: 'piechart-filled', color: '#5a83f3', title: 'Данные и память', sub: 'Автозагрузка медиа, кэш', onclick: "window.TelegramX.openSettingsPage('data')" }) +
-        row({ icon: 'devices-filled', color: '#3fb6c7', title: 'Устройства', sub: 'Активные сеансы', onclick: "window.TelegramX.openSettingsPage('devices')" }),
+        row({ icon: 'folder-tabs-chats', color: 'BLUE', title: 'Стена', sub: excluded ? `Скрыто каналов: ${excluded}` : 'Каналы на стене, прочитанное', onclick: "window.TelegramX.openSettingsPage('wall')" }) +
+        row({ icon: 'chat-settings', color: 'ORANGE', title: 'Оформление', sub: `${escapeHtml(wpName)}, текст ${p.textSize} пт`, onclick: "window.TelegramX.openSettingsPage('appearance')" }) +
+        row({ icon: 'data', color: 'BLUE_DEEP', title: 'Данные и память', sub: 'Автозагрузка медиа, кэш', onclick: "window.TelegramX.openSettingsPage('data')" }) +
+        row({ icon: 'devices-filled', color: 'CYAN', title: 'Устройства', sub: 'Активные сеансы', onclick: "window.TelegramX.openSettingsPage('devices')" }),
       )}
 
       ${group(
-        row({ icon: 'favorite-filled', color: '#f5b72f', title: 'Закладки', sub: 'Посты, сохранённые на стене', onclick: 'window.TelegramX.openFavorites()' }),
+        row({ icon: 'favorite-filled', color: 'ORANGE_DEEP', title: 'Закладки', sub: 'Посты, сохранённые на стене', onclick: 'window.TelegramX.openFavorites()' }),
       )}
 
       ${group(
-        row({ icon: 'info-filled', color: '#8e8e93', title: 'О TeleX', sub: `Версия ${APP_VERSION}`, onclick: "window.TelegramX.openSettingsPage('about')" }) +
-        row({ icon: 'code', color: '#6c6c70', title: 'Для разработчиков', sub: 'Сессия, диагностика, логи', onclick: "window.TelegramX.openSettingsPage('developer')" }),
+        row({ icon: 'faq', color: 'BLUE', title: 'О TeleX', sub: `Версия ${APP_VERSION}`, onclick: "window.TelegramX.openSettingsPage('about')" }) +
+        row({ icon: 'code', color: 'GRAY', title: 'Для разработчиков', sub: 'Сессия, диагностика, логи', onclick: "window.TelegramX.openSettingsPage('developer')" }),
       )}
       <div class="tx-settings-foot">TeleX ${APP_VERSION} · автор <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
     </div>`;
@@ -89,11 +89,11 @@ function aboutPage() {
       ${group(
         row({ title: APP_VERSION, sub: 'Версия' }) +
         (native ? row({ title: escapeHtml(native), sub: 'Приложение' }) : '') +
-        (isAndroidApp() ? row({ icon: 'reload', color: '#4fae4e', title: 'Проверить обновления', onclick: 'window.TelegramX.checkAppUpdate()' }) : ''),
+        (isAndroidApp() ? row({ icon: 'reload', color: 'GREEN', title: 'Проверить обновления', onclick: 'window.TelegramX.checkAppUpdate()' }) : ''),
       )}
       ${group(
-        row({ icon: 'user', color: '#3e88f7', title: '@' + AUTHOR.telegram, sub: 'Автор · Telegram', onclick: `window.open('https://t.me/${AUTHOR.telegram}', '_blank', 'noopener')` }) +
-        row({ icon: 'code', color: '#24292f', title: 'github.com/' + AUTHOR.github, sub: 'Исходный код', onclick: `window.open('${REPO_URL}', '_blank', 'noopener')` }),
+        row({ icon: 'user', color: 'BLUE', title: '@' + AUTHOR.telegram, sub: 'Автор · Telegram', onclick: `window.open('https://t.me/${AUTHOR.telegram}', '_blank', 'noopener')` }) +
+        row({ icon: 'code', color: 'GRAY', title: 'github.com/' + AUTHOR.github, sub: 'Исходный код', onclick: `window.open('${REPO_URL}', '_blank', 'noopener')` }),
         { hint: 'TeleX — неофициальный клиент. Работает напрямую с серверами Telegram, сессия хранится только на вашем устройстве.' },
       )}
     </div>`;
@@ -106,24 +106,24 @@ function developerPage() {
     <div class="tx-page">
       ${group(
         row({ title: '<span id="dev-conn">…</span>', sub: 'Соединение с Telegram' }) +
-        row({ icon: 'reload', color: '#4fae4e', title: 'Проверить соединение', sub: '<span id="dev-ping">Пинг MTProto</span>', onclick: 'window.TelegramX.devPing()' }) +
-        row({ icon: 'reload-arrows', color: '#3e88f7', title: 'Переподключиться', onclick: 'window.TelegramX.devReconnect()' }),
+        row({ icon: 'reload', color: 'GREEN', title: 'Проверить соединение', sub: '<span id="dev-ping">Пинг MTProto</span>', onclick: 'window.TelegramX.devPing()' }) +
+        row({ icon: 'reload-arrows', color: 'BLUE', title: 'Переподключиться', onclick: 'window.TelegramX.devReconnect()' }),
         { title: 'Диагностика' },
       )}
       ${group(
-        switchRow({ icon: 'info-filled', color: '#8774e1', title: 'Индикатор соединения', sub: 'Дата-центр и пинг поверх экрана', checked: p.devOverlay, onchange: "window.TelegramX.setPref('devOverlay', this.checked)" }) +
-        switchRow({ icon: 'data', color: '#6c6c70', title: 'Подробные логи MTProto', sub: 'Пишет в консоль всё, что делает GramJS', checked: p.devVerbose, onchange: "window.TelegramX.setPref('devVerbose', this.checked)" }),
+        switchRow({ icon: 'info-filled', color: 'PURPLE', title: 'Индикатор соединения', sub: 'Дата-центр и пинг поверх экрана', checked: p.devOverlay, onchange: "window.TelegramX.setPref('devOverlay', this.checked)" }) +
+        switchRow({ icon: 'data', color: 'GRAY', title: 'Подробные логи MTProto', sub: 'Пишет в консоль всё, что делает GramJS', checked: p.devVerbose, onchange: "window.TelegramX.setPref('devVerbose', this.checked)" }),
         { title: 'Отладка' },
       )}
       ${group(
-        row({ icon: 'download', color: '#3e88f7', title: 'Экспорт логов', sub: `<span id="dev-logs">${logCount()}</span> записей + сведения об устройстве`, onclick: 'window.TelegramX.devExportLogs()' }) +
-        row({ icon: 'copy', color: '#5a83f3', title: 'Скопировать диагностику', onclick: 'window.TelegramX.devCopyDiagnostics()' }) +
-        row({ icon: 'delete', color: '#8e8e93', title: 'Очистить логи', onclick: 'window.TelegramX.devClearLogs()' }),
+        row({ icon: 'download', color: 'BLUE', title: 'Экспорт логов', sub: `<span id="dev-logs">${logCount()}</span> записей + сведения об устройстве`, onclick: 'window.TelegramX.devExportLogs()' }) +
+        row({ icon: 'copy', color: 'BLUE_DEEP', title: 'Скопировать диагностику', onclick: 'window.TelegramX.devCopyDiagnostics()' }) +
+        row({ icon: 'delete', color: 'GRAY', title: 'Очистить логи', onclick: 'window.TelegramX.devClearLogs()' }),
         { title: 'Логи' },
       )}
       ${group(
-        row({ icon: 'link', color: '#f19d39', title: 'Экспорт сессии', sub: 'Скопировать строку входа', onclick: 'window.TelegramX.devExportSession()' }) +
-        row({ icon: 'add', color: '#4fae4e', title: 'Импорт сессии', sub: 'Войти по строке из другого TeleX', onclick: 'window.TelegramX.devToggleImport()' }) +
+        row({ icon: 'link', color: 'ORANGE', title: 'Экспорт сессии', sub: 'Скопировать строку входа', onclick: 'window.TelegramX.devExportSession()' }) +
+        row({ icon: 'add', color: 'GREEN', title: 'Импорт сессии', sub: 'Войти по строке из другого TeleX', onclick: 'window.TelegramX.devToggleImport()' }) +
         `<div id="dev-import" class="tx-hidden">
           <label class="tx-field"><textarea id="dev-import-text" rows="3" placeholder="Вставьте строку сессии" autocomplete="off" spellcheck="false"></textarea></label>
           <div style="padding:0 16px 14px"><button class="tx-btn" style="width:100%" onclick="window.TelegramX.devImportSession()">Войти</button></div>
@@ -131,7 +131,7 @@ function developerPage() {
         { title: 'Сессия', hint: 'Строка сессии — это полный доступ к аккаунту. Никому её не отправляйте: с ней можно читать и писать от вашего имени. Отозвать её можно в «Устройствах».' },
       )}
       ${group(
-        row({ icon: 'reload', color: '#ff5b5b', title: 'Перезагрузить приложение начисто', sub: 'Сбросить Service Worker и кэш кода (вход сохранится)', onclick: 'window.TelegramX.devHardReload()' }),
+        row({ icon: 'reload', color: 'RED', title: 'Перезагрузить приложение начисто', sub: 'Сбросить Service Worker и кэш кода (вход сохранится)', onclick: 'window.TelegramX.devHardReload()' }),
       )}
     </div>`;
 }
@@ -154,8 +154,8 @@ function wallPage() {
     ${titleBar('Стена', { back: true })}
     <div class="tx-page">
       ${group(
-        switchRow({ icon: 'readchats', color: '#4fae4e', title: 'Отмечать прочитанным', sub: 'Просмотренные посты — прочитаны и в Telegram', checked: p.syncRead, onchange: "window.TelegramX.setPref('syncRead', this.checked)" }) +
-        switchRow({ icon: 'group-filled', color: '#8774e1', title: 'Показывать группы', sub: 'Сообщения супергрупп на стене', checked: p.showGroups, onchange: "window.TelegramX.setPref('showGroups', this.checked); window.TelegramX.rerenderSettings()" }),
+        switchRow({ icon: 'readchats', color: 'GREEN', title: 'Отмечать прочитанным', sub: 'Просмотренные посты — прочитаны и в Telegram', checked: p.syncRead, onchange: "window.TelegramX.setPref('syncRead', this.checked)" }) +
+        switchRow({ icon: 'group-filled', color: 'PURPLE', title: 'Показывать группы', sub: 'Сообщения супергрупп на стене', checked: p.showGroups, onchange: "window.TelegramX.setPref('showGroups', this.checked); window.TelegramX.rerenderSettings()" }),
       )}
       ${group(segments([[10, '10'], [20, '20'], [40, '40'], [60, '60']], p.feedSize, "window.TelegramX.setPref('feedSize', $v); window.TelegramX.rerenderSettings()"),
         { title: 'Сколько каналов загружать', hint: 'Чем больше каналов, тем дольше обновляется стена.' })}
@@ -187,8 +187,8 @@ function appearancePage() {
       ${group(slider({ min: 0, max: 22, value: p.bubbleRadius, left: '0', right: '22', oninput: "window.TelegramX.setPref('bubbleRadius', +this.value)" }), { title: 'Скругление углов сообщений' })}
       ${group(`<div class="tx-colors">${ACCENTS.map((a) => `<button style="--c:${a.fill}" class="${a.id === p.accent ? 'is-active' : ''}" onclick="window.TelegramX.setPref('accent', '${a.id}'); window.TelegramX.rerenderSettings()" title="${a.id}"></button>`).join('')}</div>`, { title: 'Цвет акцента' })}
       ${group(
-        row({ icon: 'brush', color: '#f19d39', title: 'Обои', sub: escapeHtml(wpName), onclick: 'window.TelegramX.openWallpaperModal()' }) +
-        switchRow({ icon: 'animations', color: '#e66b9b', title: 'Уменьшить анимацию', sub: 'Стикеры и эмодзи без движения', checked: p.reduceMotion, onchange: "window.TelegramX.setPref('reduceMotion', this.checked)" }),
+        row({ icon: 'brush', color: 'ORANGE', title: 'Обои', sub: escapeHtml(wpName), onclick: 'window.TelegramX.openWallpaperModal()' }) +
+        switchRow({ icon: 'animations', color: 'RED', title: 'Уменьшить анимацию', sub: 'Стикеры и эмодзи без движения', checked: p.reduceMotion, onchange: "window.TelegramX.setPref('reduceMotion', this.checked)" }),
       )}
     </div>`;
 }
@@ -199,14 +199,14 @@ function dataPage() {
     ${titleBar('Данные и память', { back: true })}
     <div class="tx-page">
       ${group(
-        switchRow({ icon: 'photo', color: '#3e88f7', title: 'Загружать фото автоматически', checked: p.autoloadPhotos, onchange: "window.TelegramX.setPref('autoloadPhotos', this.checked)" }) +
-        switchRow({ icon: 'gifs', color: '#4fae4e', title: 'Автовоспроизведение GIF', checked: p.autoplayGifs, onchange: "window.TelegramX.setPref('autoplayGifs', this.checked)" }) +
-        switchRow({ icon: 'video', color: '#e66b9b', title: 'Автовоспроизведение видео', sub: 'Короткие видео без звука, как в Telegram', checked: p.autoplayVideos, onchange: "window.TelegramX.setPref('autoplayVideos', this.checked)" }),
+        switchRow({ icon: 'photo', color: 'BLUE', title: 'Загружать фото автоматически', checked: p.autoloadPhotos, onchange: "window.TelegramX.setPref('autoloadPhotos', this.checked)" }) +
+        switchRow({ icon: 'gifs', color: 'GREEN', title: 'Автовоспроизведение GIF', checked: p.autoplayGifs, onchange: "window.TelegramX.setPref('autoplayGifs', this.checked)" }) +
+        switchRow({ icon: 'video', color: 'RED', title: 'Автовоспроизведение видео', sub: 'Короткие видео без звука, как в Telegram', checked: p.autoplayVideos, onchange: "window.TelegramX.setPref('autoplayVideos', this.checked)" }),
         { title: 'Автозагрузка медиа' },
       )}
       ${group(
-        row({ icon: 'data', color: '#5a83f3', title: 'Использование памяти', sub: '<span id="storage-usage">Подсчёт…</span>' }) +
-        row({ icon: 'delete', color: '#ff5b5b', title: 'Очистить кэш', sub: 'Медиа и сохранённая лента', onclick: 'window.TelegramX.clearMediaCache()' }),
+        row({ icon: 'data', color: 'BLUE_DEEP', title: 'Использование памяти', sub: '<span id="storage-usage">Подсчёт…</span>' }) +
+        row({ icon: 'delete', color: 'RED', title: 'Очистить кэш', sub: 'Медиа и сохранённая лента', onclick: 'window.TelegramX.clearMediaCache()' }),
         { title: 'Хранилище', hint: 'Сессия и настройки при очистке кэша сохраняются.' },
       )}
     </div>`;
@@ -217,7 +217,7 @@ function devicesPage() {
     ${titleBar('Устройства', { back: true })}
     <div class="tx-page">
       <div id="sessions-box"><div class="tx-sentinel"><span class="animate-spin"><i class="icon icon-reload"></i></span></div></div>
-      ${group(row({ icon: 'logout', color: '#ff5b5b', title: 'Выйти из TeleX', sub: 'Завершить сеанс в этом браузере', danger: true, onclick: 'window.TelegramX.logoutTelegram()' }))}
+      ${group(row({ icon: 'logout', color: 'RED', title: 'Выйти из TeleX', sub: 'Завершить сеанс в этом браузере', danger: true, onclick: 'window.TelegramX.logoutTelegram()' }))}
     </div>`;
 }
 

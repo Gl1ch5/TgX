@@ -10,7 +10,7 @@ import { showToast, formatNumber, escapeQuotes } from '../utils.js';
 import { renderEmoji } from '../emoji.js';
 import { hydrateStickers } from './sticker.js';
 
-const STAR_SVG = '<svg class="tx-star" viewBox="0 0 24 24" width="22" height="22"><path fill="#ffc83d" stroke="#f59e0b" stroke-width="1" stroke-linejoin="round" d="M12 2.6l2.75 6.03 6.6.67-4.94 4.43 1.41 6.5L12 16.9l-5.82 3.33 1.41-6.5L2.65 9.3l6.6-.67z"/></svg>';
+const STAR_SVG = '<img class="tx-star" src="icons/android/star_reaction.svg" width="22" height="22" alt="⭐" draggable="false" />';
 
 export function reactionIcon(r) {
   if (r.paid) return STAR_SVG;
@@ -83,7 +83,15 @@ export function tapReaction(postId, index) {
   sendReaction(post.channel_id, post.msg_id, r.emoji, post.id, r.custom_id || null);
 }
 
+/** Reaction strip of the context menu: the post's own reactions first (like Telegram), then the usual set. */
 export function quickReactionButtons(postId) {
-  return state.EMOJI_PICKER_LIST.slice(0, 24).map((em) =>
+  const post = state.posts.find((p) => p.id === postId) || (state.threadPost && state.threadPost.id === postId ? state.threadPost : null);
+  const own = ((post && post.reactions) || []).filter((r) => !r.paid);
+  const seen = new Set(own.filter((r) => !r.custom_id).map((r) => r.emoji));
+  const ownHtml = own.map((r) => r.custom_id
+    ? `<button class="is-custom" onclick="window.TelegramX.pickReaction('${postId}', '${escapeQuotes(r.emoji || '')}', '${r.custom_id}')">${reactionIcon(r)}</button>`
+    : `<button onclick="window.TelegramX.pickReaction('${postId}', '${escapeQuotes(r.emoji)}')">${renderEmoji(r.emoji, 'emoji-large')}</button>`).join('');
+  const rest = state.EMOJI_PICKER_LIST.filter((em) => !seen.has(em)).slice(0, Math.max(8, 24 - own.length)).map((em) =>
     `<button onclick="window.TelegramX.pickReaction('${postId}', '${escapeQuotes(em)}')">${renderEmoji(em, 'emoji-large')}</button>`).join('');
+  return ownHtml + rest;
 }

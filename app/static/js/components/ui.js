@@ -6,6 +6,26 @@
 
 import { escapeHtml } from '../utils.js';
 
+/** Telegram for Android 12 settings icon backgrounds (top → bottom gradients). */
+export const TG = {
+  BLUE: '#1CA5ED,#1488E1',
+  BLUE_DEEP: '#4F85F6,#3568E8',
+  ORANGE: '#F09F1B,#E18A11',
+  ORANGE_DEEP: '#F28B31,#E26314',
+  GREEN: '#55CA47,#27B434',
+  RED: '#F45255,#DF3955',
+  CYAN: '#32C0CE,#1D9CC6',
+  PURPLE: '#C46EF4,#9F55DF',
+  GRAY: '#8699AA,#6E8397',
+};
+
+function iconBg(color) {
+  const c = TG[color] || color;
+  if (!c) return '';
+  const [top, bottom] = c.split(',');
+  return bottom ? `linear-gradient(180deg, ${top}, ${bottom})` : top;
+}
+
 /** Page title bar; pass `back` to show the arrow (nested pages). */
 export function titleBar(title, { back = false, actions = '' } = {}) {
   return `
@@ -30,7 +50,7 @@ export function row({ icon = '', color = '', avatar = '', title, sub = '', value
   const tag = onclick ? 'button' : 'div';
   return `
     <${tag} class="tx-row ${danger ? 'is-danger' : ''}" ${onclick ? `onclick="${onclick}"` : ''}>
-      ${icon ? `<span class="tx-row-icon" style="--c:${color}"><i class="icon icon-${icon}"></i></span>` : ''}
+      ${icon ? `<span class="tx-row-icon" style="--c:${iconBg(color)}"><i class="icon icon-${icon}"></i></span>` : ''}
       ${avatar}
       <span class="tx-row-body">
         <span class="tx-row-title">${title}</span>
@@ -45,7 +65,7 @@ export function row({ icon = '', color = '', avatar = '', title, sub = '', value
 export function switchRow({ icon = '', color = '', avatar = '', title, sub = '', checked = false, onchange }) {
   return `
     <label class="tx-row">
-      ${icon ? `<span class="tx-row-icon" style="--c:${color}"><i class="icon icon-${icon}"></i></span>` : ''}
+      ${icon ? `<span class="tx-row-icon" style="--c:${iconBg(color)}"><i class="icon icon-${icon}"></i></span>` : ''}
       ${avatar}
       <span class="tx-row-body">
         <span class="tx-row-title">${title}</span>

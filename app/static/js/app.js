@@ -53,6 +53,11 @@ window.TelegramX = {
   rerenderSettings: settings.rerenderSettings,
   openFavorites,
 
+  // Thread extras
+  toggleThreadSearch: thread.toggleThreadSearch,
+  searchThread: thread.searchThread,
+  threadJumpDown: thread.threadJumpDown,
+
   // Channel
   openChannelPage: channel.openChannelPage,
   openChannelPageMenu: channel.openChannelPageMenu,

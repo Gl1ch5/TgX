@@ -165,13 +165,20 @@
       <div class="tx-column">
         <header class="tx-header">
           <button class="tx-circle tx-glass" onclick="window.TelegramX.back()" title="Назад"><i class="icon icon-arrow-left"></i></button>
-          <div class="tx-pill tx-glass" style="padding-left:16px">
+          <div class="tx-pill tx-glass">
+            <span id="thread-avatar" class="tx-stack"></span>
             <div class="tx-pill-text">
               <span class="tx-pill-title"><span id="thread-title">Комментарии</span></span>
-              <span class="tx-pill-sub" id="thread-sub"></span>
+              <span class="tx-pill-sub tx-hidden" id="thread-sub"></span>
             </div>
           </div>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleThreadSearch()" title="Поиск"><i class="icon icon-search"></i></button>
         </header>
+        <label id="thread-search" class="tx-search tx-search-main tx-hidden">
+          <i class="icon icon-search"></i>
+          <input type="search" id="thread-search-input" placeholder="Поиск в комментариях" autocomplete="off" oninput="window.TelegramX.searchThread(this.value)" />
+          <button class="tx-icon-btn" onclick="event.preventDefault(); window.TelegramX.toggleThreadSearch(false)" title="Закрыть"><i class="icon icon-close" style="font-size:20px"></i></button>
+        </label>
         <div id="thread-list" class="tx-thread-list"></div>
       </div>
       <div class="tx-composer">
@@ -180,6 +187,7 @@
           <div id="thread-reply-bar" class="tx-reply-bar tx-glass tx-hidden"></div>
           <div class="tx-composer-row">
             <div class="tx-composer-field tx-glass">
+              <span id="thread-me" class="tx-composer-me"></span>
               <button class="tx-icon-btn" onclick="window.TelegramX.toggleThreadEmoji()" title="Эмодзи"><i class="icon icon-smile"></i></button>
               <textarea id="thread-input" rows="1" placeholder="Комментарий"
                 oninput="window.TelegramX.autosizeComposer(this)"
@@ -187,6 +195,9 @@
             </div>
             <button class="tx-send-btn" id="thread-send" onclick="window.TelegramX.sendThreadComment()" title="Отправить"><i class="icon icon-send"></i></button>
           </div>
+          <button id="thread-jump" class="tx-thread-jump tx-glass tx-hidden" onclick="window.TelegramX.threadJumpDown()" title="Вниз">
+            <i class="icon icon-arrow-down"></i><span class="tx-badge tx-hidden" id="thread-jump-count"></span>
+          </button>
         </div>
       </div>
     </section>

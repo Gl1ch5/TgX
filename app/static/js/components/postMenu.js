@@ -9,6 +9,7 @@ import { state } from '../state.js';
 import { api } from '../api.js';
 import { showToast } from '../utils.js';
 import { quickReactionButtons, sendReaction } from './reactions.js';
+import { hydrateStickers } from './sticker.js';
 
 const QUICK_REACTION = '👍';
 let lastTap = 0;
@@ -28,7 +29,7 @@ function findPost(postId) {
 }
 
 /** Generic popup anchored to an element: optional reaction strip + menu items. */
-export function openPopup(anchor, { reactionsHtml = '', items = [] }) {
+export function openPopup(anchor, { reactionsHtml = '', items = [], header = null }) {
   closeMenus();
   const backdrop = document.createElement('div');
   backdrop.className = 'tx-ctx-backdrop';
@@ -38,7 +39,10 @@ export function openPopup(anchor, { reactionsHtml = '', items = [] }) {
   ctx.className = 'tx-ctx';
   ctx.innerHTML = `
     ${reactionsHtml ? `<div class="tx-ctx-reactions">${reactionsHtml}</div>` : ''}
-    <div class="tx-menu">${items.map((it, i) => `<button data-i="${i}" class="${it.danger ? 'is-danger' : ''}"><i class="icon icon-${it.icon}"></i>${it.label}</button>`).join('')}</div>`;
+    <div class="tx-menu">
+      ${header ? `<div class="tx-menu-head"><i class="icon icon-${header.icon}"></i><span>${header.text}</span></div><div class="tx-menu-gap"></div>` : ''}
+      ${items.map((it, i) => it.sep ? '<div class="tx-menu-gap"></div>' : `<button data-i="${i}" class="${it.danger ? 'is-danger' : ''}"><i class="icon icon-${it.icon}"></i>${it.label}</button>`).join('')}
+    </div>`;
   ctx.addEventListener('click', (e) => {
     const i = e.target.closest('[data-i]')?.dataset.i;
     if (i == null) return;
@@ -75,15 +79,18 @@ export function openPostMenu(postId, event) {
     if (Date.now() - lastTap < 280) return;
     const tx = window.TelegramX;
     const items = [];
-    if (post.comments_enabled) items.push({ icon: 'comments', label: 'Комментарии', run: () => tx.openThread(post.id) });
-    if (post.text) items.push({ icon: 'copy', label: 'Копировать текст', run: () => copyText(post.text) });
+    if (post.comments_enabled) items.push({ icon: 'reply', label: 'Ответить', run: () => tx.openThread(post.id) });
+    if (post.text) items.push({ icon: 'copy', label: 'Копировать', run: () => copyText(post.text) });
+    items.push({ icon: 'link', label: 'Копировать ссылку', run: () => tx.copyPostLink(post.tg_url) });
+    if (savable(post)) items.push({ icon: 'save-gallery', label: 'Сохранить в галерею', run: () => saveMedia(post) });
     items.push(
-      { icon: 'link', label: 'Копировать ссылку', run: () => tx.copyPostLink(post.tg_url) },
       { icon: 'forward', label: 'Переслать в «Избранное»', run: () => tx.forwardToSaved(post.channel_id, post.msg_id) },
       { icon: post.is_favorite ? 'favorite-filled' : 'favorite', label: post.is_favorite ? 'Убрать из закладок' : 'В закладки', run: () => tx.togglePostFavorite(post.id) },
+      { sep: true },
       { icon: 'open-in-new-tab', label: 'Открыть в Telegram', run: () => window.open(post.tg_url, '_blank', 'noopener') },
     );
-    openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items });
+    const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post) });
+    hydrateStickers(ctx);
   }, 290);
 }
 
@@ -98,10 +105,57 @@ export function quickReact(postId, event) {
   sendReaction(post.channel_id, post.msg_id, QUICK_REACTION, post.id);
 }
 
-export function pickReaction(postId, emoji) {
+export function pickReaction(postId, emoji, customId = null) {
   closeMenus();
   const post = findPost(postId);
-  if (post) sendReaction(post.channel_id, post.msg_id, emoji, post.id);
+  if (post) sendReaction(post.channel_id, post.msg_id, emoji, post.id, customId);
+}
+
+function menuHeader(post) {
+  const d = new Date(post.timestamp * 1000);
+  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const today = d.toDateString() === new Date().toDateString();
+  const day = today ? '' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ' в ';
+  return post.edited
+    ? { icon: 'clock-edit', text: `изменено ${day ? day : 'в '}${time}` }
+    : { icon: 'clock', text: `${day || 'сегодня в '}${time}` };
+}
+
+const SAVABLE = new Set(['photo', 'video', 'gif', 'round']);
+
+function savable(post) {
+  return (post.media_items || []).some((i) => SAVABLE.has(i.type));
+}
+
+/** Download the post's photos/videos (the Android app saves them into the gallery). */
+export async function saveMedia(post) {
+  const items = (post.media_items || []).filter((i) => SAVABLE.has(i.type));
+  if (!items.length) return;
+  showToast(items.length > 1 ? `Сохранение ${items.length} файлов…` : 'Сохранение…');
+  for (const [n, it] of items.entries()) {
+    const photo = it.type === 'photo';
+    const name = `telex_${post.channel_id}_${post.msg_id}${items.length > 1 ? `_${n + 1}` : ''}.${photo ? 'jpg' : 'mp4'}`;
+    const url = new URL(it.url, location.href).href;
+    if (window.__telexDl) {
+      window.__telexDl(url, name, photo ? 'image/jpeg' : 'video/mp4');
+      continue;
+    }
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blobUrl = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (e) {
+      showToast('Не удалось сохранить: ' + (e.message || e));
+      return;
+    }
+  }
 }
 
 function copyText(text) {

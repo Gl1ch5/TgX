@@ -118,8 +118,9 @@ class Downloads(private val activity: Activity) {
                 val p = pending.remove(id) ?: return@execute
                 try {
                     p.out.close()
-                    publish(p)
-                    main.post { toast(activity.getString(R.string.download_saved, p.name)) }
+                    val gallery = publish(p)
+                    val msg = if (gallery) R.string.download_saved_gallery else R.string.download_saved
+                    main.post { toast(activity.getString(msg, p.name)) }
                 } catch (e: Exception) {
                     Log.w(TAG, "publish failed", e)
                     main.post { toast(activity.getString(R.string.download_failed)) }
@@ -141,34 +142,50 @@ class Downloads(private val activity: Activity) {
         p.file.delete()
     }
 
-    /** Copies a finished temp file into the user's Downloads/TeleX folder. */
-    private fun publish(p: Pending) {
+    /**
+     * Copies a finished temp file out of the cache: photos into Pictures/TeleX and
+     * videos into Movies/TeleX (so they show up in the gallery), everything else
+     * into Downloads/TeleX. Returns true when it went to the gallery.
+     */
+    private fun publish(p: Pending): Boolean {
+        val isImage = p.mime.startsWith("image/")
+        val isVideo = p.mime.startsWith("video/")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val resolver = activity.contentResolver
-            val values = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, p.name)
-                put(MediaStore.Downloads.MIME_TYPE, p.mime)
-                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/TeleX")
-                put(MediaStore.Downloads.IS_PENDING, 1)
+            val (collection, dir) = when {
+                isImage -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI to Environment.DIRECTORY_PICTURES
+                isVideo -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI to Environment.DIRECTORY_MOVIES
+                else -> MediaStore.Downloads.EXTERNAL_CONTENT_URI to Environment.DIRECTORY_DOWNLOADS
             }
-            val item = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-                ?: error("MediaStore insert failed")
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, p.name)
+                put(MediaStore.MediaColumns.MIME_TYPE, p.mime)
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "$dir/TeleX")
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+            val item = resolver.insert(collection, values) ?: error("MediaStore insert failed")
             resolver.openOutputStream(item)!!.use { out -> p.file.inputStream().use { it.copyTo(out) } }
             values.clear()
-            values.put(MediaStore.Downloads.IS_PENDING, 0)
+            values.put(MediaStore.MediaColumns.IS_PENDING, 0)
             resolver.update(item, values, null, null)
         } else {
+            val publicDir = when {
+                isImage -> Environment.DIRECTORY_PICTURES
+                isVideo -> Environment.DIRECTORY_MOVIES
+                else -> Environment.DIRECTORY_DOWNLOADS
+            }
             @Suppress("DEPRECATION")
             val dir = if (!needsLegacyPermission()) {
-                File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "TeleX")
+                File(Environment.getExternalStoragePublicDirectory(publicDir), "TeleX")
             } else {
-                activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: activity.filesDir
+                activity.getExternalFilesDir(publicDir) ?: activity.filesDir
             }
             dir.mkdirs()
             val target = uniqueFile(dir, p.name)
             p.file.copyTo(target)
             MediaScannerConnection.scanFile(activity, arrayOf(target.absolutePath), arrayOf(p.mime), null)
         }
+        return isImage || isVideo
     }
 
     private fun needsLegacyPermission(): Boolean =

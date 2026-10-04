@@ -230,3 +230,26 @@
 .tx-msg-stack { flex: 0 1 auto; min-width: 0; max-width: min(84%, 520px); display: flex; flex-direction: column; gap: 3px; }
 .tx-msg .tx-msg-stack > .tx-bubble { max-width: 100%; }
 .tx-msg.is-out .tx-msg-stack { align-items: flex-end; }
+
+/* Telegram 12 context menu details */
+.tx-menu { padding: 4px 0; background: rgba(38, 38, 40, 0.98); overflow: hidden; }
+.tx-menu button { gap: 22px; padding: 12px 20px; font-size: 16.5px; }
+.tx-menu button .icon { color: #fff; opacity: 0.92; }
+.tx-menu .is-danger .icon { opacity: 1; }
+.tx-menu-head { display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 20px; font-size: 15px; color: #fff; }
+.tx-menu-head .icon { font-size: 20px; color: #fff; }
+.tx-menu-gap { height: 8px; background: rgba(0, 0, 0, 0.28); }
+
+/* Original Telegram verified badge: blue rosette + white check (two masks) */
+.tx-verified { position: relative; display: inline-block; width: 18px; height: 18px; flex-shrink: 0; vertical-align: -3px; }
+.tx-verified::before, .tx-verified::after {
+  content: ''; position: absolute; inset: 0;
+  -webkit-mask: no-repeat center / contain; mask: no-repeat center / contain;
+}
+.tx-verified::before { background: #3d9cf5; -webkit-mask-image: url("../../icons/android/verified_area.webp"); mask-image: url("../../icons/android/verified_area.webp"); }
+.tx-verified::after { background: #fff; -webkit-mask-image: url("../../icons/android/verified_check.webp"); mask-image: url("../../icons/android/verified_check.webp"); }
+.tx-hero-name .tx-verified { width: 24px; height: 24px; vertical-align: -4px; }
+.tx-pill-title .tx-verified { width: 18px; height: 18px; }
+.tx-ctx-reactions .tx-cemoji { display: inline-flex; width: 34px; height: 34px; } .tx-ctx-reactions .tx-cemoji-media, .tx-ctx-reactions .tx-cemoji-media > * { width: 100%; height: 100%; }
+.tx-post-stack > .tx-bubble, .tx-msg-stack > .tx-bubble { flex: 0 0 auto; }
+#thread-avatar .tx-avatar { box-shadow: none; width: 40px; height: 40px; }

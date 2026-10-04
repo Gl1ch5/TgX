@@ -79,6 +79,19 @@ MAP = {
     'profile-photo': 'outline_profile_photo',
     'profile-edit': 'outline_profile_edit_24',
     'profile-settings': 'outline_profile_settings',
+    'mute': 'msg_mute',
+    'unmute': 'msg_unmute',
+    'pin': 'msg_pin',
+    'code': 'msg_bots',
+    'clock': 'msg_recent',
+    'clock-edit': 'msg_edit',
+    'save-gallery': 'msg_gallery',
+    'favorite': 'msg_fave',
+    'check-bold': 'checkbig',
+    'star-reaction': 'star_reaction',
+    'verified-area': 'verified_area',
+    'verified-check': 'verified_check',
+    'star': 'msg_premium_liststar',
 }
 
 
@@ -112,6 +125,33 @@ def color(v):
     return '#' + v
 
 
+def hex_alpha(v):
+    v = (v or '').lstrip('#')
+    return int(v[:2], 16) / 255 if len(v) == 8 else 1
+
+
+DEFS = []
+
+
+def gradient_fill(path, attr):
+    """aapt:attr name="android:fillColor" holding a <gradient> -> SVG gradient id."""
+    for aapt in path:
+        if aapt.tag.endswith('}attr') and aapt.get('name') == attr:
+            for g in aapt:
+                if g.tag != 'gradient':
+                    continue
+                gid = f'g{len(DEFS)}'
+                stops = ''.join(
+                    f'<stop offset="{num(i.get(A + "offset"))}" stop-color="{color(i.get(A + "color"))}" stop-opacity="{hex_alpha(i.get(A + "color")):.3f}"/>'
+                    for i in g if i.tag == 'item')
+                if g.get(A + 'type') == 'radial':
+                    DEFS.append(f'<radialGradient id="{gid}" gradientUnits="userSpaceOnUse" cx="{num(g.get(A + "centerX"))}" cy="{num(g.get(A + "centerY"))}" r="{num(g.get(A + "gradientRadius"))}">{stops}</radialGradient>')
+                else:
+                    DEFS.append(f'<linearGradient id="{gid}" gradientUnits="userSpaceOnUse" x1="{num(g.get(A + "startX"))}" y1="{num(g.get(A + "startY"))}" x2="{num(g.get(A + "endX"))}" y2="{num(g.get(A + "endY"))}">{stops}</linearGradient>')
+                return f'url(#{gid})'
+    return None
+
+
 def convert_node(node):
     out = []
     for child in node:
@@ -127,7 +167,10 @@ def convert_node(node):
             d = child.get(A + 'pathData', '')
             fill = child.get(A + 'fillColor')
             stroke = child.get(A + 'strokeColor')
-            attrs = [f'd="{d}"', f'fill="{color(fill) if fill else "none"}"']
+            grad = gradient_fill(child, 'android:fillColor')
+            attrs = [f'd="{d}"', f'fill="{grad or (color(fill) if fill else "none")}"']
+            if fill and hex_alpha(fill) < 1:
+                attrs.append(f'fill-opacity="{hex_alpha(fill):.3f}"')
             if child.get(A + 'fillType') == 'evenOdd':
                 attrs.append('fill-rule="evenodd"')
             if stroke:
@@ -152,7 +195,10 @@ def vector_to_svg(path):
     if root.tag != 'vector':
         return None
     vw, vh = num(root.get(A + 'viewportWidth'), 24), num(root.get(A + 'viewportHeight'), 24)
-    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vw:g} {vh:g}">{convert_node(root)}</svg>'
+    DEFS.clear()
+    body = convert_node(root)
+    defs = f'<defs>{"".join(DEFS)}</defs>' if DEFS else ''
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vw:g} {vh:g}">{defs}{body}</svg>'
 
 
 def main():

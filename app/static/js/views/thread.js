@@ -44,6 +44,7 @@ export function enterThread(params) {
   thread = { post, comments: null, total: post.replies_count || 0, hasMore: false, replyTo: null };
   state.threadPost = post;
   $('thread-input').value = '';
+  autosizeComposer($('thread-input'));
   setReply(null);
   render();
   load();
@@ -120,8 +121,11 @@ function commentHtml(c, first, last) {
 
 function render() {
   if (!thread) return;
-  $('thread-title').textContent = 'Комментарии';
-  $('thread-sub').textContent = subtitle();
+  $('thread-title').textContent = subtitle();
+  const ch = thread.post.channel || {};
+  $('thread-avatar').innerHTML = avatarHtml({ id: thread.post.channel_id, title: ch.title, avatar: ch.avatar }, 'md');
+  const me = state.user;
+  $('thread-me').innerHTML = me ? avatarHtml(me, 'xs') : '';
   const list = $('thread-list');
 
   const root = createPostCardElement(thread.post);
@@ -155,7 +159,67 @@ function render() {
   list.insertAdjacentHTML('beforeend', html);
   hydrateStickers(list);
   observeAutoplay(list);
+  if (searchQuery) searchThread(searchQuery);
+  updateJump();
 }
+
+// ---------------- Search & jump-down ----------------
+
+let searchQuery = '';
+
+export function toggleThreadSearch(on) {
+  const bar = $('thread-search');
+  const show = on ?? bar.classList.contains('tx-hidden');
+  bar.classList.toggle('tx-hidden', !show);
+  if (show) $('thread-search-input').focus();
+  else {
+    $('thread-search-input').value = '';
+    searchThread('');
+  }
+}
+
+/** Filter comments by text locally; matching ones stay, the rest fade out. */
+export function searchThread(q) {
+  searchQuery = String(q || '').trim().toLowerCase();
+  if (!thread || !thread.comments) return;
+  let hits = 0;
+  for (const c of thread.comments) {
+    const el = $(`comment-${c.id}`);
+    if (!el) continue;
+    const match = !searchQuery || `${c.text || ''} ${c.sender_name || ''}`.toLowerCase().includes(searchQuery);
+    el.classList.toggle('is-filtered', !match);
+    if (match) hits += 1;
+  }
+  if (searchQuery && hits) {
+    const first = thread.comments.find((c) => !$(`comment-${c.id}`)?.classList.contains('is-filtered'));
+    if (first) $(`comment-${first.id}`).scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+function updateJump() {
+  const btn = $('thread-jump');
+  if (!btn) return;
+  const inThread = document.getElementById('app').dataset.view === 'thread';
+  const fromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+  const show = inThread && fromBottom > 400;
+  btn.classList.toggle('tx-hidden', !show);
+  if (!show || !thread || !thread.comments) return;
+  const below = thread.comments.filter((c) => {
+    const el = $(`comment-${c.id}`);
+    return el && el.getBoundingClientRect().top > window.innerHeight;
+  }).length;
+  const badge = $('thread-jump-count');
+  badge.textContent = below > 99 ? '99+' : String(below);
+  badge.classList.toggle('tx-hidden', below === 0);
+}
+
+export function threadJumpDown() {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+}
+
+window.addEventListener('scroll', () => {
+  if (thread) updateJump();
+}, { passive: true });
 
 export function loadOlderComments() {
   if (thread) load(true);
@@ -220,6 +284,7 @@ export function toggleThreadEmoji() {
 export function autosizeComposer(el) {
   el.style.height = 'auto';
   el.style.height = `${Math.min(140, el.scrollHeight)}px`;
+  el.closest('.tx-composer')?.classList.toggle('is-empty', !el.value.trim());
 }
 
 export async function sendThreadComment() {
