@@ -5,12 +5,44 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
-const SW_VERSION = '3.6.0';
+const SW_VERSION = '3.7.0';
 const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb', 'storythumb', 'photofull']);
 const STREAMED = new Set(['doc', 'story']);
 
+const APP_CACHE = `telex-app-${SW_VERSION}`;
+
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil((async () => {
+  // Drop app-code caches of older releases (media cache is kept).
+  const keys = await caches.keys();
+  await Promise.all(keys.filter((k) => k.startsWith('telex-app-') && k !== APP_CACHE).map((k) => caches.delete(k)));
+  await self.clients.claim();
+})()));
+
+/**
+ * App code: always try the network first (so a release never mixes with stale
+ * modules), but give up after a few seconds on a bad connection and use the
+ * copy saved from the last successful load. Works offline too.
+ */
+async function appCode(request) {
+  const cache = await caches.open(APP_CACHE);
+  const network = fetch(request, { cache: 'no-cache' }).then((res) => {
+    if (res.ok && res.type === 'basic') cache.put(request, res.clone()).catch(() => {});
+    return res;
+  });
+  network.catch(() => {});
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 3500));
+  try {
+    const first = await Promise.race([network, timeout]);
+    if (first) return first;
+    const cached = await cache.match(request);
+    return cached || await network;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw new Error('offline');
+  }
+}
 
 // App code (HTML/CSS/JS) is always revalidated with the server, so a new
 // release never mixes with stale cached modules. Stable assets (emoji,
@@ -28,10 +60,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (APP_CODE.test(url.pathname) && !STABLE.test(url.pathname)) {
-    event.respondWith(fetch(event.request, { cache: 'no-cache' }).catch(() => caches.match(event.request)));
+  if (STABLE.test(url.pathname)) {
+    event.respondWith(stableAsset(event.request));
+    return;
+  }
+  if (APP_CODE.test(url.pathname)) {
+    event.respondWith(appCode(event.request));
   }
 });
+
+/** Emoji, wallpapers and vendor bundles: cache-first (they only change with a release). */
+async function stableAsset(request) {
+  const cache = await caches.open(APP_CACHE);
+  const hit = await cache.match(request);
+  if (hit) return hit;
+  const res = await fetch(request);
+  if (res.ok && res.type === 'basic') cache.put(request, res.clone()).catch(() => {});
+  return res;
+}
 
 async function pageClient(event) {
   const own = event.clientId && await self.clients.get(event.clientId);
