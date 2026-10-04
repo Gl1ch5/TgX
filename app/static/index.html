@@ -2,8 +2,11 @@
 <html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Telegram — Стена каналов</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TeleX — стена каналов Telegram</title>
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Все ваши Telegram-каналы одной лентой. Работает прямо в браузере." />
+  <link rel="icon" href="icons/telex.svg" type="image/svg+xml" />
   
   <!-- Fonts: Roboto & JetBrains Mono (Telegram Native) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,16 +14,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/vendor/tailwindcss.js"></script>
   
   <!-- Modular CSS Design System -->
-  <link rel="stylesheet" href="/static/css/telegram-icons.css">
-  <link rel="stylesheet" href="/static/css/liquid-glass.css">
-  <link rel="stylesheet" href="/static/css/telegram-theme.css">
-  <link rel="stylesheet" href="/static/css/animations.css">
+  <link rel="stylesheet" href="css/telegram-icons.css">
+  <link rel="stylesheet" href="css/telegram-theme.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/telex.css?v=3.7.0">
 
   <!-- External Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/vendor/qrcode.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -59,311 +62,179 @@
     }
   </script>
 </head>
-<body class="bg-[#0f0f0f] text-[#FFFFFF] min-h-screen antialiased selection:bg-[#3390ec] selection:text-white flex justify-center pb-24 relative overflow-x-hidden">
+<body class="tx">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="tx-story-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fc183"/><stop offset="1" stop-color="#2c9efc"/></linearGradient>
+      <linearGradient id="tx-story-cf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#81ce2d"/><stop offset="1" stop-color="#18bd36"/></linearGradient>
+    </defs>
+  </svg>
 
-  <!-- MAIN APP CONTAINER (Telegram Feed Stream) -->
-  <div id="app" class="w-full max-w-[660px] min-h-screen flex flex-col relative z-10 mx-auto px-2.5 sm:px-3">
-    
-    <!-- ================================================================ -->
-    <!-- AUTHENTIC TELEGRAM TOP APP BAR                                  -->
-    <!-- ================================================================ -->
-    <header class="sticky top-0 z-30 tg-app-header rounded-b-2xl px-3.5 flex items-center justify-between mb-3 shadow-lg">
-      
-      <!-- DEFAULT HEADER VIEW -->
-      <div id="header-normal-view" class="flex items-center justify-between w-full">
-        <!-- Left: Channel/Feed Info -->
-        <div class="flex items-center gap-2.5 min-w-0 flex-1">
-          <!-- Back button (only shown when filtered by channel) -->
-          <button id="header-back-btn" onclick="window.TelegramX.clearChannelFilter()" class="hidden w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-slate-300 hover:text-white transition shrink-0">
-            <i class="icon icon-arrow-left text-lg"></i>
-          </button>
+  <div id="app" class="tx-app" data-view="wall">
 
-          <!-- Channel Info / Title -->
-          <div class="flex flex-col min-w-0 cursor-pointer" onclick="window.TelegramX.resetFeed()">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span id="header-main-title" class="font-medium text-white text-[15px] leading-tight truncate">Стена каналов</span>
-              <span id="header-verified-badge" class="hidden shrink-0">
-                <svg class="VerifiedIcon" viewBox="0 0 24 24"><path d="M12.3 2.9c.1.1.2.1.3.2.7.6 1.3 1.1 2 1.7.3.2.6.4.9.4.9.1 1.7.2 2.6.2.2 0 .4.1.5.3.4.8.9 1.5 1.5 2.1.2.2.3.5.4.8.3.9.7 1.7 1.2 2.4.1.2.1.4.1.6-.1.9-.1 1.8-.1 2.7 0 .3 0 .6-.2.8-.5.8-.9 1.6-1.2 2.5-.1.3-.2.5-.4.8-.5.7-1 1.4-1.4 2.1-.1.2-.3.3-.6.3-.9.2-1.7.4-2.6.7-.3.1-.5.2-.8.5-.6.7-1.3 1.3-2.1 1.7-.2.1-.4.2-.6.1-.9-.2-1.8-.4-2.7-.4-.3 0-.6 0-.8-.2-.8-.5-1.6-.9-2.5-1.2-.3-.1-.5-.2-.8-.4-.7-.5-1.4-1-2.1-1.4-.2-.1-.3-.3-.3-.6-.2-.9-.4-1.7-.7-2.6-.1-.3-.2-.5-.5-.8-.7-.6-1.3-1.3-1.7-2.1-.1-.2-.2-.4-.1-.6.2-.9.4-1.8.4-2.7 0-.3 0-.6.2-.8.5-.8.9-1.6 1.2-2.5.1-.3.2-.5.4-.8.5-.7 1-1.4 1.4-2.1.1-.2.3-.3.6-.3.9-.2 1.7-.4 2.6-.7.3-.1.5-.2.8-.5.6-.7 1.3-1.3 2.1-1.7.2-.1.4-.2.6-.1.9.2 1.8.4 2.7.4.3 0 .6 0 .8.2.8.5 1.6.9 2.5 1.2.3.1.5.2.8.4.7.5 1.4 1 2.1 1.4.2.1.3.3.3.6.2.9.4 1.7.7 2.6.1.3.2.5.5.8.7.6 1.3 1.3 1.7 2.1.1.2.2.4.1.6-.2.9-.4 1.8-.4 2.7 0 .3 0 .6-.2.8-.5.8-.9 1.6-1.2 2.5-.1.3-.2.5-.4.8-.5.7-1 1.4-1.4 2.1-.1.2-.3.3-.6.3-.9.2-1.7.4-2.6.7-.3.1-.5.2-.8.5-.6.7-1.3 1.3-2.1 1.7-.2.1-.4.2-.6.1-.9-.2-1.8-.4-2.7-.4-.3 0-.6 0-.8-.2-.8-.5-1.6-.9-2.5-1.2-.3-.1-.5-.2-.8-.4-.7-.5-1.4-1-2.1-1.4-.2-.1-.3-.3-.3-.6-.2-.9-.4-1.7-.7-2.6-.1-.3-.2-.5-.5-.8-.7-.6-1.3-1.3-1.7-2.1-.1-.2-.2-.4-.1-.6z" fill="#3390ec"/><path d="M10.2 16.2l-3.5-3.5 1.4-1.4 2.1 2.1 6.4-6.4 1.4 1.4-7.8 7.8z" fill="#ffffff"/></svg>
-              </span>
-            </div>
-            <span id="header-sub-title" class="text-[#8a8a90] text-[11.5px] leading-tight font-normal truncate">Все публикации ваших каналов</span>
+    <!-- ================================================================ -->
+    <!-- WALL                                                              -->
+    <!-- ================================================================ -->
+    <section id="screen-wall" class="tx-screen">
+      <div class="tx-column">
+        <!-- Telegram main-screen header: stories stack + title, pull-down stories row, search -->
+        <div id="wall-top" class="tx-maintop">
+          <div class="tx-mainbar">
+            <button id="stories-stack" class="tx-stories-stack" onclick="window.TelegramX.openStackStories()" title="Истории"></button>
+            <h1 class="tx-mainbar-title" onclick="window.TelegramX.headerPill()">TeleX</h1>
+            <button class="tx-icon-btn tx-mainbar-search" onclick="window.TelegramX.focusSearch()" title="Поиск"><i class="icon icon-search"></i></button>
+            <button class="tx-icon-btn" onclick="window.TelegramX.openMainMenu(event)" title="Меню"><i class="icon icon-more"></i></button>
           </div>
+          <div id="stories-row" class="tx-stories-row"><div class="tx-stories-scroll"></div></div>
         </div>
 
-        <!-- Right: Actions -->
-        <div class="flex items-center gap-1">
-          <!-- Search Button -->
-          <button onclick="window.TelegramX.toggleHeaderSearch(true)" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition flex items-center justify-center" title="Поиск">
-            <i class="icon icon-search text-lg"></i>
+        <!-- Channel header (when the wall is filtered to one channel) -->
+        <header class="tx-header tx-channel-header">
+          <button id="header-left-btn" class="tx-circle tx-glass" onclick="window.TelegramX.headerLeft()" title="Назад">
+            <i class="icon icon-arrow-left" id="header-left-icon"></i>
           </button>
-
-          <!-- Channels Dialog Button -->
-          <button onclick="window.TelegramX.openChannelsModal()" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition flex items-center justify-center relative" title="Каналы">
-            <i class="icon icon-group text-lg"></i>
-            <span id="channels-count-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-[#3390ec] text-[10px] font-bold text-white rounded-full flex items-center justify-center"></span>
+          <div class="tx-pill tx-glass" onclick="window.TelegramX.headerPill()">
+            <div id="header-stack" class="tx-stack"></div>
+            <div class="tx-pill-text">
+              <span class="tx-pill-title"><span id="header-main-title">Стена</span><span id="header-verified-badge"></span></span>
+              <span class="tx-pill-sub" id="header-sub-title">все ваши каналы</span>
+            </div>
+          </div>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.openChannelMenu(event)" title="Ещё">
+            <i class="icon icon-more"></i>
           </button>
+        </header>
+        <button id="channel-pinned" class="tx-pinned tx-glass tx-hidden" onclick="window.TelegramX.jumpToPinned()"></button>
 
-          <!-- Refresh Button -->
-          <button onclick="window.TelegramX.refreshFeed()" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition flex items-center justify-center" title="Обновить">
-            <i class="icon icon-reload-arrows text-lg" id="refresh-icon"></i>
+        <label id="header-search-bar" class="tx-search tx-search-main">
+          <i class="icon icon-search"></i>
+          <input type="search" id="search-input" placeholder="Поиск публикаций" autocomplete="off" enterkeyhint="search"
+                 onkeydown="if(event.key==='Enter') window.TelegramX.doSearch()" oninput="if(!this.value) window.TelegramX.clearSearch()" />
+          <button class="tx-icon-btn tx-search-clear" onclick="event.preventDefault(); window.TelegramX.toggleHeaderSearch(false)" title="Очистить">
+            <i class="icon icon-close" style="font-size:20px"></i>
+          </button>
+        </label>
+
+        <div class="tx-subbar">
+          <nav class="tx-tabs tx-glass" id="feed-tabs">
+            <button class="tx-tab is-active" data-feed="all" onclick="window.TelegramX.switchFeedType('all')">Все <span class="tx-badge tx-hidden" id="tab-unread-badge"></span></button>
+            <button class="tx-tab" data-feed="media" onclick="window.TelegramX.switchFeedType('media')">Медиа</button>
+            <button class="tx-tab" data-feed="popular" onclick="window.TelegramX.switchFeedType('popular')">Популярное</button>
+            <button class="tx-tab" data-feed="favorites" onclick="window.TelegramX.switchFeedType('favorites')">Избранное</button>
+          </nav>
+        </div>
+
+        <div id="feed-loader" class="tx-feed tx-hidden">
+          <div class="tx-skeleton"><i style="width:40%;height:14px"></i><i style="height:180px;margin-top:12px"></i><i style="width:80%;height:12px;margin-top:12px"></i></div>
+          <div class="tx-skeleton"><i style="width:30%;height:14px"></i><i style="width:90%;height:12px;margin-top:12px"></i></div>
+        </div>
+
+        <div id="feed-empty-state" class="tx-empty tx-empty-card tx-glass tx-hidden">
+          <div class="tx-empty-icon"><i class="icon icon-channel-filled"></i></div>
+          <h2>Все каналы — одной лентой</h2>
+          <p>Войдите в Telegram, и публикации всех ваших каналов соберутся на одной стене. Сессия хранится только в этом браузере.</p>
+          <button class="tx-btn" onclick="window.TelegramX.openAuthModal()">Войти в Telegram</button>
+        </div>
+
+        <div id="posts-container" class="tx-feed"></div>
+
+        <div class="tx-chbar" id="channel-bar">
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleHeaderSearch(true)" title="Поиск"><i class="icon icon-search"></i></button>
+          <button class="tx-chbar-main tx-glass" id="channel-mute-btn" onclick="window.TelegramX.toggleWallChannelMute()">Убрать звук</button>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.copyChannelLink(window.TelegramX.activeChannel())" title="Ссылка"><i class="icon icon-share-filled"></i></button>
+        </div>
+
+        <div id="feed-sentinel" class="tx-sentinel">
+          <span class="animate-spin tx-hidden" id="sentinel-spinner"><i class="icon icon-reload"></i></span>
+          <span id="sentinel-text" class="tx-service tx-hidden"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- CHANNEL PAGE                                                      -->
+    <!-- ================================================================ -->
+    <section id="screen-channel" class="tx-screen">
+      <div class="tx-column" id="channel-root"></div>
+    </section>
+
+    <!-- ================================================================ -->
+    <!-- DISCUSSION (comments)                                             -->
+    <!-- ================================================================ -->
+    <section id="screen-thread" class="tx-screen">
+      <div class="tx-column">
+        <header class="tx-header">
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.back()" title="Назад"><i class="icon icon-arrow-left"></i></button>
+          <div class="tx-pill tx-glass">
+            <span id="thread-avatar" class="tx-stack"></span>
+            <div class="tx-pill-text">
+              <span class="tx-pill-title"><span id="thread-title">Комментарии</span></span>
+              <span class="tx-pill-sub tx-hidden" id="thread-sub"></span>
+            </div>
+          </div>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleThreadSearch()" title="Поиск"><i class="icon icon-search"></i></button>
+        </header>
+        <label id="thread-search" class="tx-search tx-search-main tx-hidden">
+          <i class="icon icon-search"></i>
+          <input type="search" id="thread-search-input" placeholder="Поиск в комментариях" autocomplete="off" oninput="window.TelegramX.searchThread(this.value)" />
+          <button class="tx-icon-btn" onclick="event.preventDefault(); window.TelegramX.toggleThreadSearch(false)" title="Закрыть"><i class="icon icon-close" style="font-size:20px"></i></button>
+        </label>
+        <div id="thread-list" class="tx-thread-list"></div>
+      </div>
+      <div class="tx-composer">
+        <div class="tx-composer-inner">
+          <div id="thread-emoji" class="tx-emoji-pop tx-glass tx-hidden"></div>
+          <div id="thread-reply-bar" class="tx-reply-bar tx-glass tx-hidden"></div>
+          <div class="tx-composer-row">
+            <div class="tx-composer-field tx-glass">
+              <span id="thread-me" class="tx-composer-me"></span>
+              <button class="tx-icon-btn" onclick="window.TelegramX.toggleThreadEmoji()" title="Эмодзи"><i class="icon icon-smile"></i></button>
+              <textarea id="thread-input" rows="1" placeholder="Комментарий"
+                oninput="window.TelegramX.autosizeComposer(this)"
+                onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); window.TelegramX.sendThreadComment();}"></textarea>
+            </div>
+            <button class="tx-send-btn" id="thread-send" onclick="window.TelegramX.sendThreadComment()" title="Отправить"><i class="icon icon-send"></i></button>
+          </div>
+          <button id="thread-jump" class="tx-thread-jump tx-glass tx-hidden" onclick="window.TelegramX.threadJumpDown()" title="Вниз">
+            <i class="icon icon-arrow-down"></i><span class="tx-badge tx-hidden" id="thread-jump-count"></span>
           </button>
         </div>
       </div>
+    </section>
 
-      <!-- INLINE HEADER SEARCH BAR (Shown when search is active) -->
-      <div id="header-search-bar" class="hidden flex-1 flex items-center justify-between w-full gap-2">
-        <div class="flex-1 flex items-center bg-[#18181f] rounded-xl px-3 py-1.5 border border-white/10 focus-within:border-[#3390ec] transition">
-          <i class="icon icon-search text-base text-[#8a8a90] mr-2"></i>
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Поиск по публикациям..." 
-            class="bg-transparent text-xs text-white placeholder-[#8a8a90] focus:outline-none w-full"
-            onkeydown="if(event.key==='Enter') window.TelegramX.doSearch()"
-          />
-          <button onclick="window.TelegramX.clearSearch()" id="clear-search-btn" class="text-slate-400 hover:text-white hidden ml-1">
-            <i class="icon icon-close text-xs"></i>
-          </button>
-        </div>
-        <button onclick="window.TelegramX.toggleHeaderSearch(false)" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition flex items-center justify-center shrink-0" title="Закрыть поиск">
-          <i class="icon icon-close text-base"></i>
-        </button>
-      </div>
+    <!-- ================================================================ -->
+    <!-- SETTINGS (rendered by views/settings.js)                          -->
+    <!-- ================================================================ -->
+    <section id="screen-settings" class="tx-screen">
+      <div class="tx-column" id="settings-root"></div>
+    </section>
 
-    </header>
+    <!-- ================================================================ -->
+    <!-- PROFILE (rendered by views/profile.js)                            -->
+    <!-- ================================================================ -->
+    <section id="screen-profile" class="tx-screen">
+      <div class="tx-column" id="profile-root"></div>
+    </section>
 
-    <!-- Channel Stories Bar Carousel -->
-    <div id="channels-bar" class="flex items-center gap-2.5 px-2 py-2 rounded-2xl overflow-x-auto no-scrollbar bg-black/30 backdrop-blur-md border border-white/5 mb-3">
-      <!-- Populated by components/storiesBar.js -->
-    </div>
-
-    <!-- Loading Skeleton Placeholder -->
-    <div id="feed-loader" class="p-6 flex flex-col gap-6 hidden">
-      <div class="animate-pulse flex gap-4">
-        <div class="w-10 h-10 bg-[#18181f] rounded-full shrink-0"></div>
-        <div class="flex-1 space-y-3">
-          <div class="h-4 bg-[#18181f] rounded w-1/4"></div>
-          <div class="h-3 bg-[#18181f] rounded w-3/4"></div>
-          <div class="h-28 bg-[#18181f] rounded-2xl"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div id="feed-empty-state" class="hidden p-10 text-center flex flex-col items-center justify-center my-auto">
-      <div class="w-16 h-16 rounded-2xl bg-[#18181f] border border-white/10 flex items-center justify-center mb-3 text-[#3390ec] shadow-xl">
-        <i class="icon icon-channel text-3xl text-[#3390ec]"></i>
-      </div>
-      <h2 class="text-xl font-bold text-white mb-1.5">Добро пожаловать в Telegram</h2>
-      <p class="text-[#8a8a90] text-xs max-w-sm mb-5 leading-relaxed">
-        Подключите ваш Telegram аккаунт чтобы читать публикации всех каналов в единой ленте.
-      </p>
-      <button onclick="window.TelegramX.openAuthModal()" class="bg-[#3390ec] hover:bg-[#267fd9] text-white font-medium py-2.5 px-6 rounded-full shadow-lg shadow-[#3390ec]/30 transition flex items-center gap-2 text-sm">
-        <i class="icon icon-user text-base"></i>
-        <span>Войти в Telegram</span>
+    <!-- ================================================================ -->
+    <!-- FLOATING TAB BAR                                                 -->
+    <!-- ================================================================ -->
+    <div class="tx-dock-fade"></div>
+    <nav class="tx-dock" id="dock">
+      <button class="tx-dock-tab is-active" data-view="wall" data-icon="chats" onclick="window.TelegramX.setView('wall')">
+        <span class="tx-tab-icon"><i class="icon icon-folder-tabs-chats"></i></span>
+        <span class="tx-tab-label">Стена</span>
+        <span class="tx-badge tx-hidden" id="dock-unread-badge"></span>
       </button>
-    </div>
-
-    <!-- Main Posts Stream -->
-    <main id="posts-container" class="space-y-3">
-      <!-- Dynamic Post Cards by components/postCard.js -->
-    </main>
-
-    <!-- Infinite Scroll Sentinel -->
-    <div id="feed-sentinel" class="py-6 text-center text-[#8a8a90] text-xs flex items-center justify-center gap-2">
-      <span class="animate-spin text-[#3390ec] hidden" id="sentinel-spinner"><i class="icon icon-reload-arrows text-base"></i></span>
-      <span id="sentinel-text">Конец стены каналов</span>
-    </div>
-
-  </div>
-
-  <!-- ================================================================ -->
-  <!-- FLOATING PERFECT GLASS DOCK (Telegram X Native Dock)             -->
-  <!-- ================================================================ -->
-  <div class="fixed bottom-3.5 left-1/2 -translate-x-1/2 z-40 select-none">
-    <nav class="tg-perfect-glass w-[340px] sm:w-[380px] h-[64px] flex items-center justify-between px-2 relative border border-white/10 shadow-2xl">
-      
-      <!-- TAB 1: СТЕНА (Активный) -->
-      <div onclick="window.TelegramX.resetFeed()" class="relative flex-1 h-[50px] flex flex-col items-center justify-center cursor-pointer tab-btn group">
-        <div class="tg-active-bg absolute inset-0 w-full h-full pointer-events-none"></div>
-        <div class="relative flex items-center justify-center z-10 mb-[2px]">
-          <i class="icon icon-channel text-xl text-[#3390ec]"></i>
-        </div>
-        <span class="text-[11px] font-semibold text-[#3390ec] tracking-tight z-10 leading-none">Стена</span>
-      </div>
-
-      <!-- TAB 2: КАНАЛЫ -->
-      <div onclick="window.TelegramX.openChannelsModal()" class="relative flex-1 h-[50px] flex flex-col items-center justify-center cursor-pointer tab-btn group">
-        <div class="relative flex items-center justify-center z-10 mb-[2px]">
-          <i class="icon icon-group text-xl text-white/80 group-hover:text-white transition"></i>
-        </div>
-        <span class="text-[11px] font-medium text-white/80 tracking-tight z-10 leading-none">Каналы</span>
-      </div>
-
-      <!-- TAB 3: ОБОИ -->
-      <div onclick="window.TelegramX.openWallpaperModal()" class="relative flex-1 h-[50px] flex flex-col items-center justify-center cursor-pointer tab-btn group">
-        <div class="relative flex items-center justify-center z-10 mb-[2px]">
-          <i class="icon icon-darkmode text-xl text-white/80 group-hover:text-white transition"></i>
-        </div>
-        <span class="text-[11px] font-medium text-white/80 tracking-tight z-10 leading-none">Обои</span>
-      </div>
-
-      <!-- TAB 4: НАСТРОЙКИ / ПРОФИЛЬ -->
-      <div onclick="window.TelegramX.openSettingsModal()" class="relative flex-1 h-[50px] flex flex-col items-center justify-center cursor-pointer tab-btn group">
-        <div class="relative flex items-center justify-center z-10 mb-[2px]">
-          <div id="dock-user-avatar" class="w-[22px] h-[22px] rounded-full overflow-hidden bg-neutral-800 flex items-center justify-center border border-white/20">
-            <i class="icon icon-user text-xs text-slate-300"></i>
-          </div>
-        </div>
-        <span class="text-[11px] font-medium text-white/80 tracking-tight z-10 leading-none">Профиль</span>
-      </div>
-
+      <button class="tx-dock-tab" data-view="settings" data-icon="settings" onclick="window.TelegramX.setView('settings')">
+        <span class="tx-tab-icon"><i class="icon icon-settings"></i></span>
+        <span class="tx-tab-label">Настройки</span>
+      </button>
+      <button class="tx-dock-tab" data-view="profile" onclick="window.TelegramX.setView('profile')">
+        <span class="tx-tab-icon"><span id="dock-user-avatar" class="tx-avatar tx-peer-5"><i class="icon icon-user" style="font-size:13px"></i></span></span>
+        <span class="tx-tab-label">Профиль</span>
+      </button>
     </nav>
-  </div>
-
-  <!-- ================================================================ -->
-  <!-- NATIVE SETTINGS WINDOW                                           -->
-  <!-- ================================================================ -->
-  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-2 sm:p-4" onclick="window.TelegramX.closeSettingsModal()">
-    <div class="liquid-glass rounded-3xl w-full max-w-md max-h-[88vh] flex flex-col overflow-hidden border border-white/15 shadow-2xl" onclick="event.stopPropagation()">
-      
-      <!-- Settings Header Navigation -->
-      <div class="flex justify-between items-center px-4 h-[54px] border-b border-white/10 relative z-10 bg-black/30">
-        <button class="w-8 h-8 rounded-full hover:bg-white/10 text-white transition flex items-center justify-center" onclick="window.TelegramX.closeSettingsModal()">
-          <i class="icon icon-arrow-left text-lg"></i>
-        </button>
-        
-        <div class="flex flex-col items-center justify-center">
-          <span id="modal-settings-name" class="text-[16px] font-medium leading-[20px] text-white">Профиль</span>
-          <span id="modal-settings-sub" class="text-[#8a8a90] text-[11.5px] font-mono leading-[14px]">Настройки Telegram</span>
-        </div>
-
-        <button onclick="window.TelegramX.closeSettingsModal()" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition flex items-center justify-center">
-          <i class="icon icon-close text-base"></i>
-        </button>
-      </div>
-
-      <!-- Settings Content Scroll Area -->
-      <div class="overflow-y-auto p-3.5 space-y-3 flex-1">
-        
-        <!-- Profile Account Card -->
-        <div class="bg-[#18181f]/95 rounded-2xl p-3.5 border border-white/10 flex items-center justify-between shadow-lg">
-          <div class="flex items-center gap-3 min-w-0">
-            <div id="modal-settings-avatar" class="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-tr from-[#3390ec] to-sky-400 flex items-center justify-center font-bold text-white text-base shadow border border-white/15 shrink-0">
-              P
-            </div>
-            <div class="flex flex-col min-w-0">
-              <span id="modal-account-name" class="text-[15px] font-medium text-white truncate max-w-[190px]">Pavel</span>
-              <span id="modal-account-phone" class="text-xs text-[#8a8a90] font-mono truncate max-w-[190px]">+7 (950) 090-97-53</span>
-            </div>
-          </div>
-          <span class="bg-[#3390ec]/20 text-[#62b0f2] text-[11px] font-mono font-medium px-2.5 py-0.5 rounded-full border border-[#3390ec]/30">Подключен</span>
-        </div>
-
-        <!-- Section 1: Categories -->
-        <div class="bg-[#18181f]/95 rounded-2xl border border-white/10 divide-y divide-white/5 overflow-hidden shadow-lg">
-          
-          <!-- Item: Account -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('Синхронизировано с Telegram')">
-            <div class="w-7 h-7 rounded-lg bg-[#3390ec]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-user text-base text-[#3390ec]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Аккаунт</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Номер, имя пользователя, «О себе»</span>
-            </div>
-          </div>
-
-          <!-- Item: Chat Settings -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.openWallpaperModal()">
-            <div class="w-7 h-7 rounded-lg bg-[#f28c48]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-darkmode text-base text-[#f28c48]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Настройки чатов и обоев</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Обои Telegram, ночной режим, темы</span>
-            </div>
-          </div>
-
-          <!-- Item: Privacy -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('2FA и безопасность активны')">
-            <div class="w-7 h-7 rounded-lg bg-[#49b85c]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-2fa-filled text-base text-[#49b85c]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Конфиденциальность</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Время захода, пароль 2FA</span>
-            </div>
-          </div>
-
-          <!-- Item: Notifications -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('Уведомления включены')">
-            <div class="w-7 h-7 rounded-lg bg-[#f05763]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-volume-2 text-base text-[#f05763]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Уведомления и звуки</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Звуки, звонки, счётчик сообщений</span>
-            </div>
-          </div>
-
-          <!-- Item: Data & Storage -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('Дисковый кэш 0ms активен')">
-            <div class="w-7 h-7 rounded-lg bg-[#3390ec]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-cloud-download text-base text-[#3390ec]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Данные и память</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Кэш медиафайлов, использование сети</span>
-            </div>
-          </div>
-
-          <!-- Item: Devices -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('TeleX Web сессия подключена')">
-            <div class="w-7 h-7 rounded-lg bg-[#3cb2e4]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-active-sessions text-base text-[#3cb2e4]"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Устройства</span>
-              <span class="text-xs text-[#8a8a90] truncate block">MTProto сессия активна</span>
-            </div>
-          </div>
-
-          <!-- Item: Language -->
-          <div class="flex items-center px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('Язык: Русский')">
-            <div class="w-7 h-7 rounded-lg bg-[#af68ea]/15 flex items-center justify-center mr-3 shrink-0">
-              <i class="icon icon-char text-sm text-[#af68ea]" data-char="A"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <span class="text-sm font-medium text-white block">Язык</span>
-              <span class="text-xs text-[#8a8a90] truncate block">Русский</span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Section 2: Telegram Premium & Logout -->
-        <div class="bg-[#18181f]/95 rounded-2xl border border-white/10 divide-y divide-white/5 overflow-hidden shadow-lg">
-          <div class="flex items-center justify-between px-4 py-3 tg-list-item cursor-pointer" onclick="window.TelegramX.showToast('Telegram Premium активен ⭐')">
-            <div class="flex items-center gap-3">
-              <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#b362f4] to-[#718af5] flex items-center justify-center shadow">
-                <i class="icon icon-stars-filled text-base text-white"></i>
-              </div>
-              <span class="text-sm font-medium text-white">Telegram Premium</span>
-            </div>
-            <span class="text-xs text-[#af68ea] font-medium">Активен ⭐</span>
-          </div>
-
-          <div class="flex items-center gap-3 px-4 py-3 hover:bg-red-500/15 cursor-pointer transition text-red-400" onclick="window.TelegramX.logoutTelegram()">
-            <div class="w-7 h-7 rounded-lg bg-red-500/15 flex items-center justify-center">
-              <i class="icon icon-logout text-base text-red-400"></i>
-            </div>
-            <span class="text-sm font-medium">Выйти из аккаунта</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
   </div>
 
   <!-- WALLPAPERS SELECTOR MODAL -->
@@ -509,130 +380,13 @@
     </div>
   </div>
 
-  <!-- CHANNELS SELECTION MODAL -->
-  <div id="channels-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4" onclick="window.TelegramX.closeChannelsModal()">
-    <div class="liquid-glass rounded-3xl w-full max-w-md p-4 sm:p-5 relative shadow-2xl max-h-[85vh] flex flex-col border border-white/15" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between pb-3 border-b border-white/10">
-        <h2 class="text-base font-medium text-white flex items-center gap-2">
-          <i class="icon icon-group text-xl text-[#3390ec]"></i>
-          Ваши каналы
-        </h2>
-        <button onclick="window.TelegramX.closeChannelsModal()" class="w-8 h-8 rounded-full hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center">
-          <i class="icon icon-close text-base"></i>
-        </button>
-      </div>
-
-      <div class="py-2.5">
-        <div class="flex items-center bg-[#121216] rounded-xl px-3.5 py-2 border border-white/10 focus-within:border-[#3390ec] transition">
-          <i class="icon icon-search text-sm text-[#8a8a90] mr-2"></i>
-          <input 
-            type="text" 
-            placeholder="Поиск по названию или @username..." 
-            class="bg-transparent text-xs text-white placeholder-[#8a8a90] focus:outline-none w-full"
-            oninput="window.TelegramX.filterChannelsModalList(this.value)"
-          />
-        </div>
-      </div>
-
-      <div id="channels-modal-list" class="overflow-y-auto divide-y divide-white/5 pr-1 flex-1">
-        <!-- Rendered by components/channelsModal.js -->
-      </div>
-    </div>
-  </div>
-
-  <!-- TELEGRAM STORIES VIEWER MODAL -->
-  <div id="story-viewer-modal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 hidden flex items-center justify-center p-0 sm:p-4 select-none">
-    <div class="relative w-full max-w-md h-full sm:h-[88vh] bg-[#121216] sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between border border-white/10" onmousedown="window.TelegramX.pauseStory(true)" onmouseup="window.TelegramX.pauseStory(false)" ontouchstart="window.TelegramX.pauseStory(true)" ontouchend="window.TelegramX.pauseStory(false)">
-      
-      <!-- Top Story Bar (Progress segments + Channel Header) -->
-      <div class="absolute top-0 inset-x-0 z-30 p-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex flex-col gap-2.5">
-        <!-- Progress Bars -->
-        <div id="story-progress-bars" class="flex items-center gap-1.5 w-full"></div>
-
-        <!-- Channel Info & Close -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 shrink-0">
-              <img id="story-channel-avatar" class="w-full h-full object-cover" />
-            </div>
-            <div class="flex flex-col min-w-0">
-              <div class="flex items-center gap-1">
-                <span id="story-channel-title" class="text-xs font-semibold text-white truncate max-w-[180px]">Канал</span>
-                <span id="story-verified-badge"></span>
-              </div>
-              <span id="story-time" class="text-[10px] text-slate-300 font-mono">только что</span>
-            </div>
-          </div>
-
-          <button onclick="window.TelegramX.closeStoryViewer()" class="w-8 h-8 rounded-full bg-black/40 hover:bg-white/20 text-white flex items-center justify-center transition">
-            <i class="icon icon-close text-lg"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Story Media Content -->
-      <div id="story-media-box" class="relative w-full h-full flex items-center justify-center z-10 overflow-hidden">
-        <!-- Media rendered dynamically -->
-      </div>
-
-      <!-- Navigation Tap Overlays (Left/Right) -->
-      <div class="absolute inset-0 z-20 flex">
-        <div class="w-1/3 h-full cursor-pointer" onclick="window.TelegramX.prevStory()"></div>
-        <div class="w-2/3 h-full cursor-pointer" onclick="window.TelegramX.nextStory()"></div>
-      </div>
-
-      <!-- Bottom Caption & Quick Reaction -->
-      <div class="absolute bottom-0 inset-x-0 z-30 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col gap-2 pointer-events-auto">
-        <p id="story-caption" class="text-xs text-white leading-relaxed line-clamp-3 post-text"></p>
-        
-        <div class="flex items-center gap-2 pt-1">
-          <button onclick="window.TelegramX.sendStoryQuickReaction('🔥')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>🔥</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('❤️')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>❤️</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('👍')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>👍</span>
-          </button>
-          <button onclick="window.TelegramX.sendStoryQuickReaction('🎉')" class="px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-sm transition flex items-center gap-1">
-            <span>🎉</span>
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- FULLSCREEN LIGHTBOX MODAL -->
-  <div id="lightbox-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 hidden flex items-center justify-center p-2 sm:p-4 select-none" onclick="window.TelegramX.closeLightbox()">
-    <button onclick="window.TelegramX.closeLightbox()" class="absolute top-4 right-4 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 transition flex items-center justify-center">
-      <i class="icon icon-close text-2xl"></i>
-    </button>
-    <a id="lightbox-download-btn" href="" download target="_blank" class="absolute top-4 right-16 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 transition flex items-center justify-center" onclick="event.stopPropagation()">
-      <i class="icon icon-download text-2xl"></i>
-    </a>
-    <span id="lightbox-counter" class="absolute top-6 left-6 text-xs text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full hidden"></span>
-
-    <button id="lightbox-prev-btn" onclick="window.TelegramX.prevLightboxImage(event)" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 hidden transition flex items-center justify-center">
-      <i class="icon icon-arrow-left text-3xl"></i>
-    </button>
-    <button id="lightbox-next-btn" onclick="window.TelegramX.nextLightboxImage(event)" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 rounded-full hover:bg-white/10 z-50 hidden transition flex items-center justify-center">
-      <i class="icon icon-arrow-right text-3xl"></i>
-    </button>
-
-    <div class="max-w-5xl max-h-[90vh] flex items-center justify-center relative z-40" onclick="event.stopPropagation()">
-      <img id="lightbox-img" src="" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl" />
-    </div>
-  </div>
-
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 liquid-glass border border-white/15 px-4 py-2 rounded-full text-xs font-medium text-white shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+  <div id="toast" class="tx-toast fixed bottom-20 left-1/2 -translate-x-1/2 liquid-glass border border-white/15 px-4 py-2 rounded-full text-xs font-medium text-white shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
     <i class="icon icon-check-bold text-sm text-[#4fae4e]"></i>
     <span id="toast-msg">Готово</span>
   </div>
 
   <!-- JavaScript ES Modules Entrypoint -->
-  <script type="module" src="/static/js/app.js"></script>
+  <script type="module" src="js/app.js?v=3.7.0"></script>
 </body>
 </html>

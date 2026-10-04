@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TeleX</string>
+    <string name="download_started">Загрузка: %1$s</string>
+    <string name="download_saved">Сохранено в «Загрузки»: %1$s</string>
+    <string name="download_saved_gallery">Сохранено в галерею: %1$s</string>
+    <string name="download_failed">Не удалось скачать файл</string>
+    <string name="no_app_for_link">Нет приложения, чтобы открыть ссылку</string>
+</resources>

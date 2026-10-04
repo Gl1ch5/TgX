@@ -1,0 +1,66 @@
+{
+  "name": "telex-desktop",
+  "productName": "TeleX",
+  "version": "1.0.0",
+  "description": "TeleX desktop: the live TeleX web app in a native window",
+  "author": "Gl1ch5",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gl1ch5/TgX.git"
+  },
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "icons": "node scripts/make-icons.js",
+    "dist:win": "electron-builder --win nsis portable --x64 --publish never",
+    "dist:dir": "electron-builder --dir --publish never",
+    "smoke": "electron scripts/smoke.js"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "io.github.gl1ch5.telex",
+    "productName": "TeleX",
+    "copyright": "TeleX",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TeleX",
+      "artifactName": "TeleX-Setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "TeleX-Portable.${ext}"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        "dir"
+      ],
+      "category": "Network"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+/* TeleX styles — modules live in css/tx/ */
+@import url('tx/tokens.css');
+@import url('tx/layout.css');
+@import url('tx/avatar.css');
+@import url('tx/dock.css');
+@import url('tx/post.css');
+@import url('tx/thread.css');
+@import url('tx/settings.css');
+@import url('tx/viewer.css');
+@import url('tx/stories.css');
+@import url('tx/profile.css');
+@import url('tx/icons-android.css');
+
+/* Modals (auth, wallpapers) in the same glass style */
+.liquid-glass {
+  background: rgba(30, 30, 32, 0.97) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  backdrop-filter: var(--tx-glass-blur);
+  -webkit-backdrop-filter: var(--tx-glass-blur);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+#tgx-bg-pattern { background-repeat: repeat; background-position: center top; }
+.post-text a, .post-text .hashtag, .post-text .mention { color: var(--tx-link) !important; font-weight: inherit !important; }
+.tg-quote { border-left-color: var(--tx-accent) !important; background: var(--tx-accent-soft) !important; border-radius: 6px !important; }
+
+/* Modals (auth, wallpapers): dim + spring in, like Telegram sheets */
+#auth-modal:not(.hidden), #wallpaper-modal:not(.hidden) { animation: tx-dim-in 0.2s ease-out both; }
+#auth-modal:not(.hidden) > div, #wallpaper-modal:not(.hidden) > div { animation: tx-sheet-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@keyframes tx-dim-in { from { background-color: rgba(0, 0, 0, 0); backdrop-filter: blur(0); } }
+@keyframes tx-sheet-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } }
+#toast { transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease !important; }

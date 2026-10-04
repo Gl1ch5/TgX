@@ -19,3 +19,4 @@ app/media_cache/
 .github_token
 .env
 *.log
+node_modules/

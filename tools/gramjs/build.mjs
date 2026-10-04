@@ -1,0 +1,40 @@
+import * as esbuild from 'esbuild';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const tg = path.join(here, 'node_modules/telegram');
+
+// GramJS picks browser code paths at runtime; replace node-only modules with browser shims.
+const shims = {
+  name: 'gramjs-browser-shims',
+  setup(build) {
+    build.onResolve({ filter: /^\.\/CryptoFile$/ }, () => ({ path: 'CryptoFile', namespace: 'shim' }));
+    build.onResolve({ filter: /inspect$/ }, (a) => a.importer.includes('telegram') ? { path: 'inspect', namespace: 'shim' } : undefined);
+    build.onResolve({ filter: /^os$/ }, () => ({ path: 'os', namespace: 'shim' }));
+    build.onResolve({ filter: /^path$/ }, () => ({ path: path.join(here, 'node_modules/path-browserify/index.js') }));
+    build.onResolve({ filter: /^(fs|net|events|stream|util|assert|constants|crypto|node-localstorage|socks)$/ }, (a) => ({ path: a.path, namespace: 'empty' }));
+    build.onLoad({ filter: /^inspect$/, namespace: 'shim' }, () => ({ contents: 'export const inspect = { custom: Symbol.for("nodejs.util.inspect.custom") };' }));
+    build.onLoad({ filter: /^CryptoFile$/, namespace: 'shim' }, () => ({
+      contents: `import * as c from ${JSON.stringify(path.join(tg, 'crypto/crypto.js'))}; export default c;`,
+      resolveDir: here,
+    }));
+    build.onLoad({ filter: /^os$/, namespace: 'shim' }, () => ({ contents: 'export default { type: () => "Browser", release: () => "1.0" };' }));
+    build.onLoad({ filter: /.*/, namespace: 'empty' }, () => ({ contents: 'module.exports = {};' }));
+  },
+};
+
+await esbuild.build({
+  entryPoints: [path.join(here, 'entry.js')],
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  target: 'es2020',
+  minify: true,
+  legalComments: 'eof',
+  outfile: process.argv[2] || path.join(here, 'out/gramjs.js'),
+  define: { global: 'globalThis', 'process.env.NODE_ENV': '"production"' },
+  inject: [path.join(here, 'buffer-shim.js')],
+  plugins: [shims],
+  logLevel: 'warning',
+});
