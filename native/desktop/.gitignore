@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# the repo root ignores build/, but here it holds the committed icons
+!build/
