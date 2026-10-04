@@ -5,8 +5,9 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
-const SW_VERSION = '3.2.1';
-const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb']);
+const SW_VERSION = '3.3.0';
+const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb', 'storythumb']);
+const STREAMED = new Set(['doc', 'story']);
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
@@ -60,7 +61,7 @@ function parseRange(header) {
 
 async function serveMedia(event, path) {
   const kind = path.split('/')[0];
-  const range = kind === 'doc' ? parseRange(event.request.headers.get('range')) : null;
+  const range = STREAMED.has(kind) ? parseRange(event.request.headers.get('range')) : null;
 
   if (CACHEABLE.has(kind)) {
     const cache = await caches.open(MEDIA_CACHE);

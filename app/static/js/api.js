@@ -95,6 +95,19 @@ export const api = {
     return safe(() => telegram.resetAuthorization(hash));
   },
 
+  // Stories
+  getStories() {
+    return telegram.getStories();
+  },
+
+  getStoriesById(key, ids) {
+    return telegram.getStoriesById(key, ids);
+  },
+
+  readStories(key, maxId) {
+    return telegram.readStories(key, maxId).catch((e) => console.warn('[TeleX] read stories', e));
+  },
+
   // Reactions & Actions
   sendReaction(channelId, msgId, emoji, customId = null) {
     return safe(() => telegram.sendReaction(channelId, msgId, emoji, customId));

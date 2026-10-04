@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="css/telegram-icons.css">
   <link rel="stylesheet" href="css/telegram-theme.css">
   <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/telex.css?v=3.2.0">
+  <link rel="stylesheet" href="css/telex.css?v=3.3.0">
 
   <!-- External Libraries -->
   <script src="js/vendor/qrcode.min.js"></script>
@@ -63,6 +63,12 @@
   </script>
 </head>
 <body class="tx">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="tx-story-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fc183"/><stop offset="1" stop-color="#2c9efc"/></linearGradient>
+      <linearGradient id="tx-story-cf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#81ce2d"/><stop offset="1" stop-color="#18bd36"/></linearGradient>
+    </defs>
+  </svg>
 
   <div id="app" class="tx-app" data-view="wall">
 
@@ -71,9 +77,21 @@
     <!-- ================================================================ -->
     <section id="screen-wall" class="tx-screen">
       <div class="tx-column">
-        <header class="tx-header">
-          <button id="header-left-btn" class="tx-circle tx-glass" onclick="window.TelegramX.headerLeft()" title="Поиск">
-            <i class="icon icon-search" id="header-left-icon"></i>
+        <!-- Telegram main-screen header: stories stack + title, pull-down stories row, search -->
+        <div id="wall-top" class="tx-maintop">
+          <div class="tx-mainbar">
+            <button id="stories-stack" class="tx-stories-stack" onclick="window.TelegramX.openStackStories()" title="Истории"></button>
+            <h1 class="tx-mainbar-title" onclick="window.TelegramX.headerPill()">TeleX</h1>
+            <button class="tx-icon-btn tx-mainbar-search" onclick="window.TelegramX.focusSearch()" title="Поиск"><i class="icon icon-search"></i></button>
+            <button class="tx-icon-btn" onclick="window.TelegramX.openMainMenu(event)" title="Меню"><i class="icon icon-more"></i></button>
+          </div>
+          <div id="stories-row" class="tx-stories-row"><div class="tx-stories-scroll"></div></div>
+        </div>
+
+        <!-- Channel header (when the wall is filtered to one channel) -->
+        <header class="tx-header tx-channel-header">
+          <button id="header-left-btn" class="tx-circle tx-glass" onclick="window.TelegramX.headerLeft()" title="Назад">
+            <i class="icon icon-arrow-left" id="header-left-icon"></i>
           </button>
           <div class="tx-pill tx-glass" onclick="window.TelegramX.headerPill()">
             <div id="header-stack" class="tx-stack"></div>
@@ -82,20 +100,21 @@
               <span class="tx-pill-sub" id="header-sub-title">все ваши каналы</span>
             </div>
           </div>
-          <button class="tx-circle tx-glass" onclick="window.TelegramX.openMainMenu(event)" title="Меню">
-            <i class="icon icon-more"></i>
+          <button class="tx-circle tx-glass" onclick="window.TelegramX.toggleHeaderSearch(true)" title="Поиск">
+            <i class="icon icon-search"></i>
           </button>
         </header>
 
+        <label id="header-search-bar" class="tx-search tx-search-main">
+          <i class="icon icon-search"></i>
+          <input type="search" id="search-input" placeholder="Поиск публикаций" autocomplete="off" enterkeyhint="search"
+                 onkeydown="if(event.key==='Enter') window.TelegramX.doSearch()" oninput="if(!this.value) window.TelegramX.clearSearch()" />
+          <button class="tx-icon-btn tx-search-clear" onclick="event.preventDefault(); window.TelegramX.toggleHeaderSearch(false)" title="Очистить">
+            <i class="icon icon-close" style="font-size:20px"></i>
+          </button>
+        </label>
+
         <div class="tx-subbar">
-          <label id="header-search-bar" class="tx-search tx-glass tx-hidden">
-            <i class="icon icon-search"></i>
-            <input type="search" id="search-input" placeholder="Поиск публикаций" autocomplete="off"
-                   onkeydown="if(event.key==='Enter') window.TelegramX.doSearch()" />
-            <button class="tx-icon-btn" onclick="window.TelegramX.toggleHeaderSearch(false)" title="Закрыть поиск">
-              <i class="icon icon-close" style="font-size:20px"></i>
-            </button>
-          </label>
           <nav class="tx-tabs tx-glass" id="feed-tabs">
             <button class="tx-tab is-active" data-feed="all" onclick="window.TelegramX.switchFeedType('all')">Все <span class="tx-badge tx-hidden" id="tab-unread-badge"></span></button>
             <button class="tx-tab" data-feed="media" onclick="window.TelegramX.switchFeedType('media')">Медиа</button>
@@ -343,6 +362,6 @@
   </div>
 
   <!-- JavaScript ES Modules Entrypoint -->
-  <script type="module" src="js/app.js?v=3.2.0"></script>
+  <script type="module" src="js/app.js?v=3.3.0"></script>
 </body>
 </html>

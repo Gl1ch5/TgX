@@ -1233,6 +1233,112 @@ class TelegramService {
     if (post && post.id && !this.posts.has(post.id)) this.posts.set(post.id, post);
   }
 
+  // ----- stories -----
+
+  peerKeyOf(peer) {
+    if (peer instanceof Api.PeerUser) return `u${peer.userId}`;
+    if (peer instanceof Api.PeerChannel) return `c${peer.channelId}`;
+    if (peer instanceof Api.PeerChat) return `c${peer.chatId}`;
+    return null;
+  }
+
+  formatStory(key, s) {
+    if (s instanceof Api.StoryItemDeleted) return null;
+    if (s instanceof Api.StoryItemSkipped || !s.media) {
+      return { id: s.id, date: s.date, skipped: true, close_friends: !!s.closeFriends };
+    }
+    this.storyItems = this.storyItems || new Map();
+    this.storyItems.set(`${key}/${s.id}`, s);
+    const media = s.media;
+    const doc = media.document;
+    let type = 'photo';
+    let duration = 0;
+    if (doc) {
+      const v = (doc.attributes || []).find((a) => a instanceof Api.DocumentAttributeVideo);
+      if (!v && !(doc.mimeType || '').startsWith('video/')) return null;
+      type = 'video';
+      duration = v ? Number(v.duration) || 0 : 0;
+    } else if (!(media instanceof Api.MessageMediaPhoto) || !media.photo) {
+      return null;
+    }
+    return {
+      id: s.id,
+      date: s.date,
+      type,
+      duration,
+      url: `media/story/${key}/${s.id}`,
+      thumb_url: doc && this.bestThumb(doc) ? `media/storythumb/${key}/${s.id}` : null,
+      caption: s.caption || '',
+      caption_html: s.caption ? toHtml(s.caption, s.entities) : '',
+      views: s.views ? s.views.viewsCount || 0 : null,
+      close_friends: !!s.closeFriends,
+    };
+  }
+
+  formatPeerStories(ps) {
+    const key = this.peerKeyOf(ps.peer);
+    const entity = key && this.entities.get(key);
+    if (!entity) return null;
+    const stories = (ps.stories || []).map((s) => this.formatStory(key, s)).filter(Boolean).sort((a, b) => a.id - b.id);
+    if (!stories.length) return null;
+    const maxRead = ps.maxReadId || 0;
+    const name = entity instanceof Api.User ? (entity.firstName || utils.getDisplayName(entity)) : entity.title;
+    return {
+      key,
+      id: Number(entity.id),
+      name: entity.self ? 'Моя история' : name || '',
+      title: entity instanceof Api.User ? utils.getDisplayName(entity) : entity.title,
+      avatar: this.avatarUrl(entity),
+      is_self: !!entity.self,
+      is_channel: entity instanceof Api.Channel,
+      max_read_id: maxRead,
+      unread: stories.some((x) => x.id > maxRead),
+      stories,
+    };
+  }
+
+  /** Active stories of everyone you follow (stories.getAllStories). */
+  async getStories() {
+    const client = await this.getClient();
+    const res = await client.invoke(new Api.stories.GetAllStories({}));
+    if (!(res instanceof Api.stories.AllStories)) return this.storyPeers || [];
+    [...(res.users || []), ...(res.chats || [])].forEach((e) => this.rememberEntity(e));
+    const peers = res.peerStories.map((ps) => this.formatPeerStories(ps)).filter(Boolean);
+    // Unseen first (Telegram keeps server order inside each group); own stories lead.
+    peers.sort((a, b) => (b.is_self - a.is_self) || (b.unread - a.unread));
+    this.storyPeers = peers;
+    return peers;
+  }
+
+  /** Fill in "skipped" story items (the server only sends a few in full). */
+  async getStoriesById(key, ids) {
+    const client = await this.getClient();
+    const entity = this.entities.get(key);
+    if (!entity) return [];
+    const res = await client.invoke(new Api.stories.GetStoriesByID({ peer: entity, id: ids }));
+    [...(res.users || []), ...(res.chats || [])].forEach((e) => this.rememberEntity(e));
+    return (res.stories || []).map((s) => this.formatStory(key, s)).filter(Boolean);
+  }
+
+  async readStories(key, maxId) {
+    const client = await this.getClient();
+    const entity = this.entities.get(key);
+    if (!entity) return;
+    await client.invoke(new Api.stories.ReadStories({ peer: entity, maxId }));
+    const peer = (this.storyPeers || []).find((p) => p.key === key);
+    if (peer) {
+      peer.max_read_id = Math.max(peer.max_read_id, maxId);
+      peer.unread = peer.stories.some((x) => x.id > peer.max_read_id);
+    }
+  }
+
+  async storyItem(key, id) {
+    const hit = this.storyItems && this.storyItems.get(`${key}/${id}`);
+    if (hit) return hit;
+    await this.getStoriesById(key, [Number(id)]);
+    return this.storyItems && this.storyItems.get(`${key}/${id}`);
+  }
+
   // ----- media (served to <img>/<video> through the service worker) -----
 
   async getMessage(channelId, msgId) {
@@ -1343,6 +1449,24 @@ class TelegramService {
       return bytes && bytes.length ? { bytes, mime } : null;
     }
 
+    if (kind === 'story' || kind === 'storythumb') {
+      if (!this.entities.has(a)) await this.loadDialogs();
+      const item = await this.storyItem(a, b);
+      if (!item || !item.media) return null;
+      const doc = item.media.document;
+      if (kind === 'storythumb') {
+        const thumb = doc && this.bestThumb(doc);
+        if (!thumb) return null;
+        const bytes = await client.downloadMedia(item.media, { thumb });
+        return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
+      }
+      if (!doc) {
+        const bytes = await client.downloadMedia(item.media, {});
+        return bytes && bytes.length ? { bytes, mime: 'image/jpeg', size: bytes.length, offset: 0, full: true } : null;
+      }
+      return this.documentBytes(doc, item.media, range);
+    }
+
     const msg = await this.getMessage(Number(a), Number(b));
     if (!msg || !msg.media) return null;
 
@@ -1361,29 +1485,32 @@ class TelegramService {
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
     }
 
-    if (kind === 'doc') {
-      const size = Number(doc.size);
-      const mime = doc.mimeType || 'application/octet-stream';
-      if (range && size <= SMALL_FILE) {
-        // Small files (GIFs, short clips, stickers): one full download, cached by the SW.
-        const bytes = await client.downloadMedia(msg, {});
-        return bytes ? { bytes, mime, size: bytes.length, offset: 0, full: true } : null;
-      }
-      if (range) {
-        const offset = Math.floor(range.start / STREAM_CHUNK) * STREAM_CHUNK;
-        if (offset >= size) return { bytes: new Uint8Array(0), mime, size, offset };
-        const bytes = await this.streamChunk(doc, offset, size);
-        // Read ahead so playback doesn't stall between chunks.
-        for (let i = 1; i <= STREAM_READ_AHEAD; i++) {
-          const next = offset + i * STREAM_CHUNK;
-          if (next < size) this.streamChunk(doc, next, size).catch(() => {});
-        }
-        return { bytes, mime, size, offset };
-      }
-      const bytes = await client.downloadMedia(msg, {});
-      return bytes ? { bytes, mime, size } : null;
-    }
+    if (kind === 'doc') return this.documentBytes(doc, msg, range);
     return null;
+  }
+  /** Bytes of a document: whole (small files) or one streamed chunk for a Range request. */
+  async documentBytes(doc, source, range) {
+    const client = await this.getClient();
+    const size = Number(doc.size);
+    const mime = doc.mimeType || 'application/octet-stream';
+    if (range && size <= SMALL_FILE) {
+      // Small files (GIFs, short clips, stickers): one full download, cached by the SW.
+      const bytes = await client.downloadMedia(source, {});
+      return bytes ? { bytes, mime, size: bytes.length, offset: 0, full: true } : null;
+    }
+    if (range) {
+      const offset = Math.floor(range.start / STREAM_CHUNK) * STREAM_CHUNK;
+      if (offset >= size) return { bytes: new Uint8Array(0), mime, size, offset };
+      const bytes = await this.streamChunk(doc, offset, size);
+      // Read ahead so playback doesn't stall between chunks.
+      for (let i = 1; i <= STREAM_READ_AHEAD; i++) {
+        const next = offset + i * STREAM_CHUNK;
+        if (next < size) this.streamChunk(doc, next, size).catch(() => {});
+      }
+      return { bytes, mime, size, offset };
+    }
+    const bytes = await client.downloadMedia(source, {});
+    return bytes ? { bytes, mime, size } : null;
   }
 }
 

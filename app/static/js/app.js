@@ -18,6 +18,8 @@ import { tapReaction, sendReaction } from './components/reactions.js';
 import { openPostMenu, quickReact, pickReaction, closeMenus, copyPostLink, sharePost, forwardToSaved, togglePostFavorite } from './components/postMenu.js';
 import { openViewer, closeViewer, isViewerOpen, viewerKey } from './components/mediaViewer.js';
 import { toggleAudio, seekAudio } from './components/audioPlayer.js';
+import { setupStoriesBar, loadStories, renderStories, openStackStories } from './components/stories.js';
+import { isStoryOpen, closeStoryViewer, storyKey } from './components/storyViewer.js';
 import {
   openAuthModal, closeAuthModal, switchAuthTab, generateQRLogin,
   submitQRPassword, sendPhoneCode, submitPhoneCode, submitPhonePassword,
@@ -50,6 +52,8 @@ window.TelegramX = {
   // Wall
   headerLeft: wall.headerLeft,
   headerPill: wall.headerPill,
+  focusSearch: wall.focusSearch,
+  openStackStories,
   openMainMenu,
   switchFeedType: wall.switchFeedType,
   filterByChannel: wall.filterByChannel,
@@ -150,6 +154,10 @@ async function initApp() {
 
   initNav(() => {
     closeMenus();
+    if (isStoryOpen()) {
+      closeStoryViewer();
+      return true;
+    }
     if (isViewerOpen()) {
       closeViewer();
       return true;
@@ -158,6 +166,7 @@ async function initApp() {
   });
 
   wall.setupInfiniteScroll();
+  setupStoriesBar();
   setupKeyboard();
   setupResilience();
   api.onReadChange(() => wall.loadChannels());
@@ -189,6 +198,7 @@ async function initApp() {
   if (state.isAuth) {
     await wall.loadChannels();
     startLive();
+    loadStories(true);
   }
 }
 
@@ -232,7 +242,7 @@ function setupResilience() {
 
 function setupKeyboard() {
   window.addEventListener('keydown', (e) => {
-    if (viewerKey(e)) return;
+    if (storyKey(e) || viewerKey(e)) return;
     if (e.key === 'Escape') {
       closeMenus();
       closeWallpaperModal();
@@ -259,6 +269,9 @@ export function updateAuthUI() {
   document.getElementById('feed-empty-state')?.classList.toggle('tx-hidden', state.isAuth || state.posts.length > 0);
   wall.updateHeader();
   wall.renderUnread();
+  if (!state.isAuth) state.stories = [];
+  renderStories();
+  if (state.isAuth) loadStories();
   const view = document.getElementById('app').dataset.view;
   if (view === 'settings') settings.rerenderSettings();
   if (view === 'profile') profile.renderProfile();

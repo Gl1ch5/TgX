@@ -24,4 +24,5 @@ export const state = {
   lightboxIndex: 0,
   openCommentsMap: {},
   cachedComments: {},
+  stories: [],
 };

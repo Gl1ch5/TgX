@@ -27,34 +27,22 @@ function wallChannels() {
 
 export function updateHeader() {
   const ch = state.activeChannelId ? state.channels.find((c) => c.id === state.activeChannelId) : null;
-  const stack = $('header-stack');
-  const leftIcon = $('header-left-icon');
+  $('screen-wall').classList.toggle('is-channel', !!state.activeChannelId);
+  if (!state.activeChannelId) return;
 
-  if (state.activeChannelId) {
-    leftIcon.className = 'icon icon-arrow-left';
-    stack.innerHTML = avatarHtml(ch || { id: state.activeChannelId }, 'md');
-    stack.querySelector('.tx-avatar').style.boxShadow = 'none';
-    $('header-main-title').innerHTML = parseEmojis(ch ? ch.title : 'Канал');
-    $('header-verified-badge').innerHTML = ch && ch.verified ? VERIFIED_BADGE_SVG : '';
-    const n = ch && ch.participants_count;
-    $('header-sub-title').textContent = n
-      ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}`
-      : ch && ch.username ? `@${ch.username}` : 'канал';
-  } else {
-    leftIcon.className = 'icon icon-search';
-    const list = wallChannels();
-    stack.innerHTML = list.slice(0, 3).map((c) => avatarHtml(c)).join('');
-    $('header-main-title').textContent = 'Стена';
-    $('header-verified-badge').innerHTML = '';
-    $('header-sub-title').textContent = state.isAuth
-      ? (list.length ? `${list.length} ${pluralRu(list.length, 'канал', 'канала', 'каналов')}` : 'загрузка каналов…')
-      : 'все ваши каналы';
-  }
+  const stack = $('header-stack');
+  stack.innerHTML = avatarHtml(ch || { id: state.activeChannelId }, 'md');
+  stack.querySelector('.tx-avatar').style.boxShadow = 'none';
+  $('header-main-title').innerHTML = parseEmojis(ch ? ch.title : 'Канал');
+  $('header-verified-badge').innerHTML = ch && ch.verified ? VERIFIED_BADGE_SVG : '';
+  const n = ch && ch.participants_count;
+  $('header-sub-title').textContent = n
+    ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}`
+    : ch && ch.username ? `@${ch.username}` : 'канал';
 }
 
 export function headerLeft() {
   if (state.activeChannelId) clearChannelFilter();
-  else toggleHeaderSearch($('header-search-bar').classList.contains('tx-hidden'));
 }
 
 export function headerPill() {
@@ -64,6 +52,12 @@ export function headerPill() {
     return;
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** Search icon in the bar: bring the search pill back and focus it. */
+export function focusSearch() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => $('search-input').focus({ preventScroll: true }), 260);
 }
 
 export function renderUnread() {
@@ -325,9 +319,15 @@ export function clearChannelFilter() {
 }
 
 export function toggleHeaderSearch(on) {
-  show($('header-search-bar'), on);
-  if (on) $('search-input').focus();
-  else if (state.searchQuery) clearSearch();
+  $('screen-wall').classList.toggle('is-searching', !!on);
+  const input = $('search-input');
+  if (on) {
+    input.focus();
+    return;
+  }
+  input.blur();
+  if (state.searchQuery) clearSearch();
+  else input.value = '';
 }
 
 export function filterByTag(tag) {

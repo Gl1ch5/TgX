@@ -7,6 +7,7 @@
 @import url('tx/thread.css');
 @import url('tx/settings.css');
 @import url('tx/viewer.css');
+@import url('tx/stories.css');
 
 /* Modals (auth, wallpapers) in the same glass style */
 .liquid-glass {
