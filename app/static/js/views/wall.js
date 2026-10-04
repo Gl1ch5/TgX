@@ -176,11 +176,57 @@ export function renderPosts() {
   appendPosts(state.posts);
 }
 
+function reduceMotion() {
+  return document.body.classList.contains('tx-reduce-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * A new post slides in like a new message in Telegram: the space opens
+ * smoothly (posts below glide down), the bubble grows in, and a soft
+ * gradient sheen sweeps across it once.
+ */
+function animateArrival(card, i = 0) {
+  if (reduceMotion()) return;
+  const h = card.offsetHeight;
+  const ease = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
+  card.style.overflow = 'hidden';
+  const a = card.animate([
+    { height: '0px', opacity: 0, marginBottom: '0px' },
+    { height: `${h}px`, opacity: 1, marginBottom: getComputedStyle(card).marginBottom },
+  ], { duration: 420, delay: i * 70, easing: ease, fill: 'backwards' });
+  const bubble = card.querySelector('.tx-bubble');
+  bubble?.animate([
+    { transform: 'translateY(-10px) scale(0.96)', transformOrigin: 'left top' },
+    { transform: 'none', transformOrigin: 'left top' },
+  ], { duration: 460, delay: i * 70, easing: ease, fill: 'backwards' });
+  a.finished.then(() => {
+    card.style.overflow = '';
+    bubble?.classList.add('tx-sheen');
+    setTimeout(() => bubble?.classList.remove('tx-sheen'), 1300);
+  }, () => {});
+}
+
+/** First paint of the feed: cards rise in one after another. */
+function staggerIn(cards) {
+  if (reduceMotion()) return;
+  cards.slice(0, 6).forEach((card, i) => {
+    card.style.setProperty('--i', i);
+    card.classList.add('tx-enter');
+    card.addEventListener('animationend', () => card.classList.remove('tx-enter'), { once: true });
+  });
+}
+
+let firstRender = true;
+
 export function appendPosts(posts) {
   const container = $('posts-container');
   if (!container) return;
   const frag = document.createDocumentFragment();
   const cards = posts.map((p) => createPostCardElement(p));
+  if (firstRender && cards.length) {
+    firstRender = false;
+    staggerIn(cards);
+  }
   cards.forEach((c) => frag.appendChild(c));
   container.appendChild(frag);
   cards.forEach(track);
@@ -467,13 +513,10 @@ function prependPosts(posts) {
   if (!fresh.length) return;
   state.posts.unshift(...fresh);
   container.querySelector('.tx-empty')?.remove();
-  const cards = fresh.map((p) => {
-    const card = createPostCardElement(p);
-    card.classList.add('tx-appear');
-    return card;
-  });
+  const cards = fresh.map((p) => createPostCardElement(p));
   container.prepend(...cards);
   cards.forEach(track);
+  cards.forEach((card, i) => animateArrival(card, i));
   hydrateStickers(container);
   observeAutoplay(container);
 }

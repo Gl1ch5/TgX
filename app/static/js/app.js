@@ -53,6 +53,8 @@ window.TelegramX = {
   rerenderSettings: settings.rerenderSettings,
   openFavorites,
 
+  openSettingsMenu: settings.openSettingsMenu,
+
   // Thread extras
   toggleThreadSearch: thread.toggleThreadSearch,
   searchThread: thread.searchThread,
@@ -217,6 +219,7 @@ async function initApp() {
   initDevtools();
   setupKeyboard();
   setupResilience();
+  setupMediaFadeIn();
   api.onReadChange(() => wall.loadChannels());
 
   try {
@@ -263,6 +266,21 @@ function startLive() {
  * Coming back to the tab/app: re-check the Telegram connection and refresh.
  * Also retry images that failed while the connection was down.
  */
+/** Media fade in (with a blur-to-sharp settle) once loaded; until then the tile shimmers. */
+const FADE_IN = '.tx-media, .tx-round, .tx-pf-cell, .tx-media-cell, .tx-webpage, .tx-story-media, .tx-wp';
+function setupMediaFadeIn() {
+  const done = (e) => {
+    const el = e.target;
+    if (!(el instanceof HTMLImageElement || el instanceof HTMLVideoElement)) return;
+    if (!el.closest(FADE_IN)) return;
+    el.classList.add('is-loaded');
+    el.closest('.tx-media-tap, .tx-grid > *, .tx-round, .tx-pf-cell, .tx-media-cell')?.classList.add('has-loaded');
+  };
+  document.addEventListener('load', done, true);
+  document.addEventListener('loadeddata', done, true);
+  document.addEventListener('error', done, true);
+}
+
 function setupResilience() {
   let lastCheck = Date.now();
   const revive = async () => {

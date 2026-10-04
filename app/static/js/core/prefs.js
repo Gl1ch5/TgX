@@ -28,6 +28,7 @@ const DEFAULTS = {
   autoloadPhotos: true,
   syncRead: true,         // mark posts read in Telegram when seen on the wall
   bubbleRadius: 17,       // Telegram default message corner radius
+  glass: true,            // backdrop blur under bars (off = solid, faster)
   devOverlay: false,      // developer: connection/ping badge
   devVerbose: false,      // developer: GramJS debug logging
 };
@@ -87,6 +88,8 @@ export function applyAppearance(p = prefs) {
   root.style.setProperty('--tx-bubble-radius', `${p.bubbleRadius}px`);
   root.style.setProperty('--tx-bubble-radius-small', `${Math.min(6, p.bubbleRadius)}px`);
   document.body.classList.toggle('tx-reduce-motion', !!p.reduceMotion);
+  document.body.classList.toggle('tx-no-glass', p.glass === false);
+  root.style.setProperty('--tx-glass-blur', p.glass === false ? 'none' : 'blur(22px) saturate(170%)');
 }
 
 function hexAlpha(hex, a) {

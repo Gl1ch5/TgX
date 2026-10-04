@@ -130,7 +130,13 @@
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .tx-skeleton { background: var(--tx-bubble); border-radius: var(--tx-bubble-radius); padding: 12px; }
-.tx-skeleton i { display: block; background: rgba(255, 255, 255, 0.06); border-radius: 8px; animation: tx-pulse 1.4s ease-in-out infinite; }
+.tx-skeleton i {
+  display: block; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05) linear-gradient(100deg, transparent 25%, rgba(140, 160, 255, 0.1) 45%, rgba(255, 255, 255, 0.12) 50%, rgba(140, 160, 255, 0.1) 55%, transparent 75%) no-repeat;
+  background-size: 220% 100%;
+  animation: tx-shimmer 1.5s linear infinite;
+}
+.tx-skeleton + .tx-skeleton { margin-top: 10px; }
 @keyframes tx-pulse { 50% { opacity: 0.45; } }
 
 /* Toast in Telegram style */

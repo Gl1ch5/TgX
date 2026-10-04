@@ -253,3 +253,33 @@
 .tx-ctx-reactions .tx-cemoji { display: inline-flex; width: 34px; height: 34px; } .tx-ctx-reactions .tx-cemoji-media, .tx-ctx-reactions .tx-cemoji-media > * { width: 100%; height: 100%; }
 .tx-post-stack > .tx-bubble, .tx-msg-stack > .tx-bubble { flex: 0 0 auto; }
 #thread-avatar .tx-avatar { box-shadow: none; width: 40px; height: 40px; }
+
+/* ---------------- Loading & arrival animations ---------------- */
+@keyframes tx-shimmer { from { background-position: 160% 0; } to { background-position: -60% 0; } }
+.tx-media-tap, .tx-media .tx-grid > *, .tx-round, .tx-pf-cell, .tx-media-cell {
+  background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 25%, rgba(140, 160, 255, 0.09) 45%, rgba(255, 255, 255, 0.13) 50%, rgba(140, 160, 255, 0.09) 55%, rgba(255, 255, 255, 0) 75%);
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: tx-shimmer 1.5s linear infinite;
+}
+.has-loaded, .tx-media-tap.has-loaded { animation: none; background-image: none; }
+.tx-media img, .tx-round img, .tx-pf-cell img, .tx-media-cell img, .tx-webpage img {
+  opacity: 0; filter: blur(14px); transform: scale(1.03);
+  transition: opacity 0.4s ease, filter 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+.tx-media img.is-loaded, .tx-round img.is-loaded, .tx-pf-cell img.is-loaded, .tx-media-cell img.is-loaded, .tx-webpage img.is-loaded {
+  opacity: 1; filter: none; transform: none;
+}
+.tx-reduce-motion .tx-media img, .tx-reduce-motion .tx-pf-cell img, .tx-reduce-motion .tx-media-cell img { filter: none; transform: none; }
+
+.tx-enter { animation: tx-enter 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) backwards; animation-delay: calc(var(--i, 0) * 55ms); }
+@keyframes tx-enter { from { opacity: 0; transform: translateY(18px) scale(0.985); } }
+
+.tx-bubble.tx-sheen { position: relative; }
+.tx-bubble.tx-sheen::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(120, 150, 255, 0.16) 45%, rgba(255, 255, 255, 0.14) 50%, rgba(120, 150, 255, 0.16) 55%, transparent 70%);
+  background-size: 250% 100%; background-repeat: no-repeat;
+  animation: tx-sheen 1.1s ease-out forwards;
+}
+@keyframes tx-sheen { from { background-position: 130% 0; } to { background-position: -30% 0; } }
