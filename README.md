@@ -2,9 +2,8 @@
 
 <div align="center">
 
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Telethon](https://img.shields.io/badge/Telethon-MTProto%20v2-2CA5E0.svg?style=for-the-badge&logo=telegram&logoColor=white)](https://github.com/LonamiWebs/Telethon)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-без%20сервера-222.svg?style=for-the-badge&logo=github&logoColor=white)](https://gl1ch5.github.io/TgX/)
+[![GramJS](https://img.shields.io/badge/GramJS-MTProto%20в%20браузере-2CA5E0.svg?style=for-the-badge&logo=telegram&logoColor=white)](https://github.com/gram-js/gramjs)
 [![Liquid Glass](https://img.shields.io/badge/UI-iOS%20Liquid%20Glass-black.svg?style=for-the-badge&logo=apple&logoColor=white)](#)
 
 <p align="center">
@@ -63,117 +62,67 @@
 
 ---
 
-## 🚀 Установка и быстрый запуск
+## 🚀 Открыть
 
-### 1. Клонирование репозитория
-```bash
-git clone https://github.com/Gl1ch5/TgX.git
-cd TgX
-```
+👉 **[gl1ch5.github.io/TgX](https://gl1ch5.github.io/TgX/)** — ничего устанавливать не нужно: зашёл, вошёл в Telegram, читаешь.
 
-### 2. Установка зависимостей
-Требуется **Python 3.10+**:
-```bash
-pip install fastapi uvicorn telethon pydantic pillow
-```
+TeleX работает **целиком в браузере**: клиент Telegram (MTProto через защищённый WebSocket) запускается прямо на странице, сервера у проекта нет. Ваша сессия хранится только в `localStorage` вашего браузера и никуда больше не отправляется. Кнопка «Выйти» завершает сессию в Telegram и стирает все локальные данные.
 
-### 3. Запуск приложения
-Запустите скрипт:
-```bash
-python run.py
-```
-*Или в Windows просто дважды кликните по файлу `start_telegram_x.bat`.*
-
-Приложение автоматически откроется в вашем браузере по адресу:
-👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+> Если Telegram в вашей сети заблокирован, нужен VPN — браузер подключается к серверам Telegram напрямую.
 
 ---
 
-## 🔐 Как войти в свой аккаунт Telegram (Авторизация)
+## 🔐 Вход
 
-При первом запуске откроется окно авторизации TeleX. Доступно два удобных способа входа:
-
-```
-┌────────────────────────────────────────────────────────┐
-│                   Вход в TeleX                         │
-│  [ Быстрый вход по QR ]   |   [ По номеру телефона ]  │
-└────────────────────────────────────────────────────────┘
-```
-
-### Способ 1: Вход по QR-коду (Рекомендуемый, самый быстрый)
+### Способ 1: QR-код (рекомендуется)
 1. В окне входа выберите вкладку **«QR-код»**.
-2. Откройте официальное приложение **Telegram на смартфоне**.
-3. Перейдите в **Настройки → Устройства → Подключить устройство** (Settings → Devices → Link Desktop Device).
-4. Наведите камеру смартфона на QR-код на экране компьютера.
-5. Приложение мгновенно выполнит вход и начнет загрузку ленты ваших каналов!
-   *(Если у вас включен двухфакторный облачный пароль 2FA, введите его в появившемся поле).*
+2. В Telegram на телефоне: **Настройки → Устройства → Подключить устройство**.
+3. Наведите камеру на QR-код. Если включён облачный пароль (2FA) — введите его.
+
+### Способ 2: номер телефона
+1. Вкладка **«Номер телефона»** → номер в международном формате (`+7…`).
+2. Введите код, который придёт в Telegram (или SMS).
+3. При наличии 2FA — облачный пароль.
 
 ---
 
-### Способ 2: Вход по номеру телефона
-1. Выберите вкладку **«Номер телефона»**.
-2. Введите свой номер телефона в международном формате (например, `+79991234567` или `+380...`).
-3. Нажмите кнопку **«Получить код»**.
-4. В официальное приложение Telegram вам придет служебное сообщение с 5-значным кодом подтверждения.
-5. Введите полученный код в поле на экране и нажмите **«Войти»**.
-6. При наличии 2FA введите свой облачный пароль.
+## 🛠️ Для разработчика
 
----
-
-## ⚙️ Настройка параметров и Прокси
-
-Перед первым запуском получите собственные ключи приложения на [my.telegram.org](https://my.telegram.org) (раздел *API development tools*) и создайте файл `.env` в корне проекта по образцу `.env.example`:
-
+### Локальный запуск
 ```bash
-cp .env.example .env
+python run.py            # http://localhost:8000
 ```
+*(или двойной клик по `start_telegram_x.bat`)*. Это просто статический сервер для `app/static` — Service Worker требует `localhost` или HTTPS.
 
-```env
-# Ключи с https://my.telegram.org (обязательно)
-TG_API_ID=1234567
-TG_API_HASH=0123456789abcdef0123456789abcdef
+### Публикация на GitHub Pages
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions** (один раз).
+2. Любой push в `main` запускает `.github/workflows/pages.yml` и публикует `app/static`.
 
-# HTTP/SOCKS5 прокси (опционально; пусто — прямое подключение)
-TG_PROXY_HOST=127.0.0.1
-TG_PROXY_PORT=1080
-TG_PROXY_TYPE=http
-TG_PROXY_USER=
-TG_PROXY_PASS=
+### Пересборка GramJS
+```bash
+cd tools/gramjs && npm install && npm run build   # → app/static/js/vendor/gramjs.js
 ```
-
-Файл `.env` добавлен в `.gitignore` — не публикуйте ключи и пароли в репозитории. Переменные окружения, заданные в системе, имеют приоритет над `.env`.
-
-По умолчанию API принимает браузерные запросы только со своего адреса (`http://127.0.0.1:8000` / `http://localhost:8000`). Дополнительные origin'ы можно перечислить через запятую в `TG_CORS_ORIGINS`.
 
 ---
 
-## 🧱 Архитектура проекта
+## 🧱 Архитектура
 
 ```
 TgX/
-├── app/
-│   ├── backend/
-│   │   ├── config.py           # Конфигурация, пути и прокси
-│   │   ├── main.py             # FastAPI бэкенд и REST API эндпоинты
-│   │   └── telegram_service.py # Telethon MTProto клиент, парсер форматирования и кэш
-│   ├── static/
-│   │   ├── css/
-│   │   │   ├── liquid-glass.css    # Liquid Glass дизайн-система и iOS Dock
-│   │   │   ├── telegram-theme.css  # Тематизация и стили карточек
-│   │   │   └── animations.css      # Плавные микроанимации
-│   │   ├── js/
-│   │   │   ├── app.js              # Инициализация и роутинг
-│   │   │   ├── api.js              # Клиент взаимодействия с бэкендом
-│   │   │   ├── state.js            # Реактивное состояние
-│   │   │   └── components/         # Модули интерфейса (лента, модалки, обои, плеер)
-│   │   ├── icons/                  # Пакет векторных иконок Liquid Glass
-│   │   └── wallpapers/             # Каталог оригинальных SVG обоев Telegram
-│   └── sessions/                   # Хранилище локальных сессий (в .gitignore)
-├── assets/
-│   └── screenshots/                # Скриншоты для документации
-├── run.py                          # Главный файл запуска сервера
-└── start_telegram_x.bat            # Windows Launcher
+├── .github/workflows/pages.yml   # Деплой на GitHub Pages
+├── app/static/                   # Весь сайт
+│   ├── index.html, sw.js         # SPA + Service Worker (медиа: аватары, фото, стрим видео)
+│   ├── css/  wallpapers/         # Liquid Glass дизайн-система, SVG-обои Telegram
+│   └── js/
+│       ├── telegram.js           # Клиент Telegram на GramJS: вход, каналы, лента, комментарии, реакции
+│       ├── api.js  media.js      # Слой API для UI и мост Service Worker ↔ GramJS
+│       ├── app.js  components/   # Контроллер и UI-компоненты
+│       └── vendor/               # gramjs.js, tailwindcss.js, qrcode.min.js (без внешних CDN)
+├── tools/gramjs/                 # Сборка браузерного бандла GramJS
+└── run.py                        # Локальный предпросмотр
 ```
+
+Подробности — в [AGENT.md](AGENT.md).
 
 ---
 

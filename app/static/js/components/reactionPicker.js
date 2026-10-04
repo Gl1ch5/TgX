@@ -6,7 +6,7 @@
 
 import { state, EMOJI_PICKER_LIST } from '../state.js';
 import { api } from '../api.js';
-import { showToast, formatNumber } from '../utils.js';
+import { showToast, formatNumber, escapeQuotes } from '../utils.js';
 import { renderEmoji } from '../emoji.js';
 
 export function toggleReactionPicker(postId, event) {
@@ -46,7 +46,7 @@ export async function sendReaction(channelId, msgId, emoji, postId) {
     if (wrap) {
       wrap.innerHTML = `
         ${post.reactions.map(r => `
-          <button onclick="window.TelegramX.sendReaction(${post.channel_id}, ${post.msg_id}, '${r.emoji}', '${post.id}')" class="tg-reaction-pill ${r.chosen ? 'active' : ''}">
+          <button onclick="window.TelegramX.sendReaction(${post.channel_id}, ${post.msg_id}, '${escapeQuotes(r.emoji)}', '${post.id}')" class="tg-reaction-pill ${r.chosen ? 'active' : ''}">
             ${renderEmoji(r.emoji, 'emoji-small')}
             <span class="font-medium text-[11.5px]">${formatNumber(r.count)}</span>
           </button>

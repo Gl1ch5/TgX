@@ -6,7 +6,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { showToast, formatTgTime, formatNumber, escapeQuotes, formatPostText } from '../utils.js';
+import { showToast, formatTgTime, formatNumber, escapeHtml, formatPostText } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 
 export async function toggleInlineComments(channelId, msgId, postId, event) {
@@ -115,7 +115,7 @@ export async function submitPostComment(channelId, msgId, postId) {
   const optimisticComment = {
     id: Date.now(),
     text: text,
-    text_html: escapeQuotes(text),
+    text_html: escapeHtml(text),
     date: new Date().toISOString(),
     timestamp: Math.floor(Date.now() / 1000),
     sender_name: me.first_name ? `${me.first_name} ${me.last_name || ''}`.trim() : 'Вы',
@@ -135,8 +135,8 @@ export async function submitPostComment(channelId, msgId, postId) {
 
   try {
     const res = await api.sendComment(channelId, msgId, text);
-    if (!res.ok) {
-      showToast('Ошибка отправки комментария: ' + (res.error || ''));
+    if (res.status !== 'success') {
+      showToast('Ошибка отправки комментария: ' + (res.message || ''));
     }
   } catch (e) {
     showToast('Ошибка сети при отправке: ' + e);

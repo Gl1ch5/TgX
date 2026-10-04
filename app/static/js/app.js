@@ -8,7 +8,8 @@ import { state, EMOJI_PICKER_LIST } from './state.js';
 import { api } from './api.js';
 import { showToast, formatNumber } from './utils.js';
 import { parseEmojis } from './emoji.js';
-import { createPostCardElement } from './components/postCard.js';
+import { initMediaBridge } from './media.js';
+import { createPostCardElement, playInlineVideo } from './components/postCard.js';
 import { renderChannelsBar } from './components/storiesBar.js';
 import {
   toggleInlineComments,
@@ -83,6 +84,7 @@ window.TelegramX = {
   copyPostLink,
   forwardToSaved,
   togglePostFavorite,
+  playInlineVideo,
   
   // Comments
   toggleInlineComments,
@@ -147,10 +149,16 @@ export async function initApp() {
 
   setupInfiniteScroll();
   setupKeyboardShortcuts();
-  
+
+  try {
+    await initMediaBridge();
+  } catch (e) {
+    console.error('Media bridge init failed', e);
+  }
+
   await checkAuthStatus();
   await loadFeed();
-  loadChannels();
+  if (state.isAuth) loadChannels();
 }
 
 function setupKeyboardShortcuts() {
@@ -331,6 +339,7 @@ export async function refreshFeed() {
 export async function loadFeed(forceRefresh = false) {
   if (state.isLoadingFeed) return;
   state.isLoadingFeed = true;
+  let refreshAfterCache = false;
 
   const loader = document.getElementById('feed-loader');
   const postsContainer = document.getElementById('posts-container');
@@ -352,6 +361,7 @@ export async function loadFeed(forceRefresh = false) {
     });
 
     state.posts = data.posts || [];
+    if (data.from_cache && state.isAuth) refreshAfterCache = true;
     state.hasMore = data.has_more || false;
     state.nextOffset = data.next_offset || null;
     if (loader) loader.classList.add('hidden');
@@ -387,6 +397,9 @@ export async function loadFeed(forceRefresh = false) {
   } finally {
     state.isLoadingFeed = false;
   }
+
+  // Cached wall shown instantly — now pull fresh posts from Telegram.
+  if (refreshAfterCache) loadFeed(true);
 }
 
 function preloadVisibleComments() {
@@ -488,6 +501,8 @@ export async function forwardToSaved(channelId, msgId) {
     const data = await api.forwardToSaved(channelId, msgId);
     if (data.status === 'success') {
       showToast('Сохранено в Избранное Telegram ✨');
+    } else {
+      showToast('Не удалось переслать: ' + (data.message || 'ошибка'));
     }
   } catch (e) {
     console.error(e);
@@ -496,8 +511,8 @@ export async function forwardToSaved(channelId, msgId) {
 
 export async function togglePostFavorite(postId) {
   try {
-    const data = await api.toggleFavorite(postId);
     const target = state.posts.find(p => p.id === postId);
+    const data = await api.toggleFavorite(postId, target);
     if (target) {
       target.is_favorite = data.is_favorite;
       const btn = document.getElementById(`fav-btn-${postId}`);

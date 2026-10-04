@@ -1,7 +1,7 @@
 @echo off
-title Telegram X - Wall Feed
+title TeleX - Wall Feed
 echo ====================================================
-echo   Zapusk Telegram X - Stena Kanalov
+echo   TeleX - Stena Kanalov (http://localhost:8000)
 echo ====================================================
 python run.py
 pause

@@ -5,7 +5,7 @@
  */
 
 import { state, EMOJI_PICKER_LIST } from '../state.js';
-import { formatTgTime, formatNumber, formatFileSize, formatDuration, formatPostText, escapeQuotes } from '../utils.js';
+import { formatTgTime, formatNumber, formatFileSize, formatDuration, formatPostText, escapeQuotes, escapeHtml } from '../utils.js';
 import { renderEmoji, parseEmojis } from '../emoji.js';
 
 export const VERIFIED_BADGE_SVG = `<svg class="VerifiedIcon" viewBox="0 0 24 24"><path d="M12.3 2.9c.1.1.2.1.3.2.7.6 1.3 1.1 2 1.7.3.2.6.4.9.4.9.1 1.7.2 2.6.2.2 0 .4.1.5.3.4.8.9 1.5 1.5 2.1.2.2.3.5.4.8.3.9.7 1.7 1.2 2.4.1.2.1.4.1.6-.1.9-.1 1.8-.1 2.7 0 .3 0 .6-.2.8-.5.8-.9 1.6-1.2 2.5-.1.3-.2.5-.4.8-.5.7-1 1.4-1.4 2.1-.1.2-.3.3-.6.3-.9.2-1.7.4-2.6.7-.3.1-.5.2-.8.5-.6.7-1.3 1.3-2.1 1.7-.2.1-.4.2-.6.1-.9-.2-1.8-.4-2.7-.4-.3 0-.6 0-.8-.2-.8-.5-1.6-.9-2.5-1.2-.3-.1-.5-.2-.8-.4-.7-.5-1.4-1-2.1-1.4-.2-.1-.3-.3-.3-.6-.2-.9-.4-1.7-.7-2.6-.1-.3-.2-.5-.5-.8-.7-.6-1.3-1.3-1.7-2.1-.1-.2-.2-.4-.1-.6.2-.9.4-1.8.4-2.7 0-.3 0-.6.2-.8.5-.8.9-1.6 1.2-2.5.1-.3.2-.5.4-.8.5-.7 1-1.4 1.4-2.1.1-.2.3-.3.6-.3.9-.2 1.7-.4 2.6-.7.3-.1.5-.2.8-.5.6-.7 1.3-1.3 2.1-1.7.2-.1.4-.2.6-.1.9.2 1.8.4 2.7.4.3 0 .6 0 .8.2.8.5 1.6.9 2.5 1.2.3.1.5.2.8.4.7.5 1.4 1 2.1 1.4.2.1.3.3.3.6.2.9.4 1.7.7 2.6.1.3.2.5.5.8.7.6 1.3 1.3 1.7 2.1.1.2.2.4.1.6-.2.9-.4 1.8-.4 2.7 0 .3 0 .6-.2.8-.5.8-.9 1.6-1.2 2.5-.1.3-.2.5-.4.8-.5.7-1 1.4-1.4 2.1-.1.2-.3.3-.6.3-.9.2-1.7.4-2.6.7-.3.1-.5.2-.8.5-.6.7-1.3 1.3-2.1 1.7-.2.1-.4.2-.6.1-.9-.2-1.8-.4-2.7-.4-.3 0-.6 0-.8-.2-.8-.5-1.6-.9-2.5-1.2-.3-.1-.5-.2-.8-.4-.7-.5-1.4-1-2.1-1.4-.2-.1-.3-.3-.3-.6-.2-.9-.4-1.7-.7-2.6-.1-.3-.2-.5-.5-.8-.7-.6-1.3-1.3-1.7-2.1-.1-.2-.2-.4-.1-.6z" fill="#3390ec"/><path d="M10.2 16.2l-3.5-3.5 1.4-1.4 2.1 2.1 6.4-6.4 1.4 1.4-7.8 7.8z" fill="#ffffff"/></svg>`;
@@ -16,10 +16,10 @@ export function buildMediaHtml(post) {
     if (post.webpage) {
       const wp = post.webpage;
       return `
-        <a href="${wp.url}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-white/10 bg-[#121216] hover:bg-[#1c1c24] transition overflow-hidden mt-1 shadow-md" onclick="event.stopPropagation()">
+        <a href="${escapeHtml(wp.url)}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-white/10 bg-[#121216] hover:bg-[#1c1c24] transition overflow-hidden mt-1 shadow-md" onclick="event.stopPropagation()">
           ${wp.photo_url ? `<img src="${wp.photo_url}" loading="lazy" decoding="async" class="w-full max-h-56 object-cover border-b border-white/10" />` : ''}
           <div class="p-3 border-l-4 border-[#3390ec]">
-            <span class="text-[11px] text-[#8a8a90] font-mono block">${wp.site_name || wp.display_url}</span>
+            <span class="text-[11px] text-[#8a8a90] font-mono block">${escapeHtml(wp.site_name || wp.display_url)}</span>
             <h4 class="text-sm font-semibold text-white line-clamp-1 mt-0.5">${parseEmojis(wp.title || wp.url)}</h4>
             ${wp.description ? `<p class="text-xs text-slate-300 line-clamp-2 mt-1 leading-relaxed">${parseEmojis(wp.description)}</p>` : ''}
           </div>
@@ -93,7 +93,13 @@ export function buildMediaHtml(post) {
     const item = items[0];
     return `
       <div class="rounded-xl overflow-hidden bg-black border border-white/10 mt-1 shadow-md relative" onclick="event.stopPropagation()">
-        <video src="${item.url}" poster="${item.thumb_url || ''}" controls preload="metadata" class="w-full max-h-[500px] rounded-xl"></video>
+        <button type="button" class="block w-full relative group" onclick="window.TelegramX.playInlineVideo(this, '${item.url}')" title="Смотреть видео">
+          ${item.thumb_url ? `<img src="${item.thumb_url}" loading="lazy" decoding="async" class="w-full max-h-[500px] object-cover rounded-xl" />` : `<div class="w-full aspect-video bg-black"></div>`}
+          <span class="absolute inset-0 flex items-center justify-center">
+            <span class="w-14 h-14 rounded-full bg-black/55 backdrop-blur flex items-center justify-center group-hover:scale-110 transition"><i class="icon icon-play text-2xl text-white"></i></span>
+          </span>
+          ${item.duration ? `<span class="absolute left-2 top-2 text-[11px] font-medium text-white bg-black/55 rounded-full px-2 py-0.5">${formatDuration(item.duration)}</span>` : ''}
+        </button>
       </div>
     `;
   }
@@ -108,10 +114,10 @@ export function buildMediaHtml(post) {
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-medium text-white truncate max-w-[240px]">${item.title || item.performer || (item.is_voice ? 'Голосовое сообщение' : 'Аудиозапись')}</span>
+            <span class="text-xs font-medium text-white truncate max-w-[240px]">${escapeHtml(item.title || item.performer || (item.is_voice ? 'Голосовое сообщение' : 'Аудиозапись'))}</span>
             <span class="text-[10px] text-[#8a8a90] font-mono">${formatDuration(item.duration)}</span>
           </div>
-          <audio src="${item.url}" controls class="w-full h-7"></audio>
+          <audio src="${item.url}" controls preload="none" class="w-full h-7"></audio>
         </div>
       </div>
     `;
@@ -137,8 +143,8 @@ export function buildMediaHtml(post) {
             <i class="icon icon-document text-lg text-[#3390ec]"></i>
           </div>
           <div class="flex flex-col min-w-0">
-            <span class="text-xs font-medium text-white truncate max-w-[280px]">${item.filename || 'Документ'}</span>
-            <span class="text-[10px] text-[#8a8a90] font-mono">${formatFileSize(item.size)} · ${item.mime || 'Файл'}</span>
+            <span class="text-xs font-medium text-white truncate max-w-[280px]">${escapeHtml(item.filename || 'Документ')}</span>
+            <span class="text-[10px] text-[#8a8a90] font-mono">${formatFileSize(item.size)} · ${escapeHtml(item.mime || 'Файл')}</span>
           </div>
         </div>
         <i class="icon icon-download text-base text-slate-400 hover:text-white transition"></i>
@@ -164,7 +170,7 @@ export function createPostCardElement(post) {
     reactionsHtml = `
       <div class="flex flex-wrap items-center gap-1.5 pt-0.5" id="reactions-wrap-${post.id}" onclick="event.stopPropagation()">
         ${post.reactions.map(r => `
-          <button onclick="window.TelegramX.sendReaction(${post.channel_id}, ${post.msg_id}, '${r.emoji}', '${post.id}')" class="tg-reaction-pill ${r.chosen ? 'active' : ''}">
+          <button onclick="window.TelegramX.sendReaction(${post.channel_id}, ${post.msg_id}, '${escapeQuotes(r.emoji)}', '${post.id}')" class="tg-reaction-pill ${r.chosen ? 'active' : ''}">
             ${renderEmoji(r.emoji, 'emoji-small')}
             <span class="font-medium text-[11.5px] ml-0.5">${formatNumber(r.count)}</span>
           </button>
@@ -324,4 +330,14 @@ export function createPostCardElement(post) {
   `;
 
   return card;
+}
+
+export function playInlineVideo(button, url) {
+  const video = document.createElement('video');
+  video.src = url;
+  video.controls = true;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.className = 'w-full max-h-[500px] rounded-xl bg-black';
+  button.replaceWith(video);
 }

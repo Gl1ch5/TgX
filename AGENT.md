@@ -33,76 +33,48 @@
 
 ## 2. Карта файлов и каталогов
 
+> С версии 3.0 у TeleX **нет сервера**. Весь клиент Telegram (MTProto через WebSocket) работает прямо в браузере на GramJS, поэтому сайт публикуется на GitHub Pages как статика.
+
 ```
-C:/Users/Pavel/Documents/1/
-├── app/
-│   ├── backend/
-│   │   ├── config.py                     # Конфигурация: API ID, Hash, Прокси, пути к кэшу
-│   │   ├── main.py                       # FastAPI приложение, REST API эндпоинты, раздача медиа
-│   │   └── telegram_service.py           # MTProto сервис Telethon, кэш, лента, реакции, комментарии
-│   ├── media_cache/                      # Дисковый кэш аватаров (avatar_*.jpg), фото, видео и документов
-│   ├── sessions/                         # Хранилище сессий (.session), feed_cache.json, channels_cache.json, comments_cache.json, favorites.json
-│   └── static/
-│       ├── css/                          # Модульные стили дизайн-системы
-│       │   ├── liquid-glass.css          # Эффекты стекла, размытие, dock, градиенты
-│       │   ├── telegram-theme.css        # Цветовые токены, цитаты (#FF2E6A), спойлеры, код
-│       │   └── animations.css            # Анимации аккордеона, выезда комментариев, реакций
-│       ├── js/                           # Модульный JavaScript (ES6 Modules)
-│       │   ├── api.js                    # Клиентский слой API запросов
-│       │   ├── state.js                  # Централизованное состояние и константы
-│       │   ├── utils.js                  # Форматтеры времени, чисел, спойлеров, цитат
-│       │   ├── app.js                    # Точка входа, контроллер, роутер, глобальный window.TelegramX
-│       │   └── components/               # Изолированные UI-компоненты
-│       │       ├── postCard.js           # Рендеринг карточек постов и сеток медиа-альбомов
-│       │       ├── commentsDrawer.js     # Инлайн-комментарии и форма отправки
-│       │       ├── reactionPicker.js     # Палитра реакций и обработчики
-│       │       ├── wallpaperTheme.js     # Движок и селектор официальных обоев Telegram
-│       │       ├── settingsModal.js      # Полноценное нативное окно настроек (без iframe)
-│       │       ├── storiesBar.js         # Карусель сторис и каналов вверху
-│       │       ├── lightbox.js           # Полноэкранный просмотрщик галерей и альбомов
-│       │       ├── authModal.js          # Окно авторизации (QR-код и телефон)
-│       │       └── channelsModal.js      # Диалог списка каналов и живой поиск
-│       ├── wallpapers/                   # 9 оригинальных векторных SVG-обоев Telegram + catalog.json
-│       ├── icons/                        # 3D стеклянные иконки Liquid Glass Pack
-│       ├── index.html                    # Главный чистый семантический HTML-каркас
-│       └── settings.html                 # Автономная реплика настроек (резервная)
-├── Liquid Glass Pack.icons               # Исходный архив иконок Liquid Glass
-├── run.py                                # Главная точка входа для запуска сервера
-├── start_telegram_x.bat                  # Батник быстрого запуска для Windows
-├── README.md                             # Краткое руководство пользователя
-└── AGENT.md                              # Настоящая полная документация
+TgX/
+├── .github/workflows/pages.yml           # Деплой app/static на GitHub Pages (push в main)
+├── app/static/                           # ВЕСЬ сайт (корень GitHub Pages)
+│   ├── index.html                        # Разметка SPA
+│   ├── sw.js                             # Service Worker: отдаёт media/… (аватары, фото, стрим видео)
+│   ├── css/                              # liquid-glass.css, telegram-theme.css, animations.css, telegram-icons.css
+│   ├── wallpapers/                       # Официальные SVG-обои Telegram
+│   └── js/
+│       ├── telegram.js                   # Сервис Telegram на GramJS (бывший telegram_service.py)
+│       ├── api.js                        # Тонкий слой: те же ответы, что давал старый REST API
+│       ├── media.js                      # Мост Service Worker ↔ GramJS для загрузки медиа
+│       ├── app.js, state.js, utils.js, emoji.js
+│       ├── components/                   # UI-компоненты (лента, комментарии, вход, обои, …)
+│       └── vendor/                       # gramjs.js (сборка), tailwindcss.js, qrcode.min.js
+├── tools/gramjs/                         # Сборка vendor/gramjs.js (npm i && npm run build)
+├── run.py, start_telegram_x.bat          # Локальный предпросмотр: статический сервер на localhost:8000
+├── README.md
+└── AGENT.md
 ```
 
 ---
 
-## 3. Бэкенд архитектура
+## 3. Работа с Telegram (без бэкенда)
 
-### 3.1. `app/backend/config.py`
-- Читает `.env` из корня проекта (образец — `.env.example`); системные переменные окружения имеют приоритет.
-- Telegram App ID / Hash: `TG_API_ID`, `TG_API_HASH` (обязательны, без значений по умолчанию — `run.py` не стартует без них).
-- Прокси: `TG_PROXY_HOST/PORT/TYPE/USER/PASS`; при пустом `TG_PROXY_HOST` `PROXY_CONFIG = None` (прямое подключение).
-- `CORS_ORIGINS`: по умолчанию только `http://127.0.0.1:{PORT}` и `http://localhost:{PORT}`; расширяется через `TG_CORS_ORIGINS`.
-- **Никогда не хардкодить ключи, пароли и адреса прокси в коде или документации.**
-- Пути к каталогам `media_cache/` и `sessions/`.
+### 3.1. `app/static/js/telegram.js`
+- `TelegramClient` GramJS c `useWSS: true` (обязательно — Pages работает по HTTPS).
+- `API_ID`/`API_HASH` приложения зашиты в код намеренно: так устроены все веб-клиенты, доступ даёт только сессия пользователя.
+- **Сессия** — `StringSession` в `localStorage['telex.session']`. Кэши: `telex.channels`, `telex.posts` (до 200 постов), `telex.favorites`.
+- Вход: QR (`auth.exportLoginToken` + `UpdateLoginToken`, с миграцией DC), код по номеру (`auth.signIn`), облачный пароль (`computeCheck` + `auth.checkPassword`).
+- Лента: диалоги-каналы → по 20 последних сообщений из 20 каналов (5 параллельных запросов), альбомы склеиваются по `groupedId`.
+- `toHtml(text, entities)` — форматирование сущностей в безопасный HTML (ссылки только `http(s)`, `tg:`, `mailto:`).
 
-### 3.2. `app/backend/telegram_service.py`
-- **Класс `TelegramService`**:
-  - `get_client()`: Инициализация и подключение `TelegramClient` через настроенный прокси к DC 2 (`149.154.167.50:443`).
-  - `get_wall_feed(...)`: Сбор постов со всех подписанных каналов с группировкой альбомов (`grouped_id`), кэшированием в `posts_cache` и сохранением в `feed_cache.json`.
-  - `get_post_comments(...)`: Мгновенное чтение комментариев из кэша и получение свежих веток через `GetRepliesRequest`.
-  - `send_comment(...)`: Отправка ответа в обсуждение канала через `client.send_message(entity, text, comment_to=msg_id)` или `reply_to=msg_id`.
-  - `send_reaction(...)`: Нативная отправка эмодзи-реакций через `SendReactionRequest`.
-  - `download_media(...)`: Загрузка и дисковое кэширование фото, превью, видео и документов в `app/media_cache/` (0ms при повторных запросах).
-  - `unparse_telegram_html(...)`: Конвертация сущностей MTProto (`MessageEntitySpoiler`, `MessageEntityBlockquote`, `MessageEntityBold`, `MessageEntityCode` и т.д.) в безопасный HTML.
+### 3.2. Медиа: `sw.js` + `js/media.js`
+- В разметке медиа — обычные URL: `media/avatar/{c|u}{id}/{photoId}`, `media/photo/{ch}/{msg}`, `media/thumb/…`, `media/webpage/…`, `media/doc/…`.
+- Service Worker перехватывает их и через `postMessage` просит страницу скачать байты GramJS-ом.
+- Картинки кэшируются в Cache Storage (`telex-media-v1`). Видео и аудио стримятся по `Range` блоками по 512 КБ (`iterDownload`), видео грузится только по нажатию ▶.
 
-### 3.3. `app/backend/main.py`
-- FastAPI REST API эндпоинты:
-  - `GET /api/auth/status`, `POST /api/auth/qr/start`, `GET /api/auth/qr/check`, `POST /api/auth/sign-in`, `POST /api/auth/logout`.
-  - `GET /api/channels`, `GET /api/feed` (с поддержкой параметров `channel_id`, `q`, `offset_date`, `refresh`).
-  - `GET /api/post/comments`, `POST /api/post/comment`.
-  - `POST /api/post/react`, `POST /api/post/forward-saved`, `POST /api/post/favorite`.
-  - `GET /api/media/photo/{ch}/{msg}`, `GET /api/media/doc/{ch}/{msg}`, `GET /api/media/cache/{filename}`.
-  - Статическая раздача `app/static/` и SPA fallback.
+### 3.3. `app/static/js/api.js`
+- Сохраняет интерфейс компонентов: `getFeed`, `getChannels`, `getComments`, `sendComment`, `sendReaction`, `forwardToSaved`, `toggleFavorite`, вход (`startQR`, `requestCode`, `signInCode`, `signInPassword`), `logout`.
 
 ---
 
@@ -179,13 +151,10 @@ C:/Users/Pavel/Documents/1/
 
 ## 7. Система кэширования
 
-1. **Медиафайлы (`app/media_cache/`)**: Аватарки (`avatar_{id}.jpg`), фото и видео сохраняются на диске. При наличии файла запрос к MTProto пропускается.
-2. **Сессии и данные (`app/sessions/`)**:
-   - `feed_cache.json` — сохранённый поток постов.
-   - `channels_cache.json` — список каналов и метаданных.
-   - `comments_cache.json` — ветки обсуждений.
-   - `favorites.json` — закладки пользователя.
-3. **Оперативный кэш**: При запуске приложение мгновенно рендерит посты из RAM за 0 мс.
+1. **localStorage**: сессия, каналы, последние 200 постов (мгновенный показ стены при открытии, затем фоновое обновление), избранное.
+2. **Cache Storage** (`telex-media-v1`): аватары, фото, превью — через Service Worker.
+3. **Память**: объекты сообщений/сущностей GramJS (нужны для скачивания медиа), комментарии.
+4. Выход из аккаунта (`logout`) очищает всё перечисленное.
 
 ---
 
@@ -209,18 +178,15 @@ C:/Users/Pavel/Documents/1/
 6. **Инлайн-комментарии**:
    - Комментарии должны открываться только аккордеоном вниз прямо под карточкой поста, а не отдельным модальным окном.
    - Форма отправки комментариев под постом должна оставаться рабочей.
-7. **Проверка синтаксиса**:
-   - После любых правок в бэкенде обязательно запускать проверку:
-     `python -m py_compile run.py app/backend/config.py app/backend/main.py app/backend/telegram_service.py`
+7. **Безопасность (сессия в localStorage = полный доступ к аккаунту)**:
+   - Любой текст из Telegram (названия, имена, подписи, имена файлов) вставлять в HTML только через `escapeHtml` / `parseEmojis` (они экранируют), а строки внутри `onclick="…('…')"` — через `escapeQuotes`.
+   - Не подключать сторонние скрипты с CDN: всё нужное лежит в `js/vendor/`.
+8. **Только относительные пути**: сайт живёт в подпапке `/TgX/` на GitHub Pages — никаких `/static/…` и `/api/…`.
 
 ---
 
 ## 9. Руководство по запуску
 
-Запуск сервера:
-```bash
-python run.py
-```
-или двойным кликом по `start_telegram_x.bat`.
-
-Приложение откроется в браузере: **http://127.0.0.1:8000**
+- **GitHub Pages**: Settings → Pages → Source: **GitHub Actions**; любой push в `main` публикует `app/static` на `https://gl1ch5.github.io/TgX/`.
+- **Локально**: `python run.py` (или `start_telegram_x.bat`) → **http://localhost:8000**. Service Worker работает только на `localhost` или HTTPS.
+- **Пересборка GramJS**: `cd tools/gramjs && npm install && npm run build`.

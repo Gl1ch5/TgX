@@ -1,41 +1,23 @@
-import sys
-import asyncio
+"""Local preview of TeleX: serves app/static on http://localhost:8000 and opens the browser.
+
+The app itself talks to Telegram directly from the browser (GramJS), so no backend is needed.
+"""
+import functools
+import http.server
+import os
 import webbrowser
-import uvicorn
+from pathlib import Path
 
-# Fix Windows encoding for emojis in console
-if sys.platform == "win32":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-from app.backend.config import API_ID, API_HASH, PROXY_CONFIG, HOST, PORT
+STATIC_DIR = Path(__file__).resolve().parent / "app" / "static"
 
 if __name__ == "__main__":
-    if not API_ID or not API_HASH:
-        print("❌ Не заданы TG_API_ID и TG_API_HASH.")
-        print("   Получите их на https://my.telegram.org и укажите в файле .env (см. .env.example).")
-        sys.exit(1)
-
-    url = f"http://{HOST}:{PORT}"
-    proxy = (
-        f"{PROXY_CONFIG['proxy_type']}://{PROXY_CONFIG['addr']}:{PROXY_CONFIG['port']}"
-        if PROXY_CONFIG else "не используется"
-    )
-    print(f"=====================================================")
-    print(f"  🚀 Запуск Telegram X — Стена каналов (Twitter Style)")
-    print(f"  🌐 URL: {url}")
-    print(f"  🛡️ MTProto Proxy: {proxy}")
-    print(f"  🔑 API ID: {API_ID}")
-    print(f"=====================================================")
-    
-    # Try auto-opening browser
+    port = int(os.getenv("PORT", "8000"))
+    url = f"http://localhost:{port}"
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(STATIC_DIR))
+    handler.extensions_map[".js"] = "text/javascript"
+    print(f"  🚀 TeleX: {url}  (Ctrl+C — остановить)")
     try:
         webbrowser.open(url)
     except Exception:
         pass
-
-    uvicorn.run("app.backend.main:app", host=HOST, port=PORT, reload=False)
+    http.server.ThreadingHTTPServer(("127.0.0.1", port), handler).serve_forever()

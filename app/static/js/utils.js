@@ -4,7 +4,9 @@
  * ====================================================================
  */
 
-import { parseEmojis } from './emoji.js';
+import { parseEmojis, emojifyHtml, escapeHtml } from './emoji.js';
+
+export { escapeHtml };
 
 export function showToast(msg) {
   const toast = document.getElementById('toast');
@@ -62,27 +64,44 @@ export function formatDuration(sec) {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+/**
+ * Makes a raw string safe to embed as a single-quoted JS string inside an
+ * HTML attribute, e.g. onclick="fn('${escapeQuotes(title)}')".
+ */
 export function escapeQuotes(str) {
   if (!str) return '';
-  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  const js = String(str)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, '\\n')
+    .replace(/\u2028|\u2029/g, ' ');
+  return escapeHtml(js);
+}
+
+function linkifyText(html, { urls }) {
+  // Only touch text between tags, and never inside existing links.
+  let inLink = 0;
+  return html.split(/(<[^>]+>)/g).map((part) => {
+    if (part.startsWith('<')) {
+      if (/^<a[\s>]/i.test(part)) inLink++;
+      else if (/^<\/a>/i.test(part)) inLink = Math.max(0, inLink - 1);
+      return part;
+    }
+    if (inLink) return part;
+    let out = part;
+    if (urls) {
+      out = out.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">$1</a>');
+    }
+    out = out.replace(/(^|[^\w&])#([\w\u0400-\u04FF]+)/g, '$1<span class="hashtag cursor-pointer hover:underline" onclick="event.stopPropagation(); window.TelegramX.filterByTag(\'$2\')">#$2</span>');
+    out = out.replace(/(^|[^\w/])@([a-zA-Z0-9_]{4,32})/g, '$1<a href="https://t.me/$2" target="_blank" rel="noopener noreferrer" class="mention hover:underline" onclick="event.stopPropagation()">@$2</a>');
+    return out;
+  }).join('');
 }
 
 export function formatPostText(rawText, htmlText) {
   if (htmlText) {
-    let html = htmlText.replace(/#([\w\u0400-\u04FF_]+)/g, '<span class="hashtag cursor-pointer hover:underline" onclick="event.stopPropagation(); window.TelegramX.filterByTag(\'$1\')">#$1</span>');
-    html = html.replace(/@([a-zA-Z0-9_]{4,32})/g, '<a href="https://t.me/$1" target="_blank" rel="noopener noreferrer" class="mention hover:underline" onclick="event.stopPropagation()">@$1</a>');
-    html = html.replace(/\n/g, '<br/>');
-    return parseEmojis(html);
+    return emojifyHtml(linkifyText(htmlText, { urls: false }).replace(/\n/g, '<br/>'));
   }
   if (!rawText) return '';
-  let html = rawText
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  html = html.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">$1</a>');
-  html = html.replace(/#([\w\u0400-\u04FF_]+)/g, '<span class="hashtag cursor-pointer hover:underline" onclick="event.stopPropagation(); window.TelegramX.filterByTag(\'$1\')">#$1</span>');
-  html = html.replace(/@([a-zA-Z0-9_]{4,32})/g, '<a href="https://t.me/$1" target="_blank" rel="noopener noreferrer" class="mention hover:underline" onclick="event.stopPropagation()">@$1</a>');
-  html = html.replace(/\n/g, '<br/>');
-  return parseEmojis(html);
+  return emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
 }

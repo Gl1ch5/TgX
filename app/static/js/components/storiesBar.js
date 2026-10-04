@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { parseEmojis } from '../emoji.js';
+import { escapeQuotes } from '../utils.js';
 
 export function renderChannelsBar() {
   const bar = document.getElementById('channels-bar');
@@ -33,7 +34,7 @@ export function renderChannelsBar() {
         </div>
         ${ch.unread_count > 0 ? `<span class="absolute top-0 right-0 w-2.5 h-2.5 bg-[#4fae4e] border-2 border-[#000000] rounded-full"></span>` : ''}
       </div>
-      <span class="text-[11px] font-normal text-slate-300 w-12 text-center truncate hover:underline" onclick="window.TelegramX.filterByChannel(${ch.id}, '${ch.title}')">${parseEmojis(ch.title)}</span>
+      <span class="text-[11px] font-normal text-slate-300 w-12 text-center truncate hover:underline" onclick="window.TelegramX.filterByChannel(${ch.id}, '${escapeQuotes(ch.title)}')">${parseEmojis(ch.title)}</span>
     `;
     bar.appendChild(btn);
   });

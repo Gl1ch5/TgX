@@ -128,25 +128,42 @@ export function getEmojiFilename(emojiStr) {
  * Returns HTML string of the Apple Telegram emoji with instant fallback
  */
 export function renderEmoji(emojiChar, extraClass = 'emoji-small') {
+  const safe = escapeHtml(emojiChar);
   const filename = getEmojiFilename(emojiChar);
   if (!filename) {
-    return `<span class="emoji-fallback" style="font-family:'Apple Color Emoji','Segoe UI Emoji',sans-serif;">${emojiChar}</span>`;
+    return `<span class="emoji-fallback" style="font-family:'Apple Color Emoji','Segoe UI Emoji',sans-serif;">${safe}</span>`;
   }
 
-  const cdnUrl = `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/${filename}`;
+  const cdnUrl = `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.1.2/img/apple/64/${encodeURIComponent(filename)}`;
 
-  return `<img class="emoji ${extraClass}" src="${cdnUrl}" alt="${emojiChar}" loading="lazy" decoding="async" draggable="false" onerror="this.outerHTML='${emojiChar}'" />`;
+  return `<img class="emoji ${extraClass}" src="${cdnUrl}" alt="${safe}" loading="lazy" decoding="async" draggable="false" onerror="this.replaceWith(this.alt)" />`;
+}
+
+export function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+const EMOJI_REGEX = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
+
+/**
+ * Replaces unicode emojis inside already-safe HTML with Apple emoji <img> tags
+ */
+export function emojifyHtml(html) {
+  if (!html) return '';
+  return html
+    .split(/(<[^>]*>)/g)
+    .map((part) => (part.startsWith('<') ? part : part.replace(EMOJI_REGEX, (match) => renderEmoji(match))))
+    .join('');
 }
 
 /**
- * Parses text and replaces unicode emojis with Apple emoji <img> tags
+ * Escapes plain text and replaces unicode emojis with Apple emoji <img> tags
  */
 export function parseEmojis(text) {
   if (!text) return '';
-
-  const emojiRegex = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g;
-
-  return text.replace(emojiRegex, (match) => {
-    return renderEmoji(match);
-  });
+  return emojifyHtml(escapeHtml(text));
 }

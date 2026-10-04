@@ -1,115 +1,81 @@
 /**
  * ====================================================================
- * API CLIENT LAYER (Fast Requests & Caching)
+ * API LAYER — talks to Telegram directly from the browser (GramJS).
+ * Keeps the response shapes of the former REST backend.
  * ====================================================================
  */
+
+import { telegram } from './telegram.js';
+
+async function safe(fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    console.error('[TeleX]', e);
+    return telegram.authError(e);
+  }
+}
 
 export const api = {
   // Auth
   async getAuthStatus() {
-    const res = await fetch('/api/auth/status');
-    return await res.json();
+    const isAuth = await telegram.isAuthorized();
+    const user = isAuth ? await telegram.getMe().catch(() => null) : null;
+    return { is_authorized: isAuth, user };
   },
 
-  async startQR() {
-    const res = await fetch('/api/auth/qr/start', { method: 'POST' });
-    return await res.json();
+  startQR(onQR) {
+    return safe(() => telegram.startQrLogin(onQR));
   },
 
-  async checkQR() {
-    const res = await fetch('/api/auth/qr/check');
-    return await res.json();
+  cancelQR() {
+    telegram.cancelQrLogin();
   },
 
-  async requestCode(phone) {
-    const res = await fetch('/api/auth/request-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
-    });
-    return await res.json();
+  requestCode(phone) {
+    return safe(() => telegram.requestPhoneCode(phone));
   },
 
-  async signInCode(code, password = null) {
-    const res = await fetch('/api/auth/sign-in', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, password }),
-    });
-    return await res.json();
+  signInCode(code) {
+    return safe(() => telegram.signInWithCode(code));
   },
 
-  async signInPassword(password) {
-    const res = await fetch('/api/auth/sign-in-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    });
-    return await res.json();
+  signInPassword(password) {
+    return safe(() => telegram.signInWithPassword(password));
   },
 
-  async logout() {
-    const res = await fetch('/api/auth/logout', { method: 'POST' });
-    return await res.json();
+  logout() {
+    return safe(() => telegram.logout());
   },
 
   // Channels & Feed
   async getChannels(refresh = false) {
-    const res = await fetch(`/api/channels?limit=60${refresh ? '&refresh=true' : ''}`);
-    return await res.json();
+    return { channels: await telegram.getChannels(refresh) };
   },
 
-  async getFeed({ feedType = 'all', channelId = null, searchQuery = '', offsetDate = null, limit = 40, refresh = false } = {}) {
-    let url = `/api/feed?feed_type=${feedType}&limit=${limit}`;
-    if (channelId) url += `&channel_id=${channelId}`;
-    if (searchQuery) url += `&q=${encodeURIComponent(searchQuery)}`;
-    if (offsetDate) url += `&offset_date=${offsetDate}`;
-    if (refresh) url += `&refresh=true`;
-
-    const res = await fetch(url);
-    return await res.json();
+  getFeed(params = {}) {
+    return telegram.getFeed(params);
   },
 
   // Comments
   async getComments(channelId, msgId, refresh = false) {
-    const res = await fetch(`/api/post/comments?channel_id=${channelId}&msg_id=${msgId}${refresh ? '&refresh=true' : ''}`);
-    return await res.json();
+    return { comments: await telegram.getComments(channelId, msgId, refresh) };
   },
 
-  async sendComment(channelId, msgId, text) {
-    const res = await fetch('/api/post/comment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel_id: channelId, msg_id: msgId, text }),
-    });
-    return await res.json();
+  sendComment(channelId, msgId, text) {
+    return safe(() => telegram.sendComment(channelId, msgId, text));
   },
 
   // Reactions & Actions
-  async sendReaction(channelId, msgId, emoji) {
-    const res = await fetch('/api/post/react', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel_id: channelId, msg_id: msgId, emoji }),
-    });
-    return await res.json();
+  sendReaction(channelId, msgId, emoji) {
+    return safe(() => telegram.sendReaction(channelId, msgId, emoji));
   },
 
-  async forwardToSaved(channelId, msgId) {
-    const res = await fetch('/api/post/forward-saved', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel_id: channelId, msg_id: msgId }),
-    });
-    return await res.json();
+  forwardToSaved(channelId, msgId) {
+    return safe(() => telegram.forwardToSaved(channelId, msgId));
   },
 
-  async toggleFavorite(postId) {
-    const res = await fetch('/api/post/favorite', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ post_id: postId }),
-    });
-    return await res.json();
+  async toggleFavorite(postId, post = null) {
+    return { post_id: postId, is_favorite: telegram.toggleFavorite(postId, post) };
   },
 };
