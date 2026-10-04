@@ -35,7 +35,7 @@ function openAttr(post, idx) {
 
 /** Tiny blurred preview embedded in the message (Telegram's "stripped" thumbnail): shows instantly, no network. */
 function previewSpan(item) {
-  return item.preview ? `<span class="tx-preview" style="background-image:url('${item.preview}')"></span>` : '';
+  return item.preview ? `<span class="tx-media-preview" style="background-image:url('${item.preview}')"></span>` : '';
 }
 
 function photoTile(post, item, idx, fill = false) {

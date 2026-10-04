@@ -1,5 +1,6 @@
 import * as esbuild from 'esbuild';
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -21,6 +22,11 @@ const shims = {
     }));
     build.onLoad({ filter: /^os$/, namespace: 'shim' }, () => ({ contents: 'export default { type: () => "Browser", release: () => "1.0" };' }));
     build.onLoad({ filter: /.*/, namespace: 'empty' }, () => ({ contents: 'module.exports = {};' }));
+    // GramJS pops a browser alert() on an unknown constructor (a corrupted packet it then skips).
+    build.onLoad({ filter: /telegram[\\/]errors[\\/]Common\.js$/ }, async (a) => ({
+      contents: (await readFile(a.path, 'utf8')).replace(/if \(typeof alert !== "undefined"\) \{[\s\S]*?\}\n/, ''),
+      loader: 'js',
+    }));
   },
 };
 

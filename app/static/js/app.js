@@ -287,6 +287,16 @@ function setupMediaFadeIn() {
   document.addEventListener('load', done, true);
   document.addEventListener('loadeddata', done, true);
   document.addEventListener('error', failed, true);
+  // Cards are built off-DOM: a cached image can finish loading before it is
+  // inserted, and that load event never reaches the document. Catch those here.
+  const markReady = (root) => {
+    root.querySelectorAll?.('img:not(.is-loaded)').forEach((img) => {
+      if (img.complete && img.naturalWidth && img.closest(FADE_IN)) done({ target: img });
+    });
+  };
+  new MutationObserver((records) => {
+    for (const r of records) r.addedNodes.forEach((n) => { if (n.nodeType === 1) markReady(n.tagName === 'IMG' ? n.parentNode : n); });
+  }).observe(document.body, { childList: true, subtree: true });
 }
 
 function setupResilience() {
@@ -405,4 +415,7 @@ async function logoutTelegram() {
   showToast('Вы вышли из аккаунта');
 }
 
-window.addEventListener('DOMContentLoaded', initApp);
+// Modules may finish evaluating after DOMContentLoaded (tg.js awaits the chosen
+// Telegram implementation), so start right away if the document is already parsed.
+if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', initApp);
+else initApp();
