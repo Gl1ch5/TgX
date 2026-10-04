@@ -1,7 +1,7 @@
 /* App shell: one centered column for every screen (phone and desktop) */
 .tx-app { position: relative; z-index: 10; min-height: 100vh; min-height: 100dvh; }
 
-.tx-screen { display: none; padding-bottom: calc(var(--tx-dock-h) + 28px + env(safe-area-inset-bottom)); }
+.tx-screen { display: none; padding-bottom: calc(var(--tx-dock-h) + 28px + var(--tx-safe-bottom)); }
 .tx-app[data-view="wall"] #screen-wall,
 .tx-app[data-view="settings"] #screen-settings,
 .tx-app[data-view="profile"] #screen-profile,
@@ -9,7 +9,7 @@
 
 .tx-app[data-view="settings"], .tx-app[data-view="profile"] { background: var(--tx-bg); }
 .tx-app[data-view="thread"] .tx-dock { display: none; }
-.tx-app[data-view="thread"] #screen-thread { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+.tx-app[data-view="thread"] #screen-thread { padding-bottom: calc(76px + var(--tx-safe-bottom)); }
 
 .tx-column {
   width: 100%;
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: calc(8px + env(safe-area-inset-top)) 0 8px;
+  padding: calc(8px + var(--tx-safe-top)) 0 8px;
 }
 
 .tx-glass {
@@ -68,7 +68,7 @@
 .tx-pill-sub { font-size: 14px; color: var(--tx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Plain (black) header used by settings/profile */
-.tx-titlebar { display: flex; align-items: center; gap: 4px; height: 56px; padding-top: env(safe-area-inset-top); }
+.tx-titlebar { display: flex; align-items: center; gap: 4px; height: 56px; padding-top: var(--tx-safe-top); }
 .tx-titlebar h1 { flex: 1; margin: 0 0 0 8px; font-size: 22px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tx-icon-btn {
   width: 44px; height: 44px; border-radius: 50%;
@@ -79,7 +79,7 @@
 .tx-icon-btn .icon { font-size: 24px; }
 
 /* Search pill + folder tabs (wall) */
-.tx-subbar { position: sticky; top: calc(66px + env(safe-area-inset-top)); z-index: 29; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.tx-subbar { position: sticky; top: calc(66px + var(--tx-safe-top)); z-index: 29; display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
 .tx-search { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 8px 0 16px; border-radius: 999px; }
 .tx-search .icon { font-size: 22px; color: var(--tx-text-2); }
 .tx-search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: none; color: #fff; font: inherit; font-size: 16.5px; }
@@ -143,7 +143,7 @@
 /* Floating jump-to-top button with new-posts counter (Telegram page-down style) */
 .tx-jump {
   position: fixed; z-index: 38; right: max(14px, calc(50% - var(--tx-column-w) / 2 + 14px));
-  bottom: calc(80px + env(safe-area-inset-bottom));
+  bottom: calc(80px + var(--tx-safe-bottom));
   width: 48px; height: 48px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; color: #fff;
   opacity: 0; transform: translateY(12px) scale(0.85); pointer-events: none;

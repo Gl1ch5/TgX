@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -76,6 +77,10 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
         )
+        if (Build.VERSION.SDK_INT >= 29) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
         window.setBackgroundDrawableResource(R.color.black)
 
         downloads = Downloads(this)
@@ -101,10 +106,15 @@ class MainActivity : ComponentActivity() {
     // ---------------------------------------------------------------- insets
 
     /**
-     * The page is padded natively by the system bars / cutout / keyboard, so the
-     * web app never sits under the status or navigation bar even on WebView
-     * versions that report env(safe-area-inset-*) as 0. Bars stay black.
+     * Edge-to-edge like Telegram: the page draws under the transparent status
+     * and navigation bars. Their sizes are handed to the page as CSS variables
+     * (--tx-safe-top / --tx-safe-bottom, in CSS px) because some WebView
+     * versions report env(safe-area-inset-*) as 0. Only side cutouts and the
+     * keyboard are padded natively.
      */
+    private var insetTopPx = 0
+    private var insetBottomPx = 0
+
     private fun applyInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             if (customView != null) {
@@ -112,10 +122,27 @@ class MainActivity : ComponentActivity() {
             } else {
                 val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
                 val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-                v.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
+                val keyboard = ime.bottom > bars.bottom
+                v.setPadding(bars.left, 0, bars.right, if (keyboard) ime.bottom else 0)
+                insetTopPx = bars.top
+                insetBottomPx = if (keyboard) 0 else bars.bottom
+                pushInsetsToPage()
             }
             WindowInsetsCompat.CONSUMED
         }
+    }
+
+    private fun pushInsetsToPage() {
+        if (!::webView.isInitialized) return
+        val density = resources.displayMetrics.density
+        val top = insetTopPx / density
+        val bottom = insetBottomPx / density
+        webView.evaluateJavascript(
+            "(function(){var s=document.documentElement.style;" +
+                "s.setProperty('--tx-safe-top','${top}px');s.setProperty('--tx-safe-bottom','${bottom}px');" +
+                "document.documentElement.classList.add('tx-native');})()",
+            null,
+        )
     }
 
     // -------------------------------------------------------------- web view
@@ -249,6 +276,7 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onPageFinished(view: WebView, url: String) {
+            pushInsetsToPage()
             firstPaint = true
             if (clearHistoryOnLoad && !showingError && url.startsWith("http")) {
                 clearHistoryOnLoad = false
@@ -401,6 +429,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         webView.onResume()
+        webView.resumeTimers()
+        // Let the page re-check its Telegram connection after being in background.
+        webView.evaluateJavascript("window.dispatchEvent(new Event('tx:resume'))", null)
     }
 
     override fun onPause() {

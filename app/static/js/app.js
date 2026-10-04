@@ -159,6 +159,7 @@ async function initApp() {
 
   wall.setupInfiniteScroll();
   setupKeyboard();
+  setupResilience();
   api.onReadChange(() => wall.loadChannels());
 
   try {
@@ -198,6 +199,35 @@ function startLive() {
     onReactions: wall.onLiveReactions,
     onViews: wall.onLiveViews,
   });
+}
+
+/**
+ * Coming back to the tab/app: re-check the Telegram connection and refresh.
+ * Also retry images that failed while the connection was down.
+ */
+function setupResilience() {
+  let lastCheck = Date.now();
+  const revive = async () => {
+    if (!state.isAuth || Date.now() - lastCheck < 5000) return;
+    lastCheck = Date.now();
+    const reconnected = await api.ensureAlive();
+    if (reconnected || document.getElementById('app').dataset.view === 'wall') wall.loadFeed(true);
+  };
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') revive(); });
+  window.addEventListener('tx:resume', revive);
+  window.addEventListener('online', revive);
+  setInterval(() => { if (document.visibilityState === 'visible' && state.isAuth) api.ensureAlive(); }, 60000);
+
+  document.addEventListener('error', (e) => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement)) return;
+    const src = img.getAttribute('src') || '';
+    if (!src.startsWith('media/')) return;
+    const tries = Number(img.dataset.retry || 0);
+    if (tries >= 3) return;
+    img.dataset.retry = String(tries + 1);
+    setTimeout(() => { img.src = src.replace(/[?#].*$/, '') + `?r=${tries + 1}`; }, 1500 * (tries + 1));
+  }, true);
 }
 
 function setupKeyboard() {

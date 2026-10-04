@@ -42,7 +42,7 @@
 /* Composer fixed at the bottom */
 .tx-composer {
   position: fixed; z-index: 40; left: 0; right: 0; bottom: 0;
-  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
+  padding: 8px 10px calc(10px + var(--tx-safe-bottom));
   background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
 }
 .tx-composer-inner { max-width: calc(var(--tx-column-w) - 20px); margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }

@@ -76,6 +76,10 @@ class PersistentSession extends StringSession {
 
 const SESSION_DEAD = /AUTH_KEY_UNREGISTERED|AUTH_KEY_INVALID|SESSION_REVOKED|SESSION_EXPIRED|USER_DEACTIVATED/;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+]);
 
 // ---------------- HTML formatting ----------------
 
@@ -219,6 +223,34 @@ class TelegramService {
     } finally {
       this.connecting = null;
     }
+  }
+
+  /**
+   * Make sure the MTProto connection is really alive (mobile WebViews freeze
+   * sockets in background). A ping with a short timeout; on failure the
+   * client is reconnected from scratch. Resolves true if it had to reconnect.
+   */
+  async ensureAlive() {
+    if (!this.client || !this.hasSession()) return false;
+    if (this.reviving) return this.reviving;
+    this.reviving = (async () => {
+      try {
+        await withTimeout(this.client.invoke(new Api.Ping({ pingId: bigInt(Date.now()) })), 6000);
+        return false;
+      } catch (e) {
+        console.warn('[TeleX] connection stale, reconnecting', e && e.message);
+        try { await withTimeout(this.client.disconnect(), 3000); } catch {}
+        this.client = null;
+        this.connecting = null;
+        this.liveBound = false;
+        await this.getClient();
+        if (this.live) this.startLive(this.live).catch(() => {});
+        return true;
+      } finally {
+        this.reviving = null;
+      }
+    })();
+    return this.reviving;
   }
 
   /** Open the MTProto connection early (in parallel with UI start-up). */
@@ -1262,6 +1294,15 @@ class TelegramService {
    * With `range` set, only one aligned chunk of a document is fetched (video/audio streaming).
    */
   async fetchMedia(path, range) {
+    try {
+      return await withTimeout(this._fetchMedia(path, range), range ? 45000 : 60000);
+    } catch (e) {
+      if (e && e.message === 'timeout') this.ensureAlive().catch(() => {});
+      throw e;
+    }
+  }
+
+  async _fetchMedia(path, range) {
     const [kind, a, b] = path.split('/');
     const client = await this.getClient();
 

@@ -1,5 +1,7 @@
 /* TeleX design tokens — Telegram for Android, dark theme */
 :root {
+  --tx-safe-top: env(safe-area-inset-top, 0px);
+  --tx-safe-bottom: env(safe-area-inset-bottom, 0px);
   --tx-bg: #000000;
   --tx-surface: #1c1c1d;
   --tx-surface-2: #262628;

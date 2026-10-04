@@ -52,6 +52,10 @@ export const api = {
     return safe(() => telegram.logout());
   },
 
+  ensureAlive() {
+    return telegram.ensureAlive().catch(() => false);
+  },
+
   warmUp() {
     telegram.warmUp();
   },

@@ -183,7 +183,7 @@
 /* "N new posts" pill */
 .tx-new-pill {
   position: fixed; z-index: 45; left: 50%; transform: translateX(-50%);
-  top: calc(130px + env(safe-area-inset-top)); display: inline-flex; align-items: center; gap: 6px;
+  top: calc(130px + var(--tx-safe-top)); display: inline-flex; align-items: center; gap: 6px;
   background: var(--tx-accent-fill) !important; color: #fff; padding: 8px 16px; font-size: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); animation: tx-pop 0.2s ease-out;
 }
