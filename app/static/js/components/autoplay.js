@@ -8,12 +8,18 @@
 
 import { formatDuration } from '../utils.js';
 
+// While the user flings through the feed nothing starts downloading: a video
+// only begins once it has stayed on screen for a moment.
+const SETTLE_MS = 350;
 const observer = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
   for (const e of entries) {
     const v = e.target;
+    clearTimeout(v._settle);
     if (e.isIntersecting && e.intersectionRatio >= 0.5) {
-      if (!v.src && v.dataset.src) v.src = v.dataset.src;
-      v.play().catch(() => {});
+      v._settle = setTimeout(() => {
+        if (!v.src && v.dataset.src) v.src = v.dataset.src;
+        v.play().catch(() => {});
+      }, v.src ? 0 : SETTLE_MS);
     } else {
       v.pause();
     }
@@ -23,15 +29,18 @@ const observer = 'IntersectionObserver' in window ? new IntersectionObserver((en
 // Warm-up: start buffering a bit before the video scrolls into view.
 const preloader = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
   for (const e of entries) {
-    if (!e.isIntersecting) continue;
     const v = e.target;
-    if (!v.src && v.dataset.src) {
-      v.preload = 'auto';
-      v.src = v.dataset.src;
-    }
-    preloader.unobserve(v);
+    clearTimeout(v._warm);
+    if (!e.isIntersecting) continue;
+    v._warm = setTimeout(() => {
+      if (!v.src && v.dataset.src) {
+        v.preload = 'auto';
+        v.src = v.dataset.src;
+      }
+      preloader.unobserve(v);
+    }, 600);
   }
-}, { rootMargin: '600px 0px' }) : null;
+}, { rootMargin: '300px 0px' }) : null;
 
 function tick(v) {
   const pill = v.parentElement && v.parentElement.querySelector('.tx-countdown');

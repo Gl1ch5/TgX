@@ -135,7 +135,7 @@ export async function saveMedia(post) {
   for (const [n, it] of items.entries()) {
     const photo = it.type === 'photo';
     const name = `telex_${post.channel_id}_${post.msg_id}${items.length > 1 ? `_${n + 1}` : ''}.${photo ? 'jpg' : 'mp4'}`;
-    const url = new URL(it.url, location.href).href;
+    const url = new URL(it.full_url || it.url, location.href).href;
     if (window.__telexDl) {
       window.__telexDl(url, name, photo ? 'image/jpeg' : 'video/mp4');
       continue;

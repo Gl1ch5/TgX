@@ -208,13 +208,23 @@ function show(index, dir = 0) {
   const counter = el.querySelector('.tx-viewer-counter');
   counter.textContent = items.length > 1 ? `${view.index + 1} из ${items.length}` : '';
   el.querySelectorAll('.tx-viewer-nav').forEach((b) => b.classList.toggle('tx-hidden', items.length < 2));
-  el.querySelector('[data-act="download"]').href = item.url;
+  el.querySelector('[data-act="download"]').href = item.full_url || item.url;
 
   if (view.video) view.video.pause();
   view.video = null;
 
   if (item.type === 'photo') {
+    // Feed-size copy (already cached) first, then swap in the full-resolution photo.
     stage.innerHTML = `<div class="tx-viewer-spinner"></div><img src="${escapeHtml(item.url)}" alt="" />`;
+    if (item.full_url && item.full_url !== item.url) {
+      const hi = new Image();
+      hi.decoding = 'async';
+      hi.onload = () => {
+        const img = stage.querySelector('img');
+        if (img && img.getAttribute('src') === item.url) img.src = item.full_url;
+      };
+      hi.src = item.full_url;
+    }
     stage.querySelector('img').onload = () => stage.querySelector('.tx-viewer-spinner')?.remove();
     seekRow.classList.add('tx-hidden');
     return;

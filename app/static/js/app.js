@@ -269,16 +269,22 @@ function startLive() {
 /** Media fade in (with a blur-to-sharp settle) once loaded; until then the tile shimmers. */
 const FADE_IN = '.tx-media, .tx-round, .tx-pf-cell, .tx-media-cell, .tx-webpage, .tx-story-media, .tx-wp';
 function setupMediaFadeIn() {
+  const tileOf = (el) => el.closest('.tx-media-tap, .tx-grid > *, .tx-round, .tx-pf-cell, .tx-media-cell');
   const done = (e) => {
     const el = e.target;
     if (!(el instanceof HTMLImageElement || el instanceof HTMLVideoElement)) return;
     if (!el.closest(FADE_IN)) return;
     el.classList.add('is-loaded');
-    el.closest('.tx-media-tap, .tx-grid > *, .tx-round, .tx-pf-cell, .tx-media-cell')?.classList.add('has-loaded');
+    tileOf(el)?.classList.add('has-loaded');
+  };
+  // A failed load keeps the blurred preview (the retry logic tries again) but stops the shimmer.
+  const failed = (e) => {
+    const el = e.target;
+    if (el instanceof HTMLImageElement && el.closest(FADE_IN)) tileOf(el)?.classList.add('has-error');
   };
   document.addEventListener('load', done, true);
   document.addEventListener('loadeddata', done, true);
-  document.addEventListener('error', done, true);
+  document.addEventListener('error', failed, true);
 }
 
 function setupResilience() {

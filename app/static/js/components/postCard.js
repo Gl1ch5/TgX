@@ -33,13 +33,18 @@ function openAttr(post, idx) {
   return `data-viewer="${post.id}:${idx}" onclick="event.stopPropagation(); window.TelegramX.openViewer('${post.id}', ${idx})"`;
 }
 
+/** Tiny blurred preview embedded in the message (Telegram's "stripped" thumbnail): shows instantly, no network. */
+function previewSpan(item) {
+  return item.preview ? `<span class="tx-preview" style="background-image:url('${item.preview}')"></span>` : '';
+}
+
 function photoTile(post, item, idx, fill = false) {
   const style = fill ? 'width:100%;height:100%' : aspect(item);
   if (!getPrefs().autoloadPhotos) {
     return `<span class="tx-media-tap" style="${style};background:#1a1a1c" data-src="${escapeHtml(item.url)}" data-post="${post.id}" data-idx="${idx}" onclick="event.stopPropagation(); window.TelegramX.loadPhoto(this)">
       <span class="tx-media-load"><span class="tx-play"><i class="icon icon-download"></i></span></span></span>`;
   }
-  return `<img src="${escapeHtml(item.url)}" loading="lazy" decoding="async" style="${style}" ${openAttr(post, idx)} />`;
+  return `<span class="tx-media-tap tx-ph ${item.preview ? 'has-preview' : ''}" style="${style}" ${openAttr(post, idx)}>${previewSpan(item)}<img src="${escapeHtml(item.url)}" loading="lazy" decoding="async" alt="" /></span>`;
 }
 
 const AUTOPLAY_MAX_SEC = 90;
@@ -49,13 +54,15 @@ function videoTile(post, item, idx, fill = false) {
   const poster = item.thumb_url ? `poster="${escapeHtml(item.thumb_url)}"` : '';
   if (getPrefs().autoplayVideos && item.duration && item.duration <= AUTOPLAY_MAX_SEC) {
     return `
-      <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
+      <span class="tx-media-tap ${item.preview ? 'has-preview' : ''}" style="${style}" ${openAttr(post, idx)}>
+        ${previewSpan(item)}
         <video data-autoplay="${post.id}:${idx}" data-src="${escapeHtml(item.url)}" muted loop playsinline preload="none" ${poster} style="width:100%;height:100%;object-fit:cover"></video>
         <span class="tx-media-pill"><span class="tx-countdown">${formatDuration(item.duration)}</span> <i class="icon icon-speaker-muted-story"></i></span>
       </span>`;
   }
   return `
-    <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
+    <span class="tx-media-tap ${item.preview ? 'has-preview' : ''}" style="${style}" ${openAttr(post, idx)}>
+      ${previewSpan(item)}
       ${item.thumb_url ? `<img src="${escapeHtml(item.thumb_url)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" />` : '<span style="display:block;width:100%;height:100%;background:#000"></span>'}
       <span class="tx-media-pill">${formatDuration(item.duration)}</span>
       <span class="tx-play"><i class="icon icon-play"></i></span>
@@ -67,7 +74,8 @@ function gifTile(post, item, idx, fill = false) {
   const poster = item.thumb_url ? `poster="${escapeHtml(item.thumb_url)}"` : '';
   const auto = getPrefs().autoplayGifs;
   return `
-    <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
+    <span class="tx-media-tap ${item.preview ? 'has-preview' : ''}" style="${style}" ${openAttr(post, idx)}>
+      ${previewSpan(item)}
       <video ${auto ? `data-autoplay="${post.id}:${idx}" data-src` : 'src'}="${escapeHtml(item.url)}" muted loop playsinline preload="none" ${poster} style="width:100%;height:100%;object-fit:cover"></video>
       <span class="tx-media-pill">GIF</span>
     </span>`;

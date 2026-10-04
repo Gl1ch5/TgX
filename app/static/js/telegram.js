@@ -7,7 +7,7 @@
  * Telegram over WebSocket. The session string lives in localStorage.
  */
 
-import { TelegramClient, Api, utils, StringSession, computeCheck, bigInt } from './vendor/gramjs.js';
+import { TelegramClient, Api, utils, StringSession, computeCheck, bigInt, Buffer } from './vendor/gramjs.js';
 import { getPrefs } from './core/prefs.js';
 
 // Telegram application credentials (https://my.telegram.org). Public by design:
@@ -756,6 +756,26 @@ class TelegramService {
     }).filter(Boolean).sort((a, b) => (b.paid - a.paid) || (b.count - a.count));
   }
 
+  /** data: URL of the tiny blurred preview Telegram embeds in photo/video sizes. */
+  strippedPreview(sizes) {
+    const st = (sizes || []).find((x) => x instanceof Api.PhotoStrippedSize);
+    if (!st || !st.bytes || st.bytes.length < 3) return null;
+    try {
+      return `data:image/jpeg;base64,${Buffer.from(utils.strippedPhotoToJpg(st.bytes)).toString('base64')}`;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Photo size for the feed: the largest one up to ~1280px (the viewer loads the original). */
+  feedPhotoSize(photo) {
+    const sizes = (photo.sizes || []).filter((x) => (x instanceof Api.PhotoSize || x instanceof Api.PhotoSizeProgressive) && x.w && x.h);
+    if (!sizes.length) return undefined;
+    sizes.sort((a, b) => Math.max(a.w, a.h) - Math.max(b.w, b.h));
+    const fit = sizes.filter((x) => Math.max(x.w, x.h) <= 1280);
+    return fit.length ? fit[fit.length - 1] : sizes[0];
+  }
+
   mediaOf(msg, channelId) {
     const media = msg.media;
     const base = `${channelId}/${msg.id}`;
@@ -766,7 +786,15 @@ class TelegramService {
       const big = sizes[sizes.length - 1] || {};
       return {
         type: 'photo',
-        items: [{ type: 'photo', msg_id: msg.id, url: `media/photo/${base}`, width: big.w || null, height: big.h || null }],
+        items: [{
+          type: 'photo',
+          msg_id: msg.id,
+          url: `media/photo/${base}`,
+          full_url: `media/photofull/${base}`,
+          preview: this.strippedPreview(media.photo.sizes),
+          width: big.w || null,
+          height: big.h || null,
+        }],
         webpage: null,
       };
     }
@@ -788,6 +816,7 @@ class TelegramService {
         msg_id: msg.id,
         url: `media/doc/${base}`,
         thumb_url: hasThumb ? `media/thumb/${base}` : null,
+        preview: info.sticker ? null : this.strippedPreview(doc.thumbs),
         mime: doc.mimeType || '',
         size: Number(doc.size || 0),
         is_voice: info.voice,
@@ -1679,7 +1708,13 @@ class TelegramService {
     const msg = await this.getMessage(Number(a), Number(b));
     if (!msg || !msg.media) return null;
 
-    if (kind === 'photo' || kind === 'webpage') {
+    if (kind === 'photo' && msg.media instanceof Api.MessageMediaPhoto && msg.media.photo) {
+      const thumb = this.feedPhotoSize(msg.media.photo);
+      const bytes = await client.downloadMedia(msg, thumb ? { thumb: thumb.type } : {});
+      return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
+    }
+
+    if (kind === 'photo' || kind === 'photofull' || kind === 'webpage') {
       const bytes = await client.downloadMedia(msg, {});
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
     }
