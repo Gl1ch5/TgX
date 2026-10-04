@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var root: FrameLayout
     private lateinit var webView: WebView
     private lateinit var downloads: Downloads
+    private lateinit var updater: Updater
 
     private val startedAt = SystemClock.uptimeMillis()
     private var firstPaint = false
@@ -84,6 +85,7 @@ class MainActivity : ComponentActivity() {
         window.setBackgroundDrawableResource(R.color.black)
 
         downloads = Downloads(this)
+        updater = Updater(this)
         root = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
         webView = WebView(this).apply {
             setBackgroundColor(Color.BLACK) // no white flash before the page paints
@@ -101,6 +103,7 @@ class MainActivity : ComponentActivity() {
 
         val restored = savedInstanceState?.let { webView.restoreState(it) } != null
         if (!restored) webView.loadUrl(AppConfig.START_URL)
+        updater.check()
     }
 
     // ---------------------------------------------------------------- insets
@@ -249,6 +252,10 @@ class MainActivity : ComponentActivity() {
     private fun onBridgeMessage(message: String) {
         if (message == "retry") {
             retry()
+            return
+        }
+        if (message == "checkUpdate") {
+            updater.check(manual = true)
             return
         }
         try {
@@ -432,6 +439,8 @@ class MainActivity : ComponentActivity() {
         webView.resumeTimers()
         // Let the page re-check its Telegram connection after being in background.
         webView.evaluateJavascript("window.dispatchEvent(new Event('tx:resume'))", null)
+        updater.onResume()
+        updater.check()
     }
 
     override fun onPause() {
@@ -445,6 +454,7 @@ class MainActivity : ComponentActivity() {
             runCatching { (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).unregisterNetworkCallback(it) }
         }
         downloads.shutdown()
+        updater.shutdown()
         (webView.parent as? ViewGroup)?.removeView(webView)
         webView.destroy()
         super.onDestroy()

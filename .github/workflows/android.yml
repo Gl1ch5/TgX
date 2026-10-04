@@ -72,6 +72,14 @@ jobs:
           else
             cp "$debug" dist/TeleX-android.apk
           fi
+          cat > dist/version.json <<JSON
+          {
+            "versionCode": ${TELEX_VERSION_CODE},
+            "versionName": "${TELEX_VERSION_NAME}",
+            "apk": "https://github.com/${{ github.repository }}/releases/download/nightly/TeleX-android.apk",
+            "commit": "${{ github.sha }}"
+          }
+          JSON
           ls -la dist
 
       - uses: actions/upload-artifact@v4
@@ -90,4 +98,6 @@ jobs:
           make_latest: false
           overwrite_files: true
           fail_on_unmatched_files: true
-          files: native/android/dist/*.apk
+          files: |
+            native/android/dist/*.apk
+            native/android/dist/version.json
