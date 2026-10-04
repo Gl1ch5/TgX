@@ -6,7 +6,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { showToast, formatNumber, escapeQuotes } from '../utils.js';
+import { showToast, formatNumber, escapeQuotes, haptic } from '../utils.js';
 import { renderEmoji } from '../emoji.js';
 import { hydrateStickers } from './sticker.js';
 
@@ -39,6 +39,7 @@ export function renderReactions(post, popIndex = -1) {
 
 /** Toggle a reaction on a post; one own reaction like a non-premium Telegram user. */
 export async function sendReaction(channelId, msgId, emoji, postId, customId = null) {
+  haptic();
   const post = state.posts.find((p) => p.id === postId) || (state.threadPost && state.threadPost.id === postId ? state.threadPost : null);
   let send = { emoji, customId };
 

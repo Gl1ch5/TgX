@@ -148,3 +148,10 @@ export function formatPhone(raw) {
   }
   return '+' + digits.replace(/(\d{3})(?=\d)/g, '$1 ');
 }
+
+/** Light haptic tick (Android app / mobile browsers that support it). */
+export function haptic(ms = 8) {
+  try {
+    if (navigator.vibrate && !document.body.classList.contains('tx-reduce-motion')) navigator.vibrate(ms);
+  } catch {}
+}

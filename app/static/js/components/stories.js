@@ -9,7 +9,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { escapeHtml, showToast } from '../utils.js';
+import { escapeHtml, showToast, haptic } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { avatarHtml } from './avatar.js';
 import { openStoryViewer } from './storyViewer.js';
@@ -174,11 +174,19 @@ export function setupStoriesBar() {
   window.addEventListener('touchstart', (e) => {
     startY = window.scrollY <= 0 && document.getElementById('app').dataset.view === 'wall' ? e.touches[0].clientY : null;
   }, { passive: true });
+  // Pull at the top: first the stories open; pulling again refreshes the feed.
   window.addEventListener('touchmove', (e) => {
-    if (startY == null || expanded) return;
-    if (e.touches[0].clientY - startY > 56) {
+    if (startY == null) return;
+    const dy = e.touches[0].clientY - startY;
+    const hasStories = top.classList.contains('has-stories');
+    if (!expanded && hasStories && dy > 56) {
       startY = null;
+      haptic();
       setExpanded(true);
+    } else if ((expanded || !hasStories) && dy > 110) {
+      startY = null;
+      haptic(12);
+      window.TelegramX.refreshFeed();
     }
   }, { passive: true });
   let wheelPull = 0;

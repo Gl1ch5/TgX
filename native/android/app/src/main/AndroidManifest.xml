@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Self-update: hand the downloaded APK from the nightly release to the installer. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Light haptic ticks from the page (navigator.vibrate). -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Only needed to save downloads into the public Downloads folder before Android 10. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

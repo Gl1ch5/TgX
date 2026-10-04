@@ -33,48 +33,37 @@
 
 ## 2. Карта файлов и каталогов
 
-> С версии 3.0 у TeleX **нет сервера**. Весь клиент Telegram (MTProto через WebSocket) работает прямо в браузере на GramJS, поэтому сайт публикуется на GitHub Pages как статика.
+> У TeleX **нет сервера**. Клиент Telegram (MTProto через WebSocket, GramJS) работает прямо на странице; сайт — статика на GitHub Pages.
 
 ```
 TgX/
-├── index.html, .nojekyll                 # Корень Pages (ветка): переадресация в app/static/
-├── .github/workflows/pages.yml           # Деплой app/static через GitHub Actions (push в main)
-├── app/static/                           # ВЕСЬ сайт
-│   ├── index.html                        # Экраны: стена, обсуждение, настройки, профиль + док
-│   ├── sw.js                             # Service Worker: media/… (аватары, фото, стикеры, стрим видео)
-│   ├── emoji/apple/64/                   # Оригинальный набор Apple-эмодзи (как в Telegram)
-│   ├── wallpapers/                       # SVG-обои Telegram
-│   ├── css/
-│   │   ├── telex.css                     # Точка входа: @import модулей ниже
-│   │   ├── tx/tokens.css                 # Цвета, радиусы, шрифт, слой обоев
-│   │   ├── tx/layout.css                 # Экраны, стеклянная шапка, поиск, табы, пустые состояния
-│   │   ├── tx/dock.css                   # Плавающая панель вкладок
-│   │   ├── tx/post.css                   # Пост, медиа, реакции, стикеры, меню
-│   │   ├── tx/thread.css                 # Комментарии и поле ввода
-│   │   ├── tx/settings.css               # Группы, строки, переключатели, ползунки
-│   │   ├── tx/viewer.css                 # Полноэкранный просмотр медиа
-│   │   └── telegram-icons.css, telegram-theme.css, animations.css
+├── index.html, site/                     # Лендинг (корень Pages): landing.css, shots/*.jpg, phone.svg
+├── .github/workflows/                    # pages.yml (лендинг + app), android.yml (APK + version.json), windows.yml
+├── app/static/                           # Само приложение
+│   ├── index.html                        # Экраны: стена, канал, обсуждение, настройки, профиль + док
+│   ├── sw.js                             # Service Worker: media/… (кэш + Range-стриминг doc/story)
+│   ├── icons/android/                    # Оригинальные иконки Telegram Android (генерирует tools/icons)
+│   ├── icons/tabs/                       # Lottie-иконки дока, icons/telex.svg — логотип
+│   ├── css/telex.css → tx/*.css          # tokens, layout, avatar, dock, post, thread, settings, viewer,
+│   │                                     #   stories (шапка, истории, режим канала), profile, icons-android
 │   └── js/
-│       ├── app.js                        # Сборка: window.TelegramX, init, навигация
-│       ├── api.js, telegram.js, media.js # Слой Telegram (GramJS) и мост медиа
-│       ├── emoji.js, emoji-data.js       # Apple-эмодзи
-│       ├── core/prefs.js                 # Настройки (localStorage) + применение оформления
-│       ├── core/nav.js                   # Экраны и история браузера (кнопка «назад»)
-│       ├── views/wall.js                 # Стена: лента, шапка, табы, поиск, «прочитано»
-│       ├── views/thread.js               # Обсуждение (комментарии)
-│       ├── views/settings.js             # Настройки и подстраницы
-│       ├── views/profile.js              # Профиль
-│       ├── components/postCard.js        # Пост (как сообщение в группе Telegram)
-│       ├── components/reactions.js       # Реакции: эмодзи, премиум (custom emoji), звёзды
-│       ├── components/sticker.js         # Стикеры и custom emoji: webp / webm / tgs (Lottie)
-│       ├── components/postMenu.js        # Меню поста с полосой реакций, действия
-│       ├── components/mediaViewer.js     # Плеер/просмотрщик в стиле Telegram
-│       ├── components/audioPlayer.js     # Аудио и голосовые (волна)
-│       ├── components/avatar.js, ui.js   # Аватары и конструкторы строк/переключателей
-│       ├── components/authModal.js, wallpaperTheme.js
-│       └── vendor/                       # gramjs.js, lottie_light.min.js, tailwindcss.js, qrcode.min.js
+│       ├── app.js                        # window.TelegramX, init, навигация, устойчивость соединения
+│       ├── telegram.js, api.js, media.js # GramJS-клиент; тонкий API; мост SW ↔ GramJS с очередью приоритетов
+│       ├── version.js                    # APP_VERSION, автор
+│       ├── core/prefs.js, nav.js         # Настройки; экраны + история (Back)
+│       ├── core/devtools.js              # Логи, оверлей соединения, диагностика
+│       ├── views/wall.js                 # Стена + режим канала (закреп, нижняя панель, меню)
+│       ├── views/channel.js              # Страница канала
+│       ├── views/thread.js               # Комментарии (поиск, кнопка вниз)
+│       ├── views/settings.js             # Настройки, «Энергосбережение», «О TeleX», «Для разработчиков»
+│       ├── views/profile.js              # Свой профиль (+ редактирование, фото)
+│       └── components/                   # postCard, reactions, sticker, postMenu, mediaViewer, autoplay,
+│                                         #   stories (шапка), storyViewer, audioPlayer, dock, avatar, ui, …
+├── native/android/                       # WebView-оболочка: MainActivity, Updater (автообновление), Downloads
+├── native/desktop/                       # Electron-оболочка для Windows
 ├── tools/gramjs/                         # Сборка vendor/gramjs.js
-└── run.py, start_telegram_x.bat          # Локальный предпросмотр
+├── tools/icons/extract.py                # Иконки из DrKLO/Telegram → icons/android + css/tx/icons-android.css
+└── run.py                                # Локальный предпросмотр (лендинг + /app/static/)
 ```
 
 ---
@@ -90,9 +79,10 @@ TgX/
 - `toHtml(text, entities)` — форматирование сущностей в безопасный HTML (ссылки только `http(s)`, `tg:`, `mailto:`).
 
 ### 3.2. Медиа: `sw.js` + `js/media.js`
-- В разметке медиа — обычные URL: `media/avatar/{c|u}{id}/{photoId}`, `media/photo/{ch}/{msg}`, `media/thumb/…`, `media/webpage/…`, `media/doc/…`.
-- Service Worker перехватывает их и через `postMessage` просит страницу скачать байты GramJS-ом.
-- Картинки кэшируются в Cache Storage (`telex-media-v1`). Видео и аудио стримятся по `Range` блоками по 512 КБ (`iterDownload`), видео грузится только по нажатию ▶.
+- URL медиа: `media/avatar/{c|u}{id}/{photoId}`, `media/photo/{ch}/{msg}` (размер ≤1280 для ленты), `media/photofull/…` (оригинал для просмотрщика), `media/thumb/…`, `media/webpage/…`, `media/doc/…`, `media/story/{key}/{id}`, `media/storythumb/…`, `media/cemoji/…`, `media/cmedia|cthumb/…` (комментарии).
+- SW перехватывает их и просит страницу скачать байты. `media.js` ставит запросы в очередь: мелочь (аватары, превью, эмодзи) и Range-блоки видео — в приоритете, фото — LIFO, ограниченная параллельность, одинаковые запросы объединяются.
+- Мгновенные превью: `strippedPreview()` превращает встроенный в сообщение PhotoStrippedSize в data-URL (`item.preview`), он виден сразу, пока грузится картинка.
+- Картинки кэшируются в Cache Storage (`telex-media-v1`); маленькие документы целиком, большие стримятся по `Range` блоками по 512 КБ.
 
 ### 3.3. `app/static/js/api.js`
 - Сохраняет интерфейс компонентов: `getFeed`, `getChannels`, `getComments`, `sendComment`, `sendReaction`, `forwardToSaved`, `toggleFavorite`, вход (`startQR`, `requestCode`, `signInCode`, `signInPassword`), `logout`.
@@ -101,27 +91,11 @@ TgX/
 
 ## 4. Фронтенд и компонентная архитектура
 
-### 4.1. `app/static/js/app.js` (Контроллер и шина)
-- Инициализирует все подсистемы: обои, бесконечную ленту (`IntersectionObserver`), горячие клавиши, проверку авторизации.
-- Экспортирует единый интерфейс `window.TelegramX` для взаимодействия из UI.
-
-### 4.2. `app/static/js/components/postCard.js`
-- Формирует HTML карточки публикации.
-- **Сетки медиа-альбомов**:
-  - 1 фото: полноразмерный контейнер с зумом.
-  - 2 фото: 2 колонки (50% / 50%).
-  - 3 фото: 1 большое слева + 2 справа.
-  - 4+ фото: сетка 2x2 с бейджем `+N` для оставшихся фото.
-- Нативные плееры для аудио/голосовых (`1000026051.png`) и видео.
-
-### 4.3. `app/static/js/components/commentsDrawer.js`
-- Управляет инлайн-аккордеоном под постом.
-- Предзагружает и моментально отображает комментарии из кэша `state.cachedComments`.
-- `submitPostComment(...)`: Оптимистично добавляет комментарий в список и отправляет на сервер.
-
-### 4.4. `app/static/js/components/settingsModal.js`
-- **Нативное окно настроек**: Открывается как полноценное модальное окно без сторонних iframe'ов.
-- Отображает профиль, аватар, имя, телефон, статус Premium, DC 2 и все разделы настроек с 3D-иконками Liquid Glass.
+- `app.js` собирает `window.TelegramX` (все обработчики для inline `onclick`), регистрирует экраны в `core/nav.js`: `wall` (параметр `channel` = режим канала), `channel`, `thread`, `settings` (`page`), `profile` (`page`). Вложенные экраны пушат запись в историю — Back закрывает их.
+- `components/stories.js` — главная шапка: «TeleX» + стопка историй; ряд историй раскрывается потягиванием вниз и сворачивается при прокрутке; `storyViewer.js` — полноэкранные истории.
+- `components/postCard.js` — пост как сообщение в группе Telegram (альбомы, видео с автоплеем, стикеры, голосовые, кнопки-ссылки `buttons`).
+- `components/postMenu.js` — `openPopup(anchor, {header, items, reactionsHtml})` — общее контекстное меню.
+- Анимации: View Transitions между экранами, морфинг медиа и историй, появление новых постов (`animateArrival`), shimmer-загрузка.
 
 ---
 
@@ -187,16 +161,15 @@ TgX/
    - Плавающий док `.tx-dock`: **Стена**, **Настройки**, **Профиль** (вкладки «Каналы» нет — только стена). Одна колонка на телефоне и ПК.
    - Пост = сообщение в группе Telegram: аватар канала слева, цветное имя в пузыре, время/просмотры в углу, «N комментариев ›» открывает экран обсуждения.
    - Новый код — маленькими модулями: экраны в `js/views/`, элементы в `js/components/`, стили в `css/tx/`.
-   - Иконки — только официальный шрифт Telegram Web (`css/telegram-icons.css`, классы `icon icon-*`).
+   - Иконки — классы `icon icon-*`; для них `css/tx/icons-android.css` подставляет оригинальные иконки Telegram Android (маски). Новую иконку добавлять в `MAP` в `tools/icons/extract.py` и перегенерировать.
    - Никаких «декоративных» пунктов меню, которые ничего не делают.
 4. **Настройки и профиль**:
-   - Экраны `#pane-settings` и `#pane-profile` заполняет `components/settingsModal.js`; переключение экранов — `TelegramX.setView('wall'|'channels'|'settings'|'profile')`.
+   - `views/settings.js` и `views/profile.js` рендерят `#settings-root` / `#profile-root`; строки — `ui.row/switchRow` с цветами `TG.*` (градиенты Telegram 12) и глифами `st-*`.
 5. **Фоновые обои и SVG**:
    - Не затирать белые векторные контуры в `app/static/wallpapers/*.svg`.
    - Обои видны только за стеной; левая колонка и экраны настроек — чистый чёрный фон, как в Telegram.
-6. **Инлайн-комментарии**:
-   - Комментарии открываются строкой «Прокомментировать ›» внизу пузыря и разворачиваются прямо в нём, а не в модальном окне.
-   - Форма отправки комментариев под постом должна оставаться рабочей.
+6. **Комментарии**:
+   - Открываются отдельным экраном обсуждения (`views/thread.js`) по строке «N комментариев ›»; отправка, ответы и поиск должны оставаться рабочими.
 7. **Безопасность (сессия в localStorage = полный доступ к аккаунту)**:
    - Любой текст из Telegram (названия, имена, подписи, имена файлов) вставлять в HTML только через `escapeHtml` / `parseEmojis` (они экранируют), а строки внутри `onclick="…('…')"` — через `escapeQuotes`.
    - Не подключать сторонние скрипты с CDN: всё нужное лежит в `js/vendor/`.
@@ -206,6 +179,7 @@ TgX/
 
 ## 9. Руководство по запуску
 
-- **GitHub Pages**: Settings → Pages → Source: **GitHub Actions**; любой push в `main` публикует `app/static` на `https://gl1ch5.github.io/TgX/`.
+- **GitHub Pages**: из ветки — корень репозитория (лендинг `index.html`, приложение `app/static/`); через Actions — `pages.yml` собирает то же самое в `_site`.
+- **Android**: автообновление читает `releases/download/nightly/version.json` (versionCode = номер запуска workflow). Ключ подписи — `native/android/app/debug.keystore` (не менять, иначе обновления не встанут поверх).
 - **Локально**: `python run.py` (или `start_telegram_x.bat`) → **http://localhost:8000**. Service Worker работает только на `localhost` или HTTPS.
 - **Пересборка GramJS**: `cd tools/gramjs && npm install && npm run build`.

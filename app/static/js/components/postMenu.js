@@ -7,7 +7,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { showToast } from '../utils.js';
+import { showToast, haptic } from '../utils.js';
 import { quickReactionButtons, sendReaction } from './reactions.js';
 import { hydrateStickers } from './sticker.js';
 
@@ -31,6 +31,7 @@ function findPost(postId) {
 /** Generic popup anchored to an element: optional reaction strip + menu items. */
 export function openPopup(anchor, { reactionsHtml = '', items = [], header = null }) {
   closeMenus();
+  haptic(6);
   const backdrop = document.createElement('div');
   backdrop.className = 'tx-ctx-backdrop';
   backdrop.onclick = closeMenus;
