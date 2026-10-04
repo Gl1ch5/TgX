@@ -12,7 +12,8 @@ from app.backend.config import (
     API_ID,
     PROXY_CONFIG,
     MEDIA_CACHE_DIR,
-    BASE_DIR
+    BASE_DIR,
+    CORS_ORIGINS
 )
 from app.backend.telegram_service import telegram_service
 
@@ -20,8 +21,8 @@ app = FastAPI(title="Telegram X Wall", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -60,9 +61,9 @@ async def get_config_info():
     is_auth = await telegram_service.is_authorized()
     return {
         "api_id": API_ID,
-        "proxy_host": PROXY_CONFIG["addr"],
-        "proxy_port": PROXY_CONFIG["port"],
-        "proxy_type": PROXY_CONFIG["proxy_type"],
+        "proxy_host": PROXY_CONFIG["addr"] if PROXY_CONFIG else None,
+        "proxy_port": PROXY_CONFIG["port"] if PROXY_CONFIG else None,
+        "proxy_type": PROXY_CONFIG["proxy_type"] if PROXY_CONFIG else None,
         "is_authorized": is_auth,
         "dc": "DC 2 (Production 149.154.167.50:443)",
         "version": "2.0.0 Pro"
@@ -163,8 +164,8 @@ async def toggle_favorite(data: FavoriteModel):
 # Media Routes
 @app.get("/api/media/cache/{filename}")
 async def serve_cached_media(filename: str):
-    file_path = MEDIA_CACHE_DIR / filename
-    if file_path.exists() and file_path.is_file():
+    file_path = (MEDIA_CACHE_DIR / filename).resolve()
+    if file_path.parent == MEDIA_CACHE_DIR.resolve() and file_path.is_file():
         mime_type, _ = mimetypes.guess_type(str(file_path))
         return FileResponse(str(file_path), media_type=mime_type)
     raise HTTPException(status_code=404, detail="Media not found")

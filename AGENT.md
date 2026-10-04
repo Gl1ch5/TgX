@@ -78,8 +78,11 @@ C:/Users/Pavel/Documents/1/
 ## 3. Бэкенд архитектура
 
 ### 3.1. `app/backend/config.py`
-- Содержит зарегистрированные Telegram App ID (`27451332`) и Hash (`1462d961e4a7bf6b5139309255f09fd6`).
-- Настройки HTTP/HTTPS прокси: `http://grzxk:ahCEZwkV37Mj@64.188.66.249:8888`.
+- Читает `.env` из корня проекта (образец — `.env.example`); системные переменные окружения имеют приоритет.
+- Telegram App ID / Hash: `TG_API_ID`, `TG_API_HASH` (обязательны, без значений по умолчанию — `run.py` не стартует без них).
+- Прокси: `TG_PROXY_HOST/PORT/TYPE/USER/PASS`; при пустом `TG_PROXY_HOST` `PROXY_CONFIG = None` (прямое подключение).
+- `CORS_ORIGINS`: по умолчанию только `http://127.0.0.1:{PORT}` и `http://localhost:{PORT}`; расширяется через `TG_CORS_ORIGINS`.
+- **Никогда не хардкодить ключи, пароли и адреса прокси в коде или документации.**
 - Пути к каталогам `media_cache/` и `sessions/`.
 
 ### 3.2. `app/backend/telegram_service.py`
