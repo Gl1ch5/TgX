@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Legacy (API 24-25) launcher icon: blue circle with a white paper plane. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#FF5A83F3"
+        android:pathData="M24,24m-22,0a22,22 0,1 1,44 0a22,22 0,1 1,-44 0" />
+    <group
+        android:scaleX="1.15"
+        android:scaleY="1.15"
+        android:translateX="10.4"
+        android:translateY="10.8">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M2.5,11.2L20.8,4.1C21.7,3.8 22.4,4.4 22.1,5.7L19,20.3C18.8,21.3 18.1,21.6 17.3,21.1L12.6,17.6L10.3,19.8C10.1,20 9.8,20.2 9.4,20.2L9.7,15.4L18.4,7.5C18.8,7.2 18.3,7 17.8,7.3L7,14.1L2.4,12.7C1.4,12.4 1.4,11.7 2.5,11.2Z" />
+    </group>
+</vector>
