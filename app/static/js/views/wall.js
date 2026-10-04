@@ -13,6 +13,7 @@ import { go } from '../core/nav.js';
 import { createPostCardElement, VERIFIED_BADGE_SVG } from '../components/postCard.js';
 import { avatarHtml } from '../components/avatar.js';
 import { hydrateStickers } from '../components/sticker.js';
+import { observeAutoplay } from '../components/autoplay.js';
 
 const $ = (id) => document.getElementById(id);
 const show = (el, on) => el && el.classList.toggle('tx-hidden', !on);
@@ -125,6 +126,7 @@ export function appendPosts(posts) {
   container.appendChild(frag);
   cards.forEach(track);
   hydrateStickers(container);
+  observeAutoplay(container);
 }
 
 function showNewPostsPill(count, apply) {
@@ -341,6 +343,8 @@ let pendingLive = [];
 
 function matchesView(p) {
   if (state.searchQuery) return false;
+  const ch = state.channels.find((c) => c.id === p.channel_id) || p.channel || {};
+  if (!ch.is_broadcast && !getPrefs().showGroups) return false;
   if (state.activeChannelId && p.channel_id !== state.activeChannelId) return false;
   if (!state.activeChannelId && isChannelExcluded(p.channel_id)) return false;
   if (state.feedType === 'media') return ['photo', 'video', 'gif', 'album'].includes(p.media_type);
@@ -363,6 +367,7 @@ function prependPosts(posts) {
   container.prepend(...cards);
   cards.forEach(track);
   hydrateStickers(container);
+  observeAutoplay(container);
 }
 
 export function onLivePosts(posts) {
@@ -389,6 +394,7 @@ export function onLiveEdit(post) {
     const card = createPostCardElement(state.posts[i]);
     old.replaceWith(card);
     hydrateStickers(card);
+    observeAutoplay(card);
   });
 }
 

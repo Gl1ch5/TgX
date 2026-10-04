@@ -135,7 +135,8 @@ function dataPage() {
     <div class="tx-page">
       ${group(
         switchRow({ icon: 'photo', color: '#3e88f7', title: 'Загружать фото автоматически', checked: p.autoloadPhotos, onchange: "window.TelegramX.setPref('autoloadPhotos', this.checked)" }) +
-        switchRow({ icon: 'gifs', color: '#4fae4e', title: 'Автовоспроизведение GIF', checked: p.autoplayGifs, onchange: "window.TelegramX.setPref('autoplayGifs', this.checked)" }),
+        switchRow({ icon: 'gifs', color: '#4fae4e', title: 'Автовоспроизведение GIF', checked: p.autoplayGifs, onchange: "window.TelegramX.setPref('autoplayGifs', this.checked)" }) +
+        switchRow({ icon: 'video', color: '#e66b9b', title: 'Автовоспроизведение видео', sub: 'Короткие видео без звука, как в Telegram', checked: p.autoplayVideos, onchange: "window.TelegramX.setPref('autoplayVideos', this.checked)" }),
         { title: 'Автозагрузка медиа' },
       )}
       ${group(

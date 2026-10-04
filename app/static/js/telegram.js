@@ -26,8 +26,8 @@ const LS = {
 const FEED_CONCURRENCY = 5;
 const POSTS_CACHE_LIMIT = 600;
 const STREAM_CHUNK = 512 * 1024;
-const STREAM_READ_AHEAD = 3;
-const SMALL_FILE = 10 * 1024 * 1024;
+const STREAM_READ_AHEAD = 6;
+const SMALL_FILE = 2 * 1024 * 1024; // whole-file download+cache; bigger files stream
 const LIVE_POLL_MS = 30000;
 const CHUNK_CACHE_BYTES = 384 * 1024 * 1024; // in-memory video/audio chunks
 
@@ -280,11 +280,20 @@ class TelegramService {
     return key;
   }
 
-  avatarUrl(entity, big = false) {
+  /**
+   * `ctx` = { peer, msgId }: a message the entity appeared in. Needed for
+   * "min" users/channels (comment authors) whose access hash Telegram hides —
+   * their photo is then fetched via InputPeerUserFromMessage.
+   */
+  avatarUrl(entity, big = false, ctx = null) {
     if (!entity) return null;
     const photo = entity.photo;
     if (!photo || photo instanceof Api.ChatPhotoEmpty || photo instanceof Api.UserProfilePhotoEmpty) return null;
     const key = this.rememberEntity(entity);
+    if (ctx) {
+      this.peerContext = this.peerContext || new Map();
+      this.peerContext.set(key, ctx);
+    }
     return `media/${big ? 'avatarbig' : 'avatar'}/${key}/${photo.photoId}`;
   }
 
@@ -794,9 +803,14 @@ class TelegramService {
 
     // Instant first paint from the localStorage cache; the UI refreshes afterwards.
     if (!offsetDate && !searchQuery && !channelId && !refresh && this.posts.size) {
-      const excluded = new Set(getPrefs().excludedChannels.map(Number));
+      const prefs = getPrefs();
+      const excluded = new Set(prefs.excludedChannels.map(Number));
+      const allowed = (id) => {
+        const ch = this.channels.get(id);
+        return !excluded.has(id) && (prefs.showGroups || !ch || ch.is_broadcast);
+      };
       const cached = this.filterFeed([...this.posts.values()]
-        .filter((p) => !excluded.has(p.channel_id))
+        .filter((p) => allowed(p.channel_id))
         .map((p) => ({ ...p, is_favorite: this.favorites.has(p.id) })), feedType);
       if (cached.length) return this.page(cached, limit, { from_cache: true });
     }
@@ -904,7 +918,7 @@ class TelegramService {
         timestamp: r.date,
         sender_id: sender ? Number(sender.id) : null,
         sender_name: sender ? utils.getDisplayName(sender) || 'Пользователь' : 'Пользователь',
-        sender_avatar: this.avatarUrl(sender),
+        sender_avatar: this.avatarUrl(sender, false, { peer: r.peerId, msgId: r.id }),
         is_out: !!r.out || (myId != null && sender && Number(sender.id) === myId),
         reply_to_id: replyToId,
         media: this.commentMedia(r, path),
@@ -1016,7 +1030,7 @@ class TelegramService {
       if (!(m instanceof Api.Message) || (!m.message && !m.media)) return;
       const chId = Number(m.peerId.channelId);
       const ch = this.channels.get(chId);
-      if (!ch) return;
+      if (!ch || (!ch.is_broadcast && !getPrefs().showGroups)) return;
       this.messages.set(`${chId}_${m.id}`, m);
       if (u instanceof Api.UpdateEditChannelMessage) {
         const id = `${chId}_${m.id}`;
@@ -1234,8 +1248,20 @@ class TelegramService {
     if (kind === 'avatar' || kind === 'avatarbig') {
       if (!this.entities.has(a)) await this.loadDialogs();
       const entity = this.entities.get(a);
-      if (!entity) return null;
-      const bytes = await client.downloadProfilePhoto(entity, { isBig: kind === 'avatarbig' });
+      if (!entity || !entity.photo) return null;
+      const big = kind === 'avatarbig';
+      const ctx = this.peerContext && this.peerContext.get(a);
+      let bytes = null;
+      if (!entity.min) {
+        bytes = await client.downloadProfilePhoto(entity, { isBig: big }).catch(() => null);
+      }
+      if ((!bytes || !bytes.length) && ctx) {
+        const via = await client.getInputEntity(ctx.peer);
+        const peer = entity instanceof Api.User
+          ? new Api.InputPeerUserFromMessage({ peer: via, msgId: ctx.msgId, userId: entity.id })
+          : new Api.InputPeerChannelFromMessage({ peer: via, msgId: ctx.msgId, channelId: entity.id });
+        bytes = await client.downloadFile(new Api.InputPeerPhotoFileLocation({ peer, photoId: entity.photo.photoId, big }), { dcId: entity.photo.dcId });
+      }
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
     }
 

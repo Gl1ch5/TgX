@@ -12,6 +12,7 @@ import { go } from '../core/nav.js';
 import { avatarHtml, peerColor } from '../components/avatar.js';
 import { createPostCardElement, commentsLabel } from '../components/postCard.js';
 import { stickerHtml, hydrateStickers } from '../components/sticker.js';
+import { observeAutoplay } from '../components/autoplay.js';
 import { reactionIcon } from '../components/reactions.js';
 import { openPopup } from '../components/postMenu.js';
 
@@ -150,6 +151,7 @@ function render() {
   list.appendChild(root);
   list.insertAdjacentHTML('beforeend', html);
   hydrateStickers(list);
+  observeAutoplay(list);
 }
 
 export function loadOlderComments() {

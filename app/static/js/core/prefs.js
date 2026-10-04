@@ -24,6 +24,7 @@ const DEFAULTS = {
   accent: 'blue',
   reduceMotion: false,
   autoplayGifs: true,
+  autoplayVideos: true,   // short videos play muted in the feed, like Telegram
   autoloadPhotos: true,
   syncRead: true,         // mark posts read in Telegram when seen on the wall
   bubbleRadius: 17,       // Telegram default message corner radius

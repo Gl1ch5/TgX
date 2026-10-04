@@ -30,7 +30,7 @@ import * as profile from './views/profile.js';
 state.EMOJI_PICKER_LIST = EMOJI_PICKER_LIST;
 
 const WALL_KEYS = new Set(['excludedChannels', 'showGroups', 'feedSize']);
-const RENDER_KEYS = new Set(['autoloadPhotos', 'autoplayGifs']);
+const RENDER_KEYS = new Set(['autoloadPhotos', 'autoplayGifs', 'autoplayVideos']);
 let wallDirty = false;
 let rerenderWall = false;
 

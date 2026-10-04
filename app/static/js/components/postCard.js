@@ -42,22 +42,33 @@ function photoTile(post, item, idx, fill = false) {
   return `<img src="${escapeHtml(item.url)}" loading="lazy" decoding="async" style="${style}" ${openAttr(post, idx)} />`;
 }
 
+const AUTOPLAY_MAX_SEC = 90;
+
 function videoTile(post, item, idx, fill = false) {
   const style = fill ? 'width:100%;height:100%' : aspect(item);
+  const poster = item.thumb_url ? `poster="${escapeHtml(item.thumb_url)}"` : '';
+  if (getPrefs().autoplayVideos && item.duration && item.duration <= AUTOPLAY_MAX_SEC) {
+    return `
+      <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
+        <video data-autoplay="${post.id}:${idx}" data-src="${escapeHtml(item.url)}" muted loop playsinline preload="none" ${poster} style="width:100%;height:100%;object-fit:cover"></video>
+        <span class="tx-media-pill"><span class="tx-countdown">${formatDuration(item.duration)}</span> <i class="icon icon-speaker-muted-story"></i></span>
+      </span>`;
+  }
   return `
     <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
       ${item.thumb_url ? `<img src="${escapeHtml(item.thumb_url)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" />` : '<span style="display:block;width:100%;height:100%;background:#000"></span>'}
-      <span class="tx-media-pill">${formatDuration(item.duration)} <i class="icon icon-speaker-muted-story"></i></span>
+      <span class="tx-media-pill">${formatDuration(item.duration)}</span>
       <span class="tx-play"><i class="icon icon-play"></i></span>
     </span>`;
 }
 
 function gifTile(post, item, idx, fill = false) {
   const style = fill ? 'width:100%;height:100%' : aspect(item);
+  const poster = item.thumb_url ? `poster="${escapeHtml(item.thumb_url)}"` : '';
   const auto = getPrefs().autoplayGifs;
   return `
     <span class="tx-media-tap" style="${style}" ${openAttr(post, idx)}>
-      <video src="${escapeHtml(item.url)}" ${auto ? 'autoplay' : ''} loop muted playsinline preload="${auto ? 'auto' : 'none'}" ${item.thumb_url ? `poster="${escapeHtml(item.thumb_url)}"` : ''} style="width:100%;height:100%;object-fit:cover"></video>
+      <video ${auto ? `data-autoplay="${post.id}:${idx}" data-src` : 'src'}="${escapeHtml(item.url)}" muted loop playsinline preload="none" ${poster} style="width:100%;height:100%;object-fit:cover"></video>
       <span class="tx-media-pill">GIF</span>
     </span>`;
 }

@@ -9,6 +9,7 @@
 import { state } from '../state.js';
 import { escapeHtml, formatPostText, showToast } from '../utils.js';
 import { galleryOf } from './postCard.js';
+import { inlineTime, pauseAll, resumeVisible } from './autoplay.js';
 
 let view = null; // { post, items, index, el, video }
 
@@ -63,6 +64,7 @@ export function openViewer(postId, index = 0) {
   document.body.style.overflow = 'hidden';
 
   view = { post, items, index, el, video: null };
+  pauseAll();
   bind(el);
   show(index);
   history.pushState({ ...(history.state || {}), viewer: true }, '');
@@ -96,6 +98,8 @@ function show(index) {
     <button class="tx-viewer-big-play is-playing" data-act="toggle"><i class="icon icon-play"></i></button>`;
   const video = stage.querySelector('video');
   view.video = video;
+  const resumeAt = inlineTime(view.post.id, view.index);
+  if (resumeAt) video.addEventListener('loadedmetadata', () => { video.currentTime = resumeAt; }, { once: true });
   seekRow.classList.toggle('tx-hidden', item.type === 'gif');
 
   const spinner = stage.querySelector('.tx-viewer-spinner');
@@ -188,6 +192,7 @@ export function closeViewer() {
   view.el.remove();
   view = null;
   document.body.style.overflow = '';
+  resumeVisible();
 }
 
 export function isViewerOpen() {
