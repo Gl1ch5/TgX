@@ -945,6 +945,9 @@ class TelegramService {
       }
     }
     for (const g of groups.values()) out.push(this.formatGroup(g.sort((x, y) => x.id - y.id), ch, people));
+    const msgs = res.messages || [];
+    out.full = msgs.length >= limit;
+    out.oldest = msgs.length ? Math.min(...msgs.map((m) => m.date || Infinity)) : 0;
     return out;
   }
 
@@ -958,7 +961,11 @@ class TelegramService {
   }
 
   filterFeed(posts, feedType) {
-    if (feedType === 'media') return posts.filter((p) => ['photo', 'video', 'gif', 'album'].includes(p.media_type));
+    if (feedType === 'media') {
+      return posts
+        .filter((p) => ['photo', 'video', 'gif', 'album'].includes(p.media_type))
+        .sort((a, b) => b.timestamp - a.timestamp);
+    }
     if (feedType === 'popular') {
       return posts
         .filter((p) => (p.views || 0) > 300 || p.reactions.length > 0)
@@ -1021,8 +1028,14 @@ class TelegramService {
         .slice(0, prefs.feedSize);
     }
 
-    const perChannel = channelId ? limit : 20;
+    if (!channelId && feedType !== 'popular') {
+      return this.mergedFeed(targets, { feedType, searchQuery, offsetDate, limit, onPartial });
+    }
+
+    // Many channels → fewer posts from each (60 channels × 20 posts was 1200 posts per refresh).
+    const perChannel = channelId ? limit : Math.max(6, Math.min(20, Math.ceil(400 / Math.max(1, targets.length))));
     const posts = [];
+    const fullUntil = []; // oldest date of every channel that had more posts than we asked for
     // Show what has arrived so far instead of waiting for the slowest channel.
     let partialTimer = null;
     const partial = () => {
@@ -1039,7 +1052,9 @@ class TelegramService {
       while (queue.length) {
         const ch = queue.shift();
         try {
-          posts.push(...await this.fetchChannelPosts(ch, { limit: perChannel, offsetDate, search: searchQuery }));
+          const got = await this.fetchChannelPosts(ch, { limit: perChannel, offsetDate, search: searchQuery });
+          posts.push(...got);
+          if (got.full && got.oldest) fullUntil.push(got.oldest);
           partial();
         } catch (e) {
           console.warn('[TeleX] channel fetch failed', ch.title, e);
@@ -1057,10 +1072,162 @@ class TelegramService {
 
     let result = this.filterFeed(posts, feedType);
     if (offsetDate) result = result.filter((p) => p.timestamp < offsetDate);
-    return this.page(result, limit, { from_cache: false });
+    // Older than the newest "cut" channel we may be missing posts: stop there,
+    // the next page continues from that date, so nothing is ever skipped.
+    const cutoff = fullUntil.length ? Math.max(...fullUntil) : 0;
+    if (cutoff) result = result.filter((p) => p.timestamp >= cutoff);
+    const page = this.page(result, limit, { from_cache: false });
+    if (cutoff) page.has_more = true;
+    return page;
+  }
+
+  /**
+   * Multi-channel feed as a k-way merge: every channel keeps its own cursor
+   * and a buffer of fetched posts. A post is shown only when no channel can
+   * still have something newer (its date ≥ the oldest loaded date of every
+   * unfinished channel), so nothing is skipped; scrolling down refetches only
+   * the channels that the next page actually needs, not all of them.
+   */
+  async mergedFeed(targets, { feedType, searchQuery, offsetDate, limit, onPartial }) {
+    const sig = `${searchQuery}|${targets.map((c) => c.id).join(',')}`;
+    let st = this.feedState;
+    if (!offsetDate || !st || st.sig !== sig || st.lastTs !== offsetDate) {
+      st = this.feedState = {
+        sig,
+        lastTs: null,
+        start: offsetDate || null,
+        emitted: new Set(),
+        chans: new Map(targets.map((ch) => [ch.id, { ch, buf: new Map(), oldest: offsetDate || Infinity, done: false, loaded: false, stuck: false }])),
+      };
+    }
+    const chans = [...st.chans.values()];
+    const firstSize = Math.max(5, Math.min(20, Math.ceil((2 * limit) / Math.max(1, chans.length)) + 3));
+    const fresh = [];
+
+    const candidates = () => {
+      const all = [];
+      for (const c of chans) {
+        for (const p of c.buf.values()) {
+          if (!st.emitted.has(p.id) && (!st.start || p.timestamp < st.start)) all.push(p);
+        }
+      }
+      return this.filterFeed(all, feedType);
+    };
+
+    let partialTimer = null;
+    const partial = () => {
+      if (!onPartial || partialTimer || offsetDate) return;
+      partialTimer = setTimeout(() => {
+        partialTimer = null;
+        const shown = candidates();
+        if (shown.length) onPartial(this.page(shown, limit, { partial: true }));
+      }, 250);
+    };
+
+    const refill = async (list) => {
+      const queue = [...list];
+      const run = async () => {
+        while (queue.length) {
+          const c = queue.shift();
+          try {
+            const size = c.loaded ? 20 : firstSize;
+            const from = c.oldest === Infinity ? 0 : c.stuck ? c.oldest : c.oldest + 1; // +1: same-second posts, deduped below
+            const got = await this.fetchChannelPosts(c.ch, { limit: size, offsetDate: from, search: searchQuery });
+            let added = 0;
+            for (const p of got) {
+              if (c.buf.has(p.id)) continue;
+              c.buf.set(p.id, p);
+              fresh.push(p);
+              added++;
+            }
+            const moved = got.oldest && got.oldest < c.oldest;
+            if (got.oldest) c.oldest = Math.min(c.oldest, got.oldest);
+            c.loaded = true;
+            // A full page that brought nothing older: step over that second next time.
+            c.stuck = got.full && !moved && !added;
+            if (!got.full || (c.stuck && from === c.oldest)) c.done = true;
+            partial();
+          } catch (e) {
+            console.warn('[TeleX] channel fetch failed', c.ch.title, e);
+            c.done = true;
+          }
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(FEED_CONCURRENCY, queue.length) }, run));
+    };
+
+    let ready = [];
+    for (let round = 0; round < 8; round++) {
+      const live = chans.filter((c) => !c.done);
+      const unloaded = live.filter((c) => !c.loaded);
+      if (unloaded.length) {
+        await refill(unloaded);
+        continue;
+      }
+      const cutoff = live.length ? Math.max(...live.map((c) => c.oldest)) : 0;
+      const all = candidates();
+      ready = all.filter((p) => p.timestamp >= cutoff);
+      if (ready.length >= limit || !live.length) break;
+      // Only channels whose loaded range ends above the limit-th newest post can change this page.
+      const edge = all.length >= limit ? all[limit - 1].timestamp : -Infinity;
+      const need = live.filter((c) => c.oldest > edge);
+      await refill(need.length ? need : live);
+    }
+    clearTimeout(partialTimer);
+    partialTimer = 1; // no partial update after the final result
+
+    if (!searchQuery && fresh.length && !offsetDate) {
+      fresh.forEach((p) => this.posts.set(p.id, p));
+      this.persistPosts();
+    }
+
+    const shown = ready.slice(0, limit);
+    shown.forEach((p) => st.emitted.add(p.id));
+    st.lastTs = shown.length ? shown[shown.length - 1].timestamp : offsetDate;
+    const left = candidates().length;
+    return {
+      posts: shown.map((p) => ({ ...p, is_favorite: this.favorites.has(p.id) })),
+      channels: this.sortChannels([...this.channels.values()]),
+      total_count: shown.length,
+      has_more: left > 0 || chans.some((c) => !c.done),
+      next_offset: st.lastTs,
+      from_cache: false,
+    };
   }
 
   // ----- comments -----
+
+  /**
+   * Latest comments of a post, fetched once and shared by all its replier
+   * avatars: maps "u123" → the comment (discussion chat + message id) where
+   * that person was seen, which is what Telegram accepts for their photo.
+   */
+  scanReplies(channelId, msgId) {
+    const k = `${channelId}_${msgId}`;
+    this.replierScans = this.replierScans || new Map();
+    if (!this.replierScans.has(k)) {
+      const job = (async () => {
+        const client = await this.getClient();
+        const entity = await this.channelEntity(channelId);
+        const res = await client.invoke(new Api.messages.GetReplies({
+          peer: entity, msgId, offsetId: 0, offsetDate: 0, addOffset: 0, limit: 20, maxId: 0, minId: 0, hash: bigInt.zero,
+        }));
+        [...(res.users || []), ...(res.chats || [])].forEach((e) => this.rememberEntity(e));
+        const seen = new Map();
+        for (const m of res.messages || []) {
+          const from = m.fromId;
+          const who = from instanceof Api.PeerUser ? `u${from.userId}` : from instanceof Api.PeerChannel ? `c${from.channelId}` : null;
+          if (!who || seen.has(who)) continue;
+          const chatPeer = await client.getInputEntity(m.peerId).catch(() => null);
+          if (chatPeer) seen.set(who, { peer: chatPeer, msgId: m.id });
+        }
+        return { seen };
+      })();
+      job.catch(() => this.replierScans.delete(k));
+      this.replierScans.set(k, job);
+    }
+    return this.replierScans.get(k);
+  }
 
   /** Linked discussion chat + root message for a channel post (cached). */
   async discussionOf(channelId, msgId) {
@@ -1720,24 +1887,47 @@ class TelegramService {
       if (entity && photo && !entity.min) {
         bytes = await client.downloadProfilePhoto(entity, { isBig: big }).catch(() => null);
       }
-      if ((!bytes || !bytes.length) && ctx) {
+      const failKey = `${key}/${big}`;
+      this.avatarFails = this.avatarFails || new Map();
+      if ((!bytes || !bytes.length) && Date.now() - (this.avatarFails.get(failKey) || 0) < 10 * 60 * 1000) return null;
+      const viaMessage = async (peerInput, msgId, userEntity) => {
+        const isUser = userEntity ? userEntity instanceof Api.User : key[0] === 'u';
+        const id = userEntity ? userEntity.id : bigInt(key.slice(1));
+        const peer = isUser
+          ? new Api.InputPeerUserFromMessage({ peer: peerInput, msgId, userId: id })
+          : new Api.InputPeerChannelFromMessage({ peer: peerInput, msgId, channelId: id });
+        const ph = userEntity && userEntity.photo && userEntity.photo.photoId ? userEntity.photo : photo;
+        const pid = ph ? ph.photoId : photoId ? bigInt(photoId) : null;
+        const dc = ph ? ph.dcId : Number(dcId) || undefined;
+        if (!pid) return null;
+        return client.downloadFile(new Api.InputPeerPhotoFileLocation({ peer, photoId: pid, big }), { dcId: dc });
+      };
+      // People in the "N comments" row of a channel post appear in their own
+      // comments, not in the post: Telegram answers MSG_ID_INVALID for the post.
+      const ctxChannel = ctx && (ctx.key || this.peerKeyOf(ctx.peer));
+      const isBroadcast = (k) => !!((this.channels && (this.channels.get(Number(k.slice(1))) || {}).is_broadcast) || (this.entities.get(k) || {}).broadcast);
+      const fromRepliers = !!ctxChannel && ctxChannel[0] === 'c' && isBroadcast(ctxChannel);
+      if ((!bytes || !bytes.length) && ctx && !fromRepliers) {
         const via = ctx.peer ? await client.getInputEntity(ctx.peer).catch(() => null) : await this.inputPeerFor(ctx.key);
         if (via) {
-          const isUser = entity ? entity instanceof Api.User : key[0] === 'u';
-          const id = entity ? entity.id : bigInt(key.slice(1));
-          const peer = isUser
-            ? new Api.InputPeerUserFromMessage({ peer: via, msgId: ctx.msgId, userId: id })
-            : new Api.InputPeerChannelFromMessage({ peer: via, msgId: ctx.msgId, channelId: id });
-          const pid = photo ? photo.photoId : photoId ? bigInt(photoId) : null;
-          const dc = photo ? photo.dcId : Number(dcId) || undefined;
-          if (pid) {
-            bytes = await client.downloadFile(new Api.InputPeerPhotoFileLocation({ peer, photoId: pid, big }), { dcId: dc }).catch((e) => {
-              console.warn('[TeleX] avatar via message failed', key, e && (e.errorMessage || e.message));
-              return null;
-            });
-          }
+          bytes = await viaMessage(via, ctx.msgId, entity).catch((e) => {
+            console.warn('[TeleX] avatar via message failed', key, e && (e.errorMessage || e.message));
+            return null;
+          });
         }
       }
+      if ((!bytes || !bytes.length) && fromRepliers) {
+        try {
+          const scan = await this.scanReplies(Number(ctxChannel.slice(1)), ctx.msgId);
+          const full = this.entities.get(key);
+          if (full && !full.min && full.photo) bytes = await client.downloadProfilePhoto(full, { isBig: big }).catch(() => null);
+          const seenIn = scan.seen.get(key);
+          if ((!bytes || !bytes.length) && seenIn) bytes = await viaMessage(seenIn.peer, seenIn.msgId, full);
+        } catch (e) {
+          console.warn('[TeleX] replier avatar failed', key, e && (e.errorMessage || e.message));
+        }
+      }
+      if (!bytes || !bytes.length) this.avatarFails.set(failKey, Date.now());
       return bytes && bytes.length ? { bytes, mime: 'image/jpeg' } : null;
     }
 
