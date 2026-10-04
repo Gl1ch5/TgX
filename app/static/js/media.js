@@ -5,7 +5,7 @@
  * ====================================================================
  */
 
-import { telegram } from './tg.js';
+import { telegram, workerMode } from './tg.js';
 
 /*
  * Download scheduler. Fast scrolling used to fire dozens of downloads at once,
@@ -16,7 +16,9 @@ import { telegram } from './tg.js';
  * Identical requests share one download.
  */
 const SMALL = new Set(['avatar', 'cemoji', 'thumb', 'cthumb', 'storythumb']);
-const LIMIT = { high: 6, normal: 3 };
+// With GramJS in a worker, decryption no longer competes with the interface,
+// so more downloads can run side by side.
+const LIMIT = workerMode ? { high: 8, normal: 6 } : { high: 6, normal: 3 };
 const running = { high: 0, normal: 0 };
 const queues = { high: [], normal: [] };
 const shared = new Map();

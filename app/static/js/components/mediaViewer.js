@@ -201,6 +201,7 @@ function show(index, dir = 0) {
       { duration: 260, easing: EASE_OPEN },
     ));
   }
+  if (view.resetZoom) view.resetZoom();
   view.index = (index + items.length) % items.length;
   const item = items[view.index];
   const stage = el.querySelector('.tx-viewer-stage');
@@ -305,14 +306,103 @@ function bind(el) {
     seek.addEventListener('pointerup', () => seek.removeEventListener('pointermove', move), { once: true });
   });
 
-  // Swipe: left/right = next/prev; drag down to dismiss (follows the finger)
-  let start = null;
+  // Gestures on the stage:
+  //  - pinch with two fingers / mouse wheel = zoom, drag = pan while zoomed,
+  //    double tap = zoom in at that point (or back out), like Telegram;
+  //  - not zoomed: swipe left/right = next/prev, drag down = dismiss.
   const stage = el.querySelector('.tx-viewer-stage');
   const bg = el.querySelector('.tx-viewer-bg');
+  const pointers = new Map();
+  const zoom = { z: 1, tx: 0, ty: 0 };
+  let start = null;  // swipe / dismiss
+  let pinch = null;
+  let pan = null;
+  let lastTap = { t: 0, x: 0, y: 0 };
+  const MAX_ZOOM = 5;
+
+  const media = () => stage.querySelector('img, video');
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const center = () => {
+    const r = stage.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height };
+  };
+  const applyZoom = (animate) => {
+    const m = media();
+    if (!m) return;
+    m.style.transition = animate ? 'transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1)' : 'none';
+    m.style.transform = zoom.z > 1.001 ? `translate(${zoom.tx}px, ${zoom.ty}px) scale(${zoom.z})` : '';
+    el.classList.toggle('is-zoomed', zoom.z > 1.01);
+  };
+  const clampPan = () => {
+    const m = media();
+    if (!m) return;
+    const c = center();
+    const maxX = Math.max(0, (m.offsetWidth * zoom.z - c.w) / 2);
+    const maxY = Math.max(0, (m.offsetHeight * zoom.z - c.h) / 2);
+    zoom.tx = clamp(zoom.tx, -maxX, maxX);
+    zoom.ty = clamp(zoom.ty, -maxY, maxY);
+  };
+  /** Zoom to `z`, keeping the screen point (px, py) fixed. */
+  const zoomAt = (z, px, py, base = { z: zoom.z, tx: zoom.tx, ty: zoom.ty }) => {
+    const c = center();
+    const nz = clamp(z, 1, MAX_ZOOM);
+    const k = nz / base.z;
+    zoom.tx = (px - c.x) - (px - c.x - base.tx) * k;
+    zoom.ty = (py - c.y) - (py - c.y - base.ty) * k;
+    zoom.z = nz;
+    if (nz <= 1.001) Object.assign(zoom, { z: 1, tx: 0, ty: 0 });
+  };
+  const resetZoom = (animate = false) => {
+    Object.assign(zoom, { z: 1, tx: 0, ty: 0 });
+    pinch = null;
+    pan = null;
+    applyZoom(animate);
+  };
+  view.resetZoom = resetZoom;
+
+  const pinchInfo = () => {
+    const [a, b2] = [...pointers.values()];
+    return { d: Math.hypot(a.x - b2.x, a.y - b2.y) || 1, x: (a.x + b2.x) / 2, y: (a.y + b2.y) / 2 };
+  };
+
   stage.addEventListener('pointerdown', (e) => {
-    start = { x: e.clientX, y: e.clientY, axis: null };
+    if (e.target.closest('[data-act]')) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { stage.setPointerCapture(e.pointerId); } catch {}
+    if (pointers.size === 2) {
+      const p = pinchInfo();
+      pinch = { d0: p.d, x0: p.x, y0: p.y, base: { ...zoom } };
+      start = null;
+      pan = null;
+      stage.style.transform = '';
+      return;
+    }
+    if (pointers.size === 1) {
+      if (zoom.z > 1.01) pan = { x0: e.clientX, y0: e.clientY, tx0: zoom.tx, ty0: zoom.ty, moved: false };
+      else start = { x: e.clientX, y: e.clientY, axis: null, t: Date.now() };
+    }
   });
+
   stage.addEventListener('pointermove', (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pointers.size >= 2) {
+      const p = pinchInfo();
+      // scale around the starting midpoint, then follow the fingers' movement
+      zoomAt(pinch.base.z * (p.d / pinch.d0), pinch.x0, pinch.y0, pinch.base);
+      zoom.tx += p.x - pinch.x0;
+      zoom.ty += p.y - pinch.y0;
+      if (zoom.z <= 1.001) Object.assign(zoom, { tx: 0, ty: 0 });
+      applyZoom(false);
+      return;
+    }
+    if (pan) {
+      zoom.tx = pan.tx0 + (e.clientX - pan.x0);
+      zoom.ty = pan.ty0 + (e.clientY - pan.y0);
+      if (Math.hypot(e.clientX - pan.x0, e.clientY - pan.y0) > 6) pan.moved = true;
+      applyZoom(false);
+      return;
+    }
     if (!start) return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
@@ -326,7 +416,49 @@ function bind(el) {
       stage.style.transform = `translateX(${dx}px)`;
     }
   });
+
   const end = (e) => {
+    const had = pointers.has(e.pointerId);
+    pointers.delete(e.pointerId);
+    if (!had) return;
+
+    if (pinch) {
+      if (pointers.size < 2) {
+        pinch = null;
+        if (zoom.z < 1.08) Object.assign(zoom, { z: 1, tx: 0, ty: 0 });
+        clampPan();
+        applyZoom(true);
+        // one finger still down: continue as a pan
+        const rest = [...pointers.values()][0];
+        if (rest && zoom.z > 1.01) pan = { x0: rest.x, y0: rest.y, tx0: zoom.tx, ty0: zoom.ty, moved: true };
+      }
+      return;
+    }
+
+    if (pan) {
+      const moved = pan.moved;
+      pan = null;
+      clampPan();
+      applyZoom(true);
+      if (moved) return;
+    }
+
+    // Double tap: zoom in at the point / back out
+    const now = Date.now();
+    const quick = !start || (!start.axis && now - start.t < 300);
+    if (quick && now - lastTap.t < 300 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) {
+      lastTap = { t: 0, x: 0, y: 0 };
+      start = null;
+      if (zoom.z > 1.01) resetZoom(true);
+      else {
+        zoomAt(2.6, e.clientX, e.clientY);
+        clampPan();
+        applyZoom(true);
+      }
+      return;
+    }
+    if (quick) lastTap = { t: now, x: e.clientX, y: e.clientY };
+
     if (!start) return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
@@ -352,6 +484,15 @@ function bind(el) {
   };
   stage.addEventListener('pointerup', end);
   stage.addEventListener('pointercancel', end);
+
+  // Desktop: wheel / trackpad pinch zooms around the cursor.
+  stage.addEventListener('wheel', (e) => {
+    if (!media()) return;
+    e.preventDefault();
+    zoomAt(zoom.z * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.002)), e.clientX, e.clientY);
+    clampPan();
+    applyZoom(false);
+  }, { passive: false });
 }
 
 function back() {
