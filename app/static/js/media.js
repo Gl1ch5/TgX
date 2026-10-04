@@ -5,7 +5,7 @@
  * ====================================================================
  */
 
-import { telegram } from './telegram.js';
+import { telegram } from './tg.js';
 
 /*
  * Download scheduler. Fast scrolling used to fire dozens of downloads at once,

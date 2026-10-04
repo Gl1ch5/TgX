@@ -72,6 +72,7 @@ export function diagnostics() {
     `Screen: ${screen.width}x${screen.height} @${devicePixelRatio}`,
     `Viewport: ${innerWidth}x${innerHeight}`,
     `SW: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'active' : 'none'}`,
+    `Telegram: ${getPrefs().workerMode ? 'worker thread' : 'page thread'}`,
     `MTProto: ${info.connected ? 'connected' : 'disconnected'}, DC ${info.dc ?? '—'}, session ${info.hasSession ? 'yes' : 'no'}`,
     `Prefs: ${JSON.stringify(getPrefs())}`,
   ].join('\n');

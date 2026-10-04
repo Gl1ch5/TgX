@@ -16,6 +16,7 @@ import { titleBar, group, row, switchRow, slider, segments } from '../components
 import { WALLPAPERS } from '../components/wallpaperTheme.js';
 import { openPopup } from '../components/postMenu.js';
 import { APP_VERSION, AUTHOR, REPO_URL } from '../version.js';
+import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 
 const root = () => document.getElementById('settings-root');
@@ -143,6 +144,10 @@ function developerPage() {
         switchRow({ icon: 'info-filled', color: 'PURPLE', title: 'Индикатор соединения', sub: 'Дата-центр и пинг поверх экрана', checked: p.devOverlay, onchange: "window.TelegramX.setPref('devOverlay', this.checked)" }) +
         switchRow({ icon: 'data', color: 'GRAY', title: 'Подробные логи MTProto', sub: 'Пишет в консоль всё, что делает GramJS', checked: p.devVerbose, onchange: "window.TelegramX.setPref('devVerbose', this.checked)" }),
         { title: 'Отладка' },
+      )}
+      ${group(
+        switchRow({ icon: 'st-power', color: 'ORANGE_DEEP', title: 'Telegram в отдельном потоке', sub: workerMode ? 'Включено — загрузка не тормозит интерфейс' : 'Как в Telegram Web A: быстрее при прокрутке', checked: p.workerMode, onchange: "window.TelegramX.setWorkerMode(this.checked)" }),
+        { title: 'Экспериментально', hint: 'Клиент Telegram (сеть, расшифровка, загрузка медиа) работает в отдельном потоке и не мешает интерфейсу. Применяется после перезапуска. Если что-то сломается — выключите.' },
       )}
       ${group(
         row({ icon: 'download', color: 'BLUE', title: 'Экспорт логов', sub: `<span id="dev-logs">${logCount()}</span> записей + сведения об устройстве`, onclick: 'window.TelegramX.devExportLogs()' }) +
@@ -414,4 +419,10 @@ export function openSettingsMenu(event) {
   ];
   if (state.isAuth) items.push({ icon: 'logout', label: 'Выйти', danger: true, run: () => window.TelegramX.logoutTelegram() });
   openPopup(event.currentTarget, { items });
+}
+
+export function setWorkerMode(on) {
+  setPref('workerMode', !!on);
+  showToast(on ? 'Перезапуск в новом режиме…' : 'Возврат к обычному режиму…');
+  setTimeout(() => location.reload(), 700);
 }

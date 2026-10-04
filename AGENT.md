@@ -49,6 +49,8 @@ TgX/
 │   └── js/
 │       ├── app.js                        # window.TelegramX, init, навигация, устойчивость соединения
 │       ├── telegram.js, api.js, media.js # GramJS-клиент; тонкий API; мост SW ↔ GramJS с очередью приоритетов
+│       ├── tg.js                         # Выбор реализации: на странице или в потоке (prefs.workerMode)
+│       ├── telegram-remote.js, tg-worker.js # Режим потока: прокси на странице ⇄ GramJS в Web Worker
 │       ├── version.js                    # APP_VERSION, автор
 │       ├── core/prefs.js, nav.js         # Настройки; экраны + история (Back)
 │       ├── core/devtools.js              # Логи, оверлей соединения, диагностика

@@ -5,7 +5,7 @@
  * ====================================================================
  */
 
-import { telegram } from './telegram.js';
+import { telegram } from './tg.js';
 
 async function safe(fn) {
   try {

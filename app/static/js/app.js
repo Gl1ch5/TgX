@@ -87,6 +87,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
+  setWorkerMode: settings.setWorkerMode,
 
   // Profile
   openProfilePage: profile.openProfilePage,

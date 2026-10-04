@@ -29,6 +29,7 @@ const DEFAULTS = {
   syncRead: true,         // mark posts read in Telegram when seen on the wall
   bubbleRadius: 17,       // Telegram default message corner radius
   glass: true,            // backdrop blur under bars (off = solid, faster)
+  workerMode: false,      // experimental: GramJS in a Web Worker (applies after reload)
   devOverlay: false,      // developer: connection/ping badge
   devVerbose: false,      // developer: GramJS debug logging
 };
@@ -52,6 +53,11 @@ export function setPref(key, value) {
   prefs = { ...prefs, [key]: value };
   try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch {}
   listeners.forEach((fn) => fn(prefs, key));
+}
+
+/** Re-read from storage (used by the Telegram worker when the page changes a setting). */
+export function reloadPrefs() {
+  prefs = load();
 }
 
 export function onPrefsChange(fn) {
