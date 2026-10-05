@@ -1,0 +1,68 @@
+/* Measured against Telegram for Android 12.10.6 (dark theme, 909 px screenshots = 390 CSS px at 2.33x). Loaded last. */
+:root { --cx-list-bg: #000; --cx-surface: #1c1c1d; --cx-chat-bg: #000; --cx-dock-on: #000; }
+:root[data-theme='light'] { --cx-list-bg: #f0f0f5; --cx-surface: #ffffff; }
+html, body { background: var(--cx-list-bg); }
+
+/* chats list: header, search pill, folders, FAB */
+.cx-top { padding: calc(12px + var(--tx-safe-top)) 10px 8px 16px; gap: 6px; }
+.cx-top h1 { font-size: 24px; font-weight: 700; }
+.cx-search { height: 43px; margin: 6px 13px 10px; padding: 0 16px; gap: 14px; border-radius: 22px; background: var(--cx-surface); }
+.cx-search-ic { display: inline-flex; color: var(--tx-hint); }
+.cx-search-ic .ic { width: 22px; height: 22px; }
+.cx-search input { font-size: 17px; }
+.cx-search input::placeholder { color: var(--tx-hint); }
+.cx-folders { margin: 0 13px 8px; padding: 4px; border-radius: 22px; background: var(--cx-surface); }
+.cx-folder { height: 34px; padding: 0 16px; font-size: 17px; border-radius: 18px; }
+.cx-folder.on { background: rgba(117, 149, 255, 0.16); }
+.cx-row { padding: 6px 14px; gap: 14px; }
+.cx-fab { right: 16px; bottom: calc(92px + var(--tx-safe-bottom)); width: 58px; height: 58px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); }
+.cx-fab .ic, .cx-fab svg { width: 32px; height: 32px; color: #fff; }
+.cx-fab2 { position: absolute; right: 26px; bottom: calc(160px + var(--tx-safe-bottom)); z-index: 20; width: 40px; height: 40px; border-radius: 50%; background: var(--cx-surface); color: var(--tx-text); display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4); }
+.cx-fab2 .ic, .cx-fab2 svg { width: 22px; height: 22px; }
+
+.tx-prem { display: inline-flex; vertical-align: -3px; }
+.tx-prem-big .tx-prem svg { width: 72px; height: 72px; }
+.tx-prem-big { display: inline-flex; margin-bottom: 8px; }
+
+.tx-ssearch { position: fixed; inset: 0; z-index: 60; background: var(--tx-bg); display: flex; flex-direction: column; }
+.tx-ssearch-bar { display: flex; align-items: center; gap: 4px; padding: calc(10px + var(--tx-safe-top)) 10px 8px; }
+.tx-ssearch-bar input { flex: 1; height: 44px; border: 0; outline: 0; border-radius: 22px; padding: 0 18px; background: var(--tx-surface); color: var(--tx-text); font: 17px var(--tx-font); }
+.tx-ssearch-list { flex: 1; overflow-y: auto; padding: 4px 8px; }
+.tx-settings-bar { padding-right: 8px; }
+
+/* contacts: cards on black, like the settings lists */
+.cx-card { background: var(--cx-surface); border-radius: 22px; margin: 0 13px 12px; padding: 4px 0; overflow: hidden; }
+.cx-card .cx-sect { padding: 14px 20px 6px; font-size: 15px; font-weight: 500; color: var(--tx-accent); }
+.cx-card .cx-row { padding: 6px 16px; }
+.cx-act-ic { width: 40px; height: 40px; border-radius: 12px; margin: 0 8px 0 4px; }
+.cx-act-ic .icon { font-size: 24px; }
+#page-contacts .cx-fab { bottom: calc(92px + var(--tx-safe-bottom)); }
+
+/* profile (Telegram for Android 12.10): sticky top bar that fills with the title when scrolled; round avatar for people */
+.cx-profile { background: #000; }
+.cx-profile .ptop { position: sticky; top: 0; z-index: 8; display: flex; align-items: center; justify-content: space-between; height: calc(56px + var(--tx-safe-top)); padding: var(--tx-safe-top) 6px 0; margin-bottom: calc(-56px - var(--tx-safe-top)); color: #fff; transition: background .2s; box-sizing: border-box; }
+.cx-profile.collapsed .ptop { background: rgba(10, 10, 12, 0.92); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.cx-profile .pt { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; margin-left: 4px; opacity: 0; transform: translateY(8px); transition: opacity .2s, transform .2s; }
+.cx-profile.collapsed .pt { opacity: 1; transform: none; }
+.cx-profile .pt .tx-avatar { width: 36px; height: 36px; font-size: 14px; }
+.cx-profile .pn { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.cx-profile .pn b { font-size: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-profile .pn span { font-size: 13px; color: var(--tx-text-2); }
+.cx-profile .head.userc { display: flex; flex-direction: column; align-items: center; padding: calc(40px + var(--tx-safe-top)) 12px 6px; text-align: center; }
+.cx-profile .head.userc .pbig { width: 103px; height: 103px; font-size: 40px; }
+.cx-profile .head.userc h2 { margin: 14px 0 2px; font-size: 24px; font-weight: 700; line-height: 1.2; }
+.cx-profile .head.userc .st { font-size: 15px; color: var(--tx-text-2); }
+.cx-profile .head.userc .st.live { color: var(--tx-accent); }
+.cx-profile .head.userc .acts { position: static; width: 100%; margin: 18px 0 8px; }
+.cx-profile .head.userc .acts button { height: 60px; border-radius: 20px; background: var(--cx-surface); backdrop-filter: none; font-size: 13.5px; gap: 4px; }
+.cx-profile .head.userc .acts .ic { width: 24px; height: 24px; }
+.cx-profile .hero .bar { display: none; }
+.cx-profile .info, .cx-card.info { background: var(--cx-surface); border-radius: 22px; margin: 10px 13px; padding: 2px 0; }
+.cx-profile .info .r { padding: 11px 18px; }
+.cx-profile .info .r + .r { border-top: 0; }
+.cx-profile .info b { font-size: 17px; }
+.cx-profile .info .addc .r, .cx-profile .addc .r { display: flex; align-items: center; gap: 18px; }
+.cx-profile .addc b { font-size: 17px; color: var(--tx-text); }
+.cx-profile .tabs { background: var(--cx-surface); border: 0; backdrop-filter: none; margin: 12px 13px; }
+.cx-profile .grid3 { gap: 2px; margin: 0 0 0; border-radius: 22px 22px 0 0; overflow: hidden; }
+.cx-profile .acts button { font-size: 14px; padding: 0 2px; } .cx-profile .acts button span { white-space: nowrap; }

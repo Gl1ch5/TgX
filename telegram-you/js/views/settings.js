@@ -22,6 +22,7 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { listMods, installMod, removeMod, setModEnabled } from '../ui/mods.js';
+import { S } from '../ui/store.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -38,9 +39,10 @@ export function openSettingsPage(name) {
 function render() {
   const el = root();
   if (!el) return;
-  const pages = { root: rootPage, power: powerPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, mods: modsPage, ghost: ghostPage, about: aboutPage, developer: developerPage };
+  const pages = { root: rootPage, power: powerPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, mods: modsPage, ghost: ghostPage, privacy: privacyPage, notifications: notificationsPage, folders: foldersPage, premium: premiumPage, about: aboutPage, developer: developerPage };
   el.innerHTML = (pages[page] || rootPage)();
   if (page === 'devices') loadSessions();
+  if (page === 'privacy') loadPrivacy();
   if (page === 'data') loadStorage();
   if (page === 'developer') loadDevInfo();
 }
@@ -55,6 +57,7 @@ function rootPage() {
   return `
     <div class="tx-titlebar tx-settings-bar">
       <h1></h1>
+      <button class="tx-icon-btn" onclick="window.TelegramX.openSettingsSearch()" title="${t('Поиск')}"><i class="icon icon-search"></i></button>
       <button class="tx-icon-btn" onclick="window.TelegramX.openSettingsMenu(event)" title="${t('Ещё')}"><i class="icon icon-more"></i></button>
     </div>
     <div class="tx-page">
@@ -67,24 +70,132 @@ function rootPage() {
       ${u ? '' : group(row({ icon: 'st-account', color: 'BLUE', title: t('Войти в Telegram'), sub: t('QR-код или номер телефона'), onclick: 'window.TelegramX.openAuthModal()' }))}
 
       ${group(
-        (u ? row({ icon: 'st-account', color: 'BLUE', title: t('Аккаунт'), sub: t('Имя, «О себе», фото профиля'), onclick: "window.TelegramX.setView('profile')" }) : '') +
+        (u ? row({ icon: 'st-account', color: 'BLUE', title: t('Аккаунт'), sub: t('Номер, имя пользователя, «О себе»'), onclick: "window.TelegramX.setView('profile')" }) : '') +
         row({ icon: 'st-chat', color: 'ORANGE', title: t('Настройки чатов'), sub: t('Обои, ночной режим, анимации'), onclick: "window.TelegramX.openSettingsPage('chat')" }) +
-        row({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Данные и память'), sub: t('Автозагрузка медиа, кэш'), onclick: "window.TelegramX.openSettingsPage('data')" }) +
+        row({ icon: 'st-privacy', color: 'GREEN', title: t('Конфиденциальность'), sub: t('Время захода, устройства, ключи доступа'), onclick: "window.TelegramX.openSettingsPage('privacy')" }) +
+        row({ icon: 'st-sounds', color: 'RED', title: t('Уведомления'), sub: t('Звуки, звонки, счётчик сообщений'), onclick: "window.TelegramX.openSettingsPage('notifications')" }) +
+        row({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Данные и память'), sub: t('Настройки загрузки медиафайлов'), onclick: "window.TelegramX.openSettingsPage('data')" }) +
+        row({ icon: 'st-folders', color: 'BLUE', title: t('Папки с чатами'), sub: t('Сортировка чатов по папкам'), onclick: "window.TelegramX.openSettingsPage('folders')" }) +
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
-        row({ icon: 'st-privacy', color: 'GREEN', title: t('Режим призрака'), sub: ghostSummary(), onclick: "window.TelegramX.openSettingsPage('ghost')" }) +
         row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" })
       )}
 
       ${group(
+        row({ icon: 'st-premium', color: 'PURPLE', title: t('Telegram Premium'), sub: p.localPremium ? t('Локальный Premium включён') : t('Эксклюзивные возможности'), onclick: "window.TelegramX.openSettingsPage('premium')" }) +
+        row({ icon: 'st-stars', color: 'ORANGE', title: t('Мои звёзды'), onclick: "window.TelegramX.openSettingsPage('premium')" }) +
+        row({ icon: 'st-business', color: 'ORANGE_DEEP', title: t('Telegram для бизнеса'), onclick: "window.TelegramX.openSettingsPage('premium')" }) +
+        row({ icon: 'st-gift', color: 'RED', title: t('Подарить Premium'), onclick: "window.TelegramX.openSettingsPage('premium')" })
+      )}
+
+      ${group(
+        row({ icon: 'st-ask', color: 'ORANGE', title: t('Задать вопрос'), onclick: "window.open('https://t.me/SpamBot', '_blank', 'noopener')" }) +
+        row({ icon: 'st-faq', color: 'BLUE', title: t('Вопросы о Telegram'), onclick: "window.open('https://telegram.org/faq', '_blank', 'noopener')" }) +
+        row({ icon: 'st-policy', color: 'GREEN', title: t('Политика конфиденциальности'), onclick: "window.open('https://telegram.org/privacy', '_blank', 'noopener')" }),
+        { title: t('Помощь') },
+      )}
+
+      ${group(
+        row({ icon: 'st-privacy', color: 'GREEN', title: t('Режим призрака'), sub: ghostSummary(), onclick: "window.TelegramX.openSettingsPage('ghost')" }) +
+        row({ icon: 'st-gram', color: 'BLUE_DEEP', title: t('Моды'), sub: t('Расширения Telegram You'), onclick: "window.TelegramX.openSettingsPage('mods')" }) +
         row({ icon: 'st-ask', color: 'ORANGE', title: t('Написать автору'), sub: '@' + AUTHOR.telegram, onclick: `window.open('https://t.me/${AUTHOR.telegram}', '_blank', 'noopener')` }) +
         row({ icon: 'st-faq', color: 'BLUE', title: t('О Telegram You'), sub: t('Версия {a}', {a: APP_VERSION}), onclick: "window.TelegramX.openSettingsPage('about')" }) +
-        row({ icon: 'st-gram', color: 'BLUE_DEEP', title: t('Моды'), sub: t('Расширения Telegram You'), onclick: "window.TelegramX.openSettingsPage('mods')" }) +
         row({ icon: 'st-features', color: 'PURPLE', title: t('Для разработчиков'), sub: t('Сессия, диагностика, логи'), onclick: "window.TelegramX.openSettingsPage('developer')" }),
+        { title: 'Telegram You' },
       )}
       <div class="tx-settings-foot">${t('Telegram You {a} · автор', {a: APP_VERSION})} <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
     </div>
     <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" hidden onchange="window.TelegramX.uploadProfilePhoto(this)" />`;
+}
+
+const PRIV = { all: () => t('Все'), contacts: () => t('Мои контакты'), nobody: () => t('Никто') };
+const privVal = (v) => (v ? (PRIV[v.kind] ? PRIV[v.kind]() : '') + (v.exceptions ? ` (+${v.exceptions})` : '') : '…');
+
+function privacyPage() {
+  const p = getPrefs();
+  return `
+    ${titleBar(t('Конфиденциальность'), { back: true })}
+    <div class="tx-page" id="privacy-box">
+      ${group(
+        row({ icon: 'block', color: 'RED', title: t('Заблокированные пользователи'), value: '<span id="pv-blocked">…</span>' }) +
+        row({ icon: 'st-calls', color: 'GREEN', title: t('Номер телефона'), value: '<span id="pv-phone">…</span>' }) +
+        row({ icon: 'st-account', color: 'BLUE', title: t('Время захода'), value: '<span id="pv-lastSeen">…</span>' }) +
+        row({ icon: 'photo', color: 'ORANGE', title: t('Фотографии профиля'), value: '<span id="pv-photo">…</span>' }) +
+        row({ icon: 'st-features', color: 'PURPLE', title: t('О себе'), value: '<span id="pv-about">…</span>' }) +
+        row({ icon: 'forward', color: 'CYAN', title: t('Пересланные сообщения'), value: '<span id="pv-forwards">…</span>' }) +
+        row({ icon: 'st-calls', color: 'GREEN', title: t('Звонки'), value: '<span id="pv-calls">…</span>' }) +
+        row({ icon: 'st-group', color: 'BLUE', title: t('Группы и каналы'), value: '<span id="pv-invites">…</span>' }),
+        { title: t('Конфиденциальность'), hint: t('Значения читаются из вашего аккаунта. Изменить их можно в приложении Telegram.') },
+      )}
+      ${group(
+        row({ icon: 'st-devices', color: 'CYAN', title: t('Активные сеансы'), sub: t('Управление устройствами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
+        row({ icon: 'delete', color: 'RED', title: t('Если вы не заходите'), value: '<span id="pv-ttl">…</span>' }),
+        { title: t('Безопасность') },
+      )}
+    </div>`;
+}
+
+async function loadPrivacy() {
+  let v = null;
+  try { v = await S.tg.chatPrivacy(); } catch {}
+  if (!v || page !== 'privacy') return;
+  const set = (id, text) => { const e = document.getElementById(id); if (e) e.textContent = text; };
+  for (const k of ['phone', 'lastSeen', 'photo', 'about', 'forwards', 'calls', 'invites']) set(`pv-${k}`, privVal(v[k]));
+  set('pv-blocked', v.blocked == null ? '' : String(v.blocked));
+  set('pv-ttl', v.ttlDays ? (v.ttlDays >= 365 ? t('1 год') : t('{a} дн.', { a: v.ttlDays })) : '');
+}
+
+function notificationsPage() {
+  const p = getPrefs();
+  const perm = typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
+  return `
+    ${titleBar(t('Уведомления'), { back: true })}
+    <div class="tx-page">
+      ${group(
+        switchRow({ icon: 'st-sounds', color: 'RED', title: t('Уведомления на устройстве'), sub: perm === 'unsupported' ? t('Браузер не поддерживает уведомления') : perm === 'denied' ? t('Заблокированы в настройках браузера') : t('Новые сообщения, когда вкладка скрыта'), checked: p.notify === true && perm === 'granted', onchange: "window.TelegramX.setNotify(this.checked)" }) +
+        switchRow({ icon: 'st-chat', color: 'ORANGE', title: t('Показывать текст сообщения'), sub: t('Предпросмотр в уведомлении'), checked: p.notifyPreview !== false, onchange: "window.TelegramX.setPref('notifyPreview', this.checked)" }),
+        { title: t('Уведомления из чатов') },
+      )}
+      ${group(
+        switchRow({ icon: 'st-features', color: 'BLUE', title: t('Звук в приложении'), sub: t('Короткий звук при новом сообщении'), checked: p.notifySound === true, onchange: "window.TelegramX.setPref('notifySound', this.checked)" }),
+        { title: t('В приложении') },
+      )}
+      ${group(
+        switchRow({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Считать чаты, а не сообщения'), sub: t('Счётчик на вкладке «Чаты»'), checked: p.countChats !== false, onchange: "window.TelegramX.setPref('countChats', this.checked)" }) +
+        switchRow({ icon: 'mute', color: 'GRAY', title: t('Не считать чаты без звука'), checked: p.countMuted !== true, onchange: "window.TelegramX.setPref('countMuted', !this.checked)" }),
+        { title: t('Счётчик сообщений') },
+      )}
+    </div>`;
+}
+
+export async function setNotify(on) {
+  if (on && typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+    try { await Notification.requestPermission(); } catch {}
+  }
+  setPref('notify', !!on && typeof Notification !== 'undefined' && Notification.permission === 'granted');
+  rerenderSettings();
+}
+
+function foldersPage() {
+  const list = (S.folders || []).map((f) => row({ icon: 'st-folders', color: 'BLUE', title: escapeHtml(f.title || t('Папка')), sub: [f.contacts && t('Контакты'), f.nonContacts && t('Не контакты'), f.groups && t('Группы'), f.broadcasts && t('Каналы'), f.bots && t('Боты')].filter(Boolean).join(', ') || t('Выбранные чаты') })).join('');
+  return `
+    ${titleBar(t('Папки с чатами'), { back: true })}
+    <div class="tx-page">
+      ${group(list || row({ title: t('Папок пока нет'), sub: t('Папки создаются в приложении Telegram и появляются здесь и на вкладке «Чаты».') }), { title: t('Мои папки') })}
+    </div>`;
+}
+
+function premiumPage() {
+  const p = getPrefs();
+  return `
+    ${titleBar(t('Telegram Premium'), { back: true })}
+    <div class="tx-page">
+      <div class="tx-hero"><span class="tx-prem-big">${premiumBadge()}</span><div class="tx-hero-name">Telegram Premium</div><div class="tx-hero-sub">${t('Эксклюзивные возможности')}</div></div>
+      ${group(
+        switchRow({ icon: 'st-premium', color: 'PURPLE', title: t('Локальный Premium'), sub: t('Значок возле вашего имени, только на этом устройстве'), checked: p.localPremium, onchange: "window.TelegramX.setPref('localPremium', this.checked); window.TelegramX.rerenderSettings()" }),
+        { hint: t('Это только оформление. Серверные возможности Premium (лимиты, реакции, перевод) он не включает. Подписка оформляется в приложении Telegram.') },
+      )}
+    </div>`;
 }
 
 function ghostSummary() {
@@ -579,6 +690,32 @@ export function devHardReload() {
 export function checkAppUpdate() {
   if (!postNative('checkUpdate')) showToast(t('Доступно только в приложении для Android'));
   else showToast(t('Проверяем обновления…'));
+}
+
+/** Search in settings (the magnifier of Telegram's settings screen): filters every row of the root page. */
+export function openSettingsSearch() {
+  const el = root();
+  if (!el || page !== 'root') return;
+  const rows = [...el.querySelectorAll('button.tx-row, label.tx-row')].map((n) => ({ n, title: (n.querySelector('.tx-row-title') || {}).textContent || '', sub: (n.querySelector('.tx-row-sub') || {}).textContent || '', icon: n.querySelector('.tx-row-icon') ? n.querySelector('.tx-row-icon').outerHTML : '' }));
+  const box = document.createElement('div');
+  box.className = 'tx-ssearch';
+  box.innerHTML = `<div class="tx-ssearch-bar"><button class="tx-icon-btn" data-x><i class="icon icon-arrow-left"></i></button><input type="search" placeholder="${t('Поиск')}" autocomplete="off"></div><div class="tx-ssearch-list"></div>`;
+  document.body.append(box);
+  const input = box.querySelector('input');
+  const list = box.querySelector('.tx-ssearch-list');
+  const draw = (q) => {
+    const k = q.trim().toLowerCase();
+    const hit = rows.filter((r) => !k || `${r.title} ${r.sub}`.toLowerCase().includes(k));
+    list.innerHTML = hit.length ? hit.map((r, i) => `<button class="tx-row" data-i="${rows.indexOf(r)}">${r.icon}<span class="tx-row-body"><span class="tx-row-title">${escapeHtml(r.title)}</span><span class="tx-row-sub">${escapeHtml(r.sub)}</span></span></button>`).join('') : `<div class="tx-group-hint" style="padding:30px 22px;text-align:center">${t('Ничего не найдено')}</div>`;
+  };
+  draw('');
+  input.focus();
+  input.oninput = () => draw(input.value);
+  box.onclick = (e) => {
+    if (e.target.closest('[data-x]')) return box.remove();
+    const b = e.target.closest('[data-i]');
+    if (b) { box.remove(); rows[Number(b.dataset.i)].n.click(); }
+  };
 }
 
 export function openSettingsMenu(event) {

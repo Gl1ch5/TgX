@@ -349,6 +349,28 @@ export function installChat(TelegramService, helpers) {
   };
 
   /** Chat folders ("Все", "Личные", user folders) with the rule flags needed to filter locally. */
+  /** Who sees what: the current rule of every privacy key, as 'all' | 'contacts' | 'nobody' (+ exceptions count), and the blocked count. */
+  P.chatPrivacy = async function chatPrivacy() {
+    const client = await this.getClient();
+    const keys = {
+      phone: Api.InputPrivacyKeyPhoneNumber, lastSeen: Api.InputPrivacyKeyStatusTimestamp, photo: Api.InputPrivacyKeyProfilePhoto,
+      about: Api.InputPrivacyKeyAbout, forwards: Api.InputPrivacyKeyForwards, calls: Api.InputPrivacyKeyPhoneCall, invites: Api.InputPrivacyKeyChatInvite,
+    };
+    const out = {};
+    await Promise.all(Object.entries(keys).map(async ([name, K]) => {
+      try {
+        const res = await client.invoke(new Api.account.GetPrivacy({ key: new K() }));
+        const rules = res.rules || [];
+        const kind = rules.some((r) => r instanceof Api.PrivacyValueAllowAll) ? 'all' : rules.some((r) => r instanceof Api.PrivacyValueAllowContacts) ? 'contacts' : 'nobody';
+        const ex = rules.reduce((n, r) => n + ((r instanceof Api.PrivacyValueAllowUsers || r instanceof Api.PrivacyValueDisallowUsers) ? (r.users || []).length : 0), 0);
+        out[name] = { kind, exceptions: ex };
+      } catch { out[name] = null; }
+    }));
+    try { const b = await client.invoke(new Api.contacts.GetBlocked({ offset: 0, limit: 1 })); out.blocked = b.count != null ? b.count : (b.users || []).length; } catch { out.blocked = null; }
+    try { const a = await client.invoke(new Api.account.GetAccountTTL()); out.ttlDays = a.ttl && a.ttl.days; } catch { out.ttlDays = null; }
+    return out;
+  };
+
   P.chatFolders = async function chatFolders() {
     const client = await this.getClient();
     const res = await client.invoke(new Api.messages.GetDialogFilters());

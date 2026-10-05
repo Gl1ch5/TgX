@@ -755,7 +755,22 @@
   "plural": false
  },
  {
+  "key": "Поиск чатов",
+  "where": "js/ui/list.js",
+  "plural": false
+ },
+ {
+  "key": "Новая история",
+  "where": "js/ui/list.js",
+  "plural": false
+ },
+ {
   "key": "Новое сообщение",
+  "where": "js/ui/list.js",
+  "plural": false
+ },
+ {
+  "key": "Истории скоро",
   "where": "js/ui/list.js",
   "plural": false
  },
@@ -835,7 +850,62 @@
   "plural": false
  },
  {
+  "key": "Сортировка по времени захода",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Пригласить друзей",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Недавние звонки",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Сортировка",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Поиск контактов",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
   "key": "Контактов нет",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Добавить контакт",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "По времени захода",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "По имени",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Присоединяйтесь к Telegram",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка скопирована",
+  "where": "js/ui/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Добавление контактов скоро",
   "where": "js/ui/pages.js",
   "plural": false
  },
@@ -911,6 +981,21 @@
  },
  {
   "key": "Без звука",
+  "where": "js/ui/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Обсуждение",
+  "where": "js/ui/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Покинуть",
+  "where": "js/ui/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Добавить в контакты",
   "where": "js/ui/profile.js",
   "plural": false
  },
@@ -1015,12 +1100,12 @@
   "plural": false
  },
  {
-  "key": "Покинуть",
+  "key": "Готово",
   "where": "js/ui/profile.js",
   "plural": false
  },
  {
-  "key": "Готово",
+  "key": "У этого чата нет публичной ссылки",
   "where": "js/ui/profile.js",
   "plural": false
  },
@@ -1200,11 +1285,6 @@
   "plural": false
  },
  {
-  "key": "Ссылка скопирована",
-  "where": "js/views/profile.js",
-  "plural": false
- },
- {
   "key": "День рождения",
   "where": "js/views/profile.js",
   "plural": false
@@ -1325,7 +1405,7 @@
   "plural": false
  },
  {
-  "key": "Имя, «О себе», фото профиля",
+  "key": "Номер, имя пользователя, «О себе»",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1340,12 +1420,37 @@
   "plural": false
  },
  {
+  "key": "Конфиденциальность",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Время захода, устройства, ключи доступа",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Звуки, звонки, счётчик сообщений",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Данные и память",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": "Автозагрузка медиа, кэш",
+  "key": "Настройки загрузки медиафайлов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Папки с чатами",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сортировка чатов по папкам",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1375,12 +1480,72 @@
   "plural": false
  },
  {
+  "key": "Язык",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Telegram Premium",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Локальный Premium включён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Эксклюзивные возможности",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мои звёзды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Telegram для бизнеса",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Подарить Premium",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Задать вопрос",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вопросы о Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Политика конфиденциальности",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Помощь",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Режим призрака",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": "Язык",
+  "key": "Моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Расширения Telegram You",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1400,16 +1565,6 @@
   "plural": false
  },
  {
-  "key": "Моды",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Расширения Telegram You",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
   "key": "Для разработчиков",
   "where": "js/views/settings.js",
   "plural": false
@@ -1421,6 +1576,211 @@
  },
  {
   "key": "Telegram You {a} · автор",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мои контакты",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Никто",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Заблокированные пользователи",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Время захода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Фотографии профиля",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Пересланные сообщения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Звонки",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Группы и каналы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Значения читаются из вашего аккаунта. Изменить их можно в приложении Telegram.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Активные сеансы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Управление устройствами",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Если вы не заходите",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Безопасность",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "1 год",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "{a} дн.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Уведомления на устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Браузер не поддерживает уведомления",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Заблокированы в настройках браузера",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Новые сообщения, когда вкладка скрыта",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Показывать текст сообщения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Предпросмотр в уведомлении",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Уведомления из чатов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Звук в приложении",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Короткий звук при новом сообщении",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "В приложении",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Считать чаты, а не сообщения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Счётчик на вкладке «Чаты»",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не считать чаты без звука",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Счётчик сообщений",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Папка",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не контакты",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Группы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Каналы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Боты",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Выбранные чаты",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Папок пока нет",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Папки создаются в приложении Telegram и появляются здесь и на вкладке «Чаты».",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мои папки",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Локальный Premium",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Значок возле вашего имени, только на этом устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Это только оформление. Серверные возможности Premium (лимиты, реакции, перевод) он не включает. Подписка оформляется в приложении Telegram.",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1501,16 +1861,6 @@
  },
  {
   "key": "Telegram удаляет такие сообщения на сервере. Здесь остаются только те, что уже пришли на это устройство. Свои удаления работают как обычно.",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Локальный Premium",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Значок возле вашего имени, только на этом устройстве",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1931,11 +2281,6 @@
  },
  {
   "key": "Это устройство",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Активные сеансы",
   "where": "js/views/settings.js",
   "plural": false
  },

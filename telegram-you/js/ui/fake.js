@@ -46,6 +46,7 @@ export const fake = {
     return { dialogs: page, hasMore: from + limit < dialogs.length, cursor: { i: from + limit } };
   },
   async chatFolders() { return []; },
+  async chatPrivacy() { return { phone: { kind: 'contacts', exceptions: 0 }, lastSeen: { kind: 'all', exceptions: 3 }, photo: { kind: 'all', exceptions: 0 }, about: { kind: 'all', exceptions: 0 }, forwards: { kind: 'all', exceptions: 0 }, calls: { kind: 'all', exceptions: 0 }, invites: { kind: 'all', exceptions: 0 }, blocked: 2, ttlDays: 365 }; },
   async chatHistory(key, { offsetId = 0, limit = 40 } = {}) {
     const all = history(key).filter((m) => !offsetId || m.id < offsetId);
     const page = all.slice(-limit);

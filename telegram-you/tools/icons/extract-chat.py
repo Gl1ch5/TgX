@@ -37,6 +37,7 @@ input_reply input_forward input_clear msg_panel_clear group_edit
 
 def main():
     src = sys.argv[1]
+    NAMES.extend(sys.argv[2:])  # extra drawable names from the command line
     files = set(ex.git(src, 'ls-tree', '-r', '--name-only', 'HEAD', 'TMessagesProj/src/main/res').split('\n'))
     os.makedirs(ex.OUT, exist_ok=True)
     n = 0

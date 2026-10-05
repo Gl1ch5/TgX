@@ -157,24 +157,19 @@ export function render(keepScroll = false) {
     if (!list.length && !S.loading) rows += `<div class="cx-end">${t('Здесь пока пусто')}</div>`;
     if (S.hasMore) rows += '<div class="cx-end" id="cx-more">…</div>';
   }
+  const searching = q.length > 0;
   el.innerHTML = `
     <div class="cx-top">
       ${showArchive ? `<button class="cx-icon" data-act="unarch" aria-label="${t('Назад')}">${I.back}</button>` : ''}
-      ${showArchive ? '' : `<span class="cx-stack">${S.me ? avatar({ id: S.me.id, title: S.me.name, avatar: S.me.avatar }) : ''}</span>`}
       <h1>${showArchive ? t('Архив чатов') : 'Telegram'}</h1>
-      <button class="cx-icon" data-act="search" aria-label="${t('Поиск')}">${I.search}</button>
       <button class="cx-icon" data-act="menu" aria-label="${t('Меню')}">${I.more}</button>
     </div>
-    ${searchOpen ? `<div class="cx-search">${I.search}<input id="cx-q" placeholder="${t('Поиск')}" value="${escapeHtml(query)}" autocomplete="off"></div>` : ''}
-    ${showArchive || searchOpen ? '' : foldersHtml()}
+    ${showArchive ? '' : `<label class="cx-search"><span class="cx-search-ic">${I.search}</span><input id="cx-q" placeholder="${t('Поиск чатов')}" value="${escapeHtml(query)}" autocomplete="off" enterkeyhint="search"></label>`}
+    ${showArchive || searching ? '' : foldersHtml()}
     <div class="cx-scroll" id="cx-list">${rows}</div>
-    ${showArchive ? '' : `<button class="cx-fab" data-act="new" aria-label="${t('Новое сообщение')}">${I.fab}</button>`}`;
+    ${showArchive ? '' : `<button class="cx-fab2" data-act="story" aria-label="${t('Новая история')}">${I.camera}</button><button class="cx-fab" data-act="new" aria-label="${t('Новое сообщение')}">${I.fab}</button>`}`;
   const sc = el.querySelector('.cx-scroll');
   if (keepScroll || top) sc.scrollTop = top;
-  if (searchOpen) {
-    const inp = el.querySelector('#cx-q');
-    if (inp && document.activeElement !== inp && !inp.dataset.f) { inp.dataset.f = '1'; inp.focus(); }
-  }
   const more = el.querySelector('#cx-more');
   if (more && 'IntersectionObserver' in window) new IntersectionObserver((e, o) => { if (e[0].isIntersecting) { o.disconnect(); loadMore(); } }, { root: sc, rootMargin: '600px' }).observe(more);
   emit('unread', totalUnread());
@@ -185,9 +180,9 @@ function onClick(e) {
   const act = e.target.closest('[data-act]');
   if (act) {
     const a = act.dataset.act;
-    if (a === 'search') { searchOpen = !searchOpen; query = ''; globalHits = []; render(); }
-    else if (a === 'unarch') { showArchive = false; render(); }
+    if (a === 'unarch') { showArchive = false; render(); }
     else if (a === 'new') emit('tab', 'contacts');
+    else if (a === 'story') toast(t('Истории скоро'));
     else if (a === 'menu') {
       const r = act.getBoundingClientRect();
       showMenu(r.right - 240, r.bottom, [

@@ -82,10 +82,12 @@ const FILES = {
   lock: 'msg_secret.webp', noCopy: 'menu_share_off_24.svg', shortcut: 'msg_home.webp', report: 'msg_report.webp',
   timer: 'msg_autodelete.webp', userEdit: 'msg_edit.webp', qr: 'msg_qrcode.webp', download: 'msg_download.webp',
   file: 'msg_download.webp', logout: 'msg_leave.webp', globe: 'settings_language.svg', plus: 'msg_add.webp',
-  camera: 'msg_camera.webp', fab: 'filled_fab_compose_32.svg', newmsg: 'profile_newmsg.webp', list: 'msg_pinnedlist.webp', contactsTab: 'msg_contacts.webp',
+  addUser: 'msg_addcontact.webp', camera: 'msg_camera.webp', fab: 'filled_fab_compose_32.svg', newmsg: 'profile_newmsg.webp', list: 'msg_pinnedlist.webp', contactsTab: 'msg_contacts.webp',
   chatsTab: 'settings_chat.svg', settingsTab: 'msg_settings.webp',
 };
-const mask = (file, cls = '') => `<span class="ic ${cls}" style="--m:url(icons/android/${file})"></span>`;
+// Absolute URL: a url() inside a custom property is resolved against the stylesheet that uses it (css/), not the page.
+const BASE = new URL('icons/android/', document.baseURI).href;
+const mask = (file, cls = '') => `<span class="ic ${cls}" style="--m:url(${BASE}${file})"></span>`;
 
 export const I = { ...SVG };
 for (const [k, f] of Object.entries(FILES)) I[k] = mask(f);

@@ -136,7 +136,7 @@ async function init() {
       state.user = S.me; settings.rerenderSettings(); profile.renderProfile();
     },
     setView: (view) => showTab(view),
-    openSettingsPage: settings.openSettingsPage, rerenderSettings: settings.rerenderSettings, openSettingsMenu: settings.openSettingsMenu,
+    openSettingsPage: settings.openSettingsPage, rerenderSettings: settings.rerenderSettings, openSettingsMenu: settings.openSettingsMenu, openSettingsSearch: settings.openSettingsSearch,
     setPref: settings.updatePref, setColorTheme: settings.setColorTheme, setThemeMode: settings.setThemeMode, toggleDayNight: settings.toggleDayNight,
     setAccent: settings.setAccent, setNameColor: settings.setNameColor, openChatSettingsMenu: settings.openChatSettingsMenu,
     setLanguage: settings.setLanguage, filterLanguages: settings.filterLanguages, toggleLanguageSearch: settings.toggleLanguageSearch,
@@ -147,7 +147,7 @@ async function init() {
     devImportSession: settings.devImportSession, devHardReload: settings.devHardReload,
     openProfilePage: profile.openProfilePage, openProfileMenu: profile.openProfileMenu, copyText: profile.copyText,
     pickProfilePhoto: profile.pickProfilePhoto, uploadProfilePhoto: profile.uploadProfilePhoto, saveProfile: profile.saveProfile,
-    clearDeletedMessages: settings.clearDeletedMessages,
+    clearDeletedMessages: settings.clearDeletedMessages, setNotify: settings.setNotify,
     clearMediaCache: async () => { await api.clearCache(); showToast(t('Кэш очищен')); settings.rerenderSettings(); },
     logoutTelegram: async () => {
       if (!confirm(t('Выйти из Telegram на этом устройстве?'))) return;

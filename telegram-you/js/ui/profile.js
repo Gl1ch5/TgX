@@ -40,15 +40,24 @@ function draw() {
     info.about && `<div class="r"><b>${escapeHtml(info.about)}</b><span>${info.kind === 'user' ? t('О себе') : t('Описание')}</span></div>`,
   ].filter(Boolean).join('');
   const status = statusText(info.status, info.kind);
+  const title = info.self ? t('Избранное') : info.title;
+  const acts = info.kind === 'user'
+    ? `<button data-a="chat">${I.newmsg}<span>${t('Чат')}</span></button><button data-a="mute">${info.muted ? I.sound : I.soundOff}<span>${info.muted ? t('Звук') : t('Без звука')}</span></button><button data-a="call">${I.call}<span>${t('Звонок')}</span></button><button data-a="video">${I.video}<span>${t('Видео')}</span></button>`
+    : `<button data-a="mute">${info.muted ? I.sound : I.soundOff}<span>${info.muted ? t('Звук') : t('Без звука')}</span></button>${info.kind === 'channel' ? `<button data-a="discuss">${I.discussion || I.newmsg}<span>${t('Обсуждение')}</span></button>` : `<button data-a="chat">${I.newmsg}<span>${t('Чат')}</span></button>`}<button data-a="link">${I.share}<span>${t('Ссылка')}</span></button><button data-a="leave">${I.logout}<span>${t('Покинуть')}</span></button>`;
+  const top = `<div class="ptop"><button class="cx-icon" data-a="back" aria-label="${t('Назад')}">${I.back}</button><span class="pt"><span class="pav">${avatar({ id: info.id, title, avatar: info.avatar })}</span><span class="pn"><b>${escapeHtml(title)}</b><span>${escapeHtml(status)}</span></span></span><button class="cx-icon" data-a="more" aria-label="${t('Меню')}">${I.more}</button></div>`;
+  const head = info.kind === 'user'
+    ? `<div class="head userc"><div class="pc">${avatar({ id: info.id, title, avatar: info.avatar }, 'pbig')}</div><h2>${escapeHtml(title)}</h2><span class="st${info.status && info.status.kind === 'online' ? ' live' : ''}">${escapeHtml(status)}</span><div class="acts">${acts}</div></div>`
+    : `<div class="hero tx-peer-${Math.abs(Number(String(info.id).replace(/\D/g, '').slice(-3)) || 0) % 7}">${hero}<span class="ini">${escapeHtml((info.title || '?')[0].toUpperCase())}</span>
+      <div class="who"><h2>${escapeHtml(title)}</h2><span>${escapeHtml(status)}</span></div>
+      <div class="acts">${acts}</div>
+    </div>`;
   state.el.innerHTML = `
-    <div class="hero tx-peer-${Math.abs(Number(String(info.id).replace(/\D/g, '').slice(-3)) || 0) % 7}">${hero}<span class="ini">${escapeHtml((info.title || '?')[0].toUpperCase())}</span>
-      <div class="bar"><button class="cx-icon" data-a="back" aria-label="${t('Назад')}">${I.back}</button><button class="cx-icon" data-a="more" aria-label="${t('Меню')}">${I.more}</button></div>
-      <div class="who"><h2>${escapeHtml(info.self ? t('Избранное') : info.title)}</h2><span>${escapeHtml(status)}</span></div>
-      <div class="acts"><button data-a="chat">${I.newmsg}<span>${t('Чат')}</span></button><button data-a="mute">${info.muted ? I.sound : I.soundOff}<span>${info.muted ? t('Звук') : t('Без звука')}</span></button><button data-a="call">${I.call}<span>${t('Звонок')}</span></button><button data-a="video">${I.video}<span>${t('Видео')}</span></button></div>
-    </div>
+    ${top}${head}
     ${rows ? `<div class="cx-card info">${rows}</div>` : ''}
+    ${info.kind === 'user' && info.contact === false && !info.self ? `<div class="cx-card info addc"><div class="r" data-a="addcontact">${I.addUser}<b>${t('Добавить в контакты')}</b></div></div>` : ''}
     <div class="tabs cx-pill">${TABS().map(([id, label]) => `<button data-tab="${id}" class="${tab === id ? 'on' : ''}">${label}</button>`).join('')}</div>
     <div class="shared" id="cx-shared"></div>`;
+  state.el.onscroll = () => { const y = state.el.scrollTop; state.el.classList.toggle('collapsed', y > (info.kind === 'user' ? 150 : 330)); };
   state.el.onclick = onClick;
   renderShared();
 }
@@ -120,4 +129,8 @@ async function onClick(e) {
   if (a === 'more') { const r = b.getBoundingClientRect(); return moreMenu(r.right - 300, r.bottom); }
   if (a === 'mute') { const i = state.info; try { await S.tg.chatMute(i.id, !i.muted); i.muted = !i.muted; const d = S.dialogs.get(i.id); if (d) d.muted = i.muted; draw(); } catch { toast(t('Не удалось изменить')); } return; }
   if (a === 'call' || a === 'video') return toast(t('Звонки скоро'));
+  if (a === 'link') { const i = state.info; const u = i.username ? `https://t.me/${i.username}` : ''; if (u) { navigator.clipboard?.writeText(u).then(() => toast(t('Ссылка скопирована'))); } else toast(t('У этого чата нет публичной ссылки')); return; }
+  if (a === 'leave') { const i = state.info; if (await confirmBox(t('Покинуть «{a}»?', { a: i.title }), t('Покинуть'))) { try { await S.tg.chatLeave(i.id); toast(t('Готово')); closeProfile(); } catch { toast(t('Не удалось изменить')); } } return; }
+  if (a === 'discuss') return closeProfile();
+  if (a === 'addcontact') return toast(t('Добавление контактов скоро'));
 }
