@@ -13,7 +13,7 @@ const dialogs = Array.from({ length: 60 }, (_, i) => {
     kind, title: NAMES[i % NAMES.length] + (i >= NAMES.length ? ` ${i}` : ''), username: '', avatar: null,
     verified: i === 7, bot: false, self: i === 1, muted: i % 4 === 2, pinned: i < 3, archived: false,
     unread: i % 4 === 0 ? (i * 7) % 40 + 1 : 0, unreadMentions: 0, markedUnread: false,
-    readInboxMaxId: 0, readOutboxMaxId: out ? 5 : 100, topId: 100, date,
+    readInboxMaxId: 0, readOutboxMaxId: out ? 5 : 1000, topId: 100, date,
     status: kind === 'user' ? (i % 2 ? { kind: 'recently' } : { kind: 'online' }) : { kind: 'members', count: 120 * i + 5 },
     last: { id: 100, text: TEXTS[i % TEXTS.length], out, senderName: kind === 'group' ? (out ? 'Вы' : 'Дмитрий') : '' },
   };
@@ -23,6 +23,12 @@ const history = (key) => {
   for (let i = 0; i < 80; i++) {
     const mine = i % 3 === 0;
     out.push({ id: i + 1, chatId: key, date: now - (80 - i) * 900, out: mine, senderKey: mine ? 'u1' : 'u2', senderName: mine ? 'Я' : 'Pavel', senderAvatar: null, text: TEXTS[i % TEXTS.length], html: TEXTS[i % TEXTS.length], media: [], reactions: [], replyTo: i % 9 === 4 ? { id: i - 1, name: 'Pavel', text: TEXTS[(i + 3) % TEXTS.length] } : null, status: 'sent', service: null });
+  }
+  if (key === 'u1000') {
+    const d = new Date(); d.setHours(15, 49, 0, 0); const t0 = Math.floor(d / 1000);
+    const long = 'Горинова\n\n· Продолжение политики: Василий III продолжил политику отца по созданию единого Русского государства и расширению границ.\n· Ликвидация уделов: ряд уделов был ликвидирован, строго регулировались отношения с удельными князьями.\n· Центральные ведомства: при Василии III получили развитие и оформились центральные государственные ведомства — «приказы».\n· Укрепление самодержавия: тенденция к укреплению самодержавной власти, созданию «этатистской монархии». Происходила частичная конфискация земельной собственности бояр.\n· Предпосылки самодержавия: во второй половине правления Василия III были созданы предпосылки для формирования системы самодержавного правления при Иване Грозном.';
+    const mk = (id, out, text, date, extra = {}) => ({ id, chatId: key, date, out, senderKey: out ? 'u1' : 'u2', senderName: out ? 'Я' : 'Систер', senderAvatar: null, text, html: text, media: [], reactions: [], replyTo: null, status: 'sent', service: null, ...extra });
+    out.push(mk(90, false, long, t0, { edited: true }), mk(91, false, 'Распечатай срочно', t0), mk(92, true, 'Когда', t0 + 540), mk(93, false, 'Седня', t0 + 600));
   }
   return out;
 };
@@ -55,6 +61,7 @@ export const fake = {
   async chatPinned(key) { return key === 'u1000' ? [{ id: 5, text: 'Скинь' }, { id: 9, text: 'Скачай валорант' }] : []; },
   async chatSearchIn(key, q) { return history(key).filter((m) => m.text.toLowerCase().includes(q.toLowerCase())).slice(-10); },
   async chatProfile(key) { const d = dialogs.find((x) => x.id === key) || dialogs[0]; return { id: d.id, title: d.title, username: 'muninvura', phone: '79921190156', about: 'О себе: демо', avatar: null, status: d.status, kind: d.kind, muted: d.muted, blocked: false }; },
+  async chatAppearance(key) { return key === 'u1004' ? { wallpaper: { kind: 'fill', colors: ['#dbddbb', '#6ba587', '#d5d88d', '#88b884'], intensity: 50, rotation: 0 }, theme: null } : null; },
   async chatShared() { return { messages: [], hasMore: false }; },
   async startChatLive() {}, async logout() {},
 };

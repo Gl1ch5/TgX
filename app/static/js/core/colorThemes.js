@@ -3,7 +3,7 @@
  * accent, wallpaper — like Telegram's built-in chat themes. Data only.
  */
 export const COLOR_THEMES = [
-  { id: 'classic', emoji: '🎨', accent: 'blue', wp: 'FOks2P6KCFIMAAAAyFz5S74pfKo', out: { dark: ['#2b3e63', '#2b3e63'], light: ['#4a80f5', '#5b8df7'] } },
+  { id: 'classic', emoji: '🎨', accent: 'blue', wp: 'FOks2P6KCFIMAAAAyFz5S74pfKo', out: { dark: ['#5a86c4', '#568fc3'], light: ['#4a80f5', '#5b8df7'] } },
   { id: 'violet', emoji: '💜', accent: 'violet', wp: 'T7LjEHVuYVIFAAAAS7NH4xQl6jY', out: { dark: ['#6b46c1', '#a94fb8'], light: ['#8260e0', '#b56fe0'] } },
   { id: 'newyear', emoji: '🎄', accent: 'orange', wp: 'CJNyxPMgSVAEAAAAvW9sMwc51cw', out: { dark: ['#c9731a', '#e0a93a'], light: ['#d97a1c', '#eab33f'] } },
   { id: 'games', emoji: '🎮', accent: 'violet', wp: 'MIo6r0qGSFAFAAAAtL8TsDzNX60', out: { dark: ['#5b73f0', '#d85aa8', '#f08a4a'], light: ['#5b73f0', '#d85aa8', '#f08a4a'] } },

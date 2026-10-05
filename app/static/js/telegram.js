@@ -2006,6 +2006,21 @@ class TelegramService {
       return bytes && bytes.length ? { bytes, mime: doc.mimeType } : null;
     }
 
+    if (kind === 'wallpaper') {
+      const doc = this.wallDocs && this.wallDocs.get(a);
+      if (!doc) return null;
+      let bytes = await client.downloadMedia(new Api.MessageMediaDocument({ document: doc }), {});
+      if (!bytes || !bytes.length) return null;
+      let mime = doc.mimeType || 'image/jpeg';
+      // Pattern wallpapers are gzipped SVG ("application/x-tgwallpattern").
+      if (mime === 'application/x-tgwallpattern' || (bytes[0] === 0x1f && bytes[1] === 0x8b)) {
+        const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+        bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+        mime = 'image/svg+xml';
+      }
+      return { bytes, mime };
+    }
+
     if (kind === 'cmedia' || kind === 'cthumb') {
       const msg = this.commentMsgs.get(`${a}/${b}`);
       if (!msg || !msg.media) return null;

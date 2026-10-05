@@ -487,6 +487,52 @@ export function installChat(TelegramService, helpers) {
     return { messages: list.filter((m) => m && m.id).map((m) => this.formatChatMessage(m, key)), hasMore: list.length >= limit };
   };
 
+  // ----- chat wallpaper and theme (what the official apps show behind the messages) -----
+
+  /** Plain description of an Api.WallPaper / WallPaperNoFile. */
+  P.formatWallpaper = function formatWallpaper(wp) {
+    if (!wp) return null;
+    const st = wp.settings || {};
+    const hex = (n) => (n == null ? null : '#' + (n >>> 0 & 0xffffff).toString(16).padStart(6, '0'));
+    const colors = [st.backgroundColor, st.secondBackgroundColor, st.thirdBackgroundColor, st.fourthBackgroundColor].map(hex).filter(Boolean);
+    const out = { colors, intensity: st.intensity == null ? null : st.intensity, rotation: st.rotation || 0, blur: !!st.blur, motion: !!st.motion, dark: !!wp.dark, url: null, kind: 'fill' };
+    const doc = wp.document;
+    if (doc && doc.id != null) {
+      this.wallDocs = this.wallDocs || new Map();
+      this.wallDocs.set(String(doc.id), doc);
+      out.url = `media/wallpaper/${doc.id}`;
+      out.kind = wp.pattern ? 'pattern' : 'image';
+    }
+    if (out.kind === 'fill' && !colors.length) return null;
+    return out;
+  };
+
+  /** Wallpaper and message colours of a chat: its own wallpaper, else the wallpaper of its chat theme. */
+  P.chatAppearance = async function chatAppearance(key) {
+    const { client, entity, peer } = await this.chatInput(key);
+    let full = null;
+    try {
+      if (entity instanceof Api.User) full = (await client.invoke(new Api.users.GetFullUser({ id: peer }))).fullUser;
+      else if (entity instanceof Api.Channel) full = (await client.invoke(new Api.channels.GetFullChannel({ channel: peer }))).fullChat;
+      else full = (await client.invoke(new Api.messages.GetFullChat({ chatId: entity.id }))).fullChat;
+    } catch (e) { console.warn('[chat] appearance', e); return null; }
+    const res = { wallpaper: this.formatWallpaper(full.wallpaper), theme: null };
+    const emoticon = full.themeEmoticon;
+    if (emoticon) {
+      try {
+        if (!this.chatThemes) this.chatThemes = await client.invoke(new Api.account.GetChatThemes({ hash: 0 }));
+        const theme = (this.chatThemes.themes || []).find((th) => th.emoticon === emoticon);
+        if (theme) {
+          const hex = (n) => '#' + (n >>> 0 & 0xffffff).toString(16).padStart(6, '0');
+          const pick = (dark) => (theme.settings || []).find((x) => (x.baseTheme instanceof Api.BaseThemeNight || x.baseTheme instanceof Api.BaseThemeTinted) === dark);
+          const variant = (x) => (x ? { accent: hex(x.accentColor), out: (x.messageColors || []).map(hex), wallpaper: this.formatWallpaper(x.wallpaper) } : null);
+          res.theme = { emoticon, dark: variant(pick(true)), light: variant(pick(false)) };
+        }
+      } catch (e) { console.warn('[chat] themes', e); }
+    }
+    return res;
+  };
+
   // ----- live updates -----
 
   /**

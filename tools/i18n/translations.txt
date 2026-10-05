@@ -392,7 +392,6 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Сообщение ‖ Message ‖ Mensaje ‖ Mensagem ‖ Повідомлення
 Прикрепить ‖ Attach ‖ Adjuntar ‖ Anexar ‖ Прикріпити
 Не удалось загрузить сообщения ‖ Couldn’t load messages ‖ No se pudieron cargar los mensajes ‖ Não foi possível carregar as mensagens ‖ Не вдалося завантажити повідомлення
-изм. ‖ edited ‖ editado ‖ editada ‖ змін.
 Переслано от {a} ‖ Forwarded from {a} ‖ Reenviado de {a} ‖ Encaminhada de {a} ‖ Переслано від {a}
 Редактирование ‖ Editing ‖ Edición ‖ Edição ‖ Редагування
 себе ‖ yourself ‖ ti mismo ‖ você mesmo ‖ собі
@@ -496,3 +495,4 @@ GIF скоро ‖ GIFs are coming soon ‖ Los GIF llegarán pronto ‖ GIFs em
 Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b} ‖ Mod “{a}” will get full access to the app and your account. Install only mods you trust.{b} ‖ El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b} ‖ O mod «{a}» terá acesso total ao app e à sua conta. Instale apenas mods em que confia.{b} ‖ Мод «{a}» отримає повний доступ до застосунку та вашого акаунта. Встановлюйте лише моди, яким довіряєте.{b}
 Этот мод не проверен. ‖ This mod has not been reviewed. ‖ Este mod no ha sido revisado. ‖ Este mod não foi verificado. ‖ Цей мод не перевірено.
 Установить ‖ Install ‖ Instalar ‖ Instalar ‖ Встановити
+изменено ‖ edited ‖ editado ‖ editada ‖ змінено

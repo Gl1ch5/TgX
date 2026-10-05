@@ -28,6 +28,7 @@ export async function openChat(id) {
   buildShell();
   emit('selected', id);
   loadPins();
+  loadAppearance();
   await loadOlder(true);
 }
 
@@ -103,6 +104,7 @@ function buildShell() {
   const readonly = d.kind === 'channel' && !d.admin;
   el().innerHTML = `${headerHtml()}
     <div id="cx-pin" class="cx-pinwrap"></div>
+    <div id="cx-fday" class="cx-fday"></div>
     <div class="cx-msgs" id="cx-msgs"><div class="spacer"></div><div class="cx-loading" id="cx-ld">…</div></div>
     <div id="cx-selbar" class="cx-selbar tx-hidden"><button class="cx-pill" data-a="selreply">${t('Ответить')} ${I.reply}</button><button class="cx-pill" data-a="selfwd">${t('Переслать')} ${I.forward}</button></div>
     <button class="cx-jump cx-pill tx-hidden" id="cx-jump" aria-label="${t('Вниз')}">${I.down}</button>
@@ -180,6 +182,7 @@ function onScroll() {
   const box = el().querySelector('#cx-msgs');
   if (!box || !cur) return;
   cur.atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  floatDay();
   if (cur.atBottom) { cur.unseen = 0; markRead(); }
   updateJump();
   if (box.scrollTop < 300) loadOlder();
@@ -250,7 +253,7 @@ function bubbleHtml(m, prev, next, group) {
   const showName = group && !m.out && first && !sticker;
   const read = m.out && m.id > 0 && m.id <= cur.dlg.readOutboxMaxId;
   const tick = m.out ? (m.status === 'pending' ? I.clock : m.status === 'failed' ? '!' : `<span class="${read ? 'rd' : ''}">${read ? I.checks : I.check}</span>`) : '';
-  const meta = `<span class="cx-meta">${m.pinned ? I.pin : ''}${m.edited ? t('изм.') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
+  const meta = `<span class="cx-meta">${m.pinned ? I.pin : ''}${m.edited ? t('изменено') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
   const reply = m.replyTo ? `<span class="reply" data-reply="${m.replyTo.id}"><b>${escapeHtml(m.replyTo.name || '')}</b><span>${escapeHtml(m.replyTo.text || '')}</span></span>` : '';
   const fwd = m.fwd ? `<span class="fwd">${t('Переслано от {a}', { a: escapeHtml(m.fwd.name) })}</span>` : '';
   const name = showName ? `<span class="nm tx-peer-name tx-peer-${peerColor(m.senderKey)}">${escapeHtml(m.senderName)}</span>` : '';
@@ -346,6 +349,74 @@ export function liveStatus(key, status) {
   if (cur && cur.id === key) { cur.dlg.status = status; refreshHeader(); }
 }
 
+
+// ---------------------------------------------------------------- chat wallpaper and theme (from Telegram)
+const looks = new Map(); // chat key -> appearance (cached for the session)
+async function loadAppearance() {
+  const id = cur.id;
+  let a = looks.get(id);
+  if (a === undefined) {
+    try { a = await S.tg.chatAppearance(id); } catch { a = null; }
+    looks.set(id, a);
+  }
+  if (cur && cur.id === id) applyLook(a);
+}
+
+function wallCss(w) {
+  const c = w.colors || [];
+  if (!c.length) return '#000';
+  if (c.length === 1) return c[0];
+  if (c.length === 2) return `linear-gradient(${(w.rotation || 0) + 180}deg, ${c[0]}, ${c[1]})`;
+  // Telegram's 3/4-colour "freeform" gradient: approximated with corner glows
+  const at = ['18% 12%', '86% 30%', '14% 88%', '82% 86%'];
+  return c.map((col, i) => `radial-gradient(circle at ${at[i]}, ${col} 0, transparent 70%)`).join(', ') + `, ${c[0]}`;
+}
+
+function applyLook(a) {
+  const conv = el();
+  conv.querySelector('.cx-wall')?.remove();
+  conv.style.removeProperty('--tx-bubble-out');
+  if (!a) return;
+  const dark = document.documentElement.dataset.theme !== 'light';
+  const variant = a.theme ? (dark ? a.theme.dark : a.theme.light) || a.theme.dark || a.theme.light : null;
+  if (variant && variant.out && variant.out.length) {
+    conv.style.setProperty('--tx-bubble-out', variant.out.length > 1 ? `linear-gradient(180deg, ${variant.out.join(', ')})` : variant.out[0]);
+  }
+  const w = a.wallpaper || (variant && variant.wallpaper);
+  if (!w) return;
+  const box = document.createElement('div');
+  box.className = 'cx-wall';
+  if (w.kind === 'image') {
+    box.innerHTML = `<i class="img ${w.blur ? 'blur' : ''}" style="background-image:url('${mu(w.url)}')"></i>`;
+  } else {
+    const fill = wallCss(w);
+    const neg = w.intensity != null && w.intensity < 0;
+    const op = Math.abs(w.intensity == null ? 50 : w.intensity) / 100;
+    box.style.background = neg ? '#000' : fill;
+    if (w.kind === 'pattern' && w.url) {
+      box.innerHTML = `<i class="pat" style="-webkit-mask-image:url('${mu(w.url)}');mask-image:url('${mu(w.url)}');background:${neg ? fill : '#000'};opacity:${op}"></i>`;
+    }
+  }
+  conv.prepend(box);
+}
+
+// ---------------------------------------------------------------- floating date while scrolling
+let dayTimer = 0;
+function floatDay() {
+  const box = el().querySelector('#cx-msgs');
+  const chip = el().querySelector('#cx-fday');
+  if (!box || !chip || !cur) return;
+  const top = box.getBoundingClientRect().top + (box.classList.contains('haspin') ? 130 : 70);
+  const nodes = box.querySelectorAll('.cx-msg, .cx-service');
+  let hit = null;
+  for (const n of nodes) { if (n.getBoundingClientRect().bottom > top) { hit = n; break; } }
+  const m = hit && cur.msgs.find((x) => String(x.id) === hit.dataset.id);
+  if (!m) return;
+  chip.textContent = dayLabel(m.date);
+  chip.classList.add('on');
+  clearTimeout(dayTimer);
+  dayTimer = setTimeout(() => chip.classList.remove('on'), 1100);
+}
 
 // ---------------------------------------------------------------- pinned messages, jumping
 async function loadPins() {
@@ -483,8 +554,8 @@ function chatMenu(x, y) {
 
 // ---------------------------------------------------------------- composer
 function fit(inp) {
-  inp.style.height = '50px';
-  inp.style.height = Math.min(150, Math.max(50, inp.scrollHeight)) + 'px';
+  inp.style.height = '40px';
+  inp.style.height = Math.min(140, Math.max(40, inp.scrollHeight)) + 'px';
 }
 let typingSent = 0;
 let videoMode = false;

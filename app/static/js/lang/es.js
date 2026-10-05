@@ -393,7 +393,6 @@ export const ES = {
   "Сообщение": "Mensaje",
   "Прикрепить": "Adjuntar",
   "Не удалось загрузить сообщения": "No se pudieron cargar los mensajes",
-  "изм.": "editado",
   "Переслано от {a}": "Reenviado de {a}",
   "Редактирование": "Edición",
   "себе": "ti mismo",
@@ -497,4 +496,5 @@ export const ES = {
   "Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}": "El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b}",
   "Этот мод не проверен.": "Este mod no ha sido revisado.",
   "Установить": "Instalar",
+  "изменено": "editado",
 };

@@ -1945,7 +1945,7 @@
   "plural": false
  },
  {
-  "key": "изм.",
+  "key": "изменено",
   "where": "chat/js/conv.js",
   "plural": false
  },
