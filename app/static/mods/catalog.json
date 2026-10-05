@@ -169,6 +169,148 @@
     "feed"
    ],
    "file": "ai-translate.module"
+  },
+  {
+   "id": "snowfall",
+   "name": {
+    "ru": "Снегопад",
+    "en": "Snowfall",
+    "es": "Nevada",
+    "pt": "Nevasca",
+    "uk": "Снігопад"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/snowfall.svg",
+   "description": {
+    "ru": "Снег за постами: не мешает кликам, одна лёгкая анимация",
+    "en": "Snow behind the posts: never blocks taps, one light animation",
+    "es": "Nieve detrás de las publicaciones: no bloquea toques, una animación ligera",
+    "pt": "Neve atrás das publicações: não bloqueia toques, uma animação leve",
+    "uk": "Сніг за дописами: не заважає натисканням, одна легка анімація"
+   },
+   "tags": [
+    "theme"
+   ],
+   "file": "snowfall.module"
+  },
+  {
+   "id": "read-later",
+   "name": {
+    "ru": "Читать позже",
+    "en": "Read later",
+    "es": "Leer después",
+    "pt": "Ler depois",
+    "uk": "Читати пізніше"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/read-later.svg",
+   "description": {
+    "ru": "Пункт с галочкой в меню поста, закладка 🔖 и список в настройках",
+    "en": "A checkable post-menu item, a 🔖 mark and a list in settings",
+    "es": "Un elemento con marca en el menú, una marca 🔖 y una lista en ajustes",
+    "pt": "Um item com marca no menu, uma marca 🔖 e uma lista nas configurações",
+    "uk": "Пункт із галочкою в меню допису, закладка 🔖 і список у налаштуваннях"
+   },
+   "tags": [
+    "feed"
+   ],
+   "file": "read-later.module"
+  },
+  {
+   "id": "collapse-posts",
+   "name": {
+    "ru": "Свернуть длинные посты",
+    "en": "Collapse long posts",
+    "es": "Contraer publicaciones largas",
+    "pt": "Recolher posts longos",
+    "uk": "Згорнути довгі дописи"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/collapse-posts.svg",
+   "description": {
+    "ru": "Длинный текст сворачивается, под ним кнопка «Показать полностью»",
+    "en": "Long text folds, with a “Show more” button",
+    "es": "El texto largo se contrae con un botón «Mostrar más»",
+    "pt": "O texto longo é recolhido com um botão «Mostrar mais»",
+    "uk": "Довгий текст згортається, під ним кнопка «Показати повністю»"
+   },
+   "tags": [
+    "feed"
+   ],
+   "file": "collapse-posts.module"
+  }
+ ],
+ "presets": [
+  {
+   "id": "winter",
+   "icon": "❄️",
+   "name": {
+    "ru": "Зимний набор",
+    "en": "Winter set",
+    "es": "Set de invierno",
+    "pt": "Conjunto de inverno",
+    "uk": "Зимовий набір"
+   },
+   "description": {
+    "ru": "Компактная лента, сворачивание длинных постов и снегопад",
+    "en": "Compact feed, folded long posts and snowfall",
+    "es": "Muro compacto, publicaciones largas contraídas y nevada",
+    "pt": "Mural compacto, posts longos recolhidos e nevasca",
+    "uk": "Компактна стрічка, згортання довгих дописів і снігопад"
+   },
+   "mods": [
+    "compact-feed",
+    "collapse-posts",
+    "snowfall"
+   ]
+  },
+  {
+   "id": "ai",
+   "icon": "🤖",
+   "name": {
+    "ru": "Набор «ИИ»",
+    "en": "AI set",
+    "es": "Set de IA",
+    "pt": "Conjunto de IA",
+    "uk": "Набір «ШІ»"
+   },
+   "description": {
+    "ru": "ИИ-чат и переводчик постов (нужен бесплатный ключ Groq)",
+    "en": "AI chat and a post translator (needs a free Groq key)",
+    "es": "Chat con IA y traductor de publicaciones (requiere clave gratuita de Groq)",
+    "pt": "Chat com IA e tradutor de posts (precisa de chave gratuita do Groq)",
+    "uk": "ШІ-чат і перекладач дописів (потрібен безкоштовний ключ Groq)"
+   },
+   "mods": [
+    "ai-chat",
+    "ai-translate"
+   ]
+  },
+  {
+   "id": "reader",
+   "icon": "📚",
+   "name": {
+    "ru": "Набор «Читатель»",
+    "en": "Reader set",
+    "es": "Set de lectura",
+    "pt": "Conjunto de leitura",
+    "uk": "Набір «Читач»"
+   },
+   "description": {
+    "ru": "Время чтения, «Читать позже» и сворачивание постов",
+    "en": "Reading time, Read later and folded posts",
+    "es": "Tiempo de lectura, Leer después y publicaciones contraídas",
+    "pt": "Tempo de leitura, Ler depois e posts recolhidos",
+    "uk": "Час читання, «Читати пізніше» і згортання дописів"
+   },
+   "mods": [
+    "reading-time",
+    "read-later",
+    "collapse-posts"
+   ]
   }
  ]
 }

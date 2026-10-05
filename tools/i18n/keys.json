@@ -740,6 +740,11 @@
   "plural": false
  },
  {
+  "key": "Может конфликтовать с установленными модами",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
   "key": "Установить мод «{a}»?",
   "where": "js/core/mods.js",
   "plural": false
@@ -766,6 +771,16 @@
  },
  {
   "key": "Моды отключены автоматически: приложение не запускалось. Включите нужные в Настройки → Моды.",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Будут установлены моды: {a}",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить набор",
   "where": "js/core/mods.js",
   "plural": false
  },
@@ -2015,6 +2030,11 @@
   "plural": false
  },
  {
+  "key": "Наборы модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Официальные моды",
   "where": "js/views/settings.js",
   "plural": false
@@ -2046,6 +2066,21 @@
  },
  {
   "key": "Вставьте мод в поле ниже",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установлено модов: {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Каналов пока нет",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не выбран",
   "where": "js/views/settings.js",
   "plural": false
  },

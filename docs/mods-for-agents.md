@@ -14,8 +14,9 @@ Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file w
 | a round **floating button** | `tx.ui.add('fab', { id, icon, run })` |
 | a **badge by the channel name** on every post | `tx.ui.add('post.header', { id, html })` |
 | a **block under the post text** (stats, translate, notes) | `tx.ui.add('post.footer', { id, render(el, { post }) {…} })` |
+| a block **right before/after the post text** (`position: 'start'` = before) | `tx.ui.add('post.text', { id, render(el, { post }) {…} })` |
 | a **button beside the share button** of a post | `tx.ui.add('post.actions', { id, icon, run({ post }) {…} })` |
-| an item in the **post's context menu** | `tx.ext.addMenu('post', ({ post }) => [{ label, icon, run }])` |
+| an item in the **post's context menu** | `tx.ext.addMenu('post', ({ post }) => [{ label, icon, run, checked?: bool \| ({post}) => bool, items?: [submenu…] }])` — `checked` shows a tick, `items` opens a submenu with a Back row |
 | a row or a whole page in **Settings** | `tx.settings.addRow(...)` / `tx.settings.addPage(...)` |
 | a **full screen** of its own (opened from any button) | `tx.ui.openScreen({ title, render(box) })` |
 | to change **text of posts** | `tx.ext.addHook('postText', (html) => html)` |
@@ -145,6 +146,21 @@ for a custom block use `tx.config.render((box) => { box.innerHTML = '…' })`.
 ```
 Wallpaper: `kind` `fill` | `pattern` (`url` to an svg); 1–4 `colors`; `rotation` degrees (2 colours); `intensity` negative = dark background (pattern lit by the colours).
 `accent`: `blue|violet|orange|cyan|green|pink|…` (names in `app/static/js/core/prefs.js` `ACCENTS`). CSS variables: see `app/static/css/tx/tokens.css`.
+
+## More API (read this before hacking the DOM)
+
+| Need | Use |
+|---|---|
+| a post is **laid out** (measure heights, collapse) | `tx.ui.onPostRendered((el, post, { height }) => …)` — fires two frames after the card is in the DOM; `tx.ui.onPost` fires immediately |
+| the **text element** of every post | `tx.ui.onPostText((textEl, post, card) => …)` (class `post-text`) or slot `post.text` — for collapse, highlight, translate, table of contents |
+| **theme changes** / colours for a canvas | `tx.theme.on('change', (palette) => …)` and `tx.theme.palette()` → `{ mode, bg, surface, surface2, text, textSecondary, accent, accentFill, glass, separator, red, green }` — never poll `data-theme` |
+| a **toast with an action** (Undo) | `tx.toast('Hidden', { action: 'Undo', run: () => … })` (stays ~5.5 s) |
+| **keyboard shortcuts** | `tx.keys.add('mod+shift+c', (e) => …)` — removed with the mod; plain keys never fire while the user types |
+| **weather / particles / any full-screen animation** | `tx.ambient.add({ id, draw(ctx, w, h, dtMs, palette) {…} })` — ONE shared canvas under the app (z-index 2, no clicks) and ONE ≤ 30 fps loop for all mods; cleared for you; off in power-saving mode. **Never create your own full-screen canvas or `requestAnimationFrame` loop.** |
+| **media of a post** | `tx.media.of(post)` → `[{ type, url, thumb, duration, size }]`, `tx.media.urls(post)` → `[url]` — never scrape the DOM |
+| a **list of channels** in settings | setting `{ "key": "quiet", "type": "channels", "title": "…" }` → array of channel ids (strings); `{ "type": "select", "optionsFrom": "channels" }` → one id. Channels are in `tx.S.channels` (`id`, `title`) |
+| mods that **cannot work together** | manifest `"conflicts": ["other-mod-id"]` — the install dialog warns the user (check both mods: declare it in the newer one) |
+| a **ready-made set** of mods (official catalog) | `presets` in `app/static/mods/catalog.json`: `{ id, icon, name{}, description{}, mods: [ids] }` — one button installs all |
 
 ## Code API — `tx` (argument of `export default function (tx)`; in html parts: `TeleXMods['<id>']`)
 

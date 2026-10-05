@@ -1,0 +1,41 @@
+// @manifest {"id": "read-later", "name": {"ru": "Читать позже", "en": "Read later", "es": "Leer después", "pt": "Ler depois", "uk": "Читати пізніше"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/read-later.svg", "description": {"ru": "Пункт с галочкой в меню поста, закладка 🔖 и список в настройках", "en": "A checkable post-menu item, a 🔖 mark and a list in settings", "es": "Un elemento con marca en el menú, una marca 🔖 y una lista en ajustes", "pt": "Um item com marca no menu, uma marca 🔖 e uma lista nas configurações", "uk": "Пункт із галочкою в меню допису, закладка 🔖 і список у налаштуваннях"}, "about": {"ru": "Показывает возможности API: пункт меню с галочкой, тост с кнопкой «Отмена», страница в настройках.", "en": "Shows API features: a checkable menu item, a toast with an Undo button, a settings page.", "es": "Muestra funciones del API: elemento con marca, aviso con «Deshacer», página en ajustes.", "pt": "Mostra recursos da API: item com marca, aviso com «Desfazer», página nas configurações.", "uk": "Показує можливості API: пункт із галочкою, тост із кнопкою «Скасувати», сторінка в налаштуваннях."}, "tags": ["feed"]}
+// @part js
+export default function (tx) {
+  function ids() { return tx.storage.get('items') || []; }
+  function has(id) { return ids().some(function (x) { return x.id === id; }); }
+  function put(post) {
+    var list = ids().filter(function (x) { return x.id !== post.id; });
+    list.unshift({ id: post.id, url: post.tg_url || '', text: String(post.text || '').slice(0, 140), channel: post.channel_title || '' });
+    tx.storage.set('items', list.slice(0, 200));
+  }
+  function drop(id) { tx.storage.set('items', ids().filter(function (x) { return x.id !== id; })); }
+  function mark() {
+    document.querySelectorAll('[id^="post-card-"]').forEach(function (card) {
+      var id = card.id.replace('post-card-', '');
+      var tag = card.querySelector('.rl-tag');
+      if (has(id) && !tag) { var s = document.createElement('span'); s.className = 'rl-tag'; s.textContent = '🔖'; s.style.cssText = 'margin-left:6px;font-size:13px'; (card.querySelector('.tx-bubble-name') || card).appendChild(s); }
+      else if (!has(id) && tag) tag.remove();
+    });
+  }
+  tx.ext.addMenu('post', function (ctx) {
+    var post = ctx.post;
+    return [{
+      label: tx.L({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }),
+      icon: 'favorite',
+      checked: has(post.id),
+      run: function () {
+        if (has(post.id)) { drop(post.id); mark(); tx.toast(tx.L({ ru: 'Убрано из «Читать позже»', en: 'Removed from Read later', es: 'Quitado de Leer después', pt: 'Removido de Ler depois', uk: 'Прибрано з «Читати пізніше»' }), { action: tx.L({ ru: 'Отмена', en: 'Undo', es: 'Deshacer', pt: 'Desfazer', uk: 'Скасувати' }), run: function () { put(post); mark(); } }); }
+        else { put(post); mark(); tx.toast(tx.L({ ru: 'Добавлено в «Читать позже»', en: 'Added to Read later', es: 'Añadido a Leer después', pt: 'Adicionado a Ler depois', uk: 'Додано до «Читати пізніше»' }), { action: tx.L({ ru: 'Отмена', en: 'Undo', es: 'Deshacer', pt: 'Desfazer', uk: 'Скасувати' }), run: function () { drop(post.id); mark(); } }); }
+      }
+    }];
+  });
+  tx.ui.onPostRendered(function () { mark(); });
+  tx.settings.addPage({
+    id: 'list', title: tx.L({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }), icon: 'favorite', color: 'ORANGE',
+    render: function (box) {
+      var list = ids();
+      if (!list.length) { box.innerHTML = '<p style="padding:18px;color:var(--tx-text-2)">' + tx.escapeHtml(tx.L({ ru: 'Пока пусто. Нажмите на пост и выберите «Читать позже».', en: 'Nothing yet. Tap a post and choose “Read later”.', es: 'Aún nada. Toca una publicación y elige «Leer después».', pt: 'Nada ainda. Toque numa publicação e escolha «Ler depois».', uk: 'Поки порожньо. Натисніть на допис і оберіть «Читати пізніше».' })) + '</p>'; return; }
+      box.innerHTML = list.map(function (x) { return '<a class="tx-group" style="display:block;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--tx-text)" href="' + tx.escapeHtml(x.url) + '" target="_blank" rel="noopener"><b style="display:block;font-size:14px;color:var(--tx-accent)">' + tx.escapeHtml(x.channel) + '</b><span style="font-size:15px;color:var(--tx-text-2)">' + tx.escapeHtml(x.text || '…') + '</span></a>'; }).join('');
+    }
+  });
+}

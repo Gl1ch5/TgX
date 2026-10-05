@@ -23,7 +23,7 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { ext } from '../core/ext.js';
-import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial, loadCommunity, installCommunity, loadAiPrompt, cleanPasted } from '../core/mods.js';
+import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, loadPresets, installPreset, installOfficial, loadCommunity, installCommunity, loadAiPrompt, cleanPasted } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -134,6 +134,14 @@ function aiPage() {
         { hint: hasKey() ? '' : t('Работает, когда добавлен ключ.') },
       )}
     </div>`;
+}
+
+/** Adds / removes a channel id in a "channels" setting; returns the new list (used by the switch rows). */
+export function modToggleChannel(id, key, channelId, on) {
+  const m = listMods().find((x) => x.manifest.id === id);
+  const cur = new Set((modConfigGet(m, key) || []).map(String));
+  on ? cur.add(String(channelId)) : cur.delete(String(channelId));
+  return [...cur];
 }
 
 export async function aiKeySave() {
@@ -592,7 +600,10 @@ async function fillOfficial() {
         <button class="tx-mod-get ${upToDate ? 'is-done' : ''}" onclick="event.stopPropagation(); ${act}">${state}</button>
       </div>`;
   }).join('');
-  box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div><div class="tx-mod-grid">${cards}</div></div>`;
+  let sets = [];
+  try { sets = await loadPresets(); } catch {}
+  const setRows = sets.map((p) => row({ icon: 'st-features', color: 'PURPLE', title: modL(p.name), sub: modL(p.description) || '', onclick: `window.TelegramX.installPreset('${p.id}')` })).join('');
+  box.innerHTML = (setRows ? group(setRows, { title: t('Наборы модов') }) : '') + `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div><div class="tx-mod-grid">${cards}</div></div>`;
 }
 
 /** "Community": mods published by pull request to the repository. They are not verified. */
@@ -658,6 +669,7 @@ export function installFromClipboard() {
 }
 
 export function installOfficialMod(id) { runInstall(installOfficial(id)); }
+export function installPresetMod(id) { installPreset(id).then((n) => { if (n) showToast(t('Установлено модов: {a}', { a: n })); rerenderSettings(); }).catch((e) => showToast(String(e && e.message || e))); }
 
 function modControl(m, def) {
   const id = m.manifest.id;
@@ -669,7 +681,13 @@ function modControl(m, def) {
   switch (def.type) {
     case 'switch': return switchRow({ title, sub, checked: !!v, onchange: set('this.checked') });
     case 'number': return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + slider({ min: def.min ?? 0, max: def.max ?? 100, step: def.step || 1, value: Number(v) || 0, oninput: set('+this.value'), left: '', right: '' });
-    case 'select': return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + segments((def.options || []).map((o) => (Array.isArray(o) ? [o[0], modL(o[1])] : [o, String(o)])), v, `${set('$v')}; window.TelegramX.rerenderSettings()`);
+    case 'channels': { // several channels: the value is a list of channel ids (strings)
+      const cur = new Set((Array.isArray(v) ? v : []).map(String));
+      const rows = (state.channels || []).map((c) => switchRow({ title: escapeHtml(c.title || String(c.id)), checked: cur.has(String(c.id)), onchange: `window.TelegramX.modSet('${id}', ${k}, window.TelegramX.modToggleChannel('${id}', ${k}, '${c.id}', this.checked))` })).join('');
+      return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + (rows || `<div class="tx-group-hint" style="margin:0;padding:6px 22px 14px">${t('Каналов пока нет')}</div>`);
+    }
+    case 'select': if (def.optionsFrom === 'channels') return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + `<label class="tx-field"><select class="tx-mod-text" onchange="${set('this.value')}"><option value="">${t('Не выбран')}</option>${(state.channels || []).map((c) => `<option value="${c.id}" ${String(v) === String(c.id) ? 'selected' : ''}>${escapeHtml(c.title || String(c.id))}</option>`).join('')}</select></label>`;
+      return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + segments((def.options || []).map((o) => (Array.isArray(o) ? [o[0], modL(o[1])] : [o, String(o)])), v, `${set('$v')}; window.TelegramX.rerenderSettings()`);
     case 'color': return row({ title, sub, html: `<input type="color" class="tx-mod-color" value="${escapeHtml(String(v || '#3390ec'))}" onchange="${set('this.value')}">` });
     default: return `<div class="tx-group-title" style="padding-top:12px">${title}</div><label class="tx-field"><input type="text" class="tx-mod-text" value="${escapeHtml(String(v ?? ''))}" onchange="${set('this.value')}"></label>`;
   }

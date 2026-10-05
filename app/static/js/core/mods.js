@@ -16,6 +16,7 @@ import { ext } from './ext.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
 import { tgDialog } from './dialog.js';
+import { palette, onThemeChange, keysApi, ambientApi, mediaApi } from './modsApi.js';
 import { parseEmojis, renderEmoji } from '../emoji.js';
 import { hasKey, reviewMod, groqChat } from './groq.js';
 import { t, lang } from '../i18n.js';
@@ -129,6 +130,10 @@ function themeApi(id) {
       if (dayHex) { set(hex, 'dark'); set(dayHex, 'light'); } else set(hex, 'all');
     },
     mode: modeNow,
+    /** The colours in use right now: { mode, bg, surface, surface2, text, textSecondary, accent, accentFill, glass, separator, red, green }. */
+    palette,
+    /** tx.theme.on('change', fn(palette)) — day/night, accent, wallpaper theme or variables changed. Removed with the mod. */
+    on(event, fn) { if (event !== 'change') return; const off = onThemeChange(fn); r.cleanups.push(off); return off; },
   };
   return api2;
 }
@@ -184,6 +189,7 @@ const SLOTS = {
   fab: { selector: '#app', kind: 'fab', place: (host, node) => document.body.append(node) },
   'post.header': { selector: '[id^="post-card-"]', kind: 'inline', post: true, place: (card, node) => (card.querySelector('.tx-bubble-name') || card).append(node) },
   'post.footer': { selector: '[id^="post-card-"]', kind: 'block', post: true, place: (card, node) => { const st = card.querySelector('.tx-post-stack') || card; (card.querySelector('.tx-comments-row') ? card.querySelector('.tx-comments-row').before(node) : st.append(node)); } },
+  'post.text': { selector: '[id^="post-card-"]', kind: 'block', post: true, place: (card, node, pos) => { const tx = card.querySelector('.post-text'); if (!tx) return; pos === 'start' ? tx.before(node) : tx.after(node); } },
   'post.actions': { selector: '[id^="post-card-"]', kind: 'side', post: true, place: (card, node) => { const side = card.querySelector('.tx-side-btn'); side ? side.after(node) : card.append(node); } },
 };
 
@@ -289,7 +295,7 @@ function makeApi(mod) {
   for (const p of mod.parts) if (p.type === 'json' || p.type === 'text') dataParts[p.name || p.type] = p.data !== undefined ? p.data : p.code;
   return {
     mod: manifest,
-    S: state, api, t, L, toast: showToast, confirm: (text, ok) => confirmDialog(text, ok || t('ОК')), escapeHtml,
+    S: state, api, t, L, toast: (msg, opts) => showToast(msg, opts), confirm: (text, ok) => confirmDialog(text, ok || t('ОК')), escapeHtml,
     ext: {
       addMenu: (point, provider) => ext.addMenu(point, provider, id),
       addHook: (name, fn) => ext.addHook(name, fn, id),
@@ -298,6 +304,12 @@ function makeApi(mod) {
     theme: themeApi(id),
     /** The user's own Groq key, shared with mods that declare permissions: ["ai"]. */
     ai: aiApi(mod),
+    /** tx.keys.add('mod+shift+c', fn) — keyboard shortcuts, removed with the mod; plain keys do not fire while typing. */
+    keys: keysApi(id, (fn) => { const r = running.get(id); if (r) r.cleanups.push(fn); }),
+    /** tx.ambient.add({ id, draw(ctx, w, h, dtMs, palette) }) — one shared canvas + one animation loop for all weather/visual mods. */
+    ambient: ambientApi(id, (fn) => { const r = running.get(id); if (r) r.cleanups.push(fn); }),
+    /** tx.media.of(post) → [{ type, url, thumb, duration, size }]; tx.media.urls(post) → [url]. */
+    media: mediaApi,
     /** Current app language code: 'ru' | 'en' | 'es' | 'pt' | 'uk'. */
     lang: () => lang(),
     /** Register cleanup (timers, listeners, nodes you made yourself): runs when the mod is disabled or removed. */
@@ -329,6 +341,22 @@ function makeApi(mod) {
       onPost: (fn) => {
         const run = (el) => { const post = state.posts.find((p) => `post-card-${p.id}` === el.id); try { fn(el, post || null); } catch (e) { console.warn(`[mods] ${id} onPost`, e); } };
         watchSelector(id, '[id^="post-card-"]', run);
+      },
+      /** Like onPost, but after the card is laid out (two frames later): fn(element, post, { height }). Safe to measure here. */
+      onPostRendered: (fn) => {
+        const run = (el) => {
+          const post = state.posts.find((p) => `post-card-${p.id}` === el.id);
+          requestAnimationFrame(() => requestAnimationFrame(() => { try { fn(el, post || null, { height: el.offsetHeight }); } catch (e) { console.warn(`[mods] ${id} onPostRendered`, e); } }));
+        };
+        watchSelector(id, '[id^="post-card-"]', run);
+      },
+      /** The text element of every post (class post-text): fn(textElement, post, card). For collapse, highlight, translate, table of contents. */
+      onPostText: (fn) => {
+        watchSelector(id, '[id^="post-card-"] .post-text', (el) => {
+          const card = el.closest('[id^="post-card-"]');
+          const post = card && state.posts.find((p) => `post-card-${p.id}` === card.id);
+          fn(el, post || null, card);
+        });
       },
       /** A full-screen page of your own: openScreen({ title, render(box) }) → { close(), box }. The back button/gesture closes it. */
       openScreen: (opts) => openModScreen(id, opts),
@@ -538,7 +566,7 @@ export async function installMod(mod) {
   const m = mod.manifest;
   if (!mod.trusted) { delete m.verified; delete m.official; } // only the project's own catalog may carry these marks
   const risky = parts.some((p) => p.type === 'js' || p.type === 'html');
-  const review = await reviewWithProgress(mod);
+  const review = mod.trusted ? null : await reviewWithProgress(mod); // the project's own mods are not reviewed
   let body = '';
   let note = '';
   if (risky) body = (escapeHtml(t('Мод получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.') + (m.verified ? '' : ' ' + t('Этот мод не проверен.'))));
@@ -549,7 +577,10 @@ export async function installMod(mod) {
     const head = review.verdict === 'ok' ? t('ИИ-проверка: проблем не найдено') : review.verdict === 'bad' ? t('ИИ-проверка: опасный код') : t('ИИ-проверка: есть замечания');
     note = `<div class="tx-dialog-note${cls}"><b>${escapeHtml(head)}</b>${escapeHtml(review.summary)}${review.issues.length ? '<ul>' + review.issues.map((i) => `<li>${escapeHtml(i)}</li>`).join('') + '</ul>' : ''}</div>`;
   }
-  const ok = await tgDialog({
+  // two mods that declare each other in manifest.conflicts (same slot / same skin tokens) fight over the same place
+  const clash = load().filter((x) => x.enabled && x.manifest.id !== m.id && ((m.conflicts || []).includes(x.manifest.id) || (x.manifest.conflicts || []).includes(m.id)));
+  if (clash.length) note += `<div class="tx-dialog-note is-warn"><b>${escapeHtml(t('Может конфликтовать с установленными модами'))}</b>${escapeHtml(clash.map((x) => L(x.manifest.name)).join(', '))}</div>`;
+  const ok = mod.quiet ? true : await tgDialog({
     title: risky ? t('Установить мод «{a}»?', { a: L(m.name) }) : t('Установить тему «{a}»?', { a: L(m.name) }),
     icon: modIconHtml(m),
     html: `<p>${body}</p>${note}`,
@@ -647,17 +678,20 @@ export function startMods() {
 
 // ---------------------------------------------------------------- official catalog (app/static/mods/catalog.json)
 
+let presets = [];
 let catalog = null;
 export async function loadCatalog() {
   if (catalog) return catalog;
   const res = await fetch('mods/catalog.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
-  catalog = (await res.json()).mods || [];
+  const j = await res.json();
+  catalog = j.mods || [];
+  presets = j.presets || [];
   return catalog;
 }
 
 /** Install a mod from the catalog; mods from there are the project's own, so they carry the verified mark. */
-export async function installOfficial(id) {
+export async function installOfficial(id, { quiet = false } = {}) {
   const entry = (await loadCatalog()).find((m) => m.id === id);
   if (!entry) throw new Error('not found');
   const res = await fetch('mods/' + entry.file, { cache: 'no-cache' });
@@ -665,6 +699,7 @@ export async function installOfficial(id) {
   const bundle = parseBundle(await res.text());
   bundle.manifest = { ...bundle.manifest, verified: true, official: true };
   bundle.trusted = true;
+  bundle.quiet = quiet;
   return installMod(bundle);
 }
 
@@ -697,4 +732,22 @@ export async function loadAiPrompt() {
   const res = await fetch('mods/ai-prompt.txt', { cache: 'no-cache' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   return res.text();
+}
+
+/** Ready-made sets of official mods (catalog.json → presets). */
+export async function loadPresets() { await loadCatalog(); return presets; }
+
+/** Installs every mod of a set with one confirmation; returns the number of mods installed or updated. */
+export async function installPreset(id) {
+  await loadCatalog();
+  const p = presets.find((x) => x.id === id);
+  if (!p) throw new Error('not found');
+  const have = new Map(load().map((m) => [m.manifest.id, m.manifest.version]));
+  const entries = p.mods.map((mid) => catalog.find((c) => c.id === mid)).filter(Boolean);
+  const names = entries.map((e) => L(e.name)).join(', ');
+  const ok = await tgDialog({ title: L(p.name), text: `${L(p.description) || ''}\n\n${t('Будут установлены моды: {a}', { a: names })}`, ok: t('Установить набор') });
+  if (!ok) return 0;
+  let n = 0;
+  for (const e of entries) { if (have.get(e.id) === e.version) continue; await installOfficial(e.id, { quiet: true }); n++; }
+  return n;
 }

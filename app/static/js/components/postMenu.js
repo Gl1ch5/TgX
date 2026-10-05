@@ -47,7 +47,7 @@ export function openPopup(anchor, { reactionsHtml = '', items = [], header = nul
     ${reactionsHtml ? `<div class="tx-ctx-reactions">${reactionsHtml}</div>` : ''}
     <div class="tx-menu">
       ${header ? `<div class="tx-menu-head"><i class="icon icon-${header.icon}"></i><span>${header.text}</span></div><div class="tx-menu-gap"></div>` : ''}
-      ${items.map((it, i) => it.sep ? '<div class="tx-menu-gap"></div>' : `<button data-i="${i}" class="${it.danger ? 'is-danger' : ''}"><i class="icon icon-${it.icon}"></i>${it.label}</button>`).join('')}
+      ${items.map((it, i) => it.sep ? '<div class="tx-menu-gap"></div>' : `<button data-i="${i}" class="${it.danger ? 'is-danger' : ''}"><i class="icon icon-${it.icon}"></i>${it.label}${it.checked ? '<i class="icon icon-check-bold tx-menu-check"></i>' : it.items ? '<i class="icon icon-next tx-menu-check" style="color:var(--tx-hint);font-size:14px"></i>' : ''}</button>`).join('')}
     </div>`;
   ctx.addEventListener('click', (e) => {
     const i = e.target.closest('[data-i]')?.dataset.i;
@@ -102,8 +102,18 @@ export function openPostMenu(postId, event) {
       { icon: 'mute', label: t('Не показывать канал в ленте'), run: () => hideChannel(post) },
       { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(post.tg_url, '_blank', 'noopener') },
     );
+    // mods: { label, icon, run, checked?: bool | (ctx) => bool, items?: [...] (a submenu) }
     const extra = ext.menu('post', { post });
-    if (extra.length) items.push({ sep: true }, ...extra.map((it) => ({ icon: it.icon || 'next', label: it.label, run: () => it.run({ post }) })));
+    const mapExtra = (it, back) => {
+      const checked = typeof it.checked === 'function' ? !!it.checked({ post }) : !!it.checked;
+      if (Array.isArray(it.items) && it.items.length) {
+        const sub = [{ icon: 'arrow-left', label: t('Назад'), run: back }, { sep: true }, ...it.items.map((x) => mapExtra(x, back))];
+        return { icon: it.icon || 'next', label: it.label, items: true, run: () => openPopup(anchor, { items: sub, header: menuHeader(post) }) };
+      }
+      return { icon: it.icon || 'next', label: it.label, checked, run: () => it.run && it.run({ post }) };
+    };
+    const reopen = () => openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post), onFastDismiss: () => quickReact(post.id) });
+    if (extra.length) items.push({ sep: true }, ...extra.map((it) => mapExtra(it, reopen)));
     const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post), onFastDismiss: () => quickReact(post.id) });
     hydrateStickers(ctx);
   }

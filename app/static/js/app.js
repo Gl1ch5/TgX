@@ -50,7 +50,7 @@ let rerenderWall = false;
 
 window.TelegramX = {
   maybeOnboard,
-  aiKeySave: settings.aiKeySave, aiKeyClear: settings.aiKeyClear,
+  aiKeySave: settings.aiKeySave, modToggleChannel: settings.modToggleChannel, aiKeyClear: settings.aiKeyClear,
   state,
   api,
   showToast,
@@ -96,7 +96,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
-  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod, installCommunity: settings.installCommunityMod, copyAiPrompt: settings.copyAiPrompt, installFromClipboard: settings.installFromClipboard,
+  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod, installPreset: settings.installPresetMod, installCommunity: settings.installCommunityMod, copyAiPrompt: settings.copyAiPrompt, installFromClipboard: settings.installFromClipboard,
   setWorkerMode: settings.setWorkerMode,
 
   // Profile

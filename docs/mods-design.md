@@ -131,6 +131,7 @@ If a mod has *setting*s that change a token (blur strength, radius, accent), re-
 | Own page (notes, stats, list) | `ui.openScreen` (+ a dock or topbar button) or `settings.addPage` | a screen over the app with a back arrow; never inject into other screens |
 | AI feature (chat, translate, summarise) | `permissions: ["ai"]` + `tx.ai` | built-in, free, uses the user's key — no key handling in the mod |
 | Per-mod options | `manifest.settings` | the app renders the controls and persists the values |
+| Snow, rain, stars, any full-screen animation | `tx.ambient.add(...)` | one shared canvas + one loop for all mods; a private canvas/RAF per mod kills weak phones |
 | Floating widget | an `html` part — **only** with the safe-area rules of section 1 | last resort |
 
 ## 6. Recipes (complete, copy-paste-safe)
@@ -254,6 +255,8 @@ Note `bottom` includes the dock and the gesture inset, `pointer-events:none` let
 - **Dock disappears / jumps**: `transform`, `filter`, `perspective` or `will-change: transform` set on `#app`, `.tx-screen` or `body`. Do not.
 - **Mod works once, then vanishes**: the app re-renders; a one-off `document.querySelector(...).append(...)` is lost. Use `tx.ui.add`, `tx.ui.watch`, `tx.ui.onPost`.
 - **Code breaks after copying from chat**: backtick template literals and `${}` get mangled. Use `'a' + b`. Put the whole file in ONE code block.
+- **Three weather mods = three canvases and three animation loops**: use `tx.ambient`, never your own full-screen canvas or `requestAnimationFrame`.
+- **Canvas colours stuck after the theme changes**: read `pal` in `draw(ctx,w,h,dt,pal)` or `tx.theme.palette()` every frame/change; never cache colours.
 - **Mod slows the feed**: work per post must be O(1); no `querySelectorAll('*')`, no layout reads in loops, no network call per post.
 - **`display:flex` on `.tx-hidden`** etc.: do not override `.tx-hidden`, `.hidden`, `[hidden]`.
 

@@ -494,4 +494,11 @@ export const ES = {
   "Всё равно пропустить": "Omitir igualmente",
   "Нужен ключ Groq: Настройки → Ключ Groq": "Se necesita una clave de Groq: Ajustes → Clave de Groq",
   "Мод использует ИИ через ваш ключ Groq.": "El mod usa IA con tu clave de Groq.",
+  "Может конфликтовать с установленными модами": "Puede entrar en conflicto con mods instalados",
+  "Будут установлены моды: {a}": "Se instalarán estos mods: {a}",
+  "Установить набор": "Instalar set",
+  "Наборы модов": "Sets de mods",
+  "Установлено модов: {a}": "Mods instalados: {a}",
+  "Каналов пока нет": "Aún no hay canales",
+  "Не выбран": "Sin seleccionar",
 };

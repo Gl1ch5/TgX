@@ -10,16 +10,26 @@ import { ext } from './core/ext.js';
 
 export { escapeHtml };
 
-export function showToast(msg) {
+let toastTimer = 0;
+/** showToast(msg, { action: 'Undo', run: fn, ms }) — an optional action button (Telegram-style "Undo"), stays a little longer. */
+export function showToast(msg, opts = {}) {
   const toast = document.getElementById('toast');
   const msgEl = document.getElementById('toast-msg');
   if (msgEl) msgEl.innerHTML = parseEmojis(msg);
-  if (toast) {
-    toast.classList.remove('translate-y-20', 'opacity-0');
-    setTimeout(() => {
-      toast.classList.add('translate-y-20', 'opacity-0');
-    }, 2500);
+  if (!toast) return;
+  toast.querySelector('.tx-toast-act')?.remove();
+  const hide = () => { toast.classList.add('translate-y-20', 'opacity-0'); toast.classList.add('pointer-events-none'); toast.classList.remove('pointer-events-auto'); };
+  if (opts && opts.action) {
+    const b = document.createElement('button');
+    b.className = 'tx-toast-act';
+    b.textContent = String(opts.action);
+    b.onclick = () => { hide(); clearTimeout(toastTimer); try { opts.run && opts.run(); } catch (e) { console.warn('[toast] action', e); } };
+    toast.append(b);
+    toast.classList.remove('pointer-events-none'); toast.classList.add('pointer-events-auto');
   }
+  toast.classList.remove('translate-y-20', 'opacity-0');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hide, (opts && opts.ms) || (opts && opts.action ? 5500 : 2500));
 }
 
 export function formatTgTime(dateString) {

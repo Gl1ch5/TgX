@@ -1,5 +1,5 @@
 {
- "build": "2cf3fcb63e",
+ "build": "7a351fe26e",
  "files": [
   "./",
   "index.html",
@@ -49,6 +49,7 @@
   "js/core/ext.js",
   "js/core/groq.js",
   "js/core/mods.js",
+  "js/core/modsApi.js",
   "js/core/nav.js",
   "js/core/prefs.js",
   "js/emoji-data.js",
@@ -699,15 +700,21 @@
   "mods/aurora-theme.module",
   "mods/catalog.json",
   "mods/clock-widget.module",
+  "mods/collapse-posts.module",
   "mods/compact-feed.module",
   "mods/icons/ai-chat.svg",
   "mods/icons/ai-translate.svg",
   "mods/icons/aurora-theme.svg",
   "mods/icons/clock-widget.svg",
+  "mods/icons/collapse-posts.svg",
   "mods/icons/compact-feed.svg",
   "mods/icons/liquid-glass.svg",
+  "mods/icons/read-later.svg",
   "mods/icons/reading-time.svg",
+  "mods/icons/snowfall.svg",
   "mods/liquid-glass.module",
-  "mods/reading-time.module"
+  "mods/read-later.module",
+  "mods/reading-time.module",
+  "mods/snowfall.module"
  ]
 }

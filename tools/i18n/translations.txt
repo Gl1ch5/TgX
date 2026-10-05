@@ -494,3 +494,10 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Всё равно пропустить ‖ Skip anyway ‖ Omitir igualmente ‖ Pular mesmo assim ‖ Все одно пропустити
 Нужен ключ Groq: Настройки → Ключ Groq ‖ A Groq key is needed: Settings → Groq key ‖ Se necesita una clave de Groq: Ajustes → Clave de Groq ‖ É preciso uma chave do Groq: Configurações → Chave do Groq ‖ Потрібен ключ Groq: Налаштування → Ключ Groq
 Мод использует ИИ через ваш ключ Groq. ‖ The mod uses AI through your Groq key. ‖ El mod usa IA con tu clave de Groq. ‖ O mod usa IA com a sua chave do Groq. ‖ Мод використовує ШІ через ваш ключ Groq.
+Может конфликтовать с установленными модами ‖ May conflict with installed mods ‖ Puede entrar en conflicto con mods instalados ‖ Pode conflitar com mods instalados ‖ Може конфліктувати зі встановленими модами
+Будут установлены моды: {a} ‖ Mods to install: {a} ‖ Se instalarán estos mods: {a} ‖ Mods a instalar: {a} ‖ Буде встановлено моди: {a}
+Установить набор ‖ Install set ‖ Instalar set ‖ Instalar conjunto ‖ Встановити набір
+Наборы модов ‖ Mod sets ‖ Sets de mods ‖ Conjuntos de mods ‖ Набори модів
+Установлено модов: {a} ‖ Mods installed: {a} ‖ Mods instalados: {a} ‖ Mods instalados: {a} ‖ Встановлено модів: {a}
+Каналов пока нет ‖ No channels yet ‖ Aún no hay canales ‖ Ainda não há canais ‖ Каналів поки немає
+Не выбран ‖ Not selected ‖ Sin seleccionar ‖ Não selecionado ‖ Не обрано

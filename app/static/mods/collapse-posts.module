@@ -1,0 +1,27 @@
+// @manifest {"id": "collapse-posts", "name": {"ru": "Свернуть длинные посты", "en": "Collapse long posts", "es": "Contraer publicaciones largas", "pt": "Recolher posts longos", "uk": "Згорнути довгі дописи"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/collapse-posts.svg", "description": {"ru": "Длинный текст сворачивается, под ним кнопка «Показать полностью»", "en": "Long text folds, with a “Show more” button", "es": "El texto largo se contrae con un botón «Mostrar más»", "pt": "O texto longo é recolhido com um botão «Mostrar mais»", "uk": "Довгий текст згортається, під ним кнопка «Показати повністю»"}, "about": {"ru": "Использует tx.ui.onPostText: событие приходит, когда текст поста уже в разметке.", "en": "Uses tx.ui.onPostText: called once the post text is in the layout.", "es": "Usa tx.ui.onPostText: se llama cuando el texto ya está en el diseño.", "pt": "Usa tx.ui.onPostText: chamado quando o texto já está no layout.", "uk": "Використовує tx.ui.onPostText: подія приходить, коли текст допису вже в розмітці."}, "tags": ["feed"], "conflicts": [], "settings": [{"key": "lines", "type": "number", "title": {"ru": "Строк в свёрнутом виде", "en": "Lines when folded", "es": "Líneas al contraer", "pt": "Linhas ao recolher", "uk": "Рядків у згорнутому вигляді"}, "default": 8, "min": 3, "max": 20, "step": 1}]}
+// @part css
+.cp-clamp:not(.cp-open) { max-height: var(--cp-max); overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.cp-more { display: block; margin: 4px 0 2px; padding: 6px 0; font-size: 14px; font-weight: 600; color: var(--tx-accent); }
+// @part js
+export default function (tx) {
+  function lines() { return Math.max(3, Number(tx.config.get('lines')) || 8); }
+  function apply(el) {
+    if (el.dataset.collapsed) return;
+    var lh = parseFloat(getComputedStyle(el).lineHeight) || 22;
+    var max = lines() * lh;
+    if (el.scrollHeight <= max * 1.25) return;
+    el.dataset.collapsed = '1';
+    el.classList.add('cp-clamp');
+    el.style.setProperty('--cp-max', max + 'px');
+    var b = document.createElement('button');
+    b.className = 'cp-more';
+    b.textContent = tx.L({ ru: 'Показать полностью', en: 'Show more', es: 'Mostrar más', pt: 'Mostrar mais', uk: 'Показати повністю' });
+    b.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = el.classList.toggle('cp-open');
+      b.textContent = open ? tx.L({ ru: 'Свернуть', en: 'Show less', es: 'Mostrar menos', pt: 'Mostrar menos', uk: 'Згорнути' }) : tx.L({ ru: 'Показать полностью', en: 'Show more', es: 'Mostrar más', pt: 'Mostrar mais', uk: 'Показати повністю' });
+    });
+    el.after(b);
+  }
+  tx.ui.onPostText(function (el) { requestAnimationFrame(function () { requestAnimationFrame(function () { apply(el); }); }); });
+}
