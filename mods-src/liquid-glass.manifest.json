@@ -1,0 +1,385 @@
+{
+ "id": "liquid-glass",
+ "name": {
+  "ru": "Жидкое стекло",
+  "en": "Liquid Glass",
+  "es": "Cristal líquido",
+  "pt": "Vidro líquido",
+  "uk": "Рідке скло"
+ },
+ "version": "1.2.0",
+ "author": "TeleX",
+ "icon": "mods/icons/liquid-glass.svg",
+ "description": {
+  "ru": "Реалистичное стекло с преломлением, хроматической аберрацией и бликами — как в liquidglass",
+  "en": "Realistic glass with refraction, chromatic aberration and highlights — the liquidglass look",
+  "es": "Cristal realista con refracción, aberración cromática y reflejos — el aspecto de liquidglass",
+  "pt": "Vidro realista com refração, aberração cromática e reflexos — o visual do liquidglass",
+  "uk": "Реалістичне скло з заломленням, хроматичною аберацією та відблисками — як у liquidglass"
+ },
+ "about": {
+  "ru": "Переделывает весь интерфейс в стекло: панели, поиск, вкладки, меню и диалоги получают преломление и блики по формулам шейдера библиотеки github.com/ybouane/liquidglass, а карточки, пузыри, группы настроек, кнопки и чипы — стеклянный вид (размытие, подсветка кромки, тени). Меняется и акцентный цвет всего приложения.\nКарточки и группы получают настоящее преломление по краям (только те, что рядом с экраном — для скорости); выключить можно в настройках мода. Фон остаётся живым при прокрутке. Работает в браузерах на Chromium (Chrome, Edge, приложения Android и Windows).",
+  "en": "Turns the whole interface into glass: bars, search, tabs, menus and dialogs get refraction and highlights from the shader maths of github.com/ybouane/liquidglass, while cards, bubbles, settings groups, buttons and chips get the glass look (blur, rim light, shadows). The accent colour of the whole app changes too.\nThe backdrop stays live while you scroll. Works in Chromium-based browsers (Chrome, Edge, the Android and Windows apps).",
+  "es": "Convierte toda la interfaz en cristal: barras, búsqueda, pestañas, menús y diálogos reciben refracción y reflejos con las fórmulas del shader de github.com/ybouane/liquidglass; tarjetas, burbujas, grupos de ajustes, botones y chips reciben el aspecto de cristal (desenfoque, luz de borde, sombras). También cambia el color de acento de toda la app.\nEl fondo sigue vivo al desplazarse. Funciona en navegadores Chromium (Chrome, Edge, apps de Android y Windows).",
+  "pt": "Transforma toda a interface em vidro: barras, busca, abas, menus e diálogos recebem refração e reflexos com as fórmulas do shader de github.com/ybouane/liquidglass; cartões, balões, grupos de configurações, botões e chips ganham o visual de vidro (desfoque, luz de borda, sombras). A cor de destaque de todo o app também muda.\nO fundo continua vivo ao rolar. Funciona em navegadores Chromium (Chrome, Edge, apps de Android e Windows).",
+  "uk": "Перетворює увесь інтерфейс на скло: панелі, пошук, вкладки, меню й діалоги отримують заломлення та відблиски за формулами шейдера github.com/ybouane/liquidglass, а картки, бульбашки, групи налаштувань, кнопки й чипи — скляний вигляд (розмиття, підсвітка кромки, тіні). Змінюється й акцентний колір усього застосунку.\nТло лишається живим під час прокручування. Працює в браузерах на Chromium (Chrome, Edge, застосунки для Android і Windows)."
+ },
+ "tags": [
+  "theme",
+  "glass",
+  "webgl-look"
+ ],
+ "settings": [
+  {
+   "key": "skin",
+   "type": "switch",
+   "title": {
+    "ru": "Перекрасить всё приложение",
+    "en": "Restyle the whole app",
+    "es": "Rediseñar toda la app",
+    "pt": "Redesenhar todo o app",
+    "uk": "Перефарбувати весь застосунок"
+   },
+   "default": true
+  },
+  {
+   "key": "accent",
+   "type": "color",
+   "title": {
+    "ru": "Акцентный цвет",
+    "en": "Accent colour",
+    "es": "Color de acento",
+    "pt": "Cor de destaque",
+    "uk": "Акцентний колір"
+   },
+   "default": "#0a84ff"
+  },
+  {
+   "key": "cardTint",
+   "type": "number",
+   "title": {
+    "ru": "Плотность стекла карточек, %",
+    "en": "Card glass density, %",
+    "es": "Densidad del cristal de tarjetas, %",
+    "pt": "Densidade do vidro dos cartões, %",
+    "uk": "Щільність скла карток, %"
+   },
+   "default": 14,
+   "min": 0,
+   "max": 60,
+   "step": 1
+  },
+  {
+   "key": "cardBlur",
+   "type": "number",
+   "title": {
+    "ru": "Размытие карточек, px",
+    "en": "Card blur, px",
+    "es": "Desenfoque de tarjetas, px",
+    "pt": "Desfoque dos cartões, px",
+    "uk": "Розмиття карток, px"
+   },
+   "default": 18,
+   "min": 0,
+   "max": 40,
+   "step": 1
+  },
+  {
+   "key": "radius",
+   "type": "number",
+   "title": {
+    "ru": "Скругление карточек, px",
+    "en": "Card corner radius, px",
+    "es": "Radio de esquinas de tarjetas, px",
+    "pt": "Raio dos cantos dos cartões, px",
+    "uk": "Заокруглення карток, px"
+   },
+   "default": 26,
+   "min": 8,
+   "max": 40,
+   "step": 1
+  },
+  {
+   "key": "t_dock",
+   "type": "switch",
+   "title": {
+    "ru": "Нижняя панель",
+    "en": "Bottom bar",
+    "es": "Barra inferior",
+    "pt": "Barra inferior",
+    "uk": "Нижня панель"
+   },
+   "default": true
+  },
+  {
+   "key": "t_bars",
+   "type": "switch",
+   "title": {
+    "ru": "Поиск и вкладки",
+    "en": "Search and tabs",
+    "es": "Búsqueda y pestañas",
+    "pt": "Busca e abas",
+    "uk": "Пошук і вкладки"
+   },
+   "default": true
+  },
+  {
+   "key": "t_menus",
+   "type": "switch",
+   "title": {
+    "ru": "Меню и реакции",
+    "en": "Menus and reactions",
+    "es": "Menús y reacciones",
+    "pt": "Menus e reações",
+    "uk": "Меню й реакції"
+   },
+   "default": true
+  },
+  {
+   "key": "t_dialogs",
+   "type": "switch",
+   "title": {
+    "ru": "Диалоги",
+    "en": "Dialogs",
+    "es": "Diálogos",
+    "pt": "Diálogos",
+    "uk": "Діалоги"
+   },
+   "default": true
+  },
+  {
+   "key": "t_cards",
+   "type": "switch",
+   "title": {
+    "ru": "Карточки и группы (тяжелее)",
+    "en": "Cards and groups (heavier)",
+    "es": "Tarjetas y grupos (más pesado)",
+    "pt": "Cartões e grupos (mais pesado)",
+    "uk": "Картки та групи (важче)"
+   },
+   "default": true
+  },
+  {
+   "key": "refraction",
+   "type": "number",
+   "title": {
+    "ru": "Преломление",
+    "en": "Refraction",
+    "es": "Refracción",
+    "pt": "Refração",
+    "uk": "Заломлення"
+   },
+   "default": 0.69,
+   "min": 0,
+   "max": 2,
+   "step": 0.01
+  },
+  {
+   "key": "chromAberration",
+   "type": "number",
+   "title": {
+    "ru": "Хроматическая аберрация",
+    "en": "Chromatic aberration",
+    "es": "Aberración cromática",
+    "pt": "Aberração cromática",
+    "uk": "Хроматична аберація"
+   },
+   "default": 0.05,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "edgeHighlight",
+   "type": "number",
+   "title": {
+    "ru": "Подсветка края",
+    "en": "Edge highlight",
+    "es": "Realce del borde",
+    "pt": "Realce da borda",
+    "uk": "Підсвітка краю"
+   },
+   "default": 0.05,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "specular",
+   "type": "number",
+   "title": {
+    "ru": "Блик",
+    "en": "Specular",
+    "es": "Brillo especular",
+    "pt": "Brilho especular",
+    "uk": "Відблиск"
+   },
+   "default": 0,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "fresnel",
+   "type": "number",
+   "title": {
+    "ru": "Френель",
+    "en": "Fresnel",
+    "es": "Fresnel",
+    "pt": "Fresnel",
+    "uk": "Френель"
+   },
+   "default": 1,
+   "min": 0,
+   "max": 2,
+   "step": 0.01
+  },
+  {
+   "key": "blurAmount",
+   "type": "number",
+   "title": {
+    "ru": "Размытие",
+    "en": "Blur",
+    "es": "Desenfoque",
+    "pt": "Desfoque",
+    "uk": "Розмиття"
+   },
+   "default": 0.3,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "distortion",
+   "type": "number",
+   "title": {
+    "ru": "Микро-искажение",
+    "en": "Micro-distortion",
+    "es": "Microdistorsión",
+    "pt": "Microdistorção",
+    "uk": "Мікро-спотворення"
+   },
+   "default": 0,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "zRadius",
+   "type": "number",
+   "title": {
+    "ru": "Глубина фаски",
+    "en": "Bevel depth",
+    "es": "Profundidad del bisel",
+    "pt": "Profundidade do chanfro",
+    "uk": "Глибина фаски"
+   },
+   "default": 40,
+   "min": 5,
+   "max": 80,
+   "step": 1
+  },
+  {
+   "key": "dome",
+   "type": "switch",
+   "title": {
+    "ru": "Режим «линза» (купол)",
+    "en": "Dome mode (magnifier)",
+    "es": "Modo cúpula (lupa)",
+    "pt": "Modo cúpula (lupa)",
+    "uk": "Режим «лінза» (купол)"
+   },
+   "default": false
+  },
+  {
+   "key": "saturation",
+   "type": "number",
+   "title": {
+    "ru": "Насыщенность",
+    "en": "Saturation",
+    "es": "Saturación",
+    "pt": "Saturação",
+    "uk": "Насиченість"
+   },
+   "default": 0,
+   "min": -1,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "tintStrength",
+   "type": "number",
+   "title": {
+    "ru": "Холодный оттенок",
+    "en": "Cool tint",
+    "es": "Matiz frío",
+    "pt": "Tom frio",
+    "uk": "Холодний відтінок"
+   },
+   "default": 0,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "brightness",
+   "type": "number",
+   "title": {
+    "ru": "Яркость",
+    "en": "Brightness",
+    "es": "Brillo",
+    "pt": "Brilho",
+    "uk": "Яскравість"
+   },
+   "default": 0,
+   "min": -0.5,
+   "max": 0.5,
+   "step": 0.01
+  },
+  {
+   "key": "shadowOpacity",
+   "type": "number",
+   "title": {
+    "ru": "Тень, непрозрачность",
+    "en": "Shadow opacity",
+    "es": "Opacidad de sombra",
+    "pt": "Opacidade da sombra",
+    "uk": "Тінь, непрозорість"
+   },
+   "default": 0.3,
+   "min": 0,
+   "max": 1,
+   "step": 0.01
+  },
+  {
+   "key": "shadowSpread",
+   "type": "number",
+   "title": {
+    "ru": "Тень, размах",
+    "en": "Shadow spread",
+    "es": "Extensión de sombra",
+    "pt": "Espalhamento da sombra",
+    "uk": "Тінь, розмах"
+   },
+   "default": 10,
+   "min": 0,
+   "max": 40,
+   "step": 1
+  },
+  {
+   "key": "shadowOffsetY",
+   "type": "number",
+   "title": {
+    "ru": "Тень, смещение по Y",
+    "en": "Shadow offset Y",
+    "es": "Desplazamiento Y de sombra",
+    "pt": "Deslocamento Y da sombra",
+    "uk": "Тінь, зсув по Y"
+   },
+   "default": 1,
+   "min": -10,
+   "max": 20,
+   "step": 1
+  }
+ ]
+}
