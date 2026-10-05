@@ -13,7 +13,7 @@ let seq = 0;
 let cbSeq = 0;
 const pending = new Map();   // call id -> { resolve, reject, cbs }
 const callbacks = new Map(); // cb id -> function
-const PERSISTENT = new Set(['startLive']); // their callbacks live on after the call returns
+const PERSISTENT = new Set(['startLive', 'startChatLive']); // their callbacks live on after the call returns
 
 let ready;
 const readyPromise = new Promise((r) => { ready = r; });

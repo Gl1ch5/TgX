@@ -56,7 +56,7 @@ function schedule(path, range) {
   return promise;
 }
 
-export async function initMediaBridge() {
+export async function initMediaBridge(swUrl = 'sw.js', scope = './') {
   if (!('serviceWorker' in navigator)) {
     console.warn('[TeleX] Service workers are not supported: media will not load');
     return;
@@ -95,7 +95,7 @@ export async function initMediaBridge() {
   // Keep the media cache from being evicted (Chrome grants this to installed/engaged sites).
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
-  const reg = await navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' });
+  const reg = await navigator.serviceWorker.register(swUrl, { scope, updateViaCache: 'none' });
   reg.update().catch(() => {});
   await navigator.serviceWorker.ready;
 

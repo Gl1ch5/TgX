@@ -122,6 +122,35 @@ const ok = (msg) => console.log('  ✓', msg);
       await ctx.close();
     }
   }
+  // ---- TeleX Chat (app/static/chat/, demo service ?fake=1) ----
+  console.log('\nTeleX Chat');
+  for (const scheme of ['dark', 'light']) {
+    const ctx = await browser.newContext({ viewport: { width: 412, height: 860 }, colorScheme: scheme, locale: 'ru-RU' });
+    const page = await ctx.newPage();
+    const errs = [];
+    page.on('pageerror', (e) => errs.push(e.message));
+    await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
+    await page.goto(`http://127.0.0.1:${port}/chat/?fake=1`);
+    try {
+      await page.waitForSelector('.cx-row', { timeout: 8000 });
+      ok(`${scheme}: chat list renders`);
+      await page.click('.cx-row[data-id="u1000"]');
+      await page.waitForSelector('.cx-msg', { timeout: 5000 });
+      ok(`${scheme}: conversation opens with messages`);
+      const before = await page.locator('.cx-msg').count();
+      await page.fill('#cx-input', 'тест отправки');
+      await page.click('#cx-send');
+      await page.waitForFunction((n) => document.querySelectorAll('.cx-msg').length > n, before, { timeout: 4000 });
+      await page.waitForFunction(() => !document.querySelector('.cx-msg.pending'), null, { timeout: 4000 });
+      ok(`${scheme}: message is sent (pending → sent)`);
+      await page.click('[data-act="back"], .cx-back');
+      for (const tab of ['contacts', 'settings', 'profile', 'chats']) { await page.click(`[data-tab="${tab}"]`); await page.waitForTimeout(150); }
+      ok(`${scheme}: tabs switch`);
+      if (shotsDir) await page.screenshot({ path: path.join(shotsDir, `chat-${scheme}.png`) });
+    } catch (e) { fail(`chat ${scheme}: ${e.message.split('\n')[0]}`); }
+    errs.length ? errs.slice(0, 5).forEach((e) => fail(`chat ${scheme}: page error ${e}`)) : ok(`${scheme}: no page errors`);
+    await ctx.close();
+  }
   await browser.close();
   srv.close();
   console.log(failures.length ? `\n${failures.length} problem(s)` : '\nALL GOOD');

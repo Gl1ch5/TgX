@@ -10,6 +10,7 @@
 import { TelegramClient, Api, utils, StringSession, computeCheck, bigInt, Buffer } from './vendor/gramjs.js';
 import { getPrefs } from './core/prefs.js';
 import { t } from './i18n.js';
+import { installChat } from './telegram-chat.js';
 
 // Telegram application credentials (https://my.telegram.org). Public by design:
 // every web client ships them; the user's own session is what grants access.
@@ -421,6 +422,7 @@ class TelegramService {
 
   entityKey(entity) {
     if (entity instanceof Api.User) return `u${entity.id}`;
+    if (entity instanceof Api.Chat) return `g${entity.id}`;
     return `c${entity.id}`;
   }
 
@@ -2032,7 +2034,7 @@ class TelegramService {
       return this.documentBytes(doc, item.media, range);
     }
 
-    const msg = await this.getMessage(Number(a), Number(b));
+    let msg = /^[ucg]\d/.test(a) ? await this.chatMessage(a, Number(b)) : await this.getMessage(Number(a), Number(b));
     if (!msg || !msg.media) return null;
 
     if (kind === 'photo' && msg.media instanceof Api.MessageMediaPhoto && msg.media.photo) {
@@ -2084,5 +2086,7 @@ class TelegramService {
     return bytes ? { bytes, mime, size } : null;
   }
 }
+
+installChat(TelegramService, { toHtml });
 
 export const telegram = new TelegramService();

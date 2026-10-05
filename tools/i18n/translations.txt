@@ -366,3 +366,79 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Комментарий ‖ Comment ‖ Comentario ‖ Comentário ‖ Коментар
 Отправить ‖ Send ‖ Enviar ‖ Enviar ‖ Надіслати
 Вниз ‖ Down ‖ Abajo ‖ Para baixo ‖ Вниз
+{a} создал(а) группу «{b}» ‖ {a} created the group “{b}” ‖ {a} creó el grupo «{b}» ‖ {a} criou o grupo «{b}» ‖ {a} створив(ла) групу «{b}»
+Канал «{a}» создан ‖ Channel “{a}” created ‖ Canal «{a}» creado ‖ Canal «{a}» criado ‖ Канал «{a}» створено
+{a} изменил(а) название на «{b}» ‖ {a} changed the name to “{b}” ‖ {a} cambió el nombre a «{b}» ‖ {a} mudou o nome para «{b}» ‖ {a} змінив(ла) назву на «{b}»
+{a} обновил(а) фото группы ‖ {a} updated the group photo ‖ {a} actualizó la foto del grupo ‖ {a} atualizou a foto do grupo ‖ {a} оновив(ла) фото групи
+{a} удалил(а) фото группы ‖ {a} removed the group photo ‖ {a} eliminó la foto del grupo ‖ {a} removeu a foto do grupo ‖ {a} видалив(ла) фото групи
+{a} добавил(а) участников ‖ {a} added members ‖ {a} añadió miembros ‖ {a} adicionou membros ‖ {a} додав(ла) учасників
+{a} покинул(а) группу ‖ {a} left the group ‖ {a} salió del grupo ‖ {a} saiu do grupo ‖ {a} залишив(ла) групу
+{a} вступил(а) в группу ‖ {a} joined the group ‖ {a} se unió al grupo ‖ {a} entrou no grupo ‖ {a} приєднався(лась) до групи
+{a} закрепил(а) сообщение ‖ {a} pinned a message ‖ {a} fijó un mensaje ‖ {a} fixou uma mensagem ‖ {a} закріпив(ла) повідомлення
+История очищена ‖ History cleared ‖ Historial borrado ‖ Histórico apagado ‖ Історію очищено
+Видеозвонок ‖ Video call ‖ Videollamada ‖ Chamada de vídeo ‖ Відеодзвінок
+Звонок ‖ Call ‖ Llamada ‖ Chamada ‖ Дзвінок
+{a} теперь в Telegram ‖ {a} joined Telegram ‖ {a} se unió a Telegram ‖ {a} entrou no Telegram ‖ {a} тепер у Telegram
+Служебное сообщение ‖ Service message ‖ Mensaje de servicio ‖ Mensagem de serviço ‖ Службове повідомлення
+Чат не найден ‖ Chat not found ‖ Chat no encontrado ‖ Chat não encontrado ‖ Чат не знайдено
+Удалённый аккаунт ‖ Deleted account ‖ Cuenta eliminada ‖ Conta excluída ‖ Видалений акаунт
+Скрытый отправитель ‖ Hidden sender ‖ Remitente oculto ‖ Remetente oculto ‖ Прихований відправник
+Сообщение недоступно ‖ Message unavailable ‖ Mensaje no disponible ‖ Mensagem indisponível ‖ Повідомлення недоступне
+Чаты ‖ Chats ‖ Chats ‖ Chats ‖ Чати
+Контакты ‖ Contacts ‖ Contactos ‖ Contatos ‖ Контакти
+{a} печатает ‖ {a} is typing ‖ {a} está escribiendo ‖ {a} está digitando ‖ {a} друкує
+печатает ‖ typing ‖ escribiendo ‖ digitando ‖ друкує
+Выключить звук ‖ Mute ‖ Silenciar ‖ Silenciar ‖ Вимкнути звук
+Сообщение ‖ Message ‖ Mensaje ‖ Mensagem ‖ Повідомлення
+Прикрепить ‖ Attach ‖ Adjuntar ‖ Anexar ‖ Прикріпити
+Не удалось загрузить сообщения ‖ Couldn’t load messages ‖ No se pudieron cargar los mensajes ‖ Não foi possível carregar as mensagens ‖ Не вдалося завантажити повідомлення
+изм. ‖ edited ‖ editado ‖ editada ‖ змін.
+Переслано от {a} ‖ Forwarded from {a} ‖ Reenviado de {a} ‖ Encaminhada de {a} ‖ Переслано від {a}
+Редактирование ‖ Editing ‖ Edición ‖ Edição ‖ Редагування
+Ответ {a} ‖ Reply to {a} ‖ Respuesta a {a} ‖ Resposta a {a} ‖ Відповідь {a}
+себе ‖ yourself ‖ ti mismo ‖ você mesmo ‖ собі
+Не удалось изменить ‖ Couldn’t edit ‖ No se pudo editar ‖ Não foi possível editar ‖ Не вдалося змінити
+Не отправлено ‖ Not sent ‖ No enviado ‖ Não enviada ‖ Не надіслано
+Не удалось воспроизвести ‖ Couldn’t play ‖ No se pudo reproducir ‖ Não foi possível reproduzir ‖ Не вдалося відтворити
+Голосовые сообщения скоро ‖ Voice messages are coming soon ‖ Los mensajes de voz llegarán pronto ‖ Mensagens de voz em breve ‖ Голосові повідомлення скоро
+Звонки скоро ‖ Calls are coming soon ‖ Las llamadas llegarán pronto ‖ Chamadas em breve ‖ Дзвінки скоро
+Скоро ‖ Coming soon ‖ Próximamente ‖ Em breve ‖ Скоро
+Удалить чат ‖ Delete chat ‖ Eliminar chat ‖ Excluir chat ‖ Видалити чат
+Удалить ‖ Delete ‖ Eliminar ‖ Excluir ‖ Видалити
+Не удалось удалить ‖ Couldn’t delete ‖ No se pudo eliminar ‖ Não foi possível excluir ‖ Не вдалося видалити
+Не удалось загрузить чаты ‖ Couldn’t load chats ‖ No se pudieron cargar los chats ‖ Não foi possível carregar os chats ‖ Не вдалося завантажити чати
+{a} печатает… ‖ {a} is typing… ‖ {a} está escribiendo… ‖ {a} está digitando… ‖ {a} друкує…
+печатает… ‖ typing… ‖ escribiendo… ‖ digitando… ‖ друкує…
+Архив чатов ‖ Archived chats ‖ Chats archivados ‖ Chats arquivados ‖ Архів чатів
+Личные ‖ Personal ‖ Personales ‖ Pessoais ‖ Особисті
+Новые ‖ New ‖ Nuevos ‖ Novos ‖ Нові
+Архив пуст ‖ The archive is empty ‖ El archivo está vacío ‖ O arquivo está vazio ‖ Архів порожній
+Глобальный поиск ‖ Global search ‖ Búsqueda global ‖ Pesquisa global ‖ Глобальний пошук
+Ничего не найдено ‖ Nothing found ‖ No se encontró nada ‖ Nada encontrado ‖ Нічого не знайдено
+Здесь пока пусто ‖ Nothing here yet ‖ Aquí no hay nada todavía ‖ Ainda não há nada aqui ‖ Тут поки порожньо
+Новое сообщение ‖ New message ‖ Nuevo mensaje ‖ Nova mensagem ‖ Нове повідомлення
+Прочитать все ‖ Mark all as read ‖ Marcar todo como leído ‖ Marcar tudo como lido ‖ Прочитати все
+Открепить ‖ Unpin ‖ Desfijar ‖ Desafixar ‖ Відкріпити
+Закрепить ‖ Pin ‖ Fijar ‖ Fixar ‖ Закріпити
+Прочитано ‖ Mark as read ‖ Marcar como leído ‖ Marcar como lido ‖ Прочитано
+Видеосообщение ‖ Video message ‖ Mensaje de vídeo ‖ Mensagem de vídeo ‖ Відеоповідомлення
+Не удалось загрузить контакты ‖ Couldn’t load contacts ‖ No se pudieron cargar los contactos ‖ Não foi possível carregar os contatos ‖ Не вдалося завантажити контакти
+Контактов нет ‖ No contacts ‖ Sin contactos ‖ Sem contatos ‖ Контактів немає
+Светлая ‖ Light ‖ Claro ‖ Claro ‖ Світла
+Тёмная ‖ Dark ‖ Oscuro ‖ Escuro ‖ Темна
+Стена каналов TeleX ‖ TeleX channel wall ‖ Muro de canales TeleX ‖ Mural de canais TeleX ‖ Стрічка каналів TeleX
+неофициальный клиент Telegram ‖ unofficial Telegram client ‖ cliente no oficial de Telegram ‖ cliente não oficial do Telegram ‖ неофіційний клієнт Telegram
+Автоматически ‖ Automatic ‖ Automático ‖ Automático ‖ Автоматично
+Выйти из аккаунта? ‖ Log out of this account? ‖ ¿Cerrar sesión? ‖ Sair da conta? ‖ Вийти з акаунта?
+Телефон ‖ Phone ‖ Teléfono ‖ Telefone ‖ Телефон
+бот ‖ bot ‖ bot ‖ bot ‖ бот
+был(а) недавно ‖ last seen recently ‖ visto recientemente ‖ visto recentemente ‖ був(ла) нещодавно
+был(а) на этой неделе ‖ last seen within a week ‖ visto esta semana ‖ visto esta semana ‖ був(ла) цього тижня
+был(а) в этом месяце ‖ last seen within a month ‖ visto este mes ‖ visto este mês ‖ був(ла) цього місяця
+был(а) давно ‖ last seen a long time ago ‖ visto hace mucho ‖ visto há muito tempo ‖ був(ла) давно
+был(а) в {a} ‖ last seen at {a} ‖ visto a las {a} ‖ visto às {a} ‖ був(ла) о {a}
+был(а) вчера в {a} ‖ last seen yesterday at {a} ‖ visto ayer a las {a} ‖ visto ontem às {a} ‖ був(ла) вчора о {a}
+был(а) {a} ‖ last seen {a} ‖ visto {a} ‖ visto {a} ‖ був(ла) {a}
+#{n} участник ‖ {n} member / {n} members ‖ {n} miembro / {n} miembros ‖ {n} membro / {n} membros ‖ {n} учасник / {n} учасники / {n} учасників
+Выберите чат ‖ Select a chat ‖ Selecciona un chat ‖ Selecione um chat ‖ Виберіть чат
+Полноценный клиент Telegram ‖ Full Telegram client ‖ Cliente completo de Telegram ‖ Cliente completo do Telegram ‖ Повноцінний клієнт Telegram

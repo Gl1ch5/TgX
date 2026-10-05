@@ -40,10 +40,11 @@ function scan(dir) {
   }
 }
 scan(path.join(ROOT, 'js'));
+scan(path.join(ROOT, 'chat/js'));
 // static text and attributes of index.html
-const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const html = ['index.html', 'chat/index.html'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
 for (const m of html.matchAll(/>([^<>{}]*[А-Яа-яЁё][^<>{}]*)</g)) add(m[1].trim().replace(/\s+/g, ' '), 'index.html');
 for (const m of html.matchAll(/\b(?:placeholder|title|alt|aria-label)="([^"]*[А-Яа-яЁё][^"]*)"/g)) add(m[1].trim(), 'index.html');
-const t = html.match(/<title>([^<]*)<\/title>/); if (t) add(t[1].trim(), 'index.html');
+for (const m of html.matchAll(/<title>([^<]*)<\/title>/g)) if (/[А-Яа-яЁё]/.test(m[1])) add(m[1].trim(), 'index.html');
 fs.writeFileSync(path.join(ROOT, '../../tools/i18n/keys.json'), JSON.stringify([...keys].map(([k, v]) => ({ key: k, ...v })), null, 1));
 console.log(keys.size, 'keys');

@@ -470,6 +470,136 @@
   "plural": false
  },
  {
+  "key": "Пользователь",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} создал(а) группу «{b}»",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Канал «{a}» создан",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} изменил(а) название на «{b}»",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} обновил(а) фото группы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} удалил(а) фото группы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} добавил(а) участников",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} покинул(а) группу",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} вступил(а) в группу",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} закрепил(а) сообщение",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "История очищена",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Видеозвонок",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Звонок",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} теперь в Telegram",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Служебное сообщение",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Чат не найден",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Удалённый аккаунт",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Без названия",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Вы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Скрытый отправитель",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщение недоступно",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Фото",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Видео",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Стикер",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Аудио",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Файл",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
   "key": "Неверный код подтверждения",
   "where": "js/telegram-remote.js",
   "plural": false
@@ -515,11 +645,6 @@
   "plural": false
  },
  {
-  "key": "Пользователь",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
   "key": "Канал не найден среди ваших подписок",
   "where": "js/telegram.js",
   "plural": false
@@ -540,36 +665,6 @@
   "plural": false
  },
  {
-  "key": "Без названия",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Фото",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Стикер",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Видео",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Аудио",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Файл",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
   "key": "Опрос",
   "where": "js/telegram.js",
   "plural": false
@@ -581,11 +676,6 @@
  },
  {
   "key": "Текст комментария пуст",
-  "where": "js/telegram.js",
-  "plural": false
- },
- {
-  "key": "Вы",
   "where": "js/telegram.js",
   "plural": false
  },
@@ -991,6 +1081,11 @@
  },
  {
   "key": "Анимации и автовоспроизведение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Полноценный клиент Telegram",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1760,6 +1855,321 @@
   "plural": false
  },
  {
+  "key": "Чаты",
+  "where": "chat/js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Контакты",
+  "where": "chat/js/app.js",
+  "plural": false
+ },
+ {
+  "key": "{a} печатает",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "печатает",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Избранное",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Меню",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Вниз",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Выключить звук",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Эмодзи",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщение",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Прикрепить",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Отправить",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось загрузить сообщения",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "изм.",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Переслано от {a}",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Редактирование",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Ответ {a}",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "себе",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось изменить",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не отправлено",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось воспроизвести",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Голосовые сообщения скоро",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Звонки скоро",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Скоро",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить чат",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось удалить",
+  "where": "chat/js/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось загрузить чаты",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "{a} печатает…",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "печатает…",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Архив чатов",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Все",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Личные",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Новые",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Архив пуст",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Глобальный поиск",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Ничего не найдено",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Здесь пока пусто",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Новое сообщение",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Прочитать все",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Открепить",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Закрепить",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Прочитано",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Видеосообщение",
+  "where": "chat/js/list.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось загрузить контакты",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Контактов нет",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Светлая",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Тёмная",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Стена каналов TeleX",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "неофициальный клиент Telegram",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Автоматически",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Выйти из аккаунта?",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "Телефон",
+  "where": "chat/js/pages.js",
+  "plural": false
+ },
+ {
+  "key": "бот",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) недавно",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) на этой неделе",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) в этом месяце",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) давно",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) в {a}",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) вчера в {a}",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "был(а) {a}",
+  "where": "chat/js/store.js",
+  "plural": false
+ },
+ {
+  "key": "{n} участник",
+  "where": "chat/js/store.js",
+  "plural": true,
+  "forms": [
+   "{n} участник",
+   "{n} участника",
+   "{n} участников"
+  ]
+ },
+ {
   "key": "TeleX — стена каналов Telegram",
   "where": "index.html",
   "plural": false
@@ -1770,17 +2180,7 @@
   "plural": false
  },
  {
-  "key": "Все",
-  "where": "index.html",
-  "plural": false
- },
- {
   "key": "Популярное",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Избранное",
   "where": "index.html",
   "plural": false
  },
@@ -1815,12 +2215,12 @@
   "plural": false
  },
  {
-  "key": "Истории",
+  "key": "Выберите чат",
   "where": "index.html",
   "plural": false
  },
  {
-  "key": "Меню",
+  "key": "Истории",
   "where": "index.html",
   "plural": false
  },
@@ -1835,22 +2235,7 @@
   "plural": false
  },
  {
-  "key": "Эмодзи",
-  "where": "index.html",
-  "plural": false
- },
- {
   "key": "Комментарий",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Отправить",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Вниз",
   "where": "index.html",
   "plural": false
  }
