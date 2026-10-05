@@ -1742,8 +1742,13 @@ class TelegramService {
     const markup = msg && msg.replyMarkup;
     if (!(markup instanceof Api.ReplyInlineMarkup)) return [];
     return markup.rows.map((row) => row.buttons
-      .map((b) => (b.url ? { text: b.text || '', url: safeUrl(b.url) } : null))
-      .filter((b) => b && b.url))
+      .map((b) => {
+        if (b.url) return { text: b.text || '', url: safeUrl(b.url) };
+        if (b instanceof Api.KeyboardButtonCallback && b.data) return { text: b.text || '', data: Buffer.from(b.data).toString('base64') };
+        if (b.text) return { text: b.text, inert: true };
+        return null;
+      })
+      .filter((b) => b && (b.url || b.data || b.inert)))
       .filter((row) => row.length);
   }
 

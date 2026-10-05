@@ -491,4 +491,5 @@ export const PT = {
   "Обсуждение": "Discussão",
   "У этого чата нет публичной ссылки": "Este chat não tem link público",
   "Добавить в контакты": "Adicionar aos contatos",
+  "Бот не ответил": "O bot não respondeu",
 };

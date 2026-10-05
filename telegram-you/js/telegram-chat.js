@@ -9,7 +9,7 @@
  * "media/<kind>/<key>/<msgId>" — the service worker + _fetchMedia serve them.
  * ====================================================================
  */
-import { Api } from './vendor/gramjs.js';
+import { Api, Buffer } from './vendor/gramjs.js';
 import { t } from './i18n.js';
 
 const MSG_CACHE_LIMIT = 4000;
@@ -428,6 +428,24 @@ export function installChat(TelegramService, helpers) {
     const client = await this.getClient();
     await client.forwardMessages(to, { messages: ids, fromPeer: from });
     return true;
+  };
+
+  /** Presses an inline callback button; answer is {message, url, alert}. */
+  P.chatPressButton = async function chatPressButton(key, msgId, data) {
+    const { client, peer } = await this.chatInput(key);
+    const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+    const r = await client.invoke(new Api.messages.GetBotCallbackAnswer({ peer, msgId, data: Buffer.from(bytes) }));
+    return { message: r.message || '', url: r.url || '', alert: !!r.alert };
+  };
+
+  /** Commands a bot offers: [{command, description}] (empty for non-bots). */
+  P.chatBotCommands = async function chatBotCommands(key) {
+    const client = await this.getClient();
+    const entity = await this.chatEntity(key);
+    if (!entity || !entity.bot) return [];
+    const full = await client.invoke(new Api.users.GetFullUser({ id: await client.getInputEntity(entity) }));
+    const cmds = (full.fullUser.botInfo && full.fullUser.botInfo.commands) || [];
+    return cmds.map((c) => ({ command: c.command, description: c.description || '' }));
   };
 
   P.chatMute = async function chatMute(key, mute) {

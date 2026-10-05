@@ -490,3 +490,4 @@ Telegram для бизнеса ‖ Telegram Business ‖ Telegram Business ‖ T
 Обсуждение ‖ Discuss ‖ Discusión ‖ Discussão ‖ Обговорення
 У этого чата нет публичной ссылки ‖ This chat has no public link ‖ Este chat no tiene enlace público ‖ Este chat não tem link público ‖ У цього чату немає публічного посилання
 Добавить в контакты ‖ Add to contacts ‖ Añadir a contactos ‖ Adicionar aos contatos ‖ Додати до контактів
+Бот не ответил ‖ The bot did not respond ‖ El bot no respondió ‖ O bot não respondeu ‖ Бот не відповів

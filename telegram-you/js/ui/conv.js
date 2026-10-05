@@ -128,6 +128,7 @@ function buildShell() {
   el().onclick = onClick;
   el().oncontextmenu = onContext;
   bindTouchMenu(box);
+  if (d.bot && !readonly) loadBotMenu(d.id);
   const inp = el().querySelector('#cx-input');
   if (inp) {
     inp.value = draft.get(cur.id) || '';
@@ -266,7 +267,9 @@ function bubbleHtml(m, prev, next, group) {
   const react = m.reactions && m.reactions.length ? `<div class="cx-react">${m.reactions.map((r) => `<span class="${r.chosen ? 'mine' : ''}">${escapeHtml(r.emoji || '⭐')} ${r.count}</span>`).join('')}</div>` : '';
   const av = group && !m.out ? (last ? avatar({ id: m.senderKey, title: m.senderName, avatar: m.senderAvatar }) : '<span class="av-gap"></span>') : '';
   const body = `${name}${fwd}${reply}${mediaHtml(m)}${text}${web}${meta}${react}`;
-  return `<div class="cx-msg ${m.out ? 'out' : ''} ${m.deleted ? 'deleted' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''} ${cur.sel && cur.sel.has(m.id) ? 'sel' : ''}" data-id="${m.id}"><span class="sel-dot">${I.check}</span>${av}<div class="${cls}">${body}</div></div>`;
+  const kb = m.buttons && m.buttons.length ? `<div class="cx-kb">${m.buttons.map((row) => `<div class="cx-kr">${row.map((b) => `<button class="cx-kbtn" data-kb="${b.data ? 'cb' : b.url ? 'url' : 'x'}" ${b.data ? `data-d="${escapeHtml(b.data)}"` : ''} ${b.url ? `data-u="${escapeHtml(b.url)}"` : ''}><span>${escapeHtml(b.text)}</span>${b.url ? `<i class="ic kbi" style="--m:url(${new URL('icons/android/', document.baseURI).href}bot_link.webp)"></i>` : ''}</button>`).join('')}</div>`).join('')}</div>` : '';
+  const main = kb ? `<div class="cx-col"><div class="${cls}">${body}</div>${kb}</div>` : `<div class="${cls}">${body}</div>`;
+  return `<div class="cx-msg ${m.out ? 'out' : ''} ${m.deleted ? 'deleted' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''} ${cur.sel && cur.sel.has(m.id) ? 'sel' : ''}" data-id="${m.id}"><span class="sel-dot">${I.check}</span>${av}${main}</div>`;
 }
 
 /** Turns bare URLs of already-escaped text into links (entities already made some). */
@@ -700,12 +703,54 @@ function openViewer(src, kind) {
   v.onclick = (e) => { if (e.target.tagName !== 'VIDEO') { v.classList.add('tx-hidden'); v.innerHTML = ''; } };
 }
 
+async function loadBotMenu(id) {
+  let cmds = [];
+  try { cmds = await S.tg.chatBotCommands(id); } catch { /* not a bot or no access */ }
+  if (!cur || cur.id !== id || !cmds.length) return;
+  const field = el().querySelector('.cx-field');
+  if (!field || field.querySelector('.cx-botmenu')) return;
+  field.insertAdjacentHTML('afterbegin', `<button class="cx-botmenu" data-a="botmenu"><span class="ic" style="--m:url(${new URL('icons/android/', document.baseURI).href}input_bot1.webp)"></span>${t('Меню')}</button>`);
+  cur.cmds = cmds;
+}
+
+function toggleCmds() {
+  const comp = el().querySelector('.cx-comp');
+  const old = comp.querySelector('.cx-cmds');
+  if (old) return old.remove();
+  const box = document.createElement('div');
+  box.className = 'cx-cmds';
+  box.innerHTML = cur.cmds.map((c) => `<button class="cx-cmd" data-c="${escapeHtml(c.command)}"><b>/${escapeHtml(c.command)}</b><span>${escapeHtml(c.description)}</span></button>`).join('');
+  box.onclick = (e) => {
+    const b = e.target.closest('[data-c]');
+    if (!b) return;
+    box.remove();
+    sendOne(cur.id, { text: `/${b.dataset.c}`, replyTo: null });
+  };
+  comp.appendChild(box);
+}
+
+async function pressKb(btn) {
+  if (btn.dataset.kb === 'url') return window.open(btn.dataset.u, '_blank', 'noopener');
+  if (btn.dataset.kb !== 'cb' || btn.classList.contains('busy')) return;
+  const id = Number(btn.closest('.cx-msg').dataset.id);
+  btn.classList.add('busy');
+  try {
+    const r = await S.tg.chatPressButton(cur.id, id, btn.dataset.d);
+    if (r.url) window.open(r.url, '_blank', 'noopener');
+    else if (r.message) r.alert ? await confirmBox(r.message, 'OK') : toast(r.message);
+  } catch { toast(t('Бот не ответил')); }
+  btn.classList.remove('busy');
+}
+
 function onClick(e) {
+  const kbb = e.target.closest('.cx-kbtn');
+  if (kbb) return pressKb(kbb);
   const a = e.target.closest('[data-a]');
   if (a) {
     const act = a.dataset.a;
     if (act === 'back') return closeChat();
     if (act === 'send') return send();
+    if (act === 'botmenu') return toggleCmds();
     if (act === 'attach') return el().querySelector('#cx-file').click();
     if (act === 'cancel') return cancelCtx();
     if (act === 'mic') { videoMode = !videoMode; syncSend(); return toast(videoMode ? t('Удерживайте для записи видео. Нажмите для переключения в голосовой режим.') : t('Удерживайте для записи голоса. Нажмите для переключения в режим видео.')); }

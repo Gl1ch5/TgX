@@ -670,6 +670,11 @@
   "plural": false
  },
  {
+  "key": "Бот не ответил",
+  "where": "js/ui/conv.js",
+  "plural": false
+ },
+ {
   "key": "Удерживайте для записи видео. Нажмите для переключения в голосовой режим.",
   "where": "js/ui/conv.js",
   "plural": false

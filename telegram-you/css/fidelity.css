@@ -66,3 +66,21 @@ html, body { background: var(--cx-list-bg); }
 .cx-profile .tabs { background: var(--cx-surface); border: 0; backdrop-filter: none; margin: 12px 13px; }
 .cx-profile .grid3 { gap: 2px; margin: 0 0 0; border-radius: 22px 22px 0 0; overflow: hidden; }
 .cx-profile .acts button { font-size: 14px; padding: 0 2px; } .cx-profile .acts button span { white-space: nowrap; }
+
+/* ---- inline keyboards (bots) ---- */
+.cx-col { display: flex; flex-direction: column; min-width: 0; max-width: 100%; }
+.cx-kb { display: flex; flex-direction: column; gap: 3px; margin-top: 3px; }
+.cx-kr { display: flex; gap: 3px; }
+.cx-kbtn { position: relative; flex: 1; min-width: 0; height: 36px; padding: 0 8px; border-radius: 6px; background: rgba(0, 0, 0, .38); color: #fff; font: 500 14.5px/1 var(--tx-font); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.cx-kbtn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cx-kbtn:active { background: rgba(0, 0, 0, .55); }
+.cx-kbtn.busy { opacity: .6; }
+.cx-kbtn .kbi { position: absolute; right: 3px; top: 3px; width: 10px; height: 10px; opacity: .85; }
+/* bot menu button + commands sheet */
+.cx-botmenu { flex: none; height: 32px; margin: 0 2px 0 6px; padding: 0 12px; border-radius: 16px; background: var(--tx-accent); color: #fff; font: 500 14px/1 var(--tx-font); display: inline-flex; align-items: center; gap: 6px; align-self: center; }
+.cx-botmenu .ic { width: 16px; height: 16px; background: #fff; }
+.cx-cmds { position: absolute; left: 8px; right: 8px; bottom: calc(100% + 6px); max-height: 46vh; overflow-y: auto; border-radius: 18px; background: var(--cx-surface); box-shadow: 0 6px 24px rgba(0, 0, 0, .45); padding: 6px 0; z-index: 5; }
+.cx-cmd { display: block; width: 100%; text-align: left; padding: 8px 16px; color: var(--tx-text); font-size: 15.5px; }
+.cx-cmd b { color: var(--tx-accent); font-weight: 500; margin-right: 6px; }
+.cx-cmd span { color: var(--tx-text-2); }
+.cx-cmd:active { background: var(--tx-accent-soft); }

@@ -11,7 +11,7 @@ const dialogs = Array.from({ length: 60 }, (_, i) => {
   return {
     id: `${kind === 'user' ? 'u' : kind === 'group' ? 'g' : 'c'}${1000 + i}`,
     kind, title: NAMES[i % NAMES.length] + (i >= NAMES.length ? ` ${i}` : ''), username: '', avatar: null,
-    verified: i === 7, bot: false, self: i === 1, muted: i % 4 === 2, pinned: i < 3, archived: false,
+    verified: i === 7, bot: i === 2 && kind === 'user', self: i === 1, muted: i % 4 === 2, pinned: i < 3, archived: false,
     unread: i % 4 === 0 ? (i * 7) % 40 + 1 : 0, unreadMentions: 0, markedUnread: false,
     readInboxMaxId: 0, readOutboxMaxId: out ? 5 : 1000, topId: 100, date,
     status: kind === 'user' ? (i % 2 ? { kind: 'recently' } : { kind: 'online' }) : { kind: 'members', count: 120 * i + 5 },
@@ -52,6 +52,8 @@ export const fake = {
     const page = all.slice(-limit);
     return { messages: page, hasMore: all.length > limit };
   },
+  async chatPressButton() { await new Promise((r) => setTimeout(r, 300)); return { message: 'Готово', url: '', alert: false }; },
+  async chatBotCommands(key) { return key === 'u1002' ? [{ command: 'start', description: 'Начать' }, { command: 'help', description: 'Что я умею' }, { command: 'settings', description: 'Настройки' }] : []; },
   async chatSend(key, text) { await new Promise((r) => setTimeout(r, 400)); return { id: 1000 + Math.floor(Math.random() * 1e6), chatId: key, date: Math.floor(Date.now() / 1000), out: true, senderKey: 'u1', senderName: 'Я', text, html: text, media: [], reactions: [], status: 'sent', service: null }; },
   async chatSendFile() { throw new Error('demo'); }, async chatEdit(k, id, text) { return { id, chatId: k, date: now, out: true, text, html: text, media: [], reactions: [], edited: true, status: 'sent', service: null }; },
   async chatDelete() { return true; }, async chatMarkRead() { return true; }, async chatTyping() { return true; }, async chatSetOffline() { return true; },
