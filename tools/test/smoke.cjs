@@ -43,7 +43,7 @@ const ok = (msg) => console.log('  ✓', msg);
     for (const [code, locale] of Object.entries(LANGS)) {
       const label = `${code}/${scheme}`;
       console.log(label);
-      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: scheme, locale });
+      const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: scheme, locale, serviceWorkers: 'block' });
       const page = await ctx.newPage();
       const errors = [];
       page.on('pageerror', (e) => errors.push(e.message));
@@ -146,6 +146,22 @@ const ok = (msg) => console.log('  ✓', msg);
       await page.click('[data-act="back"], .cx-back');
       for (const tab of ['contacts', 'settings', 'profile', 'chats']) { await page.click(`[data-tab="${tab}"]`); await page.waitForTimeout(150); }
       ok(`${scheme}: tabs switch`);
+      // mods: full-access ES module, plugged through the extension points, removable
+      const modOk = await page.evaluate(async () => {
+        const { installMod, removeMod } = await import('./js/mods.js');
+        const { ext } = await import('./js/ext.js');
+        const code = "export default function (tx) { tx.menu('message', 'Probe item', () => {}); tx.ext.addHook('beforeSend', (x) => x + '!'); tx.storage.set('k', 1); }";
+        const p = installMod({ manifest: { id: 'probe', name: 'Probe', version: '1' }, code });
+        await new Promise((r) => setTimeout(r, 100));
+        document.querySelector('#cx-menu button[data-v="1"]').click();
+        await p;
+        const has = ext.menu('message', { msg: {}, chat: {} }).some((i) => i.label === 'Probe item');
+        const hooked = await ext.run('beforeSend', 'hi', {});
+        removeMod('probe');
+        const gone = !ext.menu('message', { msg: {}, chat: {} }).some((i) => i.label === 'Probe item');
+        return has && hooked === 'hi!' && gone;
+      });
+      modOk ? ok(`${scheme}: a mod plugs in (menu item, send hook) and is removed cleanly`) : fail(`chat ${scheme}: mod lifecycle failed`);
       if (shotsDir) await page.screenshot({ path: path.join(shotsDir, `chat-${scheme}.png`) });
     } catch (e) { fail(`chat ${scheme}: ${e.message.split('\n')[0]}`); }
     errs.length ? errs.slice(0, 5).forEach((e) => fail(`chat ${scheme}: page error ${e}`)) : ok(`${scheme}: no page errors`);

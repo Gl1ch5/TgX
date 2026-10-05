@@ -1,7 +1,12 @@
 // Conversation screen: header pills, bubbles, composer, live updates.
-import { S, t, tn, on, emit, escapeHtml, avatar, mu, msgTime, dayLabel, dayKey, statusText, showMenu, toast, peerColor } from './store.js';
+import { S, t, tn, on, emit, escapeHtml, avatar, mu, msgTime, dayLabel, dayKey, statusText, showMenu, confirmBox, toast, peerColor } from './store.js';
 import { I } from './icons.js';
-import { patchDialog, onLiveMessage as listMessage, mediaLabel } from './list.js';
+import { patchDialog, onLiveMessage as listMessage, mediaLabel, removeDialog, forwardPicker } from './list.js';
+import { toggleEmojiPanel, closePanel } from './panel.js';
+import { openProfile } from './profile.js';
+import { ext } from './ext.js';
+import { bindModsHost } from './mods.js';
+import { WALLPAPERS, applyWallpaper } from '../../js/components/wallpaperTheme.js';
 
 const el = () => document.getElementById('cx-conv');
 const app = () => document.getElementById('cx-app');
@@ -22,6 +27,7 @@ export async function openChat(id) {
   if (!history.state || history.state.chat !== id) history.pushState({ chat: id }, '');
   buildShell();
   emit('selected', id);
+  loadPins();
   await loadOlder(true);
 }
 
@@ -35,6 +41,7 @@ async function dialogFromSearch(id) {
 export function closeChat(fromPop = false) {
   if (!cur) return;
   saveDraft();
+  closePanel();
   S.openId = null;
   cur = null;
   delete app().dataset.open;
@@ -56,31 +63,58 @@ function headerStatus() {
 
 function headerHtml() {
   const d = cur.dlg;
+  if (cur.sel) {
+    return `<div class="cx-head"><button class="cx-back cx-pill" style="display:flex" data-a="unsel" aria-label="${t('Отмена')}">${I.close}</button>
+      <div class="cx-who cx-pill" style="font-size:20px;font-weight:500;padding-left:22px">${t('Выбрано {a}', { a: cur.sel.size })}</div>
+      <div class="cx-actions cx-pill"><button class="cx-call" data-a="selcopy" aria-label="${t('Копировать')}">${I.copy}</button><button class="cx-call" data-a="selfwd" aria-label="${t('Переслать')}">${I.forward}</button><button class="cx-menu-btn" data-a="seldel" aria-label="${t('Удалить')}">${I.trash}</button></div></div>`;
+  }
+  if (cur.search) {
+    return `<div class="cx-head"><button class="cx-back cx-pill" style="display:flex" data-a="unsearch" aria-label="${t('Назад')}">${I.back}</button>
+      <div class="cx-who cx-pill" style="padding-left:18px"><input id="cx-sq" class="cx-sq" placeholder="${t('Поиск')}" value="${escapeHtml(cur.search.q)}" autocomplete="off"></div></div>`;
+  }
   const st = headerStatus();
   return `<div class="cx-head">
     <button class="cx-back cx-pill" data-a="back" aria-label="${t('Назад')}">${I.back}</button>
     <button class="cx-who cx-pill" data-a="info">${d.self ? `<span class="cx-saved-ic" style="width:44px;height:44px">${I.saved}</span>` : avatar(d)}
-      <span class="cx-who-t"><b>${escapeHtml(d.self ? t('Избранное') : d.title)}${d.verified ? I.verified : ''}</b>
+      <span class="cx-who-t"><b>${escapeHtml(d.self ? t('Избранное') : d.title)}${d.verified ? I.verified : ''}${d.muted ? `<span class="cx-name-ico">${I.mute}</span>` : ''}</b>
       <span class="${st.live ? 'live' : ''} ${st.dots ? 'cx-typing-dots' : ''}">${escapeHtml(st.text)}</span></span></button>
     <div class="cx-actions cx-pill"><button class="cx-call" data-a="call" aria-label="${t('Звонок')}">${I.call}</button><button class="cx-menu-btn" data-a="menu" aria-label="${t('Меню')}">${I.more}</button></div>
   </div>`;
+}
+
+function pinHtml() {
+  if (!cur.pins || !cur.pins.length || cur.sel || cur.search) return '';
+  const p = cur.pins[cur.pinIdx % cur.pins.length];
+  const n = cur.pins.length;
+  const bars = n > 1 ? `<span class="segs">${cur.pins.slice(0, 4).map((_, i) => `<i class="${i === cur.pinIdx % cur.pins.length ? 'on' : ''}"></i>`).join('')}</span>` : '<span class="segs"><i class="on"></i></span>';
+  return `<div class="cx-pinbar cx-pill" data-a="pin">${bars}<div><b>${t('Закреплённое сообщение')}${n > 1 ? ` #${cur.pins.length - (cur.pinIdx % n)}` : ''}</b><span>${escapeHtml(p.text || '')}</span></div><button class="cx-icon" data-a="pinlist" aria-label="${t('Все закреплённые')}">${I.pinlist}</button></div>`;
+}
+
+function refreshPin() {
+  const box = el().querySelector('#cx-pin');
+  if (!box) return;
+  box.innerHTML = pinHtml();
+  const msgs = el().querySelector('#cx-msgs');
+  if (msgs) msgs.classList.toggle('haspin', !!box.innerHTML);
 }
 
 function buildShell() {
   const d = cur.dlg;
   const readonly = d.kind === 'channel' && !d.admin;
   el().innerHTML = `${headerHtml()}
+    <div id="cx-pin" class="cx-pinwrap"></div>
     <div class="cx-msgs" id="cx-msgs"><div class="spacer"></div><div class="cx-loading" id="cx-ld">…</div></div>
+    <div id="cx-selbar" class="cx-selbar tx-hidden"><button class="cx-pill" data-a="selreply">${t('Ответить')} ${I.reply}</button><button class="cx-pill" data-a="selfwd">${t('Переслать')} ${I.forward}</button></div>
     <button class="cx-jump cx-pill tx-hidden" id="cx-jump" aria-label="${t('Вниз')}">${I.down}</button>
     <div id="cx-ctx"></div>
     ${readonly ? `<div class="cx-ro"><button class="cx-pill" style="padding:12px 28px;font-size:16px;font-weight:500;color:var(--tx-accent)" data-a="mute">${d.muted ? t('Включить звук') : t('Выключить звук')}</button></div>` : `
     <div class="cx-comp">
-      <div class="cx-field cx-pill"><button class="cx-icon" data-a="emoji" aria-label="${t('Эмодзи')}">${I.smile}</button>
+      <div class="cx-field cx-pill"><button class="cx-icon" id="cx-emo" data-a="emoji" aria-label="${t('Эмодзи')}">${I.smile}</button>
         <textarea id="cx-input" rows="1" placeholder="${t('Сообщение')}" enterkeyhint="send"></textarea>
         <button class="cx-icon" data-a="attach" aria-label="${t('Прикрепить')}">${I.attach}</button></div>
       <button class="cx-send" id="cx-send" data-a="send" aria-label="${t('Отправить')}">${I.mic}</button>
       <input type="file" id="cx-file" multiple hidden>
-    </div>`}`;
+    </div><div id="cx-panel" class="cx-panel tx-hidden"></div>`}`;
   const box = el().querySelector('#cx-msgs');
   box.addEventListener('scroll', onScroll, { passive: true });
   el().onclick = onClick;
@@ -199,7 +233,10 @@ function mediaHtml(m) {
 }
 
 function bubbleHtml(m, prev, next, group) {
-  if (m.service) return `<div class="cx-service" data-id="${m.id}">${escapeHtml(m.service.text)}</div>`;
+  if (m.service) {
+    const tail = m.service.pin && m.replyTo && m.replyTo.text ? ` «${m.replyTo.text.slice(0, 40)}»` : '';
+    return `<div class="cx-service" data-id="${m.id}">${escapeHtml(m.service.text + tail)}</div>`;
+  }
   const first = !sameRun(prev, m);
   const last = !sameRun(m, next);
   const x = m.media && m.media[0];
@@ -209,7 +246,7 @@ function bubbleHtml(m, prev, next, group) {
   const showName = group && !m.out && first && !sticker;
   const read = m.out && m.id > 0 && m.id <= cur.dlg.readOutboxMaxId;
   const tick = m.out ? (m.status === 'pending' ? I.clock : m.status === 'failed' ? '!' : `<span class="${read ? 'rd' : ''}">${read ? I.checks : I.check}</span>`) : '';
-  const meta = `<span class="cx-meta">${m.edited ? t('изм.') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
+  const meta = `<span class="cx-meta">${m.pinned ? I.pin : ''}${m.edited ? t('изм.') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
   const reply = m.replyTo ? `<span class="reply" data-reply="${m.replyTo.id}"><b>${escapeHtml(m.replyTo.name || '')}</b><span>${escapeHtml(m.replyTo.text || '')}</span></span>` : '';
   const fwd = m.fwd ? `<span class="fwd">${t('Переслано от {a}', { a: escapeHtml(m.fwd.name) })}</span>` : '';
   const name = showName ? `<span class="nm tx-peer-name tx-peer-${peerColor(m.senderKey)}">${escapeHtml(m.senderName)}</span>` : '';
@@ -218,7 +255,7 @@ function bubbleHtml(m, prev, next, group) {
   const react = m.reactions && m.reactions.length ? `<div class="cx-react">${m.reactions.map((r) => `<span class="${r.chosen ? 'mine' : ''}">${escapeHtml(r.emoji || '⭐')} ${r.count}</span>`).join('')}</div>` : '';
   const av = group && !m.out ? (last ? avatar({ id: m.senderKey, title: m.senderName, avatar: m.senderAvatar }) : '<span class="av-gap"></span>') : '';
   const body = `${name}${fwd}${reply}${mediaHtml(m)}${text}${web}${meta}${react}`;
-  return `<div class="cx-msg ${m.out ? 'out' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''}" data-id="${m.id}">${av}<div class="${cls}">${body}</div></div>`;
+  return `<div class="cx-msg ${m.out ? 'out' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''} ${cur.sel && cur.sel.has(m.id) ? 'sel' : ''}" data-id="${m.id}"><span class="sel-dot">${I.check}</span>${av}<div class="${cls}">${body}</div></div>`;
 }
 
 /** Turns bare URLs of already-escaped text into links (entities already made some). */
@@ -263,6 +300,7 @@ export function liveMessage(m) {
   const pend = cur.msgs.findIndex((x) => x.status === 'pending' && x.out && x.text === m.text);
   if (m.out && pend >= 0) return;
   cur.msgs.push(m);
+  ext.emit('message', m);
   appendMsg(m);
   if (cur.atBottom || m.out) { scrollBottom(true); markRead(); }
   else { cur.unseen += 1; updateJump(); }
@@ -304,12 +342,148 @@ export function liveStatus(key, status) {
   if (cur && cur.id === key) { cur.dlg.status = status; refreshHeader(); }
 }
 
+
+// ---------------------------------------------------------------- pinned messages, jumping
+async function loadPins() {
+  const id = cur.id;
+  try {
+    const list = await S.tg.chatPinned(id);
+    if (!cur || cur.id !== id) return;
+    cur.pins = list;
+    cur.pinIdx = 0;
+    refreshPin();
+  } catch { /* chats without pins / no rights */ }
+}
+
+async function jumpTo(id) {
+  if (!cur) return;
+  let node = el().querySelector(`.cx-msg[data-id="${id}"]`);
+  if (!node) {
+    try {
+      const res = await S.tg.chatHistory(cur.id, { offsetId: id + 15, limit: 40 });
+      cur.msgs = res.messages;
+      cur.hasMore = res.hasMore;
+      renderAll();
+      node = el().querySelector(`.cx-msg[data-id="${id}"]`);
+    } catch { return toast(t('Сообщение недоступно')); }
+  }
+  if (node) {
+    node.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    node.animate([{ filter: 'brightness(1.7)' }, { filter: 'none' }], { duration: 1000 });
+  }
+  const box = el().querySelector('#cx-msgs');
+  cur.atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+  updateJump();
+}
+
+// ---------------------------------------------------------------- selection mode
+function enterSelect(id) {
+  cur.sel = new Set([Number(id)]);
+  applySel();
+}
+function toggleSel(id) {
+  id = Number(id);
+  cur.sel.has(id) ? cur.sel.delete(id) : cur.sel.add(id);
+  if (!cur.sel.size) return exitSelect();
+  applySel();
+}
+function exitSelect() {
+  cur.sel = null;
+  applySel();
+}
+function applySel() {
+  const c = el();
+  c.classList.toggle('selecting', !!cur.sel);
+  c.querySelectorAll('.cx-msg').forEach((n) => n.classList.toggle('sel', !!cur.sel && cur.sel.has(Number(n.dataset.id))));
+  refreshHeader();
+  refreshPin();
+  c.querySelector('#cx-selbar').classList.toggle('tx-hidden', !cur.sel);
+  const comp = c.querySelector('.cx-comp');
+  if (comp) comp.classList.toggle('tx-hidden', !!cur.sel);
+}
+const selected = () => cur.msgs.filter((m) => cur.sel && cur.sel.has(m.id));
+
+async function deleteMsgs(list) {
+  const ids = list.filter((m) => m.id > 0).map((m) => m.id);
+  if (!ids.length) return;
+  const ok = await confirmBox(ids.length > 1 ? t('Удалить {a} сообщ.?', { a: ids.length }) : t('Удалить сообщение?'), t('Удалить'));
+  if (!ok) return;
+  try { await S.tg.chatDelete(cur.id, ids, true); liveDelete(cur.id, ids); } catch { toast(t('Не удалось удалить')); }
+  if (cur.sel) exitSelect();
+}
+
+async function forwardMsgs(list) {
+  const ids = list.filter((m) => m.id > 0).map((m) => m.id);
+  if (!ids.length) return;
+  const to = await forwardPicker();
+  if (!to) return;
+  try { await S.tg.chatForward(cur.id, ids, to); toast(t('Переслано')); } catch { toast(t('Не удалось переслать')); }
+  if (cur.sel) exitSelect();
+}
+
+// ---------------------------------------------------------------- search in chat
+function startSearch() {
+  cur.search = { q: '', results: [] };
+  refreshHeader();
+  refreshPin();
+  const inp = el().querySelector('#cx-sq');
+  inp.focus();
+  let timer = 0;
+  inp.oninput = () => {
+    cur.search.q = inp.value;
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const q = inp.value.trim();
+      if (q.length < 2) { cur.search.results = []; return renderSearch(); }
+      try { cur.search.results = await S.tg.chatSearchIn(cur.id, q); } catch { cur.search.results = []; }
+      renderSearch();
+    }, 350);
+  };
+}
+function renderSearch() {
+  let box = el().querySelector('#cx-results');
+  if (!box) { box = document.createElement('div'); box.id = 'cx-results'; box.className = 'cx-results'; el().appendChild(box); }
+  box.innerHTML = cur.search.results.length ? cur.search.results.map((m) => `<div class="cx-row" data-jump="${m.id}">${avatar({ id: m.senderKey, title: m.senderName, avatar: m.senderAvatar })}<div class="cx-row-main"><div class="cx-line"><span class="cx-name">${escapeHtml(m.out ? t('Вы') : m.senderName || cur.dlg.title)}</span><span class="cx-date">${escapeHtml(dayLabel(m.date))}</span></div><div class="cx-line"><span class="cx-prev">${escapeHtml(m.text || mediaLabel(m))}</span></div></div></div>`).join('') : `<div class="cx-end">${cur.search.q.trim().length > 1 ? t('Ничего не найдено') : ''}</div>`;
+  box.onclick = (e) => { const r = e.target.closest('[data-jump]'); if (r) { const id = Number(r.dataset.jump); stopSearch(); jumpTo(id); } };
+}
+function stopSearch() {
+  cur.search = null;
+  const r = el().querySelector('#cx-results');
+  if (r) r.remove();
+  refreshHeader();
+  refreshPin();
+}
+
+// ---------------------------------------------------------------- chat menu (⋮)
+function chatMenu(x, y) {
+  const d = cur.dlg;
+  const wps = () => showMenu(x - 120, y, WALLPAPERS.map((w) => ({ icon: I.image, label: w.name, run: () => applyWallpaper(w.id, false) })));
+  showMenu(x, y, [
+    { icon: d.muted ? I.bellFill : I.sound, label: t('Уведомления'), arrow: true, run: async () => {
+      try { await S.tg.chatMute(d.id, !d.muted); d.muted = !d.muted; patchDialog(d.id, { muted: d.muted }); refreshHeader(); toast(d.muted ? t('Уведомления выключены') : t('Уведомления включены')); } catch { toast(t('Не удалось изменить')); }
+    } },
+    { icon: I.video, label: t('Видеозвонок'), run: () => toast(t('Звонки скоро')) },
+    { icon: I.search, label: t('Поиск'), run: startSearch },
+    { icon: I.image, label: t('Изменить обои'), run: wps },
+    { icon: I.broom, label: t('Очистить историю'), run: async () => {
+      if (!(await confirmBox(t('Очистить историю переписки?'), t('Очистить')))) return;
+      try { await S.tg.chatClearHistory(d.id); cur.msgs = []; renderAll(); patchDialog(d.id, { last: null, unread: 0 }); } catch { toast(t('Не удалось удалить')); }
+    } },
+    { icon: I.trash, label: t('Удалить чат'), danger: true, run: async () => {
+      if (!(await confirmBox(t('Удалить чат «{a}»?', { a: d.title }), t('Удалить')))) return;
+      try { await S.tg.chatLeave(d.id); removeDialog(d.id); closeChat(); } catch { toast(t('Не удалось удалить')); }
+    } },
+    ...ext.menu('chat', { chat: d }),
+  ]);
+}
+
 // ---------------------------------------------------------------- composer
 function fit(inp) {
-  inp.style.height = '24px';
-  inp.style.height = Math.min(140, inp.scrollHeight) + 'px';
+  inp.style.height = '56px';
+  inp.style.height = Math.min(140, Math.max(56, inp.scrollHeight)) + 'px';
 }
 let typingSent = 0;
+let videoMode = false;
 function onInput(e) {
   fit(e.target);
   syncSend();
@@ -325,14 +499,14 @@ function syncSend() {
   const btn = el().querySelector('#cx-send');
   if (!inp || !btn) return;
   const has = inp.value.trim().length > 0;
-  btn.innerHTML = has ? I.send : I.mic;
+  btn.innerHTML = has ? I.send : (videoMode ? I.camVideo : I.mic);
   btn.dataset.a = has ? 'send' : 'mic';
 }
 function ctxBar() {
   const box = el().querySelector('#cx-ctx');
   if (!box) return;
   const c = cur.edit || cur.reply;
-  box.innerHTML = c ? `<div class="cx-ctx cx-pill"><span class="bar"></span><div><b>${cur.edit ? t('Редактирование') : t('Ответ {a}', { a: escapeHtml(c.out ? t('себе') : c.senderName || '') })}</b><span>${escapeHtml(c.text || mediaLabel(c))}</span></div><button class="cx-icon" data-a="cancel" style="width:36px;height:36px">${I.close}</button></div>` : '';
+  box.innerHTML = c ? `<div class="cx-ctx cx-pill"><span class="ico">${cur.edit ? I.edit : I.replyBar}</span><div><b>${cur.edit ? t('Редактирование') : t('В ответ {a}', { a: escapeHtml(c.out ? t('себе') : c.senderName || '') })}</b><span>${escapeHtml(c.text || mediaLabel(c))}</span></div><button class="cx-icon" data-a="cancel" style="width:40px;height:40px">${I.close}</button></div>` : '';
 }
 function cancelCtx() {
   if (!cur) return;
@@ -352,9 +526,11 @@ async function send() {
     try { liveEdit(await S.tg.chatEdit(id, target.id, text)); } catch { toast(t('Не удалось изменить')); }
     return;
   }
+  const out = await ext.run('beforeSend', text, { chat: cur.dlg });
+  if (out == null) return;
   const reply = cur.reply;
   inp.value = ''; fit(inp); syncSend(); saveDraft(); cancelCtx();
-  await sendOne(id, { text, replyTo: reply });
+  await sendOne(id, { text: out, replyTo: reply });
 }
 
 async function sendOne(id, { text, file, replyTo }) {
@@ -434,26 +610,41 @@ function onClick(e) {
     if (act === 'send') return send();
     if (act === 'attach') return el().querySelector('#cx-file').click();
     if (act === 'cancel') return cancelCtx();
-    if (act === 'mic') return toast(t('Голосовые сообщения скоро'));
-    if (act === 'emoji') { const inp = el().querySelector('#cx-input'); inp.focus(); return; }
+    if (act === 'mic') { videoMode = !videoMode; syncSend(); return toast(videoMode ? t('Удерживайте для записи видео. Нажмите для переключения в голосовой режим.') : t('Удерживайте для записи голоса. Нажмите для переключения в режим видео.')); }
+    if (act === 'emoji') return toggleEmojiPanel(el().querySelector('#cx-panel'), el().querySelector('#cx-input'), el().querySelector('#cx-emo'), () => { fit(el().querySelector('#cx-input')); syncSend(); });
     if (act === 'call') return toast(t('Звонки скоро'));
-    if (act === 'info') return;
-    if (act === 'mute') return toast(t('Скоро'));
+    if (act === 'info') return openProfile(cur.dlg.id, { onChat: () => {} });
+    if (act === 'unsel') return exitSelect();
+    if (act === 'selcopy') { navigator.clipboard?.writeText(selected().map((m) => m.text).filter(Boolean).join('\n')).then(() => toast(t('Скопировано'))); return exitSelect(); }
+    if (act === 'selfwd') return forwardMsgs(selected());
+    if (act === 'seldel') return deleteMsgs(selected());
+    if (act === 'selreply') { const m = selected()[0]; exitSelect(); if (m) { cur.reply = m; ctxBar(); el().querySelector('#cx-input')?.focus(); } return; }
+    if (act === 'unsearch') return stopSearch();
+    if (act === 'pin') { if (a.closest('.cx-pinbar') && !e.target.closest('[data-a=pinlist]')) { const p = cur.pins[cur.pinIdx % cur.pins.length]; cur.pinIdx += 1; refreshPin(); return jumpTo(p.id); } }
+    if (act === 'pinlist') return showMenu(innerWidth - 300, 140, cur.pins.map((p) => ({ icon: I.pinO, label: (p.text || '#' + p.id).slice(0, 38), run: () => jumpTo(p.id) })));
+    if (act === 'mute') { return S.tg.chatMute(cur.dlg.id, !cur.dlg.muted).then(() => { cur.dlg.muted = !cur.dlg.muted; patchDialog(cur.dlg.id, { muted: cur.dlg.muted }); buildShell(); renderAll(); scrollBottom(); }).catch(() => toast(t('Не удалось изменить'))); }
     if (act === 'play') return playVoice(a.closest('[data-audio]'));
-    if (act === 'menu') { const r = a.getBoundingClientRect(); return showMenu(r.right - 230, r.bottom + 4, [
-      { icon: I.search, label: t('Поиск'), run: () => toast(t('Скоро')) },
-      { icon: I.mute, label: t('Выключить звук'), run: () => toast(t('Скоро')) },
-      { icon: I.trash, label: t('Удалить чат'), danger: true, run: () => toast(t('Скоро')) },
-    ]); }
+    if (act === 'menu') { const r = a.getBoundingClientRect(); return chatMenu(r.right - 270, r.bottom + 4); }
   }
   if (e.target.closest('#cx-jump')) { scrollBottom(true); return; }
+  if (cur.sel) { const n = e.target.closest('.cx-msg'); if (n) toggleSel(n.dataset.id); return; }
   const media = e.target.closest('[data-view]');
   if (media) return openViewer(media.dataset.view, media.dataset.kind);
   const rp = e.target.closest('[data-reply]');
-  if (rp) {
-    const n = el().querySelector(`.cx-msg[data-id="${rp.dataset.reply}"]`);
-    if (n) { n.scrollIntoView({ block: 'center', behavior: 'smooth' }); n.animate([{ filter: 'brightness(1.6)' }, { filter: 'none' }], { duration: 900 }); }
+  if (rp) jumpTo(Number(rp.dataset.reply));
+}
+
+const QUICK = ['🤯', '🤔', '❤️', '👍', '👎', '🔥', '🥰'];
+async function react(m, emoji) {
+  const mine = (m.reactions || []).find((r) => r.chosen);
+  const remove = mine && mine.emoji === emoji;
+  try { await S.tg.chatReact(cur.id, m.id, remove ? '' : emoji); } catch { return toast(t('Не удалось изменить')); }
+  const next = (m.reactions || []).map((r) => ({ ...r, chosen: false, count: r.chosen ? r.count - 1 : r.count })).filter((r) => r.count > 0);
+  if (!remove) {
+    const hit = next.find((r) => r.emoji === emoji);
+    hit ? (hit.count += 1, hit.chosen = true) : next.push({ emoji, count: 1, chosen: true });
   }
+  liveReactions(cur.id, m.id, next);
 }
 
 function msgMenu(id, x, y) {
@@ -463,11 +654,15 @@ function msgMenu(id, x, y) {
     { icon: I.reply, label: t('Ответить'), run: () => { cur.reply = m; cur.edit = null; ctxBar(); el().querySelector('#cx-input')?.focus(); } },
     { icon: I.copy, label: t('Копировать'), run: () => navigator.clipboard?.writeText(m.text || '').then(() => toast(t('Скопировано'))) },
   ];
-  if (m.out && m.text && m.id > 0) items.push({ icon: I.edit, label: t('Изменить'), run: () => { cur.edit = m; cur.reply = null; const inp = el().querySelector('#cx-input'); inp.value = m.text; fit(inp); syncSend(); ctxBar(); inp.focus(); } });
-  if (m.id > 0) items.push({ icon: I.trash, label: t('Удалить'), danger: true, run: async () => {
-    try { await S.tg.chatDelete(cur.id, [m.id], true); liveDelete(cur.id, [m.id]); } catch { toast(t('Не удалось удалить')); }
+  if (m.id > 0) items.push({ icon: I.forward, label: t('Переслать'), run: () => forwardMsgs([m]) });
+  if (m.id > 0) items.push({ icon: m.pinned ? I.unpin : I.pinO, label: m.pinned ? t('Открепить') : t('Закрепить'), run: async () => {
+    try { await S.tg.chatPin(cur.id, m.id, !!m.pinned); m.pinned = !m.pinned; liveEdit({ ...m }); loadPins(); } catch { toast(t('Не удалось изменить')); }
   } });
-  showMenu(x, y, items);
+  if (m.out && m.text && m.id > 0) items.push({ icon: I.edit, label: t('Изменить'), run: () => { cur.edit = m; cur.reply = null; const inp = el().querySelector('#cx-input'); inp.value = m.text; fit(inp); syncSend(); ctxBar(); inp.focus(); } });
+  items.push({ icon: I.select, label: t('Выбрать'), run: () => enterSelect(m.id) });
+  if (m.id > 0) items.push({ icon: I.trash, label: t('Удалить'), danger: true, run: () => deleteMsgs([m]) });
+  items.push(...ext.menu('message', { msg: m, chat: cur.dlg }));
+  showMenu(x, y, items, { reactions: m.id > 0 ? QUICK : [], onReact: (e) => react(m, e) });
 }
 function onContext(e) {
   const n = e.target.closest('.cx-msg');
@@ -476,12 +671,50 @@ function onContext(e) {
   msgMenu(n.dataset.id, e.clientX, e.clientY);
 }
 function bindTouchMenu(box) {
-  let timer = 0;
+  let timer = 0, sx = 0, sy = 0, node = null, swiped = false;
   box.addEventListener('touchstart', (e) => {
-    const n = e.target.closest('.cx-msg');
-    if (!n) return;
+    node = e.target.closest('.cx-msg');
+    swiped = false;
+    if (!node) return;
     const p = e.touches[0];
-    timer = setTimeout(() => msgMenu(n.dataset.id, p.clientX, p.clientY), 480);
+    sx = p.clientX; sy = p.clientY;
+    timer = setTimeout(() => { timer = -1; if (cur.sel) return toggleSel(node.dataset.id); msgMenu(node.dataset.id, p.clientX, p.clientY); }, 480);
   }, { passive: true });
-  ['touchend', 'touchmove', 'touchcancel'].forEach((ev) => box.addEventListener(ev, () => clearTimeout(timer), { passive: true }));
+  box.addEventListener('touchmove', (e) => {
+    if (!node) return;
+    const p = e.touches[0];
+    const dx = p.clientX - sx, dy = p.clientY - sy;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(timer);
+    if (dx < -10 && Math.abs(dx) > Math.abs(dy) * 1.5 && !cur.sel) {
+      swiped = true;
+      const b = node.querySelector('.cx-bubble');
+      if (b) b.style.transform = `translateX(${Math.max(dx, -80)}px)`;
+      node.classList.toggle('swipe-ready', dx < -60);
+    }
+  }, { passive: true });
+  const end = () => {
+    clearTimeout(timer);
+    if (!node) return;
+    const b = node.querySelector('.cx-bubble');
+    if (b) { b.style.transition = 'transform .18s'; b.style.transform = ''; setTimeout(() => { b.style.transition = ''; }, 200); }
+    if (swiped && node.classList.contains('swipe-ready')) {
+      const m = cur.msgs.find((q) => String(q.id) === node.dataset.id);
+      if (m && !m.service) { cur.reply = m; cur.edit = null; ctxBar(); el().querySelector('#cx-input')?.focus(); }
+    }
+    node.classList.remove('swipe-ready');
+    node = null;
+  };
+  ['touchend', 'touchcancel'].forEach((ev) => box.addEventListener(ev, end, { passive: true }));
 }
+
+export function liveReactions(key, id, reactions) {
+  if (!cur || cur.id !== key) return;
+  const i = cur.msgs.findIndex((x) => x.id === id);
+  if (i < 0) return;
+  cur.msgs[i] = { ...cur.msgs[i], reactions };
+  const node = el().querySelector(`.cx-msg[data-id="${id}"]`);
+  if (node) node.outerHTML = bubbleHtml(cur.msgs[i], cur.msgs[i - 1], cur.msgs[i + 1], cur.dlg.kind !== 'user');
+}
+
+// the mods host sends through the open chat
+bindModsHost({ currentChat: () => (cur ? cur.id : null), send: (text) => (cur ? sendOne(cur.id, { text, replyTo: null }) : Promise.resolve()) });

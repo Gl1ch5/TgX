@@ -122,3 +122,9 @@ js/telegram-chat.js     API чатов поверх TelegramService (работ�
 Ключи собеседников: `u123` (пользователь), `g123` (обычная группа), `c123` (канал/супергруппа). Диалоги и сообщения — простые объекты (`formatDialog`, `formatChatMessage`). Адреса медиа — `media/<тип>/<ключ>/<id сообщения>`; на странице они получают префикс `../`.
 
 Методы: `chatDialogs`, `chatFolders`, `chatHistory`, `chatSend`, `chatSendFile`, `chatEdit`, `chatDelete`, `chatMarkRead`, `chatTyping`, `chatSearch`, `chatContacts`, `startChatLive`.
+
+### Расширения (моды) и точки расширения
+`chat/js/ext.js` — реестр: меню (`message`, `chat`), хуки (`beforeSend`) и события (`message`). Встроенные пункты и моды пользуются одними и теми же точками. `chat/js/mods.js` загружает моды как ES-модули (`export default function (tx) {…}`) прямо в страницу: песочницы нет, мод получает полный доступ к API (`tx.S`, `tx.tg`, `tx.ext`, `tx.menu`, `tx.send`, `tx.storage`, `tx.toast`). Перед установкой показывается предупреждение; поле `manifest.verified` зарезервировано под будущую проверку модов. Примеры: `mods-examples/`.
+
+### Иконки
+Оригинальные иконки Telegram для Android (`app/static/icons/android/`) извлекаются скриптами `tools/icons/extract.py` и `extract-chat.py` из клона DrKLO/Telegram. В Telegram You они подключаются через `chat/js/icons.js` как маски (`.ic`), анимации нижней панели — lottie из `icons/tabs/`.

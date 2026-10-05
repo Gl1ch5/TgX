@@ -167,7 +167,7 @@ export function installChat(TelegramService, helpers) {
       groupedId: m.groupedId ? m.groupedId.toString() : null,
     };
     if (m instanceof Api.MessageService) {
-      return { ...base, service: { text: actionText(m.action, senderName) }, text: '', html: '', media: [], reactions: [] };
+      return { ...base, service: { text: actionText(m.action, senderName), pin: m.action instanceof Api.MessageActionPinMessage }, replyToId: m.replyTo && m.replyTo.replyToMsgId ? m.replyTo.replyToMsgId : 0, replyTo: null, text: '', html: '', media: [], reactions: [] };
     }
     const media = this.mediaOf(m, key);
     const text = this.chatMsgText(m);
@@ -366,6 +366,127 @@ export function installChat(TelegramService, helpers) {
     return null;
   };
 
+  // ----- actions: reactions, pins, forwarding, notifications, profile, shared media -----
+
+  P.chatInput = async function chatInput(key) {
+    const entity = await this.chatEntity(key);
+    const client = await this.getClient();
+    return { entity, client, peer: await client.getInputEntity(entity) };
+  };
+
+  P.chatReact = async function chatReact(key, id, emoji) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(new Api.messages.SendReaction({ peer, msgId: id, reaction: emoji ? [new Api.ReactionEmoji({ emoticon: emoji })] : [] }));
+    return true;
+  };
+
+  P.chatPin = async function chatPin(key, id, unpin = false) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(new Api.messages.UpdatePinnedMessage({ peer, id, unpin, silent: true }));
+    return true;
+  };
+
+  /** Pinned messages of a chat, newest first: [{id, text}]. */
+  P.chatPinned = async function chatPinned(key) {
+    const { client, entity } = await this.chatInput(key);
+    const list = await client.getMessages(entity, { filter: new Api.InputMessagesFilterPinned(), limit: 50 });
+    return list.filter((m) => m && m.id).map((m) => ({ id: m.id, text: this.previewOf(m) }));
+  };
+
+  P.chatForward = async function chatForward(fromKey, ids, toKey) {
+    const from = await this.chatEntity(fromKey);
+    const to = await this.chatEntity(toKey);
+    const client = await this.getClient();
+    await client.forwardMessages(to, { messages: ids, fromPeer: from });
+    return true;
+  };
+
+  P.chatMute = async function chatMute(key, mute) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(new Api.account.UpdateNotifySettings({
+      peer: new Api.InputNotifyPeer({ peer }),
+      settings: new Api.InputPeerNotifySettings({ muteUntil: mute ? 2147483647 : 0 }),
+    }));
+    return true;
+  };
+
+  P.chatClearHistory = async function chatClearHistory(key) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(new Api.messages.DeleteHistory({ peer, maxId: 0, justClear: true, revoke: false }));
+    return true;
+  };
+
+  P.chatLeave = async function chatLeave(key) {
+    const { client, entity, peer } = await this.chatInput(key);
+    if (entity instanceof Api.Channel) await client.invoke(new Api.channels.LeaveChannel({ channel: peer }));
+    else await client.invoke(new Api.messages.DeleteHistory({ peer, maxId: 0, revoke: false }));
+    return true;
+  };
+
+  P.chatBlock = async function chatBlock(key, block = true) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(block ? new Api.contacts.Block({ id: peer }) : new Api.contacts.Unblock({ id: peer }));
+    return true;
+  };
+
+  P.chatDeleteContact = async function chatDeleteContact(key) {
+    const { client, peer } = await this.chatInput(key);
+    await client.invoke(new Api.contacts.DeleteContacts({ id: [peer] }));
+    return true;
+  };
+
+  /** Search inside one chat → messages (newest first). */
+  P.chatSearchIn = async function chatSearchIn(key, q) {
+    const { client, entity } = await this.chatInput(key);
+    const list = await client.getMessages(entity, { search: q, limit: 40 });
+    return list.filter((m) => m && m.id).map((m) => this.formatChatMessage(m, key));
+  };
+
+  /** Profile data: about, phone, username, mute state, counts of the shared media tabs. */
+  P.chatProfile = async function chatProfile(key) {
+    const { client, entity, peer } = await this.chatInput(key);
+    const out = { id: key, title: this.chatTitle(entity), username: entity.username || '', phone: entity.phone || '', about: '', avatar: this.avatarUrl(entity, true) || this.avatarUrl(entity), status: this.chatStatusOf(entity), kind: entity instanceof Api.User ? 'user' : (entity instanceof Api.Channel && entity.broadcast ? 'channel' : 'group'), muted: false, contact: !!entity.contact, blocked: false };
+    try {
+      if (entity instanceof Api.User) {
+        const f = await client.invoke(new Api.users.GetFullUser({ id: peer }));
+        out.about = f.fullUser.about || '';
+        out.blocked = !!f.fullUser.blocked;
+        out.muted = this.isMutedSettings(f.fullUser.notifySettings);
+      } else if (entity instanceof Api.Channel) {
+        const f = await client.invoke(new Api.channels.GetFullChannel({ channel: peer }));
+        out.about = f.fullChat.about || '';
+        out.count = f.fullChat.participantsCount || 0;
+        out.muted = this.isMutedSettings(f.fullChat.notifySettings);
+      } else {
+        const f = await client.invoke(new Api.messages.GetFullChat({ chatId: entity.id }));
+        out.about = f.fullChat.about || '';
+        out.muted = this.isMutedSettings(f.fullChat.notifySettings);
+      }
+    } catch (e) { console.warn('[chat] profile', e); }
+    return out;
+  };
+
+  P.isMutedSettings = function isMutedSettings(s) {
+    return !!(s && s.muteUntil && s.muteUntil > Date.now() / 1000);
+  };
+
+  const FILTERS = {
+    media: () => new Api.InputMessagesFilterPhotoVideo(),
+    files: () => new Api.InputMessagesFilterDocument(),
+    links: () => new Api.InputMessagesFilterUrl(),
+    music: () => new Api.InputMessagesFilterMusic(),
+    voice: () => new Api.InputMessagesFilterRoundVoice(),
+    gif: () => new Api.InputMessagesFilterGif(),
+  };
+
+  /** Shared media of a chat: tab = media|files|links|music|voice|gif. */
+  P.chatShared = async function chatShared(key, tab, { offsetId = 0, limit = 30 } = {}) {
+    const { client, entity } = await this.chatInput(key);
+    const make = FILTERS[tab] || FILTERS.media;
+    const list = await client.getMessages(entity, { filter: make(), limit, offsetId });
+    return { messages: list.filter((m) => m && m.id).map((m) => this.formatChatMessage(m, key)), hasMore: list.length >= limit };
+  };
+
   // ----- live updates -----
 
   /**
@@ -436,6 +557,11 @@ export function installChat(TelegramService, helpers) {
       const en = from && this.entities.get(from);
       const typing = u.action instanceof Api.SendMessageTypingAction || u.action instanceof Api.SendMessageRecordAudioAction || u.action instanceof Api.SendMessageUploadPhotoAction;
       if (typing && h.onTyping) h.onTyping(key, en && en.firstName ? en.firstName : '', u.action instanceof Api.SendMessageTypingAction ? 'typing' : 'other');
+      return;
+    }
+    if (u instanceof Api.UpdateMessageReactions) {
+      const key = this.chatPeerKey(u.peer);
+      if (key && h.onReactions) h.onReactions(key, u.msgId, this.reactionsOf({ reactions: u.reactions }));
       return;
     }
     if (u instanceof Api.UpdateUserStatus) {

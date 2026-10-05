@@ -4,7 +4,9 @@ import { applyDocumentLanguage, translateTree } from '../../js/i18n.js';
 import { S, t, on, avatar } from './store.js';
 import { I } from './icons.js';
 import { initList, loadFirst, render as renderList, bindOpen, onLiveRead, onLiveTyping, totalUnread } from './list.js';
-import { openChat, closeChat, liveMessage, liveEdit, liveDelete, liveRead, liveTyping, liveStatus } from './conv.js';
+import { openChat, closeChat, liveMessage, liveEdit, liveDelete, liveRead, liveTyping, liveStatus, liveReactions } from './conv.js';
+import { startMods } from './mods.js';
+import { initWallpaperEngine } from '../../js/components/wallpaperTheme.js';
 import { renderContacts, renderSettings, renderProfile, bindOpenPages } from './pages.js';
 
 const fake = new URLSearchParams(location.search).has('fake');
@@ -15,20 +17,58 @@ async function pickService() {
   return (await import('../../js/tg.js')).telegram;
 }
 
+// Bottom tab bar: original Telegram tab animations (lottie, outline → filled), built once and only updated.
+const TABS = [['chats', 'Чаты'], ['contacts', 'Контакты'], ['settings', 'Настройки'], ['profile', 'Профиль']];
+const anims = new Map();
+let lottieP = null;
+const loadLottie = () => lottieP || (lottieP = new Promise((res, rej) => {
+  if (window.lottie) return res(window.lottie);
+  const s = document.createElement('script');
+  s.src = '../js/vendor/lottie_light.min.js';
+  s.onload = () => res(window.lottie);
+  s.onerror = rej;
+  document.head.appendChild(s);
+}));
+
+function buildDock() {
+  const label = { chats: t('Чаты'), contacts: t('Контакты'), settings: t('Настройки'), profile: t('Профиль') };
+  $('cx-dock').innerHTML = TABS.map(([id]) => `<button class="cx-tab" data-tab="${id}"><span class="tabi" data-icon="${id}"></span><span>${label[id]}</span><span class="cx-badge tx-hidden"></span></button>`).join('');
+  loadLottie().then((lottie) => {
+    for (const id of ['chats', 'contacts', 'settings']) {
+      fetch(`../icons/tabs/tab_${id}.json`).then((r) => r.json()).then((data) => {
+        const box = document.querySelector(`.tabi[data-icon="${id}"]`);
+        if (!box) return;
+        const anim = lottie.loadAnimation({ container: box, renderer: 'svg', loop: false, autoplay: false, animationData: data });
+        anim.addEventListener('DOMLoaded', () => anim.goToAndStop(S.tab === id ? anim.totalFrames - 1 : 0, true));
+        anims.set(id, anim);
+      }).catch(() => {});
+    }
+  }).catch(() => {});
+}
+
+let lastTab = null;
 function dock() {
-  const tabs = [
-    ['chats', t('Чаты'), I.chats, I.chatsFill],
-    ['contacts', t('Контакты'), I.contacts, I.contactsFill],
-    ['settings', t('Настройки'), I.settings, I.settingsFill],
-    ['profile', t('Профиль'), null, null],
-  ];
+  if (!$('cx-dock').firstElementChild) buildDock();
   const n = totalUnread();
-  $('cx-dock').innerHTML = tabs.map(([id, label, ic, fill]) => {
-    const on = S.tab === id;
-    const icon = id === 'profile' ? (S.me ? avatar({ id: S.me.id, title: S.me.name, avatar: S.me.avatar }) : I.contacts) : (on ? fill : ic);
-    const badge = id === 'chats' && n ? `<span class="cx-badge">${n}</span>` : '';
-    return `<button class="cx-tab ${on ? 'on' : ''}" data-tab="${id}">${icon}${badge}<span>${label}</span></button>`;
-  }).join('');
+  for (const btn of $('cx-dock').children) {
+    const id = btn.dataset.tab;
+    btn.classList.toggle('on', S.tab === id);
+    if (id === 'profile') {
+      const box = btn.querySelector('.tabi');
+      const key = S.me ? `${S.me.id}|${S.me.avatar}` : '';
+      if (box.dataset.key !== key) { box.dataset.key = key; box.innerHTML = S.me ? avatar({ id: S.me.id, title: S.me.name, avatar: S.me.avatar }) : ''; }
+    }
+    if (id === 'chats') { const b = btn.querySelector('.cx-badge'); b.textContent = n > 99 ? '99+' : String(n); b.classList.toggle('tx-hidden', !n); }
+  }
+  if (lastTab !== S.tab) {
+    for (const [id, anim] of anims) {
+      if (!anim.totalFrames) continue;
+      anim.stop();
+      if (id === S.tab && lastTab !== null) anim.playSegments([0, anim.totalFrames - 1], true);
+      else anim.goToAndStop(id === S.tab ? anim.totalFrames - 1 : 0, true);
+    }
+    lastTab = S.tab;
+  }
 }
 
 function showTab(tab) {
@@ -48,6 +88,7 @@ function live() {
     onRead: (k, kind, id) => { onLiveRead(k, kind, id); liveRead(k, kind, id); },
     onTyping: (k, name) => { onLiveTyping(k, name); liveTyping(k); },
     onStatus: liveStatus,
+    onReactions: liveReactions,
   }).catch((e) => console.warn('[chat] live', e));
 }
 
@@ -60,12 +101,14 @@ async function start() {
   dock();
   await loadFirst();
   live();
+  startMods();
   try { const me = await S.tg.getMe(); if (me) { S.me = me; dock(); renderList(true); } } catch {}
 }
 
 async function init() {
   applyDocumentLanguage();
   applyAppearance();
+  initWallpaperEngine();
   translateTree(document.body);
   try { matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { if (getPrefs().theme === 'auto') applyAppearance(); }); } catch {}
   onPrefsChange((p) => applyAppearance(p));

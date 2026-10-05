@@ -1,6 +1,6 @@
 // Inline icons (24px, stroke style close to Telegram for Android).
 const svg = (body, extra = '') => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ${extra}>${body}</svg>`;
-export const I = {
+const SVG = {
   back: svg('<path d="M15 5l-7 7 7 7"/>'),
   more: svg('<circle cx="12" cy="5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/>'),
   search: svg('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>'),
@@ -39,5 +39,58 @@ export const I = {
   logout: svg('<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'),
   globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'),
   moon: svg('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>'),
+  forward: svg('<path d="M14 8V4l7 7-7 7v-4c-6 0-9 2-11 6 1-6 4-11 11-12z"/>'),
+  pinO: svg('<path d="M15 3l6 6-3 1-3.5 3.5.5 4-1.5 1.5-3.5-3.5L5 21l-1-1 4.5-4.5L5 12l1.5-1.5 4 .5L14 7.5z"/>'),
+  unpin: svg('<path d="M15 3l6 6-3 1-3.5 3.5.5 4-1.5 1.5-3.5-3.5L5 21l-1-1 4.5-4.5L5 12l1.5-1.5 4 .5L14 7.5zM3 3l18 18"/>'),
+  select: svg('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>'),
+  bell: svg('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>'),
+  bellFill: svg('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0" fill="currentColor"/>'),
+  sound: svg('<path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>'),
+  broom: svg('<path d="M20 4L11 13M9 11l4 4-5 4c-2 1-4 0-5-1 2-1 1-3 2-5z"/>'),
+  image: svg('<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/>'),
+  keyboard: svg('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+  block: svg('<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'),
+  gift: svg('<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v7h14v-7M12 8v12M12 8c-3 0-5-1-5-3a2 2 0 0 1 4 0c0 1 1 3 1 3zm0 0c3 0 5-1 5-3a2 2 0 0 0-4 0c0 1-1 3-1 3z"/>'),
+  lock: svg('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3M12 15v2"/>'),
+  noCopy: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2M3 3l18 18"/>'),
+  shortcut: svg('<path d="M12 3l8 5v11H4V8z"/><path d="M12 11v6M9 14h6"/>'),
+  report: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.01"/>'),
+  timer: svg('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/>'),
+  share: svg('<path d="M14 8V4l7 7-7 7v-4c-6 0-9 2-11 6 1-6 4-11 11-12z"/>'),
+  userEdit: svg('<path d="M4 20l1-4L16 5l3 3L8 19z"/>'),
+  qr: svg('<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 14h2v2M14 18h2M18 18h2v2"/>'),
+  replyBar: svg('<path d="M10 8V4L3 11l7 7v-4c6 0 9 2 11 6-1-6-4-11-11-12z" fill="currentColor" stroke="none"/><path d="M14 6h7M14 9h5" stroke-width="1.6"/>'),
+  camVideo: svg('<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/>'),
+  expand: svg('<path d="M6 15l6-6 6 6"/>'),
+  list: svg('<path d="M9 7h11M9 12h11M9 17h11M4 7h.01M4 12h.01M4 17h.01"/>'),
   wall: svg('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/>'),
 };
+
+// Original Telegram for Android drawables (app/static/icons/android, see tools/icons/extract-chat.py).
+// Rendered as masks, so they take the current text colour. Anything not listed keeps its inline SVG.
+const FILES = {
+  back: 'ic_ab_back.webp', more: 'ic_ab_other.webp', search: 'outline_header_search.svg', close: 'ic_close_white.webp',
+  call: 'msg_calls.webp', video: 'msg_videocall.webp', send: 'ic_send.webp', mic: 'input_mic_pressed.webp', attach: 'input_attach.webp',
+  smile: 'input_smile.webp', keyboard: 'input_keyboard.webp', camVideo: 'input_video_pressed.webp',
+  pin: 'msg_pin_mini.webp', pinO: 'msg_pin.webp', unpin: 'msg_unpin.webp', pinlist: 'msg_pinnedlist.webp',
+  mute: 'list_mute.webp', check: 'msg_check_s.webp', clock: 'msg_recent.webp',
+  saved: 'chats_saved.webp', archive: 'chats_archive_box.webp',
+  reply: 'menu_reply.svg', replyBar: 'menu_reply.svg', copy: 'msg_copy.webp', edit: 'msg_edit.webp', trash: 'msg_delete.png',
+  forward: 'msg_forward.webp', share: 'msg_forward.webp', select: 'msg_select.webp', down: 'msg_reactions_expand.webp',
+  bell: 'msg_unmute.webp', bellFill: 'msg_mute.webp', sound: 'msg_unmute.webp', soundOff: 'msg_mute.webp',
+  broom: 'msg_clear.webp', image: 'msg_background.webp', block: 'msg_block.webp', gift: 'menu_gift.webp',
+  lock: 'msg_secret.webp', noCopy: 'menu_share_off_24.svg', shortcut: 'msg_home.webp', report: 'msg_report.webp',
+  timer: 'msg_autodelete.webp', userEdit: 'msg_edit.webp', qr: 'msg_qrcode.webp', download: 'msg_download.webp',
+  file: 'msg_download.webp', logout: 'msg_leave.webp', globe: 'settings_language.svg', plus: 'msg_add.webp',
+  camera: 'msg_camera.webp', fab: 'filled_fab_compose_32.svg', newmsg: 'profile_newmsg.webp', list: 'msg_pinnedlist.webp', contactsTab: 'msg_contacts.webp',
+  chatsTab: 'settings_chat.svg', settingsTab: 'msg_settings.webp',
+};
+const mask = (file, cls = '') => `<span class="ic ${cls}" style="--m:url(../icons/android/${file})"></span>`;
+
+export const I = { ...SVG };
+for (const [k, f] of Object.entries(FILES)) I[k] = mask(f);
+// Telegram draws "read" as two ticks: the full one plus the half one shifted to the left.
+I.checks = `<span class="ic2">${mask('msg_check_s.webp', 'a')}${mask('msg_halfcheck.webp', 'b')}</span>`;
+// Verified badge: the original star area in the accent colour with the white tick on top.
+I.verified = `<span class="ic ver">${mask('verified_area.webp', 'area')}${mask('verified_check.webp', 'tick')}</span>`;
+export const icon = mask;

@@ -58,7 +58,7 @@ npm run i18n         # проверка и сборка переводов
 | `app/static/` | клиент TeleX: `js/telegram.js` (движок), `js/views`, `js/components`, `css/tx`, `sw.js` |
 | `app/static/chat/` | клиент Telegram You |
 | `native/android`, `native/desktop` | оболочки WebView и Electron |
-| `tools/` | сборка GramJS, переводы, извлечение иконок, тесты |
+| `tools/` | сборка GramJS, переводы, извлечение оригинальных иконок Telegram (`icons/extract*.py`), тесты |
 | `site/`, `index.html` | лендинг |
 | `promo/`, `promo-materials/` | ролики, логотип, тексты для соцсетей |
 | `docs/` | [архитектура](docs/architecture.md), [планы](docs/roadmap.md), [заметки по API Telegram](docs/telegram-api.md), [тестирование](docs/testing.md) |

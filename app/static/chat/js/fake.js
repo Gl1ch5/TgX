@@ -50,5 +50,11 @@ export const fake = {
   async chatDelete() { return true; }, async chatMarkRead() { return true; }, async chatTyping() { return true; },
   async chatSearch() { return []; },
   async chatContacts() { return dialogs.filter((d) => d.kind === 'user').map((d) => ({ id: d.id, kind: 'user', title: d.title, username: '', avatar: null, status: d.status })); },
+  async chatReact() { return true; }, async chatPin() { return true; }, async chatForward() { return true; }, async chatMute() { return true; },
+  async chatClearHistory() { return true; }, async chatLeave() { return true; }, async chatBlock() { return true; }, async chatDeleteContact() { return true; },
+  async chatPinned(key) { return key === 'u1000' ? [{ id: 5, text: 'Скинь' }, { id: 9, text: 'Скачай валорант' }] : []; },
+  async chatSearchIn(key, q) { return history(key).filter((m) => m.text.toLowerCase().includes(q.toLowerCase())).slice(-10); },
+  async chatProfile(key) { const d = dialogs.find((x) => x.id === key) || dialogs[0]; return { id: d.id, title: d.title, username: 'muninvura', phone: '79921190156', about: 'О себе: демо', avatar: null, status: d.status, kind: d.kind, muted: d.muted, blocked: false }; },
+  async chatShared() { return { messages: [], hasMore: false }; },
   async startChatLive() {}, async logout() {},
 };

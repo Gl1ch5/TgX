@@ -395,12 +395,10 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 изм. ‖ edited ‖ editado ‖ editada ‖ змін.
 Переслано от {a} ‖ Forwarded from {a} ‖ Reenviado de {a} ‖ Encaminhada de {a} ‖ Переслано від {a}
 Редактирование ‖ Editing ‖ Edición ‖ Edição ‖ Редагування
-Ответ {a} ‖ Reply to {a} ‖ Respuesta a {a} ‖ Resposta a {a} ‖ Відповідь {a}
 себе ‖ yourself ‖ ti mismo ‖ você mesmo ‖ собі
 Не удалось изменить ‖ Couldn’t edit ‖ No se pudo editar ‖ Não foi possível editar ‖ Не вдалося змінити
 Не отправлено ‖ Not sent ‖ No enviado ‖ Não enviada ‖ Не надіслано
 Не удалось воспроизвести ‖ Couldn’t play ‖ No se pudo reproducir ‖ Não foi possível reproduzir ‖ Не вдалося відтворити
-Голосовые сообщения скоро ‖ Voice messages are coming soon ‖ Los mensajes de voz llegarán pronto ‖ Mensagens de voz em breve ‖ Голосові повідомлення скоро
 Звонки скоро ‖ Calls are coming soon ‖ Las llamadas llegarán pronto ‖ Chamadas em breve ‖ Дзвінки скоро
 Скоро ‖ Coming soon ‖ Próximamente ‖ Em breve ‖ Скоро
 Удалить чат ‖ Delete chat ‖ Eliminar chat ‖ Excluir chat ‖ Видалити чат
@@ -442,3 +440,59 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 #{n} участник ‖ {n} member / {n} members ‖ {n} miembro / {n} miembros ‖ {n} membro / {n} membros ‖ {n} учасник / {n} учасники / {n} учасників
 Выберите чат ‖ Select a chat ‖ Selecciona un chat ‖ Selecione um chat ‖ Виберіть чат
 Полноценный клиент Telegram ‖ Full Telegram client ‖ Cliente completo de Telegram ‖ Cliente completo do Telegram ‖ Повноцінний клієнт Telegram
+Файлы ‖ Files ‖ Archivos ‖ Arquivos ‖ Файли
+Ссылки ‖ Links ‖ Enlaces ‖ Links ‖ Посилання
+Музыка ‖ Music ‖ Música ‖ Música ‖ Музика
+Голосовые ‖ Voice ‖ Voz ‖ Voz ‖ Голосові
+Отмена ‖ Cancel ‖ Cancelar ‖ Cancelar ‖ Скасувати
+Выбрано {a} ‖ {a} selected ‖ {a} seleccionados ‖ {a} selecionadas ‖ Вибрано {a}
+Переслать ‖ Forward ‖ Reenviar ‖ Encaminhar ‖ Переслати
+Все закреплённые ‖ All pinned messages ‖ Todos los fijados ‖ Todas as fixadas ‖ Усі закріплені
+Удалить {a} сообщ.? ‖ Delete {a} messages? ‖ ¿Eliminar {a} mensajes? ‖ Excluir {a} mensagens? ‖ Видалити {a} повідомл.?
+Удалить сообщение? ‖ Delete this message? ‖ ¿Eliminar el mensaje? ‖ Excluir a mensagem? ‖ Видалити повідомлення?
+Переслано ‖ Forwarded ‖ Reenviado ‖ Encaminhada ‖ Переслано
+Не удалось переслать ‖ Couldn’t forward ‖ No se pudo reenviar ‖ Não foi possível encaminhar ‖ Не вдалося переслати
+Уведомления ‖ Notifications ‖ Notificaciones ‖ Notificações ‖ Сповіщення
+Очистить историю ‖ Clear history ‖ Borrar historial ‖ Limpar histórico ‖ Очистити історію
+Очистить историю переписки? ‖ Clear the chat history? ‖ ¿Borrar el historial del chat? ‖ Limpar o histórico da conversa? ‖ Очистити історію листування?
+Удалить чат «{a}»? ‖ Delete chat “{a}”? ‖ ¿Eliminar el chat «{a}»? ‖ Excluir o chat «{a}»? ‖ Видалити чат «{a}»?
+В ответ {a} ‖ Reply to {a} ‖ En respuesta a {a} ‖ Em resposta a {a} ‖ У відповідь {a}
+Удерживайте для записи видео. Нажмите для переключения в голосовой режим. ‖ Hold to record video. Tap to switch to voice mode. ‖ Mantén para grabar vídeo. Toca para cambiar al modo de voz. ‖ Segure para gravar vídeo. Toque para alternar para o modo de voz. ‖ Утримуйте для запису відео. Натисніть для перемикання на голосовий режим.
+Удерживайте для записи голоса. Нажмите для переключения в режим видео. ‖ Hold to record voice. Tap to switch to video mode. ‖ Mantén para grabar voz. Toca para cambiar al modo de vídeo. ‖ Segure para gravar voz. Toque para alternar para o modo de vídeo. ‖ Утримуйте для запису голосу. Натисніть для перемикання на режим відео.
+Выбрать ‖ Select ‖ Seleccionar ‖ Selecionar ‖ Вибрати
+Не удалось сохранить ‖ Couldn’t save ‖ No se pudo guardar ‖ Não foi possível salvar ‖ Не вдалося зберегти
+Неверный манифест ‖ Invalid manifest ‖ Manifiesto no válido ‖ Manifesto inválido ‖ Невірний маніфест
+Неверный id мода ‖ Invalid mod id ‖ ID de mod no válido ‖ ID de mod inválido ‖ Невірний id моду
+У мода нет названия ‖ The mod has no name ‖ El mod no tiene nombre ‖ O mod não tem nome ‖ У моду немає назви
+Неверные права ‖ Invalid permissions ‖ Permisos no válidos ‖ Permissões inválidas ‖ Невірні дозволи
+Код мода слишком большой ‖ The mod code is too large ‖ El código del mod es demasiado grande ‖ O código do mod é grande demais ‖ Код моду завеликий
+Моды ‖ Mods ‖ Mods ‖ Mods ‖ Моди
+Вкл ‖ On ‖ Act. ‖ Lig. ‖ Увімк.
+Выкл ‖ Off ‖ Desact. ‖ Desl. ‖ Вимк.
+Установить мод из файла ‖ Install a mod from a file ‖ Instalar un mod desde un archivo ‖ Instalar um mod de um arquivo ‖ Встановити мод із файлу
+Мод установлен ‖ Mod installed ‖ Mod instalado ‖ Mod instalado ‖ Мод встановлено
+Стикеры ‖ Stickers ‖ Stickers ‖ Figurinhas ‖ Стікери
+GIF скоро ‖ GIFs are coming soon ‖ Los GIF llegarán pronto ‖ GIFs em breve ‖ GIF скоро
+Стикеры скоро ‖ Stickers are coming soon ‖ Los stickers llegarán pronto ‖ Figurinhas em breve ‖ Стікери скоро
+Чат ‖ Chat ‖ Chat ‖ Chat ‖ Чат
+Автоудаление ‖ Auto-delete ‖ Autoeliminación ‖ Autoexclusão ‖ Автовидалення
+Поделиться контактом ‖ Share contact ‖ Compartir contacto ‖ Compartilhar contato ‖ Поділитися контактом
+Разблокировать ‖ Unblock ‖ Desbloquear ‖ Desbloquear ‖ Розблокувати
+Заблокировать ‖ Block ‖ Bloquear ‖ Bloquear ‖ Заблокувати
+Пользователь заблокирован ‖ User blocked ‖ Usuario bloqueado ‖ Usuário bloqueado ‖ Користувача заблоковано
+Пользователь разблокирован ‖ User unblocked ‖ Usuario desbloqueado ‖ Usuário desbloqueado ‖ Користувача розблоковано
+Изменить контакт ‖ Edit contact ‖ Editar contacto ‖ Editar contato ‖ Змінити контакт
+Удалить контакт ‖ Delete contact ‖ Eliminar contacto ‖ Excluir contato ‖ Видалити контакт
+Удалить контакт «{a}»? ‖ Delete contact “{a}”? ‖ ¿Eliminar el contacto «{a}»? ‖ Excluir o contato «{a}»? ‖ Видалити контакт «{a}»?
+Контакт удалён ‖ Contact deleted ‖ Contacto eliminado ‖ Contato excluído ‖ Контакт видалено
+Отправить подарок ‖ Send a gift ‖ Enviar un regalo ‖ Enviar um presente ‖ Надіслати подарунок
+Начать секретный чат ‖ Start secret chat ‖ Iniciar chat secreto ‖ Iniciar chat secreto ‖ Почати секретний чат
+Запретить копирование ‖ Restrict saving content ‖ Restringir el guardado de contenido ‖ Restringir o salvamento de conteúdo ‖ Заборонити копіювання
+Создать ярлык ‖ Add shortcut ‖ Crear acceso directo ‖ Criar atalho ‖ Створити ярлик
+Пожаловаться ‖ Report ‖ Denunciar ‖ Denunciar ‖ Поскаржитися
+Покинуть группу ‖ Leave group ‖ Salir del grupo ‖ Sair do grupo ‖ Залишити групу
+Покинуть «{a}»? ‖ Leave “{a}”? ‖ ¿Salir de «{a}»? ‖ Sair de «{a}»? ‖ Залишити «{a}»?
+Мод «{a}» не запустился ‖ Mod “{a}” failed to start ‖ El mod «{a}» no se pudo iniciar ‖ O mod «{a}» não iniciou ‖ Мод «{a}» не запустився
+Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b} ‖ Mod “{a}” will get full access to the app and your account. Install only mods you trust.{b} ‖ El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b} ‖ O mod «{a}» terá acesso total ao app e à sua conta. Instale apenas mods em que confia.{b} ‖ Мод «{a}» отримає повний доступ до застосунку та вашого акаунта. Встановлюйте лише моди, яким довіряєте.{b}
+Этот мод не проверен. ‖ This mod has not been reviewed. ‖ Este mod no ha sido revisado. ‖ Este mod não foi verificado. ‖ Цей мод не перевірено.
+Установить ‖ Install ‖ Instalar ‖ Instalar ‖ Встановити

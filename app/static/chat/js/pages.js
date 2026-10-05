@@ -3,6 +3,7 @@ import { S, t, escapeHtml, avatar, statusText, toast, showMenu } from './store.j
 import { I } from './icons.js';
 import { getPrefs, setPref } from '../../js/core/prefs.js';
 import { LANGUAGES, lang } from '../../js/i18n.js';
+import { listMods, installMod, removeMod, setModEnabled } from './mods.js';
 
 let openChat = () => {};
 export const bindOpenPages = (fn) => { openChat = fn; };
@@ -47,13 +48,21 @@ export function renderSettings() {
       <button class="cx-set" data-act="lang">${I.globe}<span>${t('Язык')}</span><em>${escapeHtml(langName)}</em></button>
       <a class="cx-set" href="../" style="text-decoration:none;color:inherit">${I.wall}<span>${t('Стена каналов TeleX')}</span></a>
     </div>
+    <div class="cx-sect">${t('Моды')}</div>
+    <div class="cx-card">${listMods().map((m) => `<div class="cx-set" style="height:auto;padding:10px 16px"><span style="flex:1"><b style="font-weight:500">${escapeHtml(m.manifest.name)}</b><br><small style="color:var(--tx-text-2)">${escapeHtml(m.manifest.description || '')} · ${escapeHtml((m.manifest.permissions || []).join(', '))}</small></span><button data-mod-toggle="${escapeHtml(m.manifest.id)}" style="color:var(--tx-accent);margin-right:8px">${m.enabled ? t('Вкл') : t('Выкл')}</button><button data-mod-del="${escapeHtml(m.manifest.id)}" style="color:var(--tx-red)">${I.trash}</button></div>`).join('')}
+      <button class="cx-set" data-act="mod-add">${I.plus}<span>${t('Установить мод из файла')}</span></button><input type="file" id="cx-modfile" accept=".json,application/json" hidden></div>
     <div class="cx-card"><button class="cx-set danger" data-act="logout">${I.logout}<span>${t('Выйти')}</span></button></div>
     <div class="cx-end">Telegram You · ${t('неофициальный клиент Telegram')}</div></div>`;
   el.onclick = async (e) => {
     const th = e.target.closest('[data-theme]');
     if (th) { setPref('theme', th.dataset.theme); renderSettings(); return; }
+    const tg = e.target.closest('[data-mod-toggle]');
+    if (tg) { const m = listMods().find((x) => x.manifest.id === tg.dataset.modToggle); setModEnabled(tg.dataset.modToggle, !(m && m.enabled)); renderSettings(); return; }
+    const dl = e.target.closest('[data-mod-del]');
+    if (dl) { removeMod(dl.dataset.modDel); renderSettings(); return; }
     const act = e.target.closest('[data-act]');
     if (!act) return;
+    if (act.dataset.act === 'mod-add') { const f = el.querySelector('#cx-modfile'); f.onchange = async () => { try { const mod = JSON.parse(await f.files[0].text()); if (await installMod(mod)) { toast(t('Мод установлен')); renderSettings(); } } catch (err) { toast(String(err.message || err)); } }; f.click(); return; }
     if (act.dataset.act === 'lang') {
       const r = act.getBoundingClientRect();
       showMenu(r.left, r.top - 8, [{ label: t('Автоматически'), run: () => setLang('auto') }, ...LANGUAGES.map((l) => ({ label: l.name, run: () => setLang(l.code) }))]);

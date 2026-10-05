@@ -168,7 +168,7 @@ export function render(keepScroll = false) {
     ${searchOpen ? `<div class="cx-search">${I.search}<input id="cx-q" placeholder="${t('Поиск')}" value="${escapeHtml(query)}" autocomplete="off"></div>` : ''}
     ${showArchive || searchOpen ? '' : foldersHtml()}
     <div class="cx-scroll" id="cx-list">${rows}</div>
-    ${showArchive ? '' : `<button class="cx-fab" data-act="new" aria-label="${t('Новое сообщение')}">${I.edit}</button>`}`;
+    ${showArchive ? '' : `<button class="cx-fab" data-act="new" aria-label="${t('Новое сообщение')}">${I.fab}</button>`}`;
   const sc = el.querySelector('.cx-scroll');
   if (keepScroll || top) sc.scrollTop = top;
   if (searchOpen) {
@@ -191,8 +191,8 @@ function onClick(e) {
     else if (a === 'menu') {
       const r = act.getBoundingClientRect();
       showMenu(r.right - 240, r.bottom, [
-        { icon: I.chats, label: t('Прочитать все'), run: markAllRead },
-        { icon: I.settings, label: t('Настройки'), run: () => emit('tab', 'settings') },
+        { icon: I.check, label: t('Прочитать все'), run: markAllRead },
+        { icon: I.settingsTab, label: t('Настройки'), run: () => emit('tab', 'settings') },
       ]);
     }
     return;
@@ -299,4 +299,33 @@ export function onLiveTyping(key, name) {
   S.typing.set(key, { name, until: Date.now() + 6000 });
   render(true);
   setTimeout(() => render(true), 6200);
+}
+
+export function removeDialog(id) {
+  S.dialogs.delete(id);
+  S.order = S.order.filter((k) => k !== id);
+  S.archived = S.archived.filter((d) => d.id !== id);
+  render(true);
+}
+
+/** Full-screen chat picker (forwarding). Resolves a chat key or null. */
+export function forwardPicker() {
+  return new Promise((resolve) => {
+    const box = document.createElement('div');
+    box.className = 'cx-picker';
+    const draw = (q = '') => {
+      const list = S.order.map((k) => S.dialogs.get(k)).filter((d) => !q || d.title.toLowerCase().includes(q));
+      box.querySelector('.cx-scroll').innerHTML = list.slice(0, 80).map((d) => `<div class="cx-row" data-id="${d.id}">${d.self ? `<span class="cx-saved-ic">${I.saved}</span>` : avatar(d)}<div class="cx-row-main"><div class="cx-line"><span class="cx-name">${escapeHtml(d.self ? t('Избранное') : d.title)}</span></div></div></div>`).join('');
+    };
+    box.innerHTML = `<div class="cx-top"><button class="cx-icon" data-x="1">${I.back}</button><h1>${t('Переслать')}</h1></div><div class="cx-search">${I.search}<input placeholder="${t('Поиск')}" autocomplete="off"></div><div class="cx-scroll"></div>`;
+    document.body.appendChild(box);
+    draw();
+    const done = (v) => { box.remove(); resolve(v); };
+    box.onclick = (e) => {
+      if (e.target.closest('[data-x]')) return done(null);
+      const r = e.target.closest('.cx-row[data-id]');
+      if (r) done(r.dataset.id);
+    };
+    box.querySelector('input').oninput = (e) => draw(e.target.value.trim().toLowerCase());
+  });
 }

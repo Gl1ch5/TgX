@@ -97,20 +97,46 @@ export function statusText(st, kind) {
   }
 }
 
-/** Opens a floating menu near (x, y): items = [{icon, label, danger, run}] */
-export function showMenu(x, y, items) {
+/**
+ * Opens a floating menu near (x, y): items = [{icon, label, danger, arrow, run}].
+ * opts.reactions = ['👍', …] adds the quick-reaction bar above the menu; opts.onReact(emoji).
+ */
+export function showMenu(x, y, items, opts = {}) {
   const el = document.getElementById('cx-menu');
-  el.innerHTML = `<div class="sheet">${items.map((it, i) => `<button class="${it.danger ? 'danger' : ''}" data-i="${i}">${it.icon || ''}<span>${escapeHtml(it.label)}</span></button>`).join('')}</div>`;
+  const react = opts.reactions && opts.reactions.length
+    ? `<div class="reactbar">${opts.reactions.map((e) => `<button data-e="${e}">${e}</button>`).join('')}</div>` : '';
+  el.innerHTML = `${react}<div class="sheet">${items.map((it, i) => `<button class="${it.danger ? 'danger' : ''} ${it.sep ? 'sep' : ''}" data-i="${i}">${it.icon || ''}<span>${escapeHtml(it.label)}</span>${it.arrow ? '<em>›</em>' : ''}</button>`).join('')}</div>`;
   el.classList.remove('tx-hidden');
-  const sheet = el.firstElementChild;
-  const w = sheet.offsetWidth, h = sheet.offsetHeight;
-  sheet.style.left = Math.max(8, Math.min(x, innerWidth - w - 8)) + 'px';
-  sheet.style.top = Math.max(8, Math.min(y, innerHeight - h - 8)) + 'px';
+  const sheet = el.querySelector('.sheet');
+  const bar = el.querySelector('.reactbar');
+  const w = sheet.offsetWidth, h = sheet.offsetHeight + (bar ? 62 : 0);
+  const left = Math.max(8, Math.min(x, innerWidth - w - 8));
+  const top = Math.max(bar ? 70 : 8, Math.min(y, innerHeight - h - 8));
+  if (bar) { bar.style.left = Math.max(8, Math.min(x - 20, innerWidth - bar.offsetWidth - 8)) + 'px'; bar.style.top = top - 62 + 'px'; }
+  sheet.style.left = left + 'px';
+  sheet.style.top = top + 'px';
   const close = () => { el.classList.add('tx-hidden'); el.innerHTML = ''; el.onclick = null; };
   el.onclick = (e) => {
-    const b = e.target.closest('button');
+    const r = e.target.closest('.reactbar button');
+    if (r) { close(); opts.onReact && opts.onReact(r.dataset.e); return; }
+    const b = e.target.closest('.sheet button');
     close();
     if (b) items[Number(b.dataset.i)].run();
   };
   el.oncontextmenu = (e) => { e.preventDefault(); close(); };
+}
+
+/** Confirmation sheet; resolves true/false. */
+export function confirmBox(text, okLabel, danger = true) {
+  return new Promise((resolve) => {
+    const el = document.getElementById('cx-menu');
+    el.innerHTML = `<div class="dlg"><p>${escapeHtml(text)}</p><div><button data-v="0">${t('Отмена')}</button><button data-v="1" class="${danger ? 'danger' : ''}">${escapeHtml(okLabel)}</button></div></div>`;
+    el.classList.remove('tx-hidden');
+    el.onclick = (e) => {
+      const b = e.target.closest('button');
+      if (!b && e.target.closest('.dlg')) return;
+      el.classList.add('tx-hidden'); el.innerHTML = ''; el.onclick = null;
+      resolve(!!b && b.dataset.v === '1');
+    };
+  });
 }
