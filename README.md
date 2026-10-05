@@ -8,7 +8,7 @@
 Публикации всех ваших подписок — одной лентой, в интерфейсе Telegram для Android:
 истории, комментарии, реакции, премиум-эмодзи.
 
-[**Сайт**](https://gl1ch5.github.io/TgX/) · [**Открыть в браузере**](https://gl1ch5.github.io/TgX/app/static/) · [**Android APK**](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [**Windows**](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
+[**Сайт**](https://telex-web.ru/) · [**Открыть в браузере**](https://telex-web.ru/app/static/) · [**Android APK**](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [**Windows**](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
 
 <img src="site/shots/wall.jpg" width="230" alt="Стена" />
 <img src="site/shots/stories.jpg" width="230" alt="Истории" />

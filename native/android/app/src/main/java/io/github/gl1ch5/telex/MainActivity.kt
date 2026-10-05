@@ -102,7 +102,12 @@ class MainActivity : ComponentActivity() {
         watchNetwork()
 
         val restored = savedInstanceState?.let { webView.restoreState(it) } != null
-        if (!restored) webView.loadUrl(AppConfig.START_URL)
+        if (!restored) {
+            // The app moved to its own domain: bring the Telegram session along once.
+            val migration = StorageMigration(this)
+            if (migration.needed()) migration.run { webView.loadUrl(AppConfig.START_URL) }
+            else webView.loadUrl(AppConfig.START_URL)
+        }
         updater.check()
     }
 
@@ -220,7 +225,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** window.TeleXNative.postMessage(...) — only for https://gl1ch5.github.io. */
+    /** window.TeleXNative.postMessage(...) — only for the app's own origin. */
     private fun installBridge() {
         val origins = setOf(AppConfig.ORIGIN)
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {

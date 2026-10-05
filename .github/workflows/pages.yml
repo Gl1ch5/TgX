@@ -29,6 +29,7 @@ jobs:
           cp -r index.html .nojekyll site _site/
           mkdir -p _site/app
           cp -r app/static _site/app/static
+          echo telex-web.ru > _site/CNAME
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

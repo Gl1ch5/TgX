@@ -43,7 +43,7 @@ app.on('browser-window-created', (_e, win) => {
       const retried = new Promise((r) => wc.once('did-start-navigation', (ev) => r(ev.url)));
       await wc.executeJavaScript('document.getElementById("retry").click()');
       const retryUrl = await Promise.race([retried, new Promise((r) => setTimeout(() => r(null), 5000))]);
-      return finish(info.h1 === 'Нет соединения' && info.btn === 'Повторить' && info.bridge === 'function' && retryUrl === 'https://gl1ch5.github.io/TgX/app/static/',
+      return finish(info.h1 === 'Нет соединения' && info.btn === 'Повторить' && info.bridge === 'function' && retryUrl === 'https://telex-web.ru/app/static/',
         { url, info, retryUrl, visible: win.isVisible() });
     }
     checked = true;
