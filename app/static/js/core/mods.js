@@ -556,7 +556,34 @@ async function updateOfficial() {
   } catch (e) { console.warn('[mods] catalog update', e); }
 }
 
+/** Emergency switch: every mod off (they stay installed). */
+export function disableAllMods() {
+  const list = load();
+  list.forEach((m) => { m.enabled = false; stop(m.manifest.id); });
+  save(list);
+  document.dispatchEvent(new Event('tx:mods'));
+}
+
+/**
+ * Crash-loop guard: a mod that breaks the app so that it dies right after the start would lock the user out.
+ * Every start bumps a counter that is cleared after 8 seconds of life; two unfinished starts in a row (or ?safe=1)
+ * start the app with all mods off.
+ */
+function safeModeNow() {
+  const KEY2 = 'telex.mods.boots';
+  const forced = /[?&]safe=1\b/.test(location.search);
+  let n = 0;
+  try { n = Number(localStorage.getItem(KEY2) || 0); localStorage.setItem(KEY2, String(n + 1)); } catch {}
+  setTimeout(() => { try { localStorage.setItem(KEY2, '0'); } catch {} }, 8000);
+  return forced || n >= 2;
+}
+
 export function startMods() {
+  if (load().some((m) => m.enabled) && safeModeNow()) {
+    disableAllMods();
+    setTimeout(() => showToast(t('Моды отключены автоматически: приложение не запускалось. Включите нужные в Настройки → Моды.')), 1500);
+    return;
+  }
   setTimeout(updateOfficial, 4000);
   load().filter((m) => m.enabled).forEach((m) => { start(m); });
   // the app redraws its own variables on theme changes: put the mods' ones back on top

@@ -30,7 +30,7 @@ import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import { APP_VERSION } from './version.js';
-import { startMods, reapplyModVars } from './core/mods.js';
+import { startMods, reapplyModVars, listMods, disableAllMods } from './core/mods.js';
 import { ext } from './core/ext.js';
 import * as profile from './views/profile.js';
 import * as channel from './views/channel.js';
@@ -413,6 +413,8 @@ function openMainMenu(event) {
     ['search', t('Поиск публикаций'), () => wall.toggleHeaderSearch(true)],
     ['channel', t('Каналы на стене'), () => go('settings', { page: 'wall' })],
     ['brush', t('Обои'), () => openWallpaperModal()],
+    ['st-features', t('Моды'), () => go('settings', { page: 'mods' })],
+    ...(listMods().some((m) => m.enabled) ? [['reload', t('Отключить все моды'), () => { disableAllMods(); showToast(t('Моды отключены')); }]] : []),
     state.isAuth ? ['logout', t('Выйти'), () => logoutTelegram()] : ['user', t('Войти в Telegram'), () => openAuthModal()],
   ];
   const menu = document.createElement('div');

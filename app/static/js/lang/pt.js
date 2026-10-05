@@ -439,4 +439,7 @@ export const PT = {
   "Буфер обмена пуст": "A área de transferência está vazia",
   "Вставьте мод в поле ниже": "Cole o mod no campo abaixo",
   "Мод не запустился: {a}. Скорее всего, файл повредился при копировании (пропали обратные кавычки или код превратился в ссылки). Скопируйте его целиком из блока кода или сохраните файлом .module.": "O mod não iniciou: {a}. Provavelmente o arquivo foi danificado ao copiar (crases perdidas ou código virou links). Copie-o inteiro do bloco de código ou salve como arquivo .module.",
+  "Отключить все моды": "Desativar todos os mods",
+  "Моды отключены": "Mods desativados",
+  "Моды отключены автоматически: приложение не запускалось. Включите нужные в Настройки → Моды.": "Os mods foram desativados automaticamente: o app não iniciava. Ative os que precisar em Configurações → Mods.",
 };

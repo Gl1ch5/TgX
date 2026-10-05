@@ -439,4 +439,7 @@ export const EN = {
   "Буфер обмена пуст": "The clipboard is empty",
   "Вставьте мод в поле ниже": "Paste the mod into the field below",
   "Мод не запустился: {a}. Скорее всего, файл повредился при копировании (пропали обратные кавычки или код превратился в ссылки). Скопируйте его целиком из блока кода или сохраните файлом .module.": "The mod did not start: {a}. Most likely the file was damaged while copying (backticks lost or code turned into links). Copy it whole from the code block or save it as a .module file.",
+  "Отключить все моды": "Turn off all mods",
+  "Моды отключены": "Mods turned off",
+  "Моды отключены автоматически: приложение не запускалось. Включите нужные в Настройки → Моды.": "Mods were turned off automatically: the app failed to start. Turn the ones you need back on in Settings → Mods.",
 };

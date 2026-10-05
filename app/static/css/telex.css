@@ -1,19 +1,4 @@
-/* TeleX styles — modules live in css/tx/ */
-@import url('tx/tokens.css');
-@import url('tx/layout.css');
-@import url('tx/avatar.css');
-@import url('tx/dock.css');
-@import url('tx/post.css');
-@import url('tx/thread.css');
-@import url('tx/settings.css');
-@import url('tx/viewer.css');
-@import url('tx/stories.css');
-@import url('tx/profile.css');
-@import url('tx/auth.css');
-@import url('tx/mods.css');
-@import url('tx/light.css');
-@import url('tx/icons-android.css');
-@import url('tx/skin.css'); /* last: mods restyle everything through it */
+/* TeleX styles — modules live in css/tx/ and are linked from index.html (tools/build-preload.mjs); this file loads after them */
 
 /* Modals (auth, wallpapers) in the same glass style */
 .liquid-glass {
