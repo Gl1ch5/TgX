@@ -36,14 +36,24 @@ export function openSettingsPage(name) {
   go('settings', { page: name });
 }
 
+let shownPage = null;
+
 function render() {
   const el = root();
   if (!el) return;
+  const prevPage = shownPage;
   const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage };
   el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
   if (page === 'mods') fillOfficial();
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
+  // a sub-page slides in from the right, going back slides the list in from the left; groups rise one by one
+  if (prevPage !== null && prevPage !== page && !document.body.classList.contains('tx-reduce-motion')) {
+    const forward = page !== 'root';
+    el.animate([{ opacity: 0, transform: `translateX(${forward ? 28 : -28}px)` }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  }
+  if (prevPage !== page) el.querySelectorAll('.tx-group, .tx-hero').forEach((g, i) => { if (i < 9) { g.style.setProperty('--i', i); g.classList.add('tx-rise'); } });
+  shownPage = page;
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
   if (page === 'developer') loadDevInfo();
@@ -79,7 +89,7 @@ function rootPage() {
         row({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Данные и память'), sub: t('Автозагрузка медиа, кэш'), onclick: "window.TelegramX.openSettingsPage('data')" }) +
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
-        row({ icon: 'st-chat', color: 'GREEN', title: 'Telegram You', sub: t('Полноценный клиент Telegram'), onclick: "location.href='../../telegram-you/'" }) +
+        row({ icon: 'st-chat', color: 'GREEN', title: 'Telegram You', sub: t('Полноценный клиент Telegram'), onclick: "window.open('https://gl1ch5.github.io/Telegram-YOU/', '_blank', 'noopener')" }) +
         row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" }) +
         row({ icon: 'st-features', color: 'PURPLE', title: t('Моды'), sub: modsSummary(), onclick: "window.TelegramX.openSettingsPage('mods')" }),
       )}
@@ -469,14 +479,17 @@ function modsPage() {
     const mf = m.manifest;
     const sub = [modKind(m), mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).map(escapeHtml).join(' · ');
     return `
-      <div class="tx-mod-card" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">
-        ${modThumb(m)}
-        <span class="tx-mod-body">
-          <span class="tx-mod-name">${escapeHtml(modL(mf.name))}</span>
-          <span class="tx-mod-sub">${sub}</span>
-          ${mf.description ? `<span class="tx-mod-desc">${escapeHtml(modL(mf.description))}</span>` : ''}
+      <div class="tx-mod-card is-tile" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">
+        <span class="tx-mod-top">
+          ${modThumb(m)}
+          <span class="tx-mod-acts" onclick="event.stopPropagation()">
+            <button class="tx-mod-del" title="${t('Удалить')}" onclick="window.TelegramX.deleteMod('${mf.id}')"><i class="icon icon-delete"></i></button>
+            <label class="tx-switch"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label>
+          </span>
         </span>
-        <label class="tx-switch" onclick="event.stopPropagation()"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label>
+        <span class="tx-mod-name">${escapeHtml(modL(mf.name))}</span>
+        <span class="tx-mod-sub">${sub}</span>
+        ${mf.description ? `<span class="tx-mod-desc">${escapeHtml(modL(mf.description))}</span>` : ''}
       </div>`;
   }).join('');
   return `
@@ -493,7 +506,7 @@ function modsPage() {
         { title: t('Установка'), hint: t('Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.') },
       )}
       <div id="mod-official"></div>
-      <div class="tx-group"><div class="tx-group-title">${t('Установленные')}</div>${list.length ? cards : `<div class="tx-group-hint" style="padding:6px 22px 18px;margin:0">${t('Модов пока нет')}</div>`}</div>
+      <div class="tx-group"><div class="tx-group-title">${t('Установленные')}</div>${list.length ? `<div class="tx-mod-grid">${cards}</div>` : `<div class="tx-group-hint" style="padding:6px 22px 18px;margin:0">${t('Модов пока нет')}</div>`}</div>
       <input type="file" id="mod-file" accept=".module,.json,.js,.html,application/json,text/*" hidden onchange="window.TelegramX.installModFile(this)" />
     </div>`;
 }
@@ -513,17 +526,15 @@ async function fillOfficial() {
     const nm = modL(c.name);
     const pic = ic.img ? `<span class="tx-mod-pic is-img"><img src="${escapeHtml(ic.img)}" alt=""></span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(ic.emoji || nm.slice(0, 1)))}</span>`;
     return `
-      <div class="tx-mod-card">
-        ${pic}
-        <span class="tx-mod-body">
-          <span class="tx-mod-name">${escapeHtml(nm)} <i class="tx-verified"></i></span>
-          <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
-          <span class="tx-mod-desc">${escapeHtml(modL(c.description) || '')}</span>
-        </span>
+      <div class="tx-mod-card is-tile">
+        <span class="tx-mod-top">${pic}</span>
+        <span class="tx-mod-name">${escapeHtml(nm)} <i class="tx-verified"></i></span>
+        <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
+        <span class="tx-mod-desc">${escapeHtml(modL(c.description) || '')}</span>
         <button class="tx-mod-get ${cur != null && cur === c.version ? 'is-done' : ''}" ${cur != null && cur === c.version ? 'disabled' : ''} onclick="window.TelegramX.installOfficial('${c.id}')">${state}</button>
       </div>`;
   }).join('');
-  box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div>${cards}</div>`;
+  box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div><div class="tx-mod-grid">${cards}</div></div>`;
 }
 
 export function installOfficialMod(id) { runInstall(installOfficial(id)); }

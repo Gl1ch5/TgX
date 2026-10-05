@@ -139,7 +139,21 @@ export function renderUnread() {
 }
 
 function updateTabs() {
-  document.querySelectorAll('#feed-tabs .tx-tab').forEach((t) => t.classList.toggle('is-active', t.dataset.feed === state.feedType));
+  const nav = $('feed-tabs');
+  if (!nav) return;
+  let active = null;
+  nav.querySelectorAll('.tx-tab').forEach((t) => { const on = t.dataset.feed === state.feedType; t.classList.toggle('is-active', on); if (on) active = t; });
+  // a pill slides under the active tab
+  let ind = nav.querySelector('.tx-tab-ind');
+  if (!ind) { ind = document.createElement('i'); ind.className = 'tx-tab-ind'; nav.prepend(ind); nav.classList.add('has-ind'); }
+  if (active) {
+    const first = !ind.dataset.ready;
+    if (first) ind.style.transition = 'none';
+    ind.style.width = `${active.offsetWidth}px`;
+    ind.style.transform = `translateX(${active.offsetLeft - 4}px)`;
+    if (first) { ind.dataset.ready = '1'; requestAnimationFrame(() => { ind.style.transition = ''; }); }
+    if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
+  }
 }
 
 // ---------------- Seen tracking (marks posts read in Telegram) ----------------
@@ -301,9 +315,16 @@ function showNewPostsPill(count, apply) {
   updateJump();
 }
 
+let feedToken = 0;
+let loadingView = '';
+const viewKey = () => `${state.feedType}|${state.activeChannelId}|${state.searchQuery}`;
+
 export async function loadFeed(forceRefresh = false) {
-  if (state.isLoadingFeed) return;
+  // The same view is already loading: nothing to do. A different view (tab switched meanwhile) always starts.
+  if (state.isLoadingFeed && loadingView === viewKey()) return;
   state.isLoadingFeed = true;
+  loadingView = viewKey();
+  const token = ++feedToken;
   let refreshAfterCache = false;
 
   const loader = $('feed-loader');
@@ -329,6 +350,7 @@ export async function loadFeed(forceRefresh = false) {
         renderFeed();
       } : null,
     });
+    if (token !== feedToken) return; // another tab was opened while this one loaded
     const posts = data.posts || [];
     const apply = () => {
       state.posts = posts;
@@ -355,11 +377,13 @@ export async function loadFeed(forceRefresh = false) {
   } catch (e) {
     console.error('Feed loading error', e);
   } finally {
-    show(loader, false);
-    state.isLoadingFeed = false;
+    if (token === feedToken) {
+      show(loader, false);
+      state.isLoadingFeed = false;
+    }
   }
 
-  if (refreshAfterCache) loadFeed(true);
+  if (refreshAfterCache && token === feedToken) loadFeed(true);
 }
 
 function renderFeed() {
@@ -377,7 +401,9 @@ function renderFeed() {
     return;
   }
   renderPosts();
-  container.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  container.getAnimations().forEach((a) => a.cancel());
+  container.animate([{ opacity: 0, transform: slideDir ? `translateX(${slideDir * 36}px)` : 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  slideDir = 0;
   if (sentinelText) {
     sentinelText.textContent = state.hasMore ? '' : t('Вы всё прочитали');
     show(sentinelText, !state.hasMore);
@@ -407,9 +433,9 @@ export async function loadMorePosts() {
     } else {
       state.hasMore = false;
     }
-    const t = $('sentinel-text');
-    t.textContent = t('Вы всё прочитали');
-    show(t, !state.hasMore);
+    const end = $('sentinel-text');
+    end.textContent = t('Вы всё прочитали');
+    show(end, !state.hasMore);
   } catch (e) {
     console.error('Load more error', e);
   } finally {
@@ -441,11 +467,76 @@ export async function loadChannels(forceRefresh = false) {
 
 // ---------------- Filters ----------------
 
+const FEED_TABS = ['all', 'media', 'popular', 'favorites'];
+let slideDir = 0;
+
 export function switchFeedType(type) {
+  if (type === state.feedType && state.posts.length) return;
+  const from = FEED_TABS.indexOf(state.feedType);
+  const to = FEED_TABS.indexOf(type);
+  slideDir = to > from ? 1 : -1;
+  const container = $('posts-container');
+  // the old list leaves in the direction of the swipe, the new one enters from the other side
+  if (container && !reduceMotion() && state.posts.length) {
+    container.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-slideDir * 36}px)` }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
+  }
   state.feedType = type;
+  state.posts = [];
+  state.hasMore = false;
   updateTabs();
   window.scrollTo({ top: 0 });
   loadFeed();
+}
+
+/** Next/previous tab by a swipe. */
+export function stepFeedTab(delta) {
+  const i = FEED_TABS.indexOf(state.feedType) + delta;
+  if (i < 0 || i >= FEED_TABS.length) return false;
+  switchFeedType(FEED_TABS[i]);
+  return true;
+}
+
+/** Horizontal swipe over the feed switches the tab (All / Media / Popular / Favorites), like Telegram's folders. */
+export function initFeedSwipe() {
+  const area = $('screen-wall');
+  if (!area || area.dataset.swipe) return;
+  area.dataset.swipe = '1';
+  updateTabs();
+  setTimeout(updateTabs, 400);
+  window.addEventListener('resize', updateTabs);
+  let sx = 0; let sy = 0; let t0 = 0; let live = false; let dx = 0;
+  const blocked = (el) => {
+    for (let n = el; n && n !== area; n = n.parentElement) {
+      if (n.matches && n.matches('input, textarea, pre, video, .tx-subbar, .tx-album, .tx-stories, .tx-reactions, .tx-ctx, [data-noswipe]')) return true;
+      if (n.scrollWidth > n.clientWidth + 4 && /(auto|scroll)/.test(getComputedStyle(n).overflowX)) return true;
+    }
+    return false;
+  };
+  area.addEventListener('touchstart', (e) => {
+    live = e.touches.length === 1 && !state.activeChannelId && !blocked(e.target) && !document.querySelector('.tx-ctx, .tx-viewer');
+    if (!live) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY; t0 = Date.now(); dx = 0;
+  }, { passive: true });
+  area.addEventListener('touchmove', (e) => {
+    if (!live) return;
+    dx = e.touches[0].clientX - sx;
+    const dy = e.touches[0].clientY - sy;
+    if (Math.abs(dy) > Math.abs(dx) * 1.2) { live = false; $('posts-container').style.transform = ''; return; }
+    const c = $('posts-container');
+    const i = FEED_TABS.indexOf(state.feedType);
+    const edge = (dx > 0 && i === 0) || (dx < 0 && i === FEED_TABS.length - 1);
+    if (Math.abs(dx) > 10 && c) { c.style.transition = 'none'; c.style.transform = `translateX(${dx * (edge ? 0.18 : 0.5)}px)`; c.style.opacity = String(1 - Math.min(0.5, Math.abs(dx) / 500)); }
+  }, { passive: true });
+  const end = () => {
+    const c = $('posts-container');
+    if (c) { c.style.transition = 'transform .22s cubic-bezier(.2,.9,.3,1), opacity .22s'; c.style.transform = ''; c.style.opacity = ''; setTimeout(() => { c.style.transition = ''; }, 240); }
+    if (!live) return;
+    live = false;
+    const fast = Math.abs(dx) / Math.max(1, Date.now() - t0) > 0.45;
+    if (Math.abs(dx) > (fast ? 40 : 90)) stepFeedTab(dx < 0 ? 1 : -1);
+  };
+  area.addEventListener('touchend', end, { passive: true });
+  area.addEventListener('touchcancel', end, { passive: true });
 }
 
 export function filterByChannel(channelId) {

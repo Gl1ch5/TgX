@@ -25,9 +25,10 @@ object AppConfig {
     const val BRIDGE_NAME = "TeleXNative"
 
     fun isInScope(uri: Uri): Boolean {
+        // Only the app itself stays inside; the site (docs, landing) and everything else opens in the browser.
         val url = uri.toString()
-        return url.startsWith(SCOPE_PREFIX) || url == SCOPE_PREFIX.trimEnd('/') ||
-            url.startsWith(LEGACY_PREFIX) // redirects to the domain
+        return url.startsWith(START_URL) || url == START_URL.trimEnd('/') ||
+            url.startsWith(LEGACY_START_URL) // redirects to the domain
     }
 
     fun isSameOrigin(uri: Uri): Boolean =

@@ -37,3 +37,18 @@
 .tx-mod-get:active { transform: scale(0.96); }
 .tx-mod-get.is-done { background: var(--tx-accent-soft); color: var(--tx-accent); cursor: default; }
 .tx-mod-name .tx-verified { vertical-align: -3px; margin-left: 2px; }
+
+/* Two tiles per row */
+.tx-mod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 12px 14px; }
+@media (min-width: 720px) { .tx-mod-grid { grid-template-columns: repeat(3, 1fr); } }
+.tx-mod-card.is-tile { flex-direction: column; align-items: stretch; gap: 3px; padding: 12px; border-radius: 18px; background: var(--tx-surface-2, rgba(128, 128, 128, 0.12)); min-width: 0; transition: transform .16s cubic-bezier(.2,.9,.3,1), background .16s; }
+.tx-mod-card.is-tile:active { transform: scale(0.97); }
+.tx-mod-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+.tx-mod-card.is-tile .tx-mod-pic { width: 52px; height: 52px; border-radius: 14px; }
+.tx-mod-acts { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.tx-mod-del { width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--tx-text-2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tx-mod-del:active { background: rgba(255, 59, 48, 0.18); color: #ff453a; }
+.tx-mod-del .icon { font-size: 20px; }
+.tx-mod-card.is-tile .tx-mod-name { font-size: 15.5px; }
+.tx-mod-card.is-tile .tx-mod-desc { -webkit-line-clamp: 3; font-size: 13px; }
+.tx-mod-card.is-tile .tx-mod-get { margin-top: 8px; width: 100%; }

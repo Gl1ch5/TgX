@@ -251,6 +251,7 @@ async function initApp() {
   });
 
   wall.setupInfiniteScroll();
+  wall.initFeedSwipe();
   setupStoriesBar();
   initDevtools();
   setupKeyboard();

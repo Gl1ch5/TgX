@@ -8,8 +8,8 @@ const { app, BrowserWindow, session, shell, nativeTheme, Menu, net } = require('
 
 // ---- The one place that says what the app is ------------------------------
 const APP_URL = 'https://telex-web.ru/app/static/';
-const APP_SCOPE = 'https://telex-web.ru/'; // anything under here stays in-app
-const LEGACY_SCOPE = 'https://gl1ch5.github.io/TgX/'; // the old address, redirects to the domain
+const APP_SCOPE = 'https://telex-web.ru/app/static/'; // only the app stays in-app; the site and docs open in the browser
+const LEGACY_SCOPE = 'https://gl1ch5.github.io/TgX/app/static/'; // the old address, redirects to the domain
 const PARTITION = 'persist:telex'; // localStorage, session, Service Worker, cache survive restarts
 const BG = '#000000';
 

@@ -1,0 +1,269 @@
+// @manifest {"id": "liquid-glass", "name": {"ru": "Жидкое стекло", "en": "Liquid Glass", "es": "Cristal líquido", "pt": "Vidro líquido", "uk": "Рідке скло"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/liquid-glass.svg", "description": {"ru": "Реалистичное стекло с преломлением, хроматической аберрацией и бликами — как в liquidglass", "en": "Realistic glass with refraction, chromatic aberration and highlights — the liquidglass look", "es": "Cristal realista con refracción, aberración cromática y reflejos — el aspecto de liquidglass", "pt": "Vidro realista com refração, aberração cromática e reflexos — o visual do liquidglass", "uk": "Реалістичне скло з заломленням, хроматичною аберацією та відблисками — як у liquidglass"}, "about": {"ru": "Панель вкладок, поиск, меню и диалоги становятся стеклом: то, что за ними, преломляется на скошенных краях, дает цветную кайму, блик и тень. Формулы — из шейдера библиотеки github.com/ybouane/liquidglass (рефракция, хроматическая аберрация, Френель, спекуляр, обводка, тень), вычисленные для каждой панели; фон остаётся живым при прокрутке.\nРаботает в браузерах на Chromium (Chrome, Edge, Android-приложение, Windows-приложение).", "en": "The tab bar, search, menus and dialogs become glass: what is behind them bends at the bevelled edges, with a colour fringe, a highlight and a shadow. The maths is the shader of github.com/ybouane/liquidglass (refraction, chromatic aberration, Fresnel, specular, rim stroke, shadow), evaluated for every panel; the backdrop stays live while you scroll.\nWorks in Chromium-based browsers (Chrome, Edge, the Android and Windows apps).", "es": "La barra de pestañas, la búsqueda, los menús y los diálogos se vuelven cristal: lo que hay detrás se curva en los bordes biselados, con franja de color, reflejo y sombra. Las fórmulas son el shader de github.com/ybouane/liquidglass (refracción, aberración cromática, Fresnel, especular, trazo, sombra), calculadas para cada panel; el fondo sigue vivo al desplazarse.\nFunciona en navegadores Chromium (Chrome, Edge, apps de Android y Windows).", "pt": "A barra de abas, a busca, os menus e os diálogos viram vidro: o que está atrás se curva nas bordas chanfradas, com franja de cor, reflexo e sombra. As fórmulas são o shader de github.com/ybouane/liquidglass (refração, aberração cromática, Fresnel, especular, contorno, sombra), calculadas para cada painel; o fundo continua vivo ao rolar.\nFunciona em navegadores Chromium (Chrome, Edge, apps de Android e Windows).", "uk": "Панель вкладок, пошук, меню й діалоги стають склом: те, що за ними, заломлюється на скошених краях, дає кольорову кайму, відблиск і тінь. Формули — із шейдера бібліотеки github.com/ybouane/liquidglass (рефракція, хроматична аберація, Френель, спекуляр, обведення, тінь), обчислені для кожної панелі; тло лишається живим під час прокручування.\nПрацює в браузерах на Chromium (Chrome, Edge, застосунки для Android і Windows)."}, "tags": ["theme", "glass", "webgl-look"], "settings": [{"key": "t_dock", "type": "switch", "title": {"ru": "Нижняя панель", "en": "Bottom bar", "es": "Barra inferior", "pt": "Barra inferior", "uk": "Нижня панель"}, "default": true}, {"key": "t_bars", "type": "switch", "title": {"ru": "Поиск и вкладки", "en": "Search and tabs", "es": "Búsqueda y pestañas", "pt": "Busca e abas", "uk": "Пошук і вкладки"}, "default": true}, {"key": "t_menus", "type": "switch", "title": {"ru": "Меню и реакции", "en": "Menus and reactions", "es": "Menús y reacciones", "pt": "Menus e reações", "uk": "Меню й реакції"}, "default": true}, {"key": "t_dialogs", "type": "switch", "title": {"ru": "Диалоги", "en": "Dialogs", "es": "Diálogos", "pt": "Diálogos", "uk": "Діалоги"}, "default": true}, {"key": "refraction", "type": "number", "title": {"ru": "Преломление", "en": "Refraction", "es": "Refracción", "pt": "Refração", "uk": "Заломлення"}, "default": 0.69, "min": 0, "max": 2, "step": 0.01}, {"key": "chromAberration", "type": "number", "title": {"ru": "Хроматическая аберрация", "en": "Chromatic aberration", "es": "Aberración cromática", "pt": "Aberração cromática", "uk": "Хроматична аберація"}, "default": 0.05, "min": 0, "max": 1, "step": 0.01}, {"key": "edgeHighlight", "type": "number", "title": {"ru": "Подсветка края", "en": "Edge highlight", "es": "Realce del borde", "pt": "Realce da borda", "uk": "Підсвітка краю"}, "default": 0.05, "min": 0, "max": 1, "step": 0.01}, {"key": "specular", "type": "number", "title": {"ru": "Блик", "en": "Specular", "es": "Brillo especular", "pt": "Brilho especular", "uk": "Відблиск"}, "default": 0, "min": 0, "max": 1, "step": 0.01}, {"key": "fresnel", "type": "number", "title": {"ru": "Френель", "en": "Fresnel", "es": "Fresnel", "pt": "Fresnel", "uk": "Френель"}, "default": 1, "min": 0, "max": 2, "step": 0.01}, {"key": "blurAmount", "type": "number", "title": {"ru": "Размытие", "en": "Blur", "es": "Desenfoque", "pt": "Desfoque", "uk": "Розмиття"}, "default": 0, "min": 0, "max": 1, "step": 0.01}, {"key": "distortion", "type": "number", "title": {"ru": "Микро-искажение", "en": "Micro-distortion", "es": "Microdistorsión", "pt": "Microdistorção", "uk": "Мікро-спотворення"}, "default": 0, "min": 0, "max": 1, "step": 0.01}, {"key": "zRadius", "type": "number", "title": {"ru": "Глубина фаски", "en": "Bevel depth", "es": "Profundidad del bisel", "pt": "Profundidade do chanfro", "uk": "Глибина фаски"}, "default": 40, "min": 5, "max": 80, "step": 1}, {"key": "dome", "type": "switch", "title": {"ru": "Режим «линза» (купол)", "en": "Dome mode (magnifier)", "es": "Modo cúpula (lupa)", "pt": "Modo cúpula (lupa)", "uk": "Режим «лінза» (купол)"}, "default": false}, {"key": "saturation", "type": "number", "title": {"ru": "Насыщенность", "en": "Saturation", "es": "Saturación", "pt": "Saturação", "uk": "Насиченість"}, "default": 0, "min": -1, "max": 1, "step": 0.01}, {"key": "tintStrength", "type": "number", "title": {"ru": "Холодный оттенок", "en": "Cool tint", "es": "Matiz frío", "pt": "Tom frio", "uk": "Холодний відтінок"}, "default": 0, "min": 0, "max": 1, "step": 0.01}, {"key": "brightness", "type": "number", "title": {"ru": "Яркость", "en": "Brightness", "es": "Brillo", "pt": "Brilho", "uk": "Яскравість"}, "default": 0, "min": -0.5, "max": 0.5, "step": 0.01}, {"key": "shadowOpacity", "type": "number", "title": {"ru": "Тень, непрозрачность", "en": "Shadow opacity", "es": "Opacidad de sombra", "pt": "Opacidade da sombra", "uk": "Тінь, непрозорість"}, "default": 0.3, "min": 0, "max": 1, "step": 0.01}, {"key": "shadowSpread", "type": "number", "title": {"ru": "Тень, размах", "en": "Shadow spread", "es": "Extensión de sombra", "pt": "Espalhamento da sombra", "uk": "Тінь, розмах"}, "default": 10, "min": 0, "max": 40, "step": 1}, {"key": "shadowOffsetY", "type": "number", "title": {"ru": "Тень, смещение по Y", "en": "Shadow offset Y", "es": "Desplazamiento Y de sombra", "pt": "Deslocamento Y da sombra", "uk": "Тінь, зсув по Y"}, "default": 1, "min": -10, "max": 20, "step": 1}]}
+export default function (tx) {
+  // Liquid Glass for TeleX. The refraction / chromatic aberration / fresnel / specular / rim / shadow maths below
+  // is the fragment shader of github.com/ybouane/liquidglass, run once per panel on the CPU. The result is a pair of
+  // displacement maps and two light layers that an SVG backdrop-filter applies to the LIVE page behind the panel,
+  // so the glass follows scrolling without re-rasterising the DOM. Light is layered as white overlays (alpha = the shader's additive term). (Chromium: Chrome, Edge, Android, Windows app.)
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const TARGETS = {
+    dock: '.tx-dock',
+    bars: '.tx-glass, .tx-search-main',
+    menus: '.tx-ctx-reactions, .tx-ctx .tx-menu',
+    dialogs: '.tx-dialog',
+  };
+  const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+  const smooth = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+  const supported = !!(window.CSS && CSS.supports && (CSS.supports('backdrop-filter', 'url(#a)') || CSS.supports('-webkit-backdrop-filter', 'url(#a)')));
+  if (!supported) { tx.toast(tx.L({ ru: 'Этот браузер не поддерживает стекло', en: 'This browser does not support the glass effect', es: 'Este navegador no admite el efecto de cristal', pt: 'Este navegador não suporta o efeito de vidro', uk: 'Цей браузер не підтримує ефект скла' })); return; }
+
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+  svg.style.cssText = 'position:absolute;pointer-events:none';
+  const defs = document.createElementNS(SVGNS, 'defs');
+  svg.append(defs);
+  document.body.append(svg);
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .lg-on { background: transparent !important; border-color: transparent !important; }
+    .lg-layer { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+    .lg-add { z-index: -1; }
+    .lg-fres { z-index: -1; }
+  `;
+  document.head.append(style);
+
+  const conf = () => {
+    const c = tx.config;
+    return {
+      blurAmount: c.get('blurAmount'), refraction: c.get('refraction'), chromAberration: c.get('chromAberration'),
+      edgeHighlight: c.get('edgeHighlight'), specular: c.get('specular'), fresnel: c.get('fresnel'),
+      distortion: c.get('distortion'), zRadius: c.get('zRadius'), saturation: c.get('saturation'),
+      tintStrength: c.get('tintStrength'), brightness: c.get('brightness'),
+      shadowOpacity: c.get('shadowOpacity'), shadowSpread: c.get('shadowSpread'), shadowOffsetY: c.get('shadowOffsetY'),
+      bevelMode: c.get('dome') ? 1 : 0,
+    };
+  };
+
+  // ---- the shader, per pixel ----
+  const rrSDF = (px, py, bx, by, r) => {
+    const qx = Math.abs(px) - bx + r, qy = Math.abs(py) - by + r;
+    return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) - r;
+  };
+  const bevel = (d, zR) => (d <= 0 ? 0 : d >= zR ? zR : Math.sqrt(d * (2 * zR - d)));
+  const hash = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
+  const norm3 = (x, y, z) => { const l = Math.hypot(x, y, z) || 1; return [x / l, y / l, z / l]; };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const L1 = norm3(0.4, 0.7, 1), L2 = norm3(-0.3, -0.5, 1), L3 = norm3(0.1, 0.3, 1), L4 = norm3(0, 0.9, 0.4);
+  const H1 = norm3(L1[0], L1[1], L1[2] + 1), H2 = norm3(L2[0], L2[1], L2[2] + 1), H4 = norm3(L4[0], L4[1], L4[2] + 1);
+
+  function build(w, h, radiusCss, cfg, D) {
+    const W = Math.max(2, Math.round(w * D)), H = Math.max(2, Math.round(h * D));
+    const hx = W / 2, hy = H / 2;
+    const r = Math.min(radiusCss * D, hx, hy);
+    const zR = cfg.zRadius * D;
+    const n = W * H;
+    const disp = [new Float32Array(n * 2), new Float32Array(n * 2), new Float32Array(n * 2)]; // R, G, B: dx, dy (device px)
+    const add = new Float32Array(n), fre = new Float32Array(n);
+    const e = 2;
+    const refrPow = 1 - 1 / 1.5;
+    const maxD = Math.min(hx, hy);
+    let maxAbs = 1e-6;
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        const px = x + 0.5 - hx, py = y + 0.5 - hy;
+        const sdf = rrSDF(px, py, hx, hy, r);
+        if (sdf > 0) continue;
+        const inside = -sdf;
+        const edge = smooth(maxD * 0.35, 0, inside);
+        const dR = -rrSDF(px + e, py, hx, hy, r), dL = -rrSDF(px - e, py, hx, hy, r);
+        const dU = -rrSDF(px, py + e, hx, hy, r), dD = -rrSDF(px, py - e, hx, hy, r);
+        const hC = bevel(inside, zR);
+        // the gradient is fed to zero over the last 18% towards the medial axis, where its sign would flip
+        const ridge = smooth(maxD, maxD * 0.82, inside);
+        const gx = ((bevel(dR, zR) - bevel(dL, zR)) / (2 * e)) * ridge, gy = ((bevel(dU, zR) - bevel(dD, zR)) / (2 * e)) * ridge;
+        const N = norm3(-gx, -gy, 1);
+        const depth = smooth(0, zR, inside);
+        // refraction
+        let rx, ry;
+        if (cfg.bevelMode < 0.5) {
+          const thickNorm = (hC * 2) / Math.max(zR * 2, 1);
+          const k = refrPow * (2 + thickNorm * 0.5);
+          rx = gx * k * cfg.refraction * 30; ry = gy * k * cfg.refraction * 30;
+          rx += (-px / Math.max(hx, 1)) * cfg.refraction * 4 * depth;
+          ry += (-py / Math.max(hy, 1)) * cfg.refraction * 4 * depth;
+        } else {
+          rx = -px * cfg.refraction * depth * 0.35; ry = -py * cfg.refraction * depth * 0.35;
+        }
+        if (cfg.distortion > 0) {
+          rx += (hash(px * 0.08, py * 0.08) - 0.5) * cfg.distortion * 4;
+          ry += (hash(px * 0.08 + 37, py * 0.08 + 37) - 0.5) * cfg.distortion * 4;
+        }
+        const caS = cfg.chromAberration * 18 * (edge * 0.7 + 0.3) * 2;
+        const cx = N[0] * caS, cy = N[1] * caS;
+        const o = i * 2;
+        const put = (m, ax, ay) => { m[o] = clamp(ax, 0.5 - (x + 0.5), W - 0.5 - (x + 0.5)); m[o + 1] = clamp(ay, 0.5 - (y + 0.5), H - 0.5 - (y + 0.5)); };
+        put(disp[0], rx + cx, ry + cy); put(disp[1], rx, ry); put(disp[2], rx - cx, ry - cy);
+        for (const m of disp) maxAbs = Math.max(maxAbs, Math.abs(m[o]), Math.abs(m[o + 1]));
+        // light
+        const f = Math.pow(1 - Math.abs(N[2]), 4) * cfg.fresnel;
+        const sp1 = Math.pow(Math.max(dot(N, H1), 0), 90);
+        const sp2 = Math.pow(Math.max(dot(N, H2), 0), 50) * 0.3;
+        const spB = Math.pow(Math.max(dot(N, L3), 0), 6) * 0.1;
+        const sp4 = Math.pow(Math.max(dot(N, H4), 0), 120) * 0.6;
+        const totalSpec = (sp1 + sp2 + spB + sp4) * cfg.specular;
+        let stroke = smooth(-2.5, -1.5, sdf) * (1 - smooth(-1, 0, sdf));
+        stroke *= 0.4 + 0.6 * (0.5 + 0.5 * (-py / hy));
+        const rim = edge * cfg.edgeHighlight * 0.22;
+        const glow = smooth(5, 0, inside) * cfg.edgeHighlight * 0.15;
+        const env = (N[1] * 0.5 + 0.5) * f * 0.08;
+        add[i] = totalSpec + rim + glow + stroke * cfg.edgeHighlight * 0.55 + env + 0.03 * depth;
+        fre[i] = f * 0.2;
+      }
+    }
+    // The bevel normal flips sign on the pill's medial axis; a tiny blur turns that seam into a ramp (no colour-fringe hairline).
+    const rad = Math.max(1, Math.round(1.6 * D));
+    const tmp = new Float32Array(n * 2);
+    for (const m of disp) {
+      for (let pass = 0; pass < 2; pass++) {
+        const horizontal = pass === 0;
+        tmp.set(m);
+        for (let y = 0; y < H; y++) {
+          for (let x = 0; x < W; x++) {
+            let sx = 0, sy = 0, c = 0;
+            for (let k = -rad; k <= rad; k++) {
+              const xx = horizontal ? clamp(x + k, 0, W - 1) : x, yy = horizontal ? y : clamp(y + k, 0, H - 1);
+              const j = (yy * W + xx) * 2;
+              sx += tmp[j]; sy += tmp[j + 1]; c++;
+            }
+            const o = (y * W + x) * 2;
+            m[o] = sx / c; m[o + 1] = sy / c;
+          }
+        }
+      }
+    }
+    const S = maxAbs * 2; // displacement scale in device px; channel = 0.5 + d / S
+    const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
+    const maps = disp.map((m) => {
+      const c = mk(); const g = c.getContext('2d'); const img = g.createImageData(W, H); const d = img.data;
+      for (let i = 0; i < n; i++) {
+        d[i * 4] = clamp(Math.round((0.5 + m[i * 2] / S) * 255), 0, 255);
+        d[i * 4 + 1] = clamp(Math.round((0.5 + m[i * 2 + 1] / S) * 255), 0, 255);
+        d[i * 4 + 2] = 128; d[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+      return c.toDataURL('image/png');
+    });
+    const addC = mk(), fC = mk();
+    { const g = addC.getContext('2d'), img = g.createImageData(W, H), d = img.data;
+      for (let i = 0; i < n; i++) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = 255; d[i * 4 + 3] = clamp(Math.round(add[i] * 255), 0, 255); }
+      g.putImageData(img, 0, 0); }
+    { const g = fC.getContext('2d'), img = g.createImageData(W, H), d = img.data;
+      for (let i = 0; i < n; i++) { d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = 255; d[i * 4 + 3] = clamp(Math.round(fre[i] * 255), 0, 255); }
+      g.putImageData(img, 0, 0); }
+    return { maps, add: addC.toDataURL('image/png'), fres: fC.toDataURL('image/png'), scale: S / D };
+  }
+
+  // ---- one filter + two light layers per panel ----
+  let seq = 0;
+  const panels = new Map(); // el -> { id, filter, layers, ro, timer, size }
+
+  function filterXml(id, w, h, b, cfg, mapUrls, scale) {
+    const f = document.createElementNS(SVGNS, 'filter');
+    f.setAttribute('id', id);
+    f.setAttribute('filterUnits', 'userSpaceOnUse');
+    f.setAttribute('x', '0'); f.setAttribute('y', '0'); f.setAttribute('width', String(w)); f.setAttribute('height', String(h));
+    f.setAttribute('color-interpolation-filters', 'sRGB');
+    const sat = 1 + cfg.saturation, br = 1 + cfg.brightness, t = cfg.tintStrength;
+    const tint = [1 + (0.92 - 1) * t, 1 + (0.95 - 1) * t, 1 + (1.05 - 1) * t];
+    const chan = (k) => { const v = ['0 0 0 0 0', '0 0 0 0 0', '0 0 0 0 0']; v[k] = [0, 1, 2].map((j) => (j === k ? 1 : 0)).join(' ') + ' 0 0'; return v; };
+    f.innerHTML = `
+      <feGaussianBlur in="SourceGraphic" stdDeviation="${b}" edgeMode="duplicate" result="src"/>
+      ${['R', 'G', 'B'].map((c, k) => `
+      <feImage href="${mapUrls[k]}" x="0" y="0" width="${w}" height="${h}" preserveAspectRatio="none" result="m${c}"/>
+      <feDisplacementMap in="src" in2="m${c}" scale="${scale}" xChannelSelector="R" yChannelSelector="G" result="d${c}"/>
+      <feColorMatrix in="d${c}" type="matrix" values="${k === 0 ? '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0' : k === 1 ? '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0' : '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0'}" result="c${c}"/>`).join('')}
+      <feBlend in="cR" in2="cG" mode="screen" result="rg"/>
+      <feBlend in="rg" in2="cB" mode="screen" result="rgb"/>
+      <feColorMatrix in="rgb" type="saturate" values="${Math.max(0, sat)}" result="sat"/>
+      <feColorMatrix in="sat" type="matrix" values="${br * tint[0]} 0 0 0 0  0 ${br * tint[1]} 0 0 0  0 0 ${br * tint[2]} 0 0  0 0 0 1 0"/>`;
+    return f;
+  }
+
+  function apply(el) {
+    const rect = el.getBoundingClientRect();
+    const w = Math.round(rect.width), h = Math.round(rect.height);
+    if (w < 24 || h < 24 || w > 1400 || h > 900) return;
+    let p = panels.get(el);
+    const cfg = conf();
+    const cs = getComputedStyle(el);
+    let radius = parseFloat(el.dataset.lgRadius || cs.borderTopLeftRadius) || Math.min(w, h) / 2;
+    if (/%/.test(cs.borderTopLeftRadius) && !el.dataset.lgRadius) radius = Math.min(w, h) / 2;
+    el.dataset.lgRadius = String(radius);
+    radius = Math.min(radius, w / 2, h / 2);
+    const D = Math.min(3, window.devicePixelRatio || 1);
+    const built = build(w, h, radius, cfg, D);
+    const id = p ? p.id : `lg-${++seq}`;
+    const filter = filterXml(id, w, h, cfg.blurAmount * 8, cfg, built.maps, built.scale.toFixed(3));
+    if (p && p.filter) p.filter.remove();
+    defs.append(filter);
+    if (!p) {
+      p = { id, layers: [], size: '' };
+      const add = document.createElement('i'); add.className = 'lg-layer lg-add';
+      const fres = document.createElement('i'); fres.className = 'lg-layer lg-fres';
+      el.prepend(fres); el.prepend(add);
+      p.layers = [add, fres];
+      p.pos = el.style.position; p.bf = el.style.getPropertyValue('backdrop-filter'); p.sh = el.style.getPropertyValue('box-shadow');
+      if (cs.position === 'static') el.style.position = 'relative';
+      el.classList.add('lg-on');
+      panels.set(el, p);
+      let timer = 0;
+      p.ro = new ResizeObserver(() => { clearTimeout(timer); timer = setTimeout(() => apply(el), 160); });
+      p.ro.observe(el);
+    }
+    p.filter = filter; p.size = `${w}x${h}`;
+    p.layers[0].style.backgroundImage = `url(${built.add})`;
+    p.layers[1].style.backgroundImage = `url(${built.fres})`;
+    el.style.setProperty('backdrop-filter', `url(#${id})`, 'important');
+    el.style.setProperty('-webkit-backdrop-filter', `url(#${id})`, 'important');
+    const so = cfg.shadowOpacity;
+    el.style.setProperty('box-shadow', `0 ${cfg.shadowOffsetY}px ${cfg.shadowSpread * 1.6}px rgba(0,0,0,${(so * 0.65).toFixed(3)}), 0 1px 2px rgba(0,0,0,${(so * 0.35).toFixed(3)})`, 'important');
+  }
+
+  function release(el) {
+    const p = panels.get(el);
+    if (!p) return;
+    p.ro && p.ro.disconnect();
+    p.layers.forEach((n) => n.remove());
+    p.filter && p.filter.remove();
+    el.classList.remove('lg-on');
+    el.style.position = p.pos || '';
+    for (const k of ['backdrop-filter', '-webkit-backdrop-filter', 'box-shadow']) el.style.removeProperty(k);
+    if (p.bf) el.style.setProperty('backdrop-filter', p.bf);
+    if (p.sh) el.style.setProperty('box-shadow', p.sh);
+    delete el.dataset.lgRadius;
+    panels.delete(el);
+  }
+
+  const watchers = [];
+  const refreshAll = () => { for (const el of [...panels.keys()]) { if (!el.isConnected) { release(el); continue; } apply(el); } };
+  function wireTargets() {
+    const on = (k) => tx.config.get(k);
+    for (const [k, sel] of Object.entries(TARGETS)) {
+      tx.ui.watch(sel, (el) => { if (on('t_' + k)) requestAnimationFrame(() => apply(el)); });
+    }
+  }
+  wireTargets();
+  let again = 0;
+  tx.config.on('*', (v, key) => {
+    clearTimeout(again);
+    again = setTimeout(() => {
+      for (const [k, sel] of Object.entries(TARGETS)) {
+        document.querySelectorAll(sel).forEach((el) => { if (tx.config.get('t_' + k)) apply(el); else release(el); });
+      }
+    }, 120);
+  });
+  // popups/menus appear and disappear: drop panels whose element is gone
+  const sweep = setInterval(() => { for (const el of [...panels.keys()]) if (!el.isConnected) release(el); }, 2000);
+  tx.onStop(() => { clearInterval(sweep); clearTimeout(again); for (const el of [...panels.keys()]) release(el); svg.remove(); style.remove(); });
+}

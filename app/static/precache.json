@@ -1,5 +1,5 @@
 {
- "build": "1e1331850d",
+ "build": "a5252697b7",
  "files": [
   "./",
   "index.html",
@@ -695,7 +695,9 @@
   "mods/icons/aurora-theme.svg",
   "mods/icons/clock-widget.svg",
   "mods/icons/compact-feed.svg",
+  "mods/icons/liquid-glass.svg",
   "mods/icons/reading-time.svg",
+  "mods/liquid-glass.module",
   "mods/reading-time.module"
  ]
 }

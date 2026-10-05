@@ -2,6 +2,30 @@
  "updated": "2026-10-05",
  "mods": [
   {
+   "id": "liquid-glass",
+   "file": "liquid-glass.module",
+   "name": {
+    "ru": "Жидкое стекло",
+    "en": "Liquid Glass",
+    "es": "Cristal líquido",
+    "pt": "Vidro líquido",
+    "uk": "Рідке скло"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/liquid-glass.svg",
+   "description": {
+    "ru": "Реалистичное стекло с преломлением, хроматической аберрацией и бликами — как в liquidglass",
+    "en": "Realistic glass with refraction, chromatic aberration and highlights — the liquidglass look",
+    "es": "Cristal realista con refracción, aberración cromática y reflejos — el aspecto de liquidglass",
+    "pt": "Vidro realista com refração, aberração cromática e reflexos — o visual do liquidglass",
+    "uk": "Реалістичне скло з заломленням, хроматичною аберацією та відблисками — як у liquidglass"
+   },
+   "tags": [
+    "theme"
+   ]
+  },
+  {
    "id": "aurora-theme",
    "file": "aurora-theme.module",
    "name": {
