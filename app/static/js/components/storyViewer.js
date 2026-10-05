@@ -7,10 +7,11 @@
  */
 
 import { api } from '../api.js';
-import { escapeHtml, formatPostText, pluralRu } from '../utils.js';
+import { escapeHtml, formatPostText } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { avatarHtml } from './avatar.js';
 import { pauseAll, resumeVisible } from './autoplay.js';
+import { t, tn, locale } from '../i18n.js';
 
 const PHOTO_MS = 6000;
 const EASE = 'cubic-bezier(0.2, 0.9, 0.3, 1)';
@@ -27,12 +28,12 @@ function reduceMotion() {
 
 function ago(unix) {
   const s = Math.max(0, Math.floor(Date.now() / 1000) - unix);
-  if (s < 60) return 'только что';
+  if (s < 60) return t('только что');
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m} ${pluralRu(m, 'минуту', 'минуты', 'минут')} назад`;
+  if (m < 60) return tn(['{n} минуту назад', '{n} минуты назад', '{n} минут назад'], m);
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h} ${pluralRu(h, 'час', 'часа', 'часов')} назад`;
-  return new Date(unix * 1000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  if (h < 24) return tn(['{n} час назад', '{n} часа назад', '{n} часов назад'], h);
+  return new Date(unix * 1000).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 }
 
 function firstUnread(peer) {
@@ -58,11 +59,11 @@ export function openStoryViewer(peers, index, opts = {}) {
       <div class="tx-story-head">
         <span class="tx-story-peer"></span>
         <span class="tx-story-who"><b></b><span></span></span>
-        <button class="tx-story-btn tx-hidden" data-act="mute" title="Звук"><i class="icon icon-speaker-story"></i></button>
-        <button class="tx-story-btn" data-act="close" title="Закрыть"><i class="icon icon-close"></i></button>
+        <button class="tx-story-btn tx-hidden" data-act="mute" title="${t('Звук')}"><i class="icon icon-speaker-story"></i></button>
+        <button class="tx-story-btn" data-act="close" title="${t('Закрыть')}"><i class="icon icon-close"></i></button>
       </div>
       <div class="tx-story-caption post-text"></div>
-      <button class="tx-story-like" data-act="like" title="Нравится"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6l-1.4-1.3C5.6 14.8 2.4 11.9 2.4 8.3 2.4 5.4 4.7 3.1 7.6 3.1c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.9 0 5.2 2.3 5.2 5.2 0 3.6-3.2 6.5-8.2 11l-1.4 1.3z"/></svg></button>
+      <button class="tx-story-like" data-act="like" title="${t('Нравится')}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6l-1.4-1.3C5.6 14.8 2.4 11.9 2.4 8.3 2.4 5.4 4.7 3.1 7.6 3.1c1.6 0 3.2.8 4.4 2 1.2-1.2 2.8-2 4.4-2 2.9 0 5.2 2.3 5.2 5.2 0 3.6-3.2 6.5-8.2 11l-1.4 1.3z"/></svg></button>
       <div class="tx-story-spinner tx-hidden"><span class="animate-spin"><i class="icon icon-reload"></i></span></div>
     </div>`;
   document.body.appendChild(el);
@@ -136,7 +137,7 @@ async function show() {
   }
 
   el.querySelector('.tx-story-peer').innerHTML = avatarHtml({ id: p.id, title: p.title, avatar: p.avatar }, 'sm');
-  el.querySelector('.tx-story-who b').innerHTML = parseEmojis(p.is_self ? 'Моя история' : p.title);
+  el.querySelector('.tx-story-who b').innerHTML = parseEmojis(p.is_self ? t('Моя история') : p.title);
   el.querySelector('.tx-story-who span').textContent = s ? ago(s.date) : '';
   renderBars();
 

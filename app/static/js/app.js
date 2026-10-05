@@ -9,7 +9,7 @@ import { state, EMOJI_PICKER_LIST } from './state.js';
 import { api } from './api.js';
 import { showToast } from './utils.js';
 import { initMediaBridge } from './media.js';
-import { getPrefs, setPref, onPrefsChange, applyAppearance } from './core/prefs.js';
+import { getPrefs, setPref, onPrefsChange, applyAppearance, resolvedTheme } from './core/prefs.js';
 import { initNav, registerView, go, back } from './core/nav.js';
 import { avatarHtml } from './components/avatar.js';
 import { initDock, setDockActive } from './components/dock.js';
@@ -25,13 +25,14 @@ import {
   submitQRPassword, sendPhoneCode, submitPhoneCode, submitPhonePassword,
   authBack, authNext, authPickCountry, authQr, authResend,
 } from './components/authModal.js';
-import { initWallpaperEngine, applyWallpaper, openWallpaperModal, closeWallpaperModal, WALLPAPERS } from './components/wallpaperTheme.js';
+import { initWallpaperEngine, applyWallpaper, openWallpaperModal, closeWallpaperModal, refreshWallpaper, WALLPAPERS } from './components/wallpaperTheme.js';
 import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import * as profile from './views/profile.js';
 import * as channel from './views/channel.js';
-import { captureLogs, initDevtools } from './core/devtools.js';
+import { captureLogs, initDevtools, postNative } from './core/devtools.js';
+import { t, applyDocumentLanguage, translateTree } from './i18n.js';
 
 captureLogs();
 
@@ -143,6 +144,15 @@ window.TelegramX = {
 
   // Settings
   setPref: settings.updatePref,
+  setColorTheme: settings.setColorTheme,
+  setThemeMode: settings.setThemeMode,
+  toggleDayNight: settings.toggleDayNight,
+  setAccent: settings.setAccent,
+  setNameColor: settings.setNameColor,
+  openChatSettingsMenu: settings.openChatSettingsMenu,
+  setLanguage: settings.setLanguage,
+  filterLanguages: settings.filterLanguages,
+  toggleLanguageSearch: settings.toggleLanguageSearch,
   setChannelOnWall: settings.setChannelOnWall,
   filterWallChannels: settings.filterWallChannels,
   terminateSession: settings.terminateSession,
@@ -177,8 +187,21 @@ window.TelegramX = {
 // ---------------- Init ----------------
 
 async function initApp() {
+  applyDocumentLanguage();
+  translateTree(document.body);
   applyAppearance();
   initWallpaperEngine();
+  // "Auto" theme follows the device live (sunset → dark, sunrise → light).
+  try {
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+      if (getPrefs().theme !== 'auto') return;
+      applyAppearance();
+      refreshWallpaper();
+      postNative('theme:' + resolvedTheme());
+      settings.rerenderSettings();
+    });
+  } catch {}
+  postNative('theme:' + resolvedTheme());
   api.warmUp();
   initDock();
   window.addEventListener('tx:view', (e) => setDockActive(e.detail.view, e.detail.prev));
@@ -187,7 +210,7 @@ async function initApp() {
     applyAppearance(p);
     if (WALL_KEYS.has(key) || key === null) wallDirty = true;
     if (RENDER_KEYS.has(key)) rerenderWall = true;
-    if (key === 'syncRead' && p.syncRead) showToast('Просмотренные посты будут отмечаться прочитанными');
+    if (key === 'syncRead' && p.syncRead) showToast(t('Просмотренные посты будут отмечаться прочитанными'));
   });
 
   registerView('wall', {
@@ -378,11 +401,11 @@ function openMainMenu(event) {
   if (event) event.stopPropagation();
   closeMenus();
   const items = [
-    ['reload', 'Обновить стену', () => wall.refreshFeed()],
-    ['search', 'Поиск публикаций', () => wall.toggleHeaderSearch(true)],
-    ['channel', 'Каналы на стене', () => go('settings', { page: 'wall' })],
-    ['brush', 'Обои', () => openWallpaperModal()],
-    state.isAuth ? ['logout', 'Выйти', () => logoutTelegram()] : ['user', 'Войти в Telegram', () => openAuthModal()],
+    ['reload', t('Обновить стену'), () => wall.refreshFeed()],
+    ['search', t('Поиск публикаций'), () => wall.toggleHeaderSearch(true)],
+    ['channel', t('Каналы на стене'), () => go('settings', { page: 'wall' })],
+    ['brush', t('Обои'), () => openWallpaperModal()],
+    state.isAuth ? ['logout', t('Выйти'), () => logoutTelegram()] : ['user', t('Войти в Telegram'), () => openAuthModal()],
   ];
   const menu = document.createElement('div');
   menu.className = 'tx-ctx';
@@ -405,20 +428,20 @@ function openMainMenu(event) {
 
 async function clearMediaCache() {
   await api.clearCache();
-  showToast('Кэш очищен');
+  showToast(t('Кэш очищен'));
   settings.rerenderSettings();
   wall.loadFeed(true);
 }
 
 async function logoutTelegram() {
-  if (!confirm('Выйти из Telegram на этом устройстве?')) return;
+  if (!confirm(t('Выйти из Telegram на этом устройстве?'))) return;
   await api.logout();
   Object.assign(state, { isAuth: false, user: null, posts: [], channels: [], cachedComments: {}, activeChannelId: null, feedType: 'all' });
   profile.resetProfile();
   wall.renderPosts();
   go('wall');
   updateAuthUI();
-  showToast('Вы вышли из аккаунта');
+  showToast(t('Вы вышли из аккаунта'));
 }
 
 // Modules may finish evaluating after DOMContentLoaded (tg.js awaits the chosen

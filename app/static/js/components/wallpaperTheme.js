@@ -5,12 +5,14 @@
  */
 
 import { showToast } from '../utils.js';
+import { t } from '../i18n.js';
 
 export const WALLPAPERS = [
   {
     id: 'FOks2P6KCFIMAAAAyFz5S74pfKo',
     name: 'Cosmic Liquid',
     gradient: 'radial-gradient(ellipse at 60% 20%, #1e1544 0%, #0d0922 45%, #05030d 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #e3e9fb 0%, #c4d0f1 100%)',
     svg: 'wallpapers/FOks2P6KCFIMAAAAyFz5S74pfKo.svg',
     patternOpacity: 0.28,
   },
@@ -18,6 +20,7 @@ export const WALLPAPERS = [
     id: 'MIo6r0qGSFAFAAAAtL8TsDzNX60',
     name: 'Neon Cyber',
     gradient: 'radial-gradient(ellipse at 30% 70%, #0e2946 0%, #081729 45%, #02070e 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #d8eef8 0%, #b6dbee 100%)',
     svg: 'wallpapers/MIo6r0qGSFAFAAAAtL8TsDzNX60.svg',
     patternOpacity: 0.28,
   },
@@ -25,6 +28,7 @@ export const WALLPAPERS = [
     id: 'CJNyxPMgSVAEAAAAvW9sMwc51cw',
     name: 'Midnight Glass',
     gradient: 'radial-gradient(circle at 50% 30%, #252533 0%, #13131c 45%, #07070a 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #e8e8f1 0%, #d0d0de 100%)',
     svg: 'wallpapers/CJNyxPMgSVAEAAAAvW9sMwc51cw.svg',
     patternOpacity: 0.30,
   },
@@ -32,6 +36,7 @@ export const WALLPAPERS = [
     id: 'aiuT0cIzaVIHAAAAjS-ebiVKLtU',
     name: 'Emerald Dream',
     gradient: 'radial-gradient(ellipse at 80% 20%, #103825 0%, #092015 45%, #020a07 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #d9f0e3 0%, #bde2cf 100%)',
     svg: 'wallpapers/aiuT0cIzaVIHAAAAjS-ebiVKLtU.svg',
     patternOpacity: 0.28,
   },
@@ -39,6 +44,7 @@ export const WALLPAPERS = [
     id: 'T7LjEHVuYVIFAAAAS7NH4xQl6jY',
     name: 'Obsidian Purple',
     gradient: 'radial-gradient(ellipse at 20% 40%, #36174a 0%, #1c0a27 45%, #09030d 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #ecdff8 0%, #d5bfeb 100%)',
     svg: 'wallpapers/T7LjEHVuYVIFAAAAS7NH4xQl6jY.svg',
     patternOpacity: 0.28,
   },
@@ -46,6 +52,7 @@ export const WALLPAPERS = [
     id: 'bJcwphEAYVINAAAA5jpWNRMqilA',
     name: 'Deep Ocean',
     gradient: 'radial-gradient(ellipse at 50% 85%, #0d3156 0%, #071b30 45%, #020810 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #d5e8f8 0%, #b3d2ee 100%)',
     svg: 'wallpapers/bJcwphEAYVINAAAA5jpWNRMqilA.svg',
     patternOpacity: 0.28,
   },
@@ -53,6 +60,7 @@ export const WALLPAPERS = [
     id: '8u8Y1ggMYVITAAAAluQYztxHp6s',
     name: 'Aurora Glow',
     gradient: 'radial-gradient(ellipse at 70% 60%, #1a3245 0%, #0f1e2a 45%, #03080e 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #daeef1 0%, #bcdbe3 100%)',
     svg: 'wallpapers/8u8Y1ggMYVITAAAAluQYztxHp6s.svg',
     patternOpacity: 0.28,
   },
@@ -60,6 +68,7 @@ export const WALLPAPERS = [
     id: 'DRaa0SbvYVIjAAAAWv3uHfEiYyI',
     name: 'Sunset Dunes',
     gradient: 'radial-gradient(ellipse at 30% 30%, #3b211d 0%, #221210 45%, #0a0404 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #f8e5da 0%, #ebc8b6 100%)',
     svg: 'wallpapers/DRaa0SbvYVIjAAAAWv3uHfEiYyI.svg',
     patternOpacity: 0.28,
   },
@@ -67,6 +76,7 @@ export const WALLPAPERS = [
     id: 'rF5kQBMSYFICAAAAUCWVFDNCLnU',
     name: 'Dark Velvet',
     gradient: 'radial-gradient(ellipse at 50% 50%, #2f2232 0%, #19111b 45%, #08040a 100%)',
+    light: 'radial-gradient(ellipse at 60% 20%, #f2dfec 0%, #e2c3d7 100%)',
     svg: 'wallpapers/rF5kQBMSYFICAAAAUCWVFDNCLnU.svg',
     patternOpacity: 0.28,
   },
@@ -74,6 +84,7 @@ export const WALLPAPERS = [
     id: 'oled',
     name: 'OLED Pure Black',
     gradient: '#000000',
+    light: '#f0f0f5',
     svg: null,
     patternOpacity: 0,
   },
@@ -104,14 +115,15 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
     document.body.prepend(bgPattern);
   }
 
-  // Set background gradient
-  bgCanvas.style.background = wp.gradient;
+  // Set background gradient (day theme: the pale variant)
+  const day = document.documentElement.dataset.theme === 'light';
+  bgCanvas.style.background = day && wp.light ? wp.light : wp.gradient;
 
   // Set vector pattern
   if (wp.svg) {
     bgPattern.style.backgroundImage = `url("${wp.svg}")`;
     bgPattern.style.backgroundSize = '360px auto';
-    bgPattern.style.opacity = wp.patternOpacity || 0.28;
+    bgPattern.style.opacity = day ? 0.1 : wp.patternOpacity || 0.28;
   } else {
     bgPattern.style.backgroundImage = 'none';
     bgPattern.style.opacity = '0';
@@ -127,8 +139,13 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
   });
 
   if (showFeedback) {
-    showToast(`Обои установлены: ${wp.name} ✨`);
+    showToast(t('Обои установлены: {a} ✨', {a: wp.name}));
   }
+}
+
+/** Re-draw the wallpaper (the theme changed). */
+export function refreshWallpaper() {
+  applyWallpaper(localStorage.getItem('tgx_wallpaper') || WALLPAPERS[0].id, false);
 }
 
 export function openWallpaperModal() {

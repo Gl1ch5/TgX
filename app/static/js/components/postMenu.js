@@ -10,6 +10,7 @@ import { api } from '../api.js';
 import { showToast, haptic } from '../utils.js';
 import { quickReactionButtons, sendReaction } from './reactions.js';
 import { hydrateStickers } from './sticker.js';
+import { t, locale } from '../i18n.js';
 
 const QUICK_REACTION = '👍';
 let lastTap = 0;
@@ -80,15 +81,15 @@ export function openPostMenu(postId, event) {
     if (Date.now() - lastTap < 280) return;
     const tx = window.TelegramX;
     const items = [];
-    if (post.comments_enabled) items.push({ icon: 'reply', label: 'Ответить', run: () => tx.openThread(post.id) });
-    if (post.text) items.push({ icon: 'copy', label: 'Копировать', run: () => copyText(post.text) });
-    items.push({ icon: 'link', label: 'Копировать ссылку', run: () => tx.copyPostLink(post.tg_url) });
-    if (savable(post)) items.push({ icon: 'save-gallery', label: 'Сохранить в галерею', run: () => saveMedia(post) });
+    if (post.comments_enabled) items.push({ icon: 'reply', label: t('Ответить'), run: () => tx.openThread(post.id) });
+    if (post.text) items.push({ icon: 'copy', label: t('Копировать'), run: () => copyText(post.text) });
+    items.push({ icon: 'link', label: t('Копировать ссылку'), run: () => tx.copyPostLink(post.tg_url) });
+    if (savable(post)) items.push({ icon: 'save-gallery', label: t('Сохранить в галерею'), run: () => saveMedia(post) });
     items.push(
-      { icon: 'forward', label: 'Переслать в «Избранное»', run: () => tx.forwardToSaved(post.channel_id, post.msg_id) },
-      { icon: post.is_favorite ? 'favorite-filled' : 'favorite', label: post.is_favorite ? 'Убрать из закладок' : 'В закладки', run: () => tx.togglePostFavorite(post.id) },
+      { icon: 'forward', label: t('Переслать в «Избранное»'), run: () => tx.forwardToSaved(post.channel_id, post.msg_id) },
+      { icon: post.is_favorite ? 'favorite-filled' : 'favorite', label: post.is_favorite ? t('Убрать из закладок') : t('В закладки'), run: () => tx.togglePostFavorite(post.id) },
       { sep: true },
-      { icon: 'open-in-new-tab', label: 'Открыть в Telegram', run: () => window.open(post.tg_url, '_blank', 'noopener') },
+      { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(post.tg_url, '_blank', 'noopener') },
     );
     const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post) });
     hydrateStickers(ctx);
@@ -114,12 +115,11 @@ export function pickReaction(postId, emoji, customId = null) {
 
 function menuHeader(post) {
   const d = new Date(post.timestamp * 1000);
-  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const time = d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   const today = d.toDateString() === new Date().toDateString();
-  const day = today ? '' : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ' в ';
-  return post.edited
-    ? { icon: 'clock-edit', text: `изменено ${day ? day : 'в '}${time}` }
-    : { icon: 'clock', text: `${day || 'сегодня в '}${time}` };
+  const day = d.toLocaleDateString(locale(), { day: 'numeric', month: 'long' });
+  if (post.edited) return { icon: 'clock-edit', text: today ? t('изменено в {time}', { time }) : t('изменено {day} в {time}', { day, time }) };
+  return { icon: 'clock', text: today ? t('сегодня в {time}', { time }) : t('{day} в {time}', { day, time }) };
 }
 
 const SAVABLE = new Set(['photo', 'video', 'gif', 'round']);
@@ -132,7 +132,7 @@ function savable(post) {
 export async function saveMedia(post) {
   const items = (post.media_items || []).filter((i) => SAVABLE.has(i.type));
   if (!items.length) return;
-  showToast(items.length > 1 ? `Сохранение ${items.length} файлов…` : 'Сохранение…');
+  showToast(items.length > 1 ? t('Сохранение {a} файлов…', {a: items.length}) : t('Сохранение…'));
   for (const [n, it] of items.entries()) {
     const photo = it.type === 'photo';
     const name = `telex_${post.channel_id}_${post.msg_id}${items.length > 1 ? `_${n + 1}` : ''}.${photo ? 'jpg' : 'mp4'}`;
@@ -153,18 +153,18 @@ export async function saveMedia(post) {
       a.remove();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
     } catch (e) {
-      showToast('Не удалось сохранить: ' + (e.message || e));
+      showToast(t('Не удалось сохранить: ') + (e.message || e));
       return;
     }
   }
 }
 
 function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => showToast('Текст скопирован')).catch(() => {});
+  navigator.clipboard.writeText(text).then(() => showToast(t('Текст скопирован'))).catch(() => {});
 }
 
 export function copyPostLink(url) {
-  navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована')).catch(() => showToast(url));
+  navigator.clipboard.writeText(url).then(() => showToast(t('Ссылка скопирована'))).catch(() => showToast(url));
 }
 
 export async function sharePost(postId) {
@@ -183,7 +183,7 @@ export async function sharePost(postId) {
 
 export async function forwardToSaved(channelId, msgId) {
   const res = await api.forwardToSaved(channelId, msgId);
-  showToast(res.status === 'success' ? 'Сохранено в «Избранное» Telegram' : 'Не удалось переслать: ' + (res.message || 'ошибка'));
+  showToast(res.status === 'success' ? t('Сохранено в «Избранное» Telegram') : t('Не удалось переслать: ') + (res.message || t('ошибка')));
 }
 
 export async function togglePostFavorite(postId) {
@@ -195,5 +195,5 @@ export async function togglePostFavorite(postId) {
     document.getElementById(`post-card-${postId}`)?.remove();
     state.posts = state.posts.filter((p) => p.id !== postId);
   }
-  showToast(res.is_favorite ? 'Добавлено в закладки' : 'Удалено из закладок');
+  showToast(res.is_favorite ? t('Добавлено в закладки') : t('Удалено из закладок'));
 }

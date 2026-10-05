@@ -9,6 +9,7 @@
 
 import { TelegramClient, Api, utils, StringSession, computeCheck, bigInt, Buffer } from './vendor/gramjs.js';
 import { getPrefs } from './core/prefs.js';
+import { t } from './i18n.js';
 
 // Telegram application credentials (https://my.telegram.org). Public by design:
 // every web client ships them; the user's own session is what grants access.
@@ -182,7 +183,7 @@ function entityTags(e, text) {
     return [`<pre class="tg-pre"><code class="language-${lang}">`, '</code></pre>'];
   }
   if (e instanceof Api.MessageEntitySpoiler) {
-    return ['<span class="tg-spoiler" title="Нажмите, чтобы показать" onclick="this.classList.toggle(\'revealed\')">', '</span>'];
+    return [`<span class="tg-spoiler" title="${t('Нажмите, чтобы показать')}" onclick="this.classList.toggle('revealed')">`, '</span>'];
   }
   if (e instanceof Api.MessageEntityBlockquote) {
     return [e.collapsed ? '<blockquote class="tg-quote expandable">' : '<blockquote class="tg-quote">', '</blockquote>'];
@@ -319,11 +320,11 @@ class TelegramService {
   /** Log in with a StringSession exported from another TeleX. Caller reloads the page. */
   async importSession(value) {
     const str = String(value || '').trim();
-    if (str.length < 100) throw new Error('Это не похоже на сессию TeleX');
+    if (str.length < 100) throw new Error(t('Это не похоже на сессию TeleX'));
     try {
       new StringSession(str); // throws on garbage
     } catch {
-      throw new Error('Строка сессии повреждена');
+      throw new Error(t('Строка сессии повреждена'));
     }
     if (this.client) {
       this.client.session.disabled = true;
@@ -467,7 +468,7 @@ class TelegramService {
   }
 
   formatUser(me) {
-    const name = `${me.firstName || ''} ${me.lastName || ''}`.trim() || 'Пользователь';
+    const name = `${me.firstName || ''} ${me.lastName || ''}`.trim() || t('Пользователь');
     return {
       id: Number(me.id),
       first_name: me.firstName || '',
@@ -526,7 +527,7 @@ class TelegramService {
     return {
       key,
       id: Number(me.id),
-      name: 'Моя история',
+      name: t('Моя история'),
       title: utils.getDisplayName(me),
       avatar: this.avatarUrl(me),
       is_self: true,
@@ -570,7 +571,7 @@ class TelegramService {
     const key = `c${channelId}`;
     if (!this.entities.has(key)) await this.loadDialogs();
     const entity = this.entities.get(key);
-    if (!entity) throw new Error('Канал не найден среди ваших подписок');
+    if (!entity) throw new Error(t('Канал не найден среди ваших подписок'));
     return entity;
   }
 
@@ -592,7 +593,7 @@ class TelegramService {
 
   async signInWithCode(code) {
     if (!this.phone || !this.phoneCodeHash) {
-      return { status: 'error', message: 'Сначала запросите код по номеру телефона' };
+      return { status: 'error', message: t('Сначала запросите код по номеру телефона') };
     }
     const client = await this.getClient();
     try {
@@ -602,7 +603,7 @@ class TelegramService {
         phoneCode: code.trim(),
       }));
       if (res instanceof Api.auth.AuthorizationSignUpRequired) {
-        return { status: 'error', message: 'Этот номер не зарегистрирован в Telegram' };
+        return { status: 'error', message: t('Этот номер не зарегистрирован в Telegram') };
       }
       return await this.finishLogin();
     } catch (e) {
@@ -626,14 +627,14 @@ class TelegramService {
     const code = e && e.errorMessage;
     const messages = {
       SESSION_PASSWORD_NEEDED: null,
-      PHONE_CODE_INVALID: 'Неверный код подтверждения',
-      PHONE_CODE_EXPIRED: 'Срок действия кода истёк. Запросите новый.',
-      PHONE_NUMBER_INVALID: 'Неверный номер телефона',
-      PASSWORD_HASH_INVALID: 'Неверный облачный пароль',
-      FLOOD: 'Слишком много попыток. Попробуйте позже.',
+      PHONE_CODE_INVALID: t('Неверный код подтверждения'),
+      PHONE_CODE_EXPIRED: t('Срок действия кода истёк. Запросите новый.'),
+      PHONE_NUMBER_INVALID: t('Неверный номер телефона'),
+      PASSWORD_HASH_INVALID: t('Неверный облачный пароль'),
+      FLOOD: t('Слишком много попыток. Попробуйте позже.'),
     };
     if (code === 'SESSION_PASSWORD_NEEDED') {
-      return { status: '2fa_needed', message: 'Требуется облачный пароль (2FA)' };
+      return { status: '2fa_needed', message: t('Требуется облачный пароль (2FA)') };
     }
     if (code && code.startsWith('FLOOD_WAIT')) return { status: 'error', message: messages.FLOOD };
     return { status: 'error', message: messages[code] || (e && e.message) || String(e) };
@@ -677,7 +678,7 @@ class TelegramService {
         res = await client.invoke(new Api.auth.ImportLoginToken({ token: res.token }));
       }
       if (res instanceof Api.auth.LoginTokenSuccess) return await this.finishLogin();
-      return { status: 'error', message: `Неожиданный ответ Telegram: ${res.className}` };
+      return { status: 'error', message: t('Неожиданный ответ Telegram: {a}', {a: res.className}) };
     } catch (e) {
       return this.authError(e);
     } finally {
@@ -755,7 +756,7 @@ class TelegramService {
       const id = Number(e.id);
       fresh.set(id, {
         id,
-        title: e.title || 'Без названия',
+        title: e.title || t('Без названия'),
         username: e.username || (e.usernames && e.usernames[0] && e.usernames[0].username) || '',
         is_broadcast: !!e.broadcast,
         is_megagroup: !!e.megagroup,
@@ -796,16 +797,16 @@ class TelegramService {
     const text = (msg.message || '').replace(/\s+/g, ' ').trim();
     const media = msg.media;
     let label = '';
-    if (media instanceof Api.MessageMediaPhoto) label = 'Фото';
+    if (media instanceof Api.MessageMediaPhoto) label = t('Фото');
     else if (media instanceof Api.MessageMediaDocument && media.document instanceof Api.Document) {
       const attrs = media.document.attributes || [];
-      if (attrs.some((a) => a instanceof Api.DocumentAttributeSticker)) label = 'Стикер';
+      if (attrs.some((a) => a instanceof Api.DocumentAttributeSticker)) label = t('Стикер');
       else if (attrs.some((a) => a instanceof Api.DocumentAttributeAnimated)) label = 'GIF';
-      else if (attrs.some((a) => a instanceof Api.DocumentAttributeVideo)) label = 'Видео';
-      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio && a.voice)) label = 'Голосовое сообщение';
-      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio)) label = 'Аудио';
-      else label = 'Файл';
-    } else if (media instanceof Api.MessageMediaPoll) label = 'Опрос';
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeVideo)) label = t('Видео');
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio && a.voice)) label = t('Голосовое сообщение');
+      else if (attrs.some((a) => a instanceof Api.DocumentAttributeAudio)) label = t('Аудио');
+      else label = t('Файл');
+    } else if (media instanceof Api.MessageMediaPoll) label = t('Опрос');
     if (label && text) return `${label}, ${text}`.slice(0, 140);
     return (label || text).slice(0, 140);
   }
@@ -1295,7 +1296,7 @@ class TelegramService {
     const entity = await this.channelEntity(channelId);
     const res = await client.invoke(new Api.messages.GetDiscussionMessage({ peer: entity, msgId }));
     const root = res.messages && res.messages[0];
-    if (!root) throw new Error('Комментарии к этому посту отключены');
+    if (!root) throw new Error(t('Комментарии к этому посту отключены'));
     const chat = (res.chats || []).find((c) => String(c.id) === String(root.peerId.channelId));
     if (chat) this.rememberEntity(chat);
     const info = { chat: chat || root.peerId, rootId: root.id, chatId: chat ? Number(chat.id) : Number(root.peerId.channelId) };
@@ -1359,7 +1360,7 @@ class TelegramService {
         date: new Date(r.date * 1000).toISOString(),
         timestamp: r.date,
         sender_id: sender ? Number(sender.id) : null,
-        sender_name: sender ? utils.getDisplayName(sender) || 'Пользователь' : 'Пользователь',
+        sender_name: sender ? utils.getDisplayName(sender) || t('Пользователь') : t('Пользователь'),
         sender_avatar: this.avatarUrl(sender, false, { peer: r.peerId, msgId: r.id }),
         is_out: !!r.out || (myId != null && sender && Number(sender.id) === myId),
         reply_to_id: replyToId,
@@ -1382,7 +1383,7 @@ class TelegramService {
 
   async sendComment(channelId, msgId, text, replyToCommentId = null) {
     const clean = (text || '').trim();
-    if (!clean) return { status: 'error', message: 'Текст комментария пуст' };
+    if (!clean) return { status: 'error', message: t('Текст комментария пуст') };
     const client = await this.getClient();
     const disc = await this.discussionOf(channelId, msgId);
     const sent = await client.invoke(new Api.messages.SendMessage({
@@ -1400,7 +1401,7 @@ class TelegramService {
       date: new Date().toISOString(),
       timestamp: Math.floor(Date.now() / 1000),
       sender_id: me ? me.id : null,
-      sender_name: me ? me.name : 'Вы',
+      sender_name: me ? me.name : t('Вы'),
       sender_avatar: me ? me.avatar : null,
       is_out: true,
       reply_to_id: replyToCommentId,
@@ -1636,7 +1637,7 @@ class TelegramService {
     const ch = this.channels && this.channels.get(Number(channelId));
     if (ch) return ch;
     const e = this.entities.get(`c${channelId}`);
-    return e ? { id: Number(e.id), title: e.title, username: e.username || '', is_broadcast: !!e.broadcast, avatar: this.avatarUrl(e) } : { id: Number(channelId), title: 'Канал', username: '' };
+    return e ? { id: Number(e.id), title: e.title, username: e.username || '', is_broadcast: !!e.broadcast, avatar: this.avatarUrl(e) } : { id: Number(channelId), title: t('Канал'), username: '' };
   }
 
   /** Everything the channel page shows (channels.getFullChannel). */
@@ -1657,7 +1658,7 @@ class TelegramService {
           pinned = {
             msg_id: m.id,
             text: (m.message || '').replace(/\s+/g, ' ').trim(),
-            kind: media.type === 'video' ? 'Видео' : media.type === 'photo' || media.type === 'album' ? 'Фотография' : media.type ? 'Медиа' : '',
+            kind: media.type === 'video' ? t('Видео') : media.type === 'photo' || media.type === 'album' ? t('Фотография') : media.type ? t('Медиа') : '',
             thumb: first ? first.thumb_url || (first.type === 'photo' ? first.url : null) : null,
           };
         }
@@ -1798,7 +1799,7 @@ class TelegramService {
     return {
       key,
       id: Number(entity.id),
-      name: entity.self ? 'Моя история' : name || '',
+      name: entity.self ? t('Моя история') : name || '',
       title: entity instanceof Api.User ? utils.getDisplayName(entity) : entity.title,
       avatar: this.avatarUrl(entity),
       is_self: !!entity.self,

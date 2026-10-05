@@ -4,19 +4,21 @@
  * ====================================================================
  */
 
+import { COLOR_THEMES, outGradient } from './colorThemes.js';
+
 const KEY = 'telex.prefs';
 
 // Bumped when a default changes for everyone (saved prefs keep the old value otherwise).
 const MIGRATION = 1;
 
 export const ACCENTS = [
-  { id: 'blue', fill: '#5a83f3', text: '#7595ff' },
-  { id: 'classic', fill: '#3e88f7', text: '#62a5ff' },
-  { id: 'violet', fill: '#8774e1', text: '#a594ff' },
-  { id: 'cyan', fill: '#2fa9c7', text: '#4cc6e3' },
-  { id: 'green', fill: '#4fae4e', text: '#6fd16e' },
-  { id: 'orange', fill: '#e88a35', text: '#ffa65a' },
-  { id: 'pink', fill: '#d9608f', text: '#ff86b2' },
+  { id: 'blue', fill: '#5a83f3', text: '#7595ff', day: '#3a6fe6' },
+  { id: 'classic', fill: '#3e88f7', text: '#62a5ff', day: '#2a7ae4' },
+  { id: 'violet', fill: '#8774e1', text: '#a594ff', day: '#6c58c9' },
+  { id: 'cyan', fill: '#2fa9c7', text: '#4cc6e3', day: '#17869f' },
+  { id: 'green', fill: '#4fae4e', text: '#6fd16e', day: '#2f8f3e' },
+  { id: 'orange', fill: '#e88a35', text: '#ffa65a', day: '#c76a14' },
+  { id: 'pink', fill: '#d9608f', text: '#ff86b2', day: '#c13d73' },
 ];
 
 const DEFAULTS = {
@@ -33,6 +35,10 @@ const DEFAULTS = {
   bubbleRadius: 17,       // Telegram default message corner radius
   glass: true,            // backdrop blur under bars (off = solid, faster)
   workerMode: true,       // GramJS in a Web Worker (applies after reload)
+  theme: 'auto',          // 'auto' follows the device, or 'light' / 'dark'
+  colorTheme: 'classic',  // chat colour theme (outgoing bubbles, wallpaper, accent)
+  lang: 'auto',           // interface language: 'auto' or a code from i18n.js
+  nameColor: 'auto',      // own name colour in chats: 'auto' or a peer colour 0-6
   devOverlay: false,      // developer: connection/ping badge
   devVerbose: false,      // developer: GramJS debug logging
 };
@@ -92,19 +98,33 @@ export function resetPrefs() {
 }
 
 /** Push appearance prefs into CSS variables / body classes */
+/** 'light' or 'dark': the saved choice, or what the device uses. */
+export function resolvedTheme(p = prefs) {
+  if (p.theme === 'light' || p.theme === 'dark') return p.theme;
+  try { return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch { return 'dark'; }
+}
+
 export function applyAppearance(p = prefs) {
   const root = document.documentElement;
+  const mode = resolvedTheme(p);
+  root.dataset.theme = mode;
+  root.classList.toggle('dark', mode === 'dark');
   const accent = ACCENTS.find((a) => a.id === p.accent) || ACCENTS[0];
+  const text = mode === 'light' ? accent.day : accent.text;
   root.style.setProperty('--tx-accent-fill', accent.fill);
-  root.style.setProperty('--tx-accent', accent.text);
-  root.style.setProperty('--tx-link', accent.text);
-  root.style.setProperty('--tx-accent-soft', hexAlpha(accent.text, 0.16));
+  root.style.setProperty('--tx-accent', text);
+  root.style.setProperty('--tx-link', text);
+  root.style.setProperty('--tx-accent-soft', hexAlpha(text, mode === 'light' ? 0.12 : 0.16));
+  const theme = COLOR_THEMES.find((c) => c.id === p.colorTheme) || COLOR_THEMES[0];
+  root.style.setProperty('--tx-bubble-out', outGradient(theme, mode));
   root.style.setProperty('--tx-text-size', `${p.textSize}px`);
   root.style.setProperty('--tx-bubble-radius', `${p.bubbleRadius}px`);
   root.style.setProperty('--tx-bubble-radius-small', `${Math.min(6, p.bubbleRadius)}px`);
   document.body.classList.toggle('tx-reduce-motion', !!p.reduceMotion);
   document.body.classList.toggle('tx-no-glass', p.glass === false);
   root.style.setProperty('--tx-glass-blur', p.glass === false ? 'none' : 'blur(22px) saturate(170%)');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', mode === 'light' ? '#f0f0f5' : '#000000');
 }
 
 function hexAlpha(hex, a) {

@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 /**
  * ====================================================================
  * TELEGRAM (WORKER MODE) — same interface as telegram.js, but every call
@@ -126,13 +127,13 @@ const local = {
   authError(e) {
     const code = e && e.errorMessage;
     const messages = {
-      PHONE_CODE_INVALID: 'Неверный код подтверждения',
-      PHONE_CODE_EXPIRED: 'Срок действия кода истёк. Запросите новый.',
-      PHONE_NUMBER_INVALID: 'Неверный номер телефона',
-      PASSWORD_HASH_INVALID: 'Неверный облачный пароль',
+      PHONE_CODE_INVALID: t('Неверный код подтверждения'),
+      PHONE_CODE_EXPIRED: t('Срок действия кода истёк. Запросите новый.'),
+      PHONE_NUMBER_INVALID: t('Неверный номер телефона'),
+      PASSWORD_HASH_INVALID: t('Неверный облачный пароль'),
     };
-    if (code === 'SESSION_PASSWORD_NEEDED') return { status: '2fa_needed', message: 'Требуется облачный пароль (2FA)' };
-    if (code && code.startsWith('FLOOD_WAIT')) return { status: 'error', message: 'Слишком много попыток. Попробуйте позже.' };
+    if (code === 'SESSION_PASSWORD_NEEDED') return { status: '2fa_needed', message: t('Требуется облачный пароль (2FA)') };
+    if (code && code.startsWith('FLOOD_WAIT')) return { status: 'error', message: t('Слишком много попыток. Попробуйте позже.') };
     return { status: 'error', message: messages[code] || (e && e.message) || String(e) };
   },
   // Fire-and-forget calls: same names, no awaited result.

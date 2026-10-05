@@ -10,6 +10,7 @@ import { state } from '../state.js';
 import { escapeHtml, formatPostText, showToast } from '../utils.js';
 import { galleryOf } from './postCard.js';
 import { inlineTime, pauseAll, resumeVisible } from './autoplay.js';
+import { t, locale } from '../i18n.js';
 
 let view = null; // { post, items, index, el, video }
 
@@ -22,12 +23,12 @@ function fmt(sec) {
 
 function dateLabel(iso) {
   const d = new Date(iso);
-  const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const time = d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   const today = new Date();
   const yesterday = new Date(Date.now() - 86400000);
-  if (d.toDateString() === today.toDateString()) return `сегодня в ${time}`;
-  if (d.toDateString() === yesterday.toDateString()) return `вчера в ${time}`;
-  return `${d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} в ${time}`;
+  if (d.toDateString() === today.toDateString()) return t('сегодня в {a}', {a: time});
+  if (d.toDateString() === yesterday.toDateString()) return t('вчера в {a}', {a: time});
+  return t('{a} в {b}', {a: d.toLocaleDateString(locale(), { day: 'numeric', month: 'long' }), b: time});
 }
 
 export function openViewer(postId, index = 0) {
@@ -42,10 +43,10 @@ export function openViewer(postId, index = 0) {
   el.innerHTML = `
     <div class="tx-viewer-bg"></div>
     <div class="tx-viewer-top">
-      <button class="tx-icon-btn" data-act="close" title="Назад"><i class="icon icon-arrow-left"></i></button>
+      <button class="tx-icon-btn" data-act="close" title="${t('Назад')}"><i class="icon icon-arrow-left"></i></button>
       <div class="tx-viewer-title"><b></b><span>${escapeHtml(dateLabel(post.date))}</span></div>
-      <button class="tx-icon-btn" data-act="share" title="Поделиться"><i class="icon icon-share-filled"></i></button>
-      <a class="tx-icon-btn" data-act="download" title="Скачать" download><i class="icon icon-download"></i></a>
+      <button class="tx-icon-btn" data-act="share" title="${t('Поделиться')}"><i class="icon icon-share-filled"></i></button>
+      <a class="tx-icon-btn" data-act="download" title="${t('Скачать')}" download><i class="icon icon-download"></i></a>
     </div>
     <div class="tx-viewer-counter"></div>
     <div class="tx-viewer-stage"></div>
@@ -54,12 +55,12 @@ export function openViewer(postId, index = 0) {
     <div class="tx-viewer-bottom">
       <div class="tx-viewer-caption post-text"></div>
       <div class="tx-seek-row tx-hidden">
-        <button class="tx-icon-btn" data-act="toggle" title="Пауза"><i class="icon icon-pause"></i></button>
+        <button class="tx-icon-btn" data-act="toggle" title="${t('Пауза')}"><i class="icon icon-pause"></i></button>
         <div class="tx-seek"><div class="tx-seek-track"><div class="tx-seek-buf"></div><div class="tx-seek-fill"></div></div><div class="tx-seek-thumb"></div></div>
         <span class="tx-seek-time">00:00 / 00:00</span>
       </div>
     </div>`;
-  el.querySelector('.tx-viewer-title b').textContent = post.channel?.title || 'Канал';
+  el.querySelector('.tx-viewer-title b').textContent = post.channel?.title || t('Канал');
   el.querySelector('.tx-viewer-caption').innerHTML = formatPostText(post.text, post.text_html);
   document.body.appendChild(el);
   document.body.style.overflow = 'hidden';
@@ -207,7 +208,7 @@ function show(index, dir = 0) {
   const stage = el.querySelector('.tx-viewer-stage');
   const seekRow = el.querySelector('.tx-seek-row');
   const counter = el.querySelector('.tx-viewer-counter');
-  counter.textContent = items.length > 1 ? `${view.index + 1} из ${items.length}` : '';
+  counter.textContent = items.length > 1 ? t('{a} из {b}', {a: view.index + 1, b: items.length}) : '';
   el.querySelectorAll('.tx-viewer-nav').forEach((b) => b.classList.toggle('tx-hidden', items.length < 2));
   el.querySelector('[data-act="download"]').href = item.full_url || item.url;
 
@@ -534,5 +535,5 @@ export function viewerKey(e) {
 
 export function copyMediaLink() {
   if (!view) return;
-  navigator.clipboard.writeText(view.post.tg_url).then(() => showToast('Ссылка скопирована'));
+  navigator.clipboard.writeText(view.post.tg_url).then(() => showToast(t('Ссылка скопирована')));
 }

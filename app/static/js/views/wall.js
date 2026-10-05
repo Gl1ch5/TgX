@@ -6,7 +6,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { showToast, formatNumber, escapeHtml, pluralRu } from '../utils.js';
+import { showToast, formatNumber, escapeHtml } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs, isChannelExcluded } from '../core/prefs.js';
 import { go } from '../core/nav.js';
@@ -17,6 +17,7 @@ import { avatarHtml } from '../components/avatar.js';
 import { hydrateStickers } from '../components/sticker.js';
 import { observeAutoplay } from '../components/autoplay.js';
 import { warmComments } from './thread.js';
+import { t, tn } from '../i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const show = (el, on) => el && el.classList.toggle('tx-hidden', !on);
@@ -36,12 +37,12 @@ export function updateHeader() {
   const stack = $('header-stack');
   stack.innerHTML = avatarHtml(ch || { id: state.activeChannelId }, 'md');
   stack.querySelector('.tx-avatar').style.boxShadow = 'none';
-  $('header-main-title').innerHTML = parseEmojis(ch ? ch.title : 'Канал');
+  $('header-main-title').innerHTML = parseEmojis(ch ? ch.title : t('Канал'));
   $('header-verified-badge').innerHTML = ch && ch.verified ? VERIFIED_BADGE_SVG : '';
   const n = ch && ch.participants_count;
   $('header-sub-title').textContent = n
-    ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}`
-    : ch && ch.username ? `@${ch.username}` : 'канал';
+    ? tn(['{n} подписчик', '{n} подписчика', '{n} подписчиков'], n, { n: formatNumber(n) })
+    : ch && ch.username ? `@${ch.username}` : t('канал');
   renderChannelExtras();
   const id = state.activeChannelId;
   if (!cachedChannelFull(id) && state.isAuth) channelFull(id).then(() => { if (state.activeChannelId === id) renderChannelExtras(); }).catch(() => {});
@@ -58,12 +59,12 @@ function renderChannelExtras() {
     bar.innerHTML = `
       <span class="tx-pinned-line"></span>
       ${pin.thumb ? `<img class="tx-pinned-thumb" src="${escapeHtml(pin.thumb)}" alt="" />` : ''}
-      <span class="tx-pinned-body"><b>Закреплённое сообщение</b><span>${pin.kind ? `<em>${pin.kind}</em> ` : ''}${parseEmojis(pin.text || '')}</span></span>
+      <span class="tx-pinned-body"><b>${t('Закреплённое сообщение')}</b><span>${pin.kind ? `<em>${pin.kind}</em> ` : ''}${parseEmojis(pin.text || '')}</span></span>
       <i class="icon icon-pin tx-pinned-icon"></i>`;
   }
   show(bar, !!pin);
   const muted = full ? full.muted : ch.muted;
-  $('channel-mute-btn').textContent = muted ? 'Включить звук' : 'Убрать звук';
+  $('channel-mute-btn').textContent = muted ? t('Включить звук') : t('Убрать звук');
 }
 
 export function activeChannel() {
@@ -98,12 +99,12 @@ export function openChannelMenu(event) {
   const muted = full ? full.muted : ch.muted;
   openPopup(event.currentTarget, {
     items: [
-      { icon: muted ? 'unmute' : 'mute', label: muted ? 'Включить уведомления' : 'Выключить уведомления', run: toggleWallChannelMute },
-      { icon: 'search', label: 'Поиск', run: () => toggleHeaderSearch(true) },
-      { icon: 'info-filled', label: 'Информация о канале', run: () => openChannelPage(id) },
-      { icon: 'link', label: 'Копировать ссылку', run: () => copyChannelLink(id) },
-      { icon: 'open-in-new-tab', label: 'Открыть в Telegram', run: () => window.open(ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${id}`, '_blank', 'noopener') },
-      { icon: 'logout', label: 'Покинуть канал', danger: true, run: () => leaveChannelConfirm(id) },
+      { icon: muted ? 'unmute' : 'mute', label: muted ? t('Включить уведомления') : t('Выключить уведомления'), run: toggleWallChannelMute },
+      { icon: 'search', label: t('Поиск'), run: () => toggleHeaderSearch(true) },
+      { icon: 'info-filled', label: t('Информация о канале'), run: () => openChannelPage(id) },
+      { icon: 'link', label: t('Копировать ссылку'), run: () => copyChannelLink(id) },
+      { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${id}`, '_blank', 'noopener') },
+      { icon: 'logout', label: t('Покинуть канал'), danger: true, run: () => leaveChannelConfirm(id) },
     ],
   });
 }
@@ -270,7 +271,7 @@ function jumpButton() {
     btn = document.createElement('button');
     btn.id = 'tx-jump';
     btn.className = 'tx-jump tx-glass';
-    btn.title = 'Наверх';
+    btn.title = t('Наверх');
     btn.innerHTML = '<i class="icon icon-arrow-left"></i><span class="tx-badge tx-hidden"></span>';
     btn.onclick = () => {
       const apply = jumpApply;
@@ -368,8 +369,8 @@ function renderFeed() {
 
   if (state.posts.length === 0) {
     const text = state.feedType === 'favorites'
-      ? 'Нажмите на пост и выберите «В закладки» — он появится здесь'
-      : state.searchQuery ? 'По запросу ничего не найдено' : 'Публикаций пока нет';
+      ? t('Нажмите на пост и выберите «В закладки» — он появится здесь')
+      : state.searchQuery ? t('По запросу ничего не найдено') : t('Публикаций пока нет');
     container.innerHTML = state.isAuth || state.feedType === 'favorites'
       ? `<div class="tx-empty"><span class="tx-service">${escapeHtml(text)}</span></div>`
       : '';
@@ -378,7 +379,7 @@ function renderFeed() {
   renderPosts();
   container.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
   if (sentinelText) {
-    sentinelText.textContent = state.hasMore ? '' : 'Вы всё прочитали';
+    sentinelText.textContent = state.hasMore ? '' : t('Вы всё прочитали');
     show(sentinelText, !state.hasMore);
   }
 }
@@ -407,7 +408,7 @@ export async function loadMorePosts() {
       state.hasMore = false;
     }
     const t = $('sentinel-text');
-    t.textContent = 'Вы всё прочитали';
+    t.textContent = t('Вы всё прочитали');
     show(t, !state.hasMore);
   } catch (e) {
     console.error('Load more error', e);
@@ -523,7 +524,7 @@ export function resetFeed() {
 export async function refreshFeed() {
   await loadChannels(true);
   await loadFeed(true);
-  showToast('Стена обновлена');
+  showToast(t('Стена обновлена'));
 }
 
 // ---------------- Live updates ----------------

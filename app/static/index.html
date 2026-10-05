@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>TeleX — стена каналов Telegram</title>
   <meta name="theme-color" content="#000000" />
+  <script>
+    // Theme before the first paint (no dark flash on a light phone): saved choice or the device's.
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('telex.prefs') || '{}');
+        var t = p.theme === 'light' || p.theme === 'dark' ? p.theme : (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        var r = document.documentElement;
+        r.setAttribute('data-theme', t);
+        if (t === 'light') { r.classList.remove('dark'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f0f0f5'); }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="description" content="Все ваши Telegram-каналы одной лентой. Работает прямо в браузере." />
   <link rel="icon" href="icons/telex.svg" type="image/svg+xml" />
   
@@ -20,7 +32,7 @@
   <link rel="stylesheet" href="css/telegram-icons.css">
   <link rel="stylesheet" href="css/telegram-theme.css">
   <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/telex.css?v=3.12.1">
+  <link rel="stylesheet" href="css/telex.css?v=3.13.0">
 
   <!-- External Libraries -->
   <script src="js/vendor/qrcode.min.js"></script>
@@ -270,6 +282,6 @@
   </div>
 
   <!-- JavaScript ES Modules Entrypoint -->
-  <script type="module" src="js/app.js?v=3.12.1"></script>
+  <script type="module" src="js/app.js?v=3.13.0"></script>
 </body>
 </html>

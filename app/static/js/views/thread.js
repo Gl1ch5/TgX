@@ -6,7 +6,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { showToast, escapeHtml, formatPostText, pluralRu, formatNumber } from '../utils.js';
+import { showToast, escapeHtml, formatPostText, formatNumber } from '../utils.js';
 import { parseEmojis, renderEmoji } from '../emoji.js';
 import { go } from '../core/nav.js';
 import { avatarHtml, peerColor } from '../components/avatar.js';
@@ -15,6 +15,7 @@ import { stickerHtml, hydrateStickers } from '../components/sticker.js';
 import { observeAutoplay } from '../components/autoplay.js';
 import { reactionIcon } from '../components/reactions.js';
 import { openPopup } from '../components/postMenu.js';
+import { t, tn, locale } from '../i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const GROUP_GAP = 5 * 60;
@@ -51,7 +52,7 @@ export function enterThread(params) {
 }
 
 function subtitle() {
-  return thread.total ? `${formatNumber(thread.total)} ${pluralRu(thread.total, 'комментарий', 'комментария', 'комментариев')}` : 'нет комментариев';
+  return thread.total ? tn(['{n} комментарий', '{n} комментария', '{n} комментариев'], thread.total, { n: formatNumber(thread.total) }) : t('нет комментариев');
 }
 
 // Comments start downloading the moment the "N comments" row is touched,
@@ -145,23 +146,23 @@ async function load(older = false) {
 function dayLabel(ts) {
   const d = new Date(ts * 1000);
   const today = new Date();
-  if (d.toDateString() === today.toDateString()) return 'Сегодня';
-  if (d.toDateString() === new Date(Date.now() - 86400000).toDateString()) return 'Вчера';
+  if (d.toDateString() === today.toDateString()) return t('Сегодня');
+  if (d.toDateString() === new Date(Date.now() - 86400000).toDateString()) return t('Вчера');
   const opts = { day: 'numeric', month: 'long' };
   if (d.getFullYear() !== today.getFullYear()) opts.year = 'numeric';
-  return d.toLocaleDateString('ru-RU', opts);
+  return d.toLocaleDateString(locale(), opts);
 }
 
 function replyQuote(c) {
   if (!c.reply_to_id) return '';
   const target = thread.comments.find((x) => x.id === c.reply_to_id);
   if (!target) return '';
-  const snippet = target.text || (target.media ? (target.media.type === 'sticker' ? 'Стикер' : 'Фото') : '');
+  const snippet = target.text || (target.media ? (target.media.type === 'sticker' ? t('Стикер') : t('Фото')) : '');
   return `<span class="tx-reply tx-peer-${peerColor(target.sender_id)}" onclick="event.stopPropagation(); window.TelegramX.jumpToComment(${target.id})"><b>${parseEmojis(target.sender_name)}</b><span>${parseEmojis(snippet)}</span></span>`;
 }
 
 function commentHtml(c, first, last) {
-  const time = new Date(c.date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const time = new Date(c.date).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   const sticker = c.media && c.media.type === 'sticker';
   const media = c.media
     ? sticker
@@ -225,10 +226,10 @@ function render() {
   if (thread.comments === null) {
     html = skeletonHtml(thread.total);
   } else if (thread.error) {
-    html = `<span class="tx-service" style="display:table;margin:10px auto">Не удалось загрузить комментарии: ${escapeHtml(thread.error)}</span>`;
+    html = `<span class="tx-service" style="display:table;margin:10px auto">${t('Не удалось загрузить комментарии: {a}', {a: escapeHtml(thread.error)})}</span>`;
   } else {
-    html += `<span class="tx-service" style="display:table;margin:8px auto">${thread.comments.length ? 'Начало обсуждения' : 'Комментариев пока нет — напишите первым'}</span>`;
-    if (thread.hasMore) html += `<button class="tx-service" style="display:table;margin:4px auto" onclick="window.TelegramX.loadOlderComments()">Показать предыдущие комментарии</button>`;
+    html += `<span class="tx-service" style="display:table;margin:8px auto">${thread.comments.length ? t('Начало обсуждения') : t('Комментариев пока нет — напишите первым')}</span>`;
+    if (thread.hasMore) html += `<button class="tx-service" style="display:table;margin:4px auto" onclick="window.TelegramX.loadOlderComments()">${t('Показать предыдущие комментарии')}</button>`;
     let lastDay = '';
     thread.comments.forEach((c, i) => {
       const prev = thread.comments[i - 1];
@@ -344,7 +345,7 @@ function setReply(comment) {
   }
   bar.innerHTML = `
     <i class="icon icon-reply"></i>
-    <span class="tx-reply tx-peer-${peerColor(comment.sender_id)}"><b>${parseEmojis(comment.sender_name)}</b><span>${parseEmojis(comment.text || 'Медиа')}</span></span>
+    <span class="tx-reply tx-peer-${peerColor(comment.sender_id)}"><b>${parseEmojis(comment.sender_name)}</b><span>${parseEmojis(comment.text || t('Медиа'))}</span></span>
     <button class="tx-icon-btn" onclick="window.TelegramX.cancelReply()"><i class="icon icon-close" style="font-size:20px"></i></button>`;
   bar.classList.remove('tx-hidden');
   $('thread-input').focus();
@@ -358,8 +359,8 @@ export function openCommentMenu(id, event) {
   if (event && event.target.closest('a, .tx-reply')) return;
   const c = thread && thread.comments.find((x) => x.id === id);
   if (!c) return;
-  const items = [{ icon: 'reply', label: 'Ответить', run: () => setReply(c) }];
-  if (c.text) items.push({ icon: 'copy', label: 'Копировать текст', run: () => navigator.clipboard.writeText(c.text).then(() => showToast('Текст скопирован')) });
+  const items = [{ icon: 'reply', label: t('Ответить'), run: () => setReply(c) }];
+  if (c.text) items.push({ icon: 'copy', label: t('Копировать текст'), run: () => navigator.clipboard.writeText(c.text).then(() => showToast(t('Текст скопирован'))) });
   openPopup(event.currentTarget, { items });
 }
 
@@ -400,7 +401,7 @@ export async function sendThreadComment() {
   const res = await api.sendComment(t.post.channel_id, t.post.msg_id, text, replyTo ? replyTo.id : null);
   if (res.status !== 'success') {
     input.value = text;
-    showToast('Не удалось отправить: ' + (res.message || 'ошибка'));
+    showToast(t('Не удалось отправить: ') + (res.message || t('ошибка')));
     return;
   }
   if (thread !== t) return;

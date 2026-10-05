@@ -10,6 +10,7 @@
 @import url('tx/stories.css');
 @import url('tx/profile.css');
 @import url('tx/auth.css');
+@import url('tx/light.css');
 @import url('tx/icons-android.css');
 
 /* Modals (auth, wallpapers) in the same glass style */

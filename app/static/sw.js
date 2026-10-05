@@ -5,7 +5,7 @@
  */
 
 const MEDIA_CACHE = 'telex-media-v1';
-const SW_VERSION = '3.12.1';
+const SW_VERSION = '3.13.0';
 const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb', 'storythumb', 'photofull']);
 const STREAMED = new Set(['doc', 'story']);
 

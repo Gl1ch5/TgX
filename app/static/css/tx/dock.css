@@ -62,9 +62,9 @@
 .tx-tab-icon .icon { font-size: 24px; }
 .tx-tab-icon .tx-avatar { width: 24px; height: 24px; font-size: 10px; }
 .tx-tab-label {
-  position: absolute; left: 0; right: 0; top: 28.33px; text-align: center;
+  position: absolute; left: -8px; right: -8px; top: 28.33px; text-align: center;
   font-size: 12px; line-height: 14px; font-weight: 500; letter-spacing: 0.01em;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; overflow: visible; /* long translations spill over the tab padding instead of being cut */
 }
 .tx-dock-tab.is-active { color: var(--tx-accent-fill); }
 .tx-dock-tab.is-active .tx-tab-label { font-weight: 700; }
@@ -80,3 +80,5 @@
 }
 .tx-dock-tab { --tx-dock-cut: rgb(37, 37, 38); }
 .tx-dock-tab.is-active { --tx-dock-cut: color-mix(in srgb, var(--tx-accent-fill) 14%, rgb(37, 37, 38)); }
+
+html[lang='uk'] .tx-tab-label, html[lang='pt'] .tx-tab-label, html[lang='es'] .tx-tab-label { font-size: 11px; letter-spacing: 0; }

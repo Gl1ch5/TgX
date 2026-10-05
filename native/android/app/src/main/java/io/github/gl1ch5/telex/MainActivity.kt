@@ -95,6 +95,8 @@ class MainActivity : ComponentActivity() {
         setContentView(root)
         applyInsets()
 
+        // Same bar colours as last time, so a light phone does not flash black.
+        applyBarTheme(getSharedPreferences("telex", Context.MODE_PRIVATE).getBoolean("lightTheme", false), save = false)
         configureWebView()
         configureServiceWorkers()
         installBridge()
@@ -254,7 +256,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** The web app switched between its light and dark theme: dark icons in the bars on light. */
+    private fun applyBarTheme(light: Boolean, save: Boolean = true) {
+        val bg = if (light) 0xFFF0F0F5.toInt() else Color.BLACK
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.isAppearanceLightStatusBars = light
+        controller.isAppearanceLightNavigationBars = light
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bg))
+        if (::root.isInitialized) root.setBackgroundColor(bg)
+        if (::webView.isInitialized) webView.setBackgroundColor(bg)
+        if (save) getSharedPreferences("telex", Context.MODE_PRIVATE).edit().putBoolean("lightTheme", light).apply()
+    }
+
     private fun onBridgeMessage(message: String) {
+        if (message.startsWith("theme:")) {
+            applyBarTheme(message.removePrefix("theme:") == "light")
+            return
+        }
         if (message == "retry") {
             retry()
             return

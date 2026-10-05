@@ -9,6 +9,7 @@ import { state } from '../state.js';
 import { api } from '../api.js';
 import { showToast, escapeHtml } from '../utils.js';
 import { COUNTRIES, countryByCode, formatNational, prettyPhone } from './countries.js';
+import { t } from '../i18n.js';
 
 const CODE_LEN = 5;
 
@@ -72,9 +73,9 @@ function screen(step, inner, { back = true, fab = true } = {}) {
   const el = root();
   el.innerHTML = `
     <div class="tx-auth-screen" data-step="${step}">
-      ${back ? `<button class="tx-auth-back" aria-label="Назад" onclick="window.TelegramX.authBack()">${ICON.back}</button>` : ''}
+      ${back ? `<button class="tx-auth-back" aria-label="${t('Назад')}" onclick="window.TelegramX.authBack()">${ICON.back}</button>` : ''}
       <div class="tx-auth-body">${inner}</div>
-      ${fab ? `<button class="tx-auth-fab" id="auth-fab" aria-label="Далее" onclick="window.TelegramX.authNext()">${ICON.next}</button>` : ''}
+      ${fab ? `<button class="tx-auth-fab" id="auth-fab" aria-label="${t('Далее')}" onclick="window.TelegramX.authNext()">${ICON.next}</button>` : ''}
     </div>`;
   el.querySelector('.tx-auth-screen').animate([{ opacity: 0, transform: 'translateX(28px)' }, { opacity: 1, transform: 'none' }],
     { duration: 220, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
@@ -97,27 +98,27 @@ function setError(text) {
 
 function showPhone() {
   screen('phone', `
-    <h1 class="tx-auth-title">Номер телефона</h1>
-    <p class="tx-auth-sub">Проверьте код страны и введите свой номер телефона.</p>
+    <h1 class="tx-auth-title">${t('Номер телефона')}</h1>
+    <p class="tx-auth-sub">${t('Проверьте код страны и введите свой номер телефона.')}</p>
     <button class="tx-auth-field tx-auth-country" id="auth-country" onclick="window.TelegramX.authPickCountry()">
-      <span class="tx-auth-country-name">Страна</span>${ICON.chevron}
+      <span class="tx-auth-country-name">${t('Страна')}</span>${ICON.chevron}
     </button>
     <label class="tx-auth-field tx-auth-phone" id="auth-phone-box">
-      <span class="tx-auth-float">Номер телефона</span>
+      <span class="tx-auth-float">${t('Номер телефона')}</span>
       <span class="tx-auth-plus">+</span>
-      <input id="auth-code-in" class="tx-auth-code-in" inputmode="numeric" autocomplete="tel-country-code" maxlength="4" aria-label="Код страны">
+      <input id="auth-code-in" class="tx-auth-code-in" inputmode="numeric" autocomplete="tel-country-code" maxlength="4" aria-label="${t('Код страны')}">
       <i class="tx-auth-div"></i>
-      <input id="auth-num-in" class="tx-auth-num-in" type="tel" inputmode="numeric" autocomplete="tel-national" aria-label="Номер телефона">
+      <input id="auth-num-in" class="tx-auth-num-in" type="tel" inputmode="numeric" autocomplete="tel-national" aria-label="${t('Номер телефона')}">
     </label>
     <div class="tx-auth-error"></div>
-    <button class="tx-auth-link" onclick="window.TelegramX.authQr()">Войти по QR-коду</button>`);
+    <button class="tx-auth-link" onclick="window.TelegramX.authQr()">${t('Войти по QR-коду')}</button>`);
 
   const codeIn = $('#auth-code-in');
   const numIn = $('#auth-num-in');
   const box = $('#auth-phone-box');
   const sync = () => {
     const c = flow.country;
-    $('#auth-country .tx-auth-country-name').textContent = c ? `${c[0]}  ${c[1]}` : 'Страна';
+    $('#auth-country .tx-auth-country-name').textContent = c ? `${c[0]}  ${c[1]}` : t('Страна');
     $('#auth-country').classList.toggle('has-value', !!c);
   };
   codeIn.addEventListener('input', () => {
@@ -164,8 +165,8 @@ export function authPickCountry() {
   sheet.className = 'tx-auth-picker';
   sheet.innerHTML = `
     <div class="tx-auth-picker-top">
-      <button class="tx-auth-back" aria-label="Назад" onclick="this.closest('.tx-auth-picker').remove()">${ICON.back}</button>
-      <input class="tx-auth-search" placeholder="Страна" autocomplete="off">
+      <button class="tx-auth-back" aria-label="${t('Назад')}" onclick="this.closest('.tx-auth-picker').remove()">${ICON.back}</button>
+      <input class="tx-auth-search" placeholder="${t('Страна')}" autocomplete="off">
     </div>
     <div class="tx-auth-list"></div>`;
   root().appendChild(sheet);
@@ -195,7 +196,7 @@ async function sendPhone(forceSms = false) {
   const code = $('#auth-code-in') ? $('#auth-code-in').value : flow.phone.code;
   const num = $('#auth-num-in') ? $('#auth-num-in').value.replace(/\D/g, '') : flow.phone.num;
   if (!code || num.length < 6) {
-    setError('Введите номер телефона полностью');
+    setError(t('Введите номер телефона полностью'));
     return false;
   }
   flow.phone = { code, num };
@@ -208,7 +209,7 @@ async function sendPhone(forceSms = false) {
     flow.resendAt = Date.now() + 60000;
     return true;
   }
-  setError(res.message || 'Не удалось отправить код');
+  setError(res.message || t('Не удалось отправить код'));
   return false;
 }
 
@@ -217,16 +218,16 @@ async function sendPhone(forceSms = false) {
 function showCode() {
   const pretty = prettyPhone(`+${flow.phone.code}${flow.phone.num}`).replace(/ /g, '\u00a0');
   const how = flow.viaApp
-    ? `Мы отправили код через <b>Telegram</b> на другое устройство, где авторизован ${escapeHtml(pretty)}.`
-    : `Мы отправили SMS с кодом на номер ${escapeHtml(pretty)}.`;
+    ? t('Мы отправили код через <b>Telegram</b> на другое устройство, где авторизован {a}.', {a: escapeHtml(pretty)})
+    : t('Мы отправили SMS с кодом на номер {a}.', {a: escapeHtml(pretty)});
   screen('code', `
     <div class="tx-auth-art">${ICON.device}</div>
-    <h1 class="tx-auth-title">${flow.viaApp ? 'Проверьте сообщения в Telegram' : 'Введите код'}</h1>
+    <h1 class="tx-auth-title">${flow.viaApp ? t('Проверьте сообщения в Telegram') : t('Введите код')}</h1>
     <p class="tx-auth-sub">${how}</p>
     <div class="tx-auth-boxes" id="auth-boxes">${Array.from({ length: CODE_LEN }, () => '<i class="tx-auth-box"></i>').join('')}</div>
-    <input id="auth-code-hidden" class="tx-auth-hidden-in" inputmode="numeric" autocomplete="one-time-code" maxlength="${CODE_LEN}" aria-label="Код">
+    <input id="auth-code-hidden" class="tx-auth-hidden-in" inputmode="numeric" autocomplete="one-time-code" maxlength="${CODE_LEN}" aria-label="${t('Код')}">
     <div class="tx-auth-error is-center"></div>
-    <button class="tx-auth-link" id="auth-resend" onclick="window.TelegramX.authResend()">Не получили код?</button>`, { fab: false });
+    <button class="tx-auth-link" id="auth-resend" onclick="window.TelegramX.authResend()">${t('Не получили код?')}</button>`, { fab: false });
   const input = $('#auth-code-hidden');
   const boxes = [...document.querySelectorAll('#auth-boxes .tx-auth-box')];
   const paint = () => {
@@ -258,9 +259,9 @@ async function submitCode() {
   const res = await api.signInCode(flow.code);
   flow.busy = false;
   boxes.classList.remove('is-busy');
-  if (res.status === 'success') return onLoggedIn(res.user, 'Добро пожаловать!');
+  if (res.status === 'success') return onLoggedIn(res.user, t('Добро пожаловать!'));
   if (res.status === '2fa_needed') return showPassword();
-  setError(res.message || 'Неверный код');
+  setError(res.message || t('Неверный код'));
   boxes.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(0)' }], { duration: 300 });
   const input = $('#auth-code-hidden');
   input.value = '';
@@ -278,16 +279,16 @@ export async function authResend() {
   if (!link || flow.busy) return;
   const wait = Math.ceil((flow.resendAt - Date.now()) / 1000);
   if (wait > 0) {
-    showToast(`Повторно запросить код можно через ${wait} с`);
+    showToast(t('Повторно запросить код можно через {a} с', {a: wait}));
     return;
   }
-  link.textContent = 'Отправляем…';
+  link.textContent = t('Отправляем…');
   const ok = await sendPhone(flow.viaApp); // first resend goes out as an SMS
   if (ok) {
     showCode();
-    showToast(flow.viaApp ? 'Код отправлен ещё раз' : 'Код отправлен по SMS');
+    showToast(flow.viaApp ? t('Код отправлен ещё раз') : t('Код отправлен по SMS'));
   } else {
-    link.textContent = 'Не получили код?';
+    link.textContent = t('Не получили код?');
   }
 }
 
@@ -295,12 +296,12 @@ export async function authResend() {
 
 function showPassword() {
   screen('password', `
-    <h1 class="tx-auth-title">Ваш пароль</h1>
-    <p class="tx-auth-sub">Включена двухэтапная аутентификация, ваш аккаунт защищён дополнительным паролем.</p>
+    <h1 class="tx-auth-title">${t('Ваш пароль')}</h1>
+    <p class="tx-auth-sub">${t('Включена двухэтапная аутентификация, ваш аккаунт защищён дополнительным паролем.')}</p>
     <label class="tx-auth-field tx-auth-pass is-focus" id="auth-pass-box">
-      <span class="tx-auth-float">Пароль</span>
-      <input id="auth-pass-in" type="password" autocomplete="current-password" aria-label="Пароль">
-      <button type="button" class="tx-auth-eye" id="auth-eye" aria-label="Показать пароль">${ICON.eye}</button>
+      <span class="tx-auth-float">${t('Пароль')}</span>
+      <input id="auth-pass-in" type="password" autocomplete="current-password" aria-label="${t('Пароль')}">
+      <button type="button" class="tx-auth-eye" id="auth-eye" aria-label="${t('Показать пароль')}">${ICON.eye}</button>
     </label>
     <div class="tx-auth-error"></div>`);
   const input = $('#auth-pass-in');
@@ -318,23 +319,23 @@ function showPassword() {
 
 async function submitPassword() {
   const password = $('#auth-pass-in').value;
-  if (!password) return setError('Введите пароль');
+  if (!password) return setError(t('Введите пароль'));
   setBusy(true);
   const res = await api.signInPassword(password);
   setBusy(false);
-  if (res.status === 'success') onLoggedIn(res.user, 'Добро пожаловать!');
-  else setError(res.message || 'Неверный пароль');
+  if (res.status === 'success') onLoggedIn(res.user, t('Добро пожаловать!'));
+  else setError(res.message || t('Неверный пароль'));
 }
 
 // ---------------------------------------------------------------- QR
 
 export function authQr() {
   screen('qr', `
-    <h1 class="tx-auth-title">Вход по QR-коду</h1>
-    <p class="tx-auth-sub">Откройте Telegram на телефоне: <b>Настройки → Устройства → Подключить устройство</b> и наведите камеру на код.</p>
+    <h1 class="tx-auth-title">${t('Вход по QR-коду')}</h1>
+    <p class="tx-auth-sub">${t('Откройте Telegram на телефоне: <b>Настройки → Устройства → Подключить устройство</b> и наведите камеру на код.')}</p>
     <div class="tx-auth-qr" id="qr-container"><span class="tx-auth-qr-wait">${ICON.spinner}</span></div>
     <div class="tx-auth-error is-center"></div>
-    <button class="tx-auth-link" onclick="window.TelegramX.authBack()">Войти по номеру телефона</button>`, { fab: false });
+    <button class="tx-auth-link" onclick="window.TelegramX.authBack()">${t('Войти по номеру телефона')}</button>`, { fab: false });
   generateQRLogin();
 }
 
@@ -349,9 +350,9 @@ export async function generateQRLogin() {
   api.cancelQR();
   const res = await api.startQR(renderQR);
   if (flow.step !== 'qr') return;
-  if (res.status === 'success') onLoggedIn(res.user, 'Добро пожаловать!');
+  if (res.status === 'success') onLoggedIn(res.user, t('Добро пожаловать!'));
   else if (res.status === '2fa_needed') showPassword();
-  else if (res.status === 'error') setError(res.message || 'Ошибка подключения');
+  else if (res.status === 'error') setError(res.message || t('Ошибка подключения'));
 }
 
 // ---------------------------------------------------------------- navigation
