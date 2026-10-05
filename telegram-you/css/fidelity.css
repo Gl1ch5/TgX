@@ -101,3 +101,4 @@ html, body { background: var(--cx-list-bg); }
 .cx-lnk b, .cx-fil b { font-size: 16px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cx-lnk .lb span, .cx-fil .fb span { font-size: 14px; color: var(--tx-text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cx-lnk em { font-style: normal; font-size: 14px; color: var(--tx-accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cx-lnk .lt[class*="tx-peer-"], .cx-fil .ft[class*="tx-peer-"] { background: linear-gradient(var(--a1, var(--tx-accent)), var(--a2, var(--tx-accent))); }
