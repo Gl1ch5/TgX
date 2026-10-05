@@ -293,6 +293,13 @@ export function installChat(TelegramService, helpers) {
     return true;
   };
 
+  /** Ghost mode: tell Telegram we are offline (call again every ~25 s, the server flips back to online on activity). */
+  P.chatSetOffline = async function chatSetOffline(offline = true) {
+    const client = await this.getClient();
+    await client.invoke(new Api.account.UpdateStatus({ offline: !!offline }));
+    return true;
+  };
+
   P.chatTyping = async function chatTyping(key) {
     const entity = await this.chatEntity(key);
     const client = await this.getClient();

@@ -96,6 +96,8 @@ function live() {
     onStatus: liveStatus,
     onReactions: liveReactions,
   }).catch((e) => console.warn('[chat] live', e));
+  // ghost mode: keep telling Telegram that we are offline (the server flips to "online" on any activity)
+  setInterval(() => { if (getPrefs().ghostOffline && S.tg.chatSetOffline) S.tg.chatSetOffline(true).catch(() => {}); }, 25000);
 }
 
 async function start() {
@@ -145,6 +147,7 @@ async function init() {
     devImportSession: settings.devImportSession, devHardReload: settings.devHardReload,
     openProfilePage: profile.openProfilePage, openProfileMenu: profile.openProfileMenu, copyText: profile.copyText,
     pickProfilePhoto: profile.pickProfilePhoto, uploadProfilePhoto: profile.uploadProfilePhoto, saveProfile: profile.saveProfile,
+    clearDeletedMessages: settings.clearDeletedMessages,
     clearMediaCache: async () => { await api.clearCache(); showToast(t('Кэш очищен')); settings.rerenderSettings(); },
     logoutTelegram: async () => {
       if (!confirm(t('Выйти из Telegram на этом устройстве?'))) return;

@@ -530,6 +530,11 @@
   "plural": false
  },
  {
+  "key": "удалено",
+  "where": "js/ui/conv.js",
+  "plural": false
+ },
+ {
   "key": "изменено",
   "where": "js/ui/conv.js",
   "plural": false
@@ -586,6 +591,16 @@
  },
  {
   "key": "Не удалось изменить",
+  "where": "js/ui/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Прочитать сейчас",
+  "where": "js/ui/conv.js",
+  "plural": false
+ },
+ {
+  "key": "Отмечено прочитанным",
   "where": "js/ui/conv.js",
   "plural": false
  },
@@ -1360,6 +1375,11 @@
   "plural": false
  },
  {
+  "key": "Режим призрака",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Язык",
   "where": "js/views/settings.js",
   "plural": false
@@ -1401,6 +1421,106 @@
  },
  {
   "key": "Telegram You {a} · автор",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Включено: {a} из 3",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Прочтение, «печатает…», статус, удалённые",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не отмечать прочитанным",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Собеседники не увидят, что вы прочитали сообщение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не показывать «печатает…»",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Набор текста не отправляется",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скрывать «в сети»",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Статус остаётся «был(а) недавно»",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не оставлять следов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Прочитать чат вручную можно в меню чата: «Прочитать сейчас». Сообщения при этом остаются непрочитанными для собеседников, пока вы сами этого не сделаете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранять удалённые сообщения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Помечаются «удалено», хранятся только на этом устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранено сообщений: {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Нажмите, чтобы очистить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалённые",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Telegram удаляет такие сообщения на сервере. Здесь остаются только те, что уже пришли на это устройство. Свои удаления работают как обычно.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Локальный Premium",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Значок возле вашего имени, только на этом устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Premium",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Это только оформление. Серверные возможности Premium (лимиты, реакции, перевод) он не включает.",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1841,6 +1961,11 @@
  },
  {
   "key": "нет данных",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранённые удалённые сообщения очищены",
   "where": "js/views/settings.js",
   "plural": false
  },

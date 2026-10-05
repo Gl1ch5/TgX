@@ -1,4 +1,6 @@
 // Conversation screen: header pills, bubbles, composer, live updates.
+import { getPrefs } from '../core/prefs.js';
+import { rememberMessage, rememberMany, markSelfDeleted, takeDeleted, saveDeleted, mergeDeleted, keepEnabled } from '../core/deleted.js';
 import { S, t, tn, on, emit, escapeHtml, avatar, mu, msgTime, dayLabel, dayKey, statusText, showMenu, confirmBox, toast, peerColor } from './store.js';
 import { I } from './icons.js';
 import { patchDialog, onLiveMessage as listMessage, mediaLabel, removeDialog, forwardPicker } from './list.js';
@@ -164,7 +166,8 @@ async function loadOlder(first = false) {
     if (!cur || cur.id !== id) return;
     cur.hasMore = res.hasMore;
     const before = box.scrollHeight;
-    cur.msgs = [...res.messages, ...cur.msgs];
+    rememberMany(res.messages);
+    cur.msgs = mergeDeleted(id, [...res.messages, ...cur.msgs]);
     renderAll();
     if (first) { scrollBottom(); markRead(); } else box.scrollTop += box.scrollHeight - before;
   } catch (e) {
@@ -201,8 +204,9 @@ function scrollBottom(smooth = false) {
 }
 
 let readTimer = 0;
-function markRead() {
+function markRead(force = false) {
   if (!cur || document.visibilityState !== 'visible') return;
+  if (getPrefs().ghostRead && !force) return; // ghost mode: Telegram is not told that the messages were read
   const d = cur.dlg;
   const last = cur.msgs.filter((m) => !m.out && m.id > 0).pop();
   if (!last && !d.unread) return;
@@ -210,7 +214,7 @@ function markRead() {
   readTimer = setTimeout(() => {
     if (!cur) return;
     const top = cur.msgs.length ? cur.msgs[cur.msgs.length - 1].id : d.topId;
-    if (d.unread || d.markedUnread) {
+    if (d.unread || d.markedUnread || force) {
       patchDialog(d.id, { unread: 0, markedUnread: false });
       S.tg.chatMarkRead(d.id, top).catch(() => {});
     }
@@ -253,7 +257,7 @@ function bubbleHtml(m, prev, next, group) {
   const showName = group && !m.out && first && !sticker;
   const read = m.out && m.id > 0 && m.id <= cur.dlg.readOutboxMaxId;
   const tick = m.out ? (m.status === 'pending' ? I.clock : m.status === 'failed' ? '!' : `<span class="${read ? 'rd' : ''}">${read ? I.checks : I.check}</span>`) : '';
-  const meta = `<span class="cx-meta">${m.pinned ? I.pin : ''}${m.edited ? t('изменено') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
+  const meta = `<span class="cx-meta">${m.deleted ? `<span class="cx-del">${I.trash}${t('удалено')}</span> ` : ''}${m.pinned ? I.pin : ''}${m.edited ? t('изменено') + ' ' : ''}${msgTime(m.date)}${tick}</span>`;
   const reply = m.replyTo ? `<span class="reply" data-reply="${m.replyTo.id}"><b>${escapeHtml(m.replyTo.name || '')}</b><span>${escapeHtml(m.replyTo.text || '')}</span></span>` : '';
   const fwd = m.fwd ? `<span class="fwd">${t('Переслано от {a}', { a: escapeHtml(m.fwd.name) })}</span>` : '';
   const name = showName ? `<span class="nm tx-peer-name tx-peer-${peerColor(m.senderKey)}">${escapeHtml(m.senderName)}</span>` : '';
@@ -262,7 +266,7 @@ function bubbleHtml(m, prev, next, group) {
   const react = m.reactions && m.reactions.length ? `<div class="cx-react">${m.reactions.map((r) => `<span class="${r.chosen ? 'mine' : ''}">${escapeHtml(r.emoji || '⭐')} ${r.count}</span>`).join('')}</div>` : '';
   const av = group && !m.out ? (last ? avatar({ id: m.senderKey, title: m.senderName, avatar: m.senderAvatar }) : '<span class="av-gap"></span>') : '';
   const body = `${name}${fwd}${reply}${mediaHtml(m)}${text}${web}${meta}${react}`;
-  return `<div class="cx-msg ${m.out ? 'out' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''} ${cur.sel && cur.sel.has(m.id) ? 'sel' : ''}" data-id="${m.id}"><span class="sel-dot">${I.check}</span>${av}<div class="${cls}">${body}</div></div>`;
+  return `<div class="cx-msg ${m.out ? 'out' : ''} ${m.deleted ? 'deleted' : ''} ${first ? 'first' : ''} ${m.status === 'pending' ? 'pending' : ''} ${m.status === 'failed' ? 'failed' : ''} ${cur.sel && cur.sel.has(m.id) ? 'sel' : ''}" data-id="${m.id}"><span class="sel-dot">${I.check}</span>${av}<div class="${cls}">${body}</div></div>`;
 }
 
 /** Turns bare URLs of already-escaped text into links (entities already made some). */
@@ -300,6 +304,7 @@ function appendMsg(m) {
 
 // ---------------------------------------------------------------- live events
 export function liveMessage(m) {
+  rememberMessage(m);
   listMessage(m);
   if (!cur || cur.id !== m.chatId) return;
   if (cur.msgs.some((x) => x.id === m.id)) return;
@@ -314,6 +319,7 @@ export function liveMessage(m) {
 }
 
 export function liveEdit(m) {
+  rememberMessage(m);
   if (!cur || cur.id !== m.chatId) return;
   const i = cur.msgs.findIndex((x) => x.id === m.id);
   if (i < 0) return;
@@ -322,7 +328,22 @@ export function liveEdit(m) {
   if (node) node.outerHTML = bubbleHtml(cur.msgs[i], cur.msgs[i - 1], cur.msgs[i + 1], cur.dlg.kind !== 'user');
 }
 
-export function liveDelete(key, ids) {
+export function liveDelete(key, ids, self = false) {
+  // messages someone else deleted stay in the chat (marked), unless the user turned that off or deleted them himself
+  if (!self && keepEnabled()) {
+    const gone = takeDeleted(key, ids);
+    if (gone.length) {
+      saveDeleted(gone);
+      if (cur && gone.some((m) => m.chatId === cur.id)) {
+        const set = new Set(gone.filter((m) => m.chatId === cur.id).map((m) => m.id));
+        cur.msgs = cur.msgs.map((m) => (set.has(m.id) ? { ...m, deleted: true } : m));
+        const keep = el().querySelector('#cx-msgs').scrollTop;
+        renderAll();
+        el().querySelector('#cx-msgs').scrollTop = keep;
+      }
+      return;
+    }
+  }
   if (!cur || (key && key !== cur.id)) return;
   const set = new Set(ids);
   if (!cur.msgs.some((m) => set.has(m.id))) return;
@@ -483,7 +504,8 @@ async function deleteMsgs(list) {
   if (!ids.length) return;
   const ok = await confirmBox(ids.length > 1 ? t('Удалить {a} сообщ.?', { a: ids.length }) : t('Удалить сообщение?'), t('Удалить'));
   if (!ok) return;
-  try { await S.tg.chatDelete(cur.id, ids, true); liveDelete(cur.id, ids); } catch { toast(t('Не удалось удалить')); }
+  markSelfDeleted(cur.id, ids);
+  try { await S.tg.chatDelete(cur.id, ids, true); liveDelete(cur.id, ids, true); } catch { toast(t('Не удалось удалить')); }
   if (cur.sel) exitSelect();
 }
 
@@ -537,6 +559,7 @@ function chatMenu(x, y) {
     { icon: d.muted ? I.bellFill : I.sound, label: t('Уведомления'), arrow: true, run: async () => {
       try { await S.tg.chatMute(d.id, !d.muted); d.muted = !d.muted; patchDialog(d.id, { muted: d.muted }); refreshHeader(); toast(d.muted ? t('Уведомления выключены') : t('Уведомления включены')); } catch { toast(t('Не удалось изменить')); }
     } },
+    ...(getPrefs().ghostRead ? [{ icon: I.check, label: t('Прочитать сейчас'), run: () => { cur.dlg.markedUnread = true; markRead(true); toast(t('Отмечено прочитанным')); } }] : []),
     { icon: I.video, label: t('Видеозвонок'), run: () => toast(t('Звонки скоро')) },
     { icon: I.search, label: t('Поиск'), run: startSearch },
     { icon: I.image, label: t('Изменить обои'), run: wps },
@@ -563,7 +586,7 @@ function onInput(e) {
   fit(e.target);
   syncSend();
   saveDraft();
-  if (cur && Date.now() - typingSent > 5000 && e.target.value) { typingSent = Date.now(); S.tg.chatTyping(cur.id).catch(() => {}); }
+  if (cur && !getPrefs().ghostTyping && Date.now() - typingSent > 5000 && e.target.value) { typingSent = Date.now(); S.tg.chatTyping(cur.id).catch(() => {}); }
 }
 function saveDraft() {
   const inp = el().querySelector('#cx-input');

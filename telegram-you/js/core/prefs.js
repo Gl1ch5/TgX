@@ -39,6 +39,11 @@ const DEFAULTS = {
   colorTheme: 'classic',  // chat colour theme (outgoing bubbles, wallpaper, accent)
   lang: 'auto',           // interface language: 'auto' or a code from i18n.js
   nameColor: 'auto',      // own name colour in chats: 'auto' or a peer colour 0-6
+  ghostRead: false,       // ghost mode: do not tell Telegram that messages were read
+  ghostTyping: false,     // ghost mode: do not send "typing…"
+  ghostOffline: false,    // ghost mode: keep the account shown as offline
+  keepDeleted: true,      // keep messages that others delete (marked as deleted, stored only on this device)
+  localPremium: false,    // local Premium look: star badge by your name (no server features)
   devOverlay: false,      // developer: connection/ping badge
   devVerbose: false,      // developer: GramJS debug logging
 };

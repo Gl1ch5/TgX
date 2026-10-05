@@ -13,7 +13,8 @@ import { getPrefs, setPref, ACCENTS, applyAppearance, resolvedTheme } from '../c
 import { COLOR_THEMES, NAME_COLORS, NAME_COLORS_DAY, outGradient } from '../core/colorThemes.js';
 import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
-import { titleBar, group, row, switchRow, slider, segments, radioRow } from '../components/ui.js';
+import { titleBar, group, row, switchRow, slider, segments, radioRow, premiumBadge } from '../components/ui.js';
+import { deletedCount, clearAllDeleted } from '../core/deleted.js';
 import { WALLPAPERS, applyWallpaper, refreshWallpaper } from '../components/wallpaperTheme.js';
 import { openPopup } from '../components/popup.js';
 import { APP_VERSION, AUTHOR, REPO_URL } from '../version.js';
@@ -37,7 +38,7 @@ export function openSettingsPage(name) {
 function render() {
   const el = root();
   if (!el) return;
-  const pages = { root: rootPage, power: powerPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, mods: modsPage, about: aboutPage, developer: developerPage };
+  const pages = { root: rootPage, power: powerPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, mods: modsPage, ghost: ghostPage, about: aboutPage, developer: developerPage };
   el.innerHTML = (pages[page] || rootPage)();
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
@@ -59,7 +60,7 @@ function rootPage() {
     <div class="tx-page">
       <div class="tx-hero">
         ${u ? `<button class="tx-pf-avatar tx-settings-avatar" onclick="window.TelegramX.pickProfilePhoto()" title="${t('Выбрать фото')}">${avatar}<span class="tx-cam-badge"><i class="icon icon-camera"></i></span></button>` : avatar}
-        <div class="tx-hero-name">${parseEmojis(name)}</div>
+        <div class="tx-hero-name">${parseEmojis(name)}${p.localPremium ? ' ' + premiumBadge() : ''}</div>
         <div class="tx-hero-sub">${escapeHtml(sub)}</div>
       </div>
 
@@ -71,6 +72,7 @@ function rootPage() {
         row({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Данные и память'), sub: t('Автозагрузка медиа, кэш'), onclick: "window.TelegramX.openSettingsPage('data')" }) +
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
+        row({ icon: 'st-privacy', color: 'GREEN', title: t('Режим призрака'), sub: ghostSummary(), onclick: "window.TelegramX.openSettingsPage('ghost')" }) +
         row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" })
       )}
 
@@ -83,6 +85,36 @@ function rootPage() {
       <div class="tx-settings-foot">${t('Telegram You {a} · автор', {a: APP_VERSION})} <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
     </div>
     <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" hidden onchange="window.TelegramX.uploadProfilePhoto(this)" />`;
+}
+
+function ghostSummary() {
+  const p = getPrefs();
+  const on = [p.ghostRead, p.ghostTyping, p.ghostOffline].filter(Boolean).length;
+  return on ? t('Включено: {a} из 3', { a: on }) : t('Прочтение, «печатает…», статус, удалённые');
+}
+
+function ghostPage() {
+  const p = getPrefs();
+  const n = deletedCount();
+  return `
+    ${titleBar(t('Режим призрака'), { back: true })}
+    <div class="tx-page">
+      ${group(
+        switchRow({ icon: 'st-privacy', color: 'GREEN', title: t('Не отмечать прочитанным'), sub: t('Собеседники не увидят, что вы прочитали сообщение'), checked: p.ghostRead, onchange: "window.TelegramX.setPref('ghostRead', this.checked)" }) +
+        switchRow({ icon: 'st-chat', color: 'ORANGE', title: t('Не показывать «печатает…»'), sub: t('Набор текста не отправляется'), checked: p.ghostTyping, onchange: "window.TelegramX.setPref('ghostTyping', this.checked)" }) +
+        switchRow({ icon: 'st-account', color: 'BLUE', title: t('Скрывать «в сети»'), sub: t('Статус остаётся «был(а) недавно»'), checked: p.ghostOffline, onchange: "window.TelegramX.setPref('ghostOffline', this.checked)" }),
+        { title: t('Не оставлять следов'), hint: t('Прочитать чат вручную можно в меню чата: «Прочитать сейчас». Сообщения при этом остаются непрочитанными для собеседников, пока вы сами этого не сделаете.') },
+      )}
+      ${group(
+        switchRow({ icon: 'delete', color: 'RED', title: t('Сохранять удалённые сообщения'), sub: t('Помечаются «удалено», хранятся только на этом устройстве'), checked: p.keepDeleted !== false, onchange: "window.TelegramX.setPref('keepDeleted', this.checked)" }) +
+        row({ icon: 'data', color: 'BLUE_DEEP', title: t('Сохранено сообщений: {a}', { a: n }), sub: t('Нажмите, чтобы очистить'), onclick: 'window.TelegramX.clearDeletedMessages()' }),
+        { title: t('Удалённые'), hint: t('Telegram удаляет такие сообщения на сервере. Здесь остаются только те, что уже пришли на это устройство. Свои удаления работают как обычно.') },
+      )}
+      ${group(
+        switchRow({ icon: 'st-premium', color: 'PURPLE', title: t('Локальный Premium'), sub: t('Значок возле вашего имени, только на этом устройстве'), checked: p.localPremium, onchange: "window.TelegramX.setPref('localPremium', this.checked); window.TelegramX.rerenderSettings()" }),
+        { title: t('Premium'), hint: t('Это только оформление. Серверные возможности Premium (лимиты, реакции, перевод) он не включает.') },
+      )}
+    </div>`;
 }
 
 function powerPage() {
@@ -443,6 +475,13 @@ async function loadStorage() {
 }
 
 // ---------------- Actions ----------------
+
+export function clearDeletedMessages() {
+  if (!deletedCount()) return;
+  clearAllDeleted();
+  showToast(t('Сохранённые удалённые сообщения очищены'));
+  rerenderSettings();
+}
 
 export function rerenderSettings() {
   if (document.getElementById('cx-app').dataset.tab === 'settings') {

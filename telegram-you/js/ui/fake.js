@@ -53,7 +53,7 @@ export const fake = {
   },
   async chatSend(key, text) { await new Promise((r) => setTimeout(r, 400)); return { id: 1000 + Math.floor(Math.random() * 1e6), chatId: key, date: Math.floor(Date.now() / 1000), out: true, senderKey: 'u1', senderName: 'Я', text, html: text, media: [], reactions: [], status: 'sent', service: null }; },
   async chatSendFile() { throw new Error('demo'); }, async chatEdit(k, id, text) { return { id, chatId: k, date: now, out: true, text, html: text, media: [], reactions: [], edited: true, status: 'sent', service: null }; },
-  async chatDelete() { return true; }, async chatMarkRead() { return true; }, async chatTyping() { return true; },
+  async chatDelete() { return true; }, async chatMarkRead() { return true; }, async chatTyping() { return true; }, async chatSetOffline() { return true; },
   async chatSearch() { return []; },
   async chatContacts() { return dialogs.filter((d) => d.kind === 'user').map((d) => ({ id: d.id, kind: 'user', title: d.title, username: '', avatar: null, status: d.status })); },
   async chatReact() { return true; }, async chatPin() { return true; }, async chatForward() { return true; }, async chatMute() { return true; },

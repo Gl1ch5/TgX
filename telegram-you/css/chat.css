@@ -476,3 +476,9 @@ body.cx { font-family: var(--tx-font); color: var(--tx-text); }
 .cx-views .tx-page { padding-left: 12px; padding-right: 12px; }
 .cx-page .tx-titlebar:not(.tx-settings-bar) { position: sticky; top: 0; z-index: 5; background: var(--cx-list-bg); padding-top: calc(var(--tx-safe-top)); }
 .icon { display: inline-block; }
+
+/* messages that were deleted by the other side (kept locally) */
+.cx-msg.deleted .cx-bubble { box-shadow: inset 0 0 0 1px rgba(255, 91, 91, 0.55); }
+.cx-del { display: inline-flex; align-items: center; gap: 3px; color: #ff6b6b; font-size: 11.5px; margin-right: 4px; }
+.cx-del svg { width: 12px; height: 12px; }
+.cx-msg.deleted .tx-body { opacity: 0.92; }

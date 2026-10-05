@@ -103,3 +103,6 @@ export function radioRow({ title, sub = '', checked = false, onclick = '' }) {
       </span>
     </button>`;
 }
+
+/** The Premium badge (a star in a violet-blue gradient) shown by the local Premium look. */
+export const premiumBadge = () => '<span class="tx-prem" title="Premium"><svg viewBox="0 0 24 24" width="18" height="18"><defs><linearGradient id="txpg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6b93ff"/><stop offset="1" stop-color="#a65cf6"/></linearGradient></defs><path fill="url(#txpg)" d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.3l-5.9 3.2 1.2-6.5-4.8-4.6 6.6-.9z"/></svg></span>';
