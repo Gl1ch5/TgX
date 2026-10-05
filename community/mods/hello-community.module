@@ -1,0 +1,9 @@
+// @manifest {"id":"hello-community","name":{"ru":"Привет, сообщество","en":"Hello, community","es":"Hola, comunidad","pt":"Olá, comunidade","uk":"Привіт, спільноти"},"version":"1.0.0","author":"TeleX","icon":"👋","description":{"ru":"Пример мода сообщества: добавляет пункт в меню поста","en":"A community mod example: adds an item to the post menu","es":"Ejemplo de mod de la comunidad: añade un elemento al menú de la publicación","pt":"Exemplo de mod da comunidade: adiciona um item ao menu da publicação","uk":"Приклад моду спільноти: додає пункт у меню допису"},"tags":["example"]}
+// @part js
+export default function (tx) {
+  tx.ext.addMenu('post', ({ post }) => [{
+    label: tx.L({ ru: 'Сказать привет', en: 'Say hello', es: 'Saludar', pt: 'Dizer olá', uk: 'Привітатися' }),
+    icon: 'smile',
+    run: () => tx.toast('👋 ' + post.id),
+  }]);
+}

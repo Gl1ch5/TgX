@@ -1,5 +1,5 @@
 {
- "build": "beead59076",
+ "build": "1ff18ffedf",
  "files": [
   "./",
   "index.html",
@@ -689,6 +689,7 @@
   "fonts/roboto-latin-400-normal.woff2",
   "fonts/roboto-latin-500-normal.woff2",
   "fonts/roboto-latin-700-normal.woff2",
+  "mods/ai-prompt.txt",
   "mods/aurora-theme.module",
   "mods/catalog.json",
   "mods/clock-widget.module",

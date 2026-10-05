@@ -424,3 +424,16 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Обновить ‖ Update ‖ Actualizar ‖ Atualizar ‖ Оновити
 Документация по созданию модов ‖ How to create mods ‖ Cómo crear mods ‖ Como criar mods ‖ Документація зі створення модів
 Открыть ‖ Open ‖ Abrir ‖ Abrir ‖ Відкрити
+Скопировать промпт для нейросети ‖ Copy the prompt for an AI ‖ Copiar el prompt para una IA ‖ Copiar o prompt para uma IA ‖ Скопіювати промпт для нейромережі
+Вставьте его в нейросеть и опишите нужный мод ‖ Paste it into an AI and describe the mod you want ‖ Pégalo en una IA y describe el mod que quieres ‖ Cole em uma IA e descreva o mod que quer ‖ Вставте його в нейромережу й опишіть потрібний мод
+Вставить мод из буфера ‖ Paste mod from clipboard ‖ Pegar mod del portapapeles ‖ Colar mod da área de transferência ‖ Вставити мод із буфера
+Готовый файл от нейросети — одним нажатием ‖ The ready file from the AI — in one tap ‖ El archivo listo de la IA, con un toque ‖ O arquivo pronto da IA, com um toque ‖ Готовий файл від нейромережі — одним дотиком
+Мод с помощью нейросети ‖ A mod made by an AI ‖ Un mod hecho con IA ‖ Um mod feito por IA ‖ Мод за допомогою нейромережі
+1. Нажмите «Скопировать промпт». 2. Вставьте его в нейросеть и допишите, какой мод нужен. 3. Скопируйте ответ нейросети и нажмите «Вставить мод из буфера». ‖ 1. Tap "Copy the prompt". 2. Paste it into an AI and add which mod you need. 3. Copy the AI's answer and tap "Paste mod from clipboard". ‖ 1. Toca «Copiar el prompt». 2. Pégalo en una IA y añade qué mod necesitas. 3. Copia la respuesta de la IA y toca «Pegar mod del portapapeles». ‖ 1. Toque em «Copiar o prompt». 2. Cole em uma IA e acrescente qual mod você precisa. 3. Copie a resposta da IA e toque em «Colar mod da área de transferência». ‖ 1. Натисніть «Скопіювати промпт». 2. Вставте його в нейромережу й допишіть, який мод потрібен. 3. Скопіюйте відповідь нейромережі й натисніть «Вставити мод із буфера».
+Опубликовать свой мод ‖ Publish your mod ‖ Publicar tu mod ‖ Publicar seu mod ‖ Опублікувати свій мод
+Репозиторий сообщества на GitHub ‖ Community repository on GitHub ‖ Repositorio de la comunidad en GitHub ‖ Repositório da comunidade no GitHub ‖ Репозиторій спільноти на GitHub
+Сообщество ‖ Community ‖ Comunidad ‖ Comunidade ‖ Спільнота
+Моды сообщества не проверяются проектом: ставьте только то, чему доверяете. ‖ Community mods are not reviewed by the project: install only what you trust. ‖ El proyecto no revisa los mods de la comunidad: instala solo lo que merezca tu confianza. ‖ O projeto não revisa os mods da comunidade: instale apenas o que merece confiança. ‖ Моди спільноти проєкт не перевіряє: ставте лише те, чому довіряєте.
+Промпт скопирован — вставьте его в нейросеть ‖ Prompt copied — paste it into an AI ‖ Prompt copiado: pégalo en una IA ‖ Prompt copiado — cole em uma IA ‖ Промпт скопійовано — вставте його в нейромережу
+Буфер обмена пуст ‖ The clipboard is empty ‖ El portapapeles está vacío ‖ A área de transferência está vazia ‖ Буфер обміну порожній
+Вставьте мод в поле ниже ‖ Paste the mod into the field below ‖ Pega el mod en el campo de abajo ‖ Cole o mod no campo abaixo ‖ Вставте мод у поле нижче

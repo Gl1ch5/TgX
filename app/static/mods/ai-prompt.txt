@@ -1,3 +1,14 @@
+You write mods for TeleX, a web client for Telegram. A mod is ONE text file with the extension .module that the user pastes into the app (Settings → Mods → "Paste mod from clipboard").
+Below is the complete specification. Read it, then build exactly the mod the user asks for at the end of this message.
+
+HARD RULES FOR YOUR ANSWER
+- Reply with the contents of the .module file ONLY. No explanations before or after. No markdown code fences.
+- The first character must be "{" (JSON bundle) or the file must start with a comment line carrying @manifest (annotated / sectioned file).
+- Fill the manifest completely: id, name, version, author, description, about (all texts for ru, en, es, pt, uk), icon (an emoji or a 96x96 SVG data URL), tags and settings if the mod has options.
+- The mod must work in day and night mode and on a phone. Use the app's CSS variables and skin tokens, not hard-coded colours.
+- Use only the documented API. Do not invent tx methods.
+
+SPECIFICATION
 # TeleX mods — brief for AI agents
 
 Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file with the extension `.module`** that the user installs in
@@ -116,3 +127,12 @@ Wallpaper: `kind` `fill` | `pattern` (`url` to an svg); 1–4 `colors`; `rotatio
 
 Working examples: `mods-examples/sunset-theme.module` (JSON bundle, theme) · `clock-widget.module` (HTML + settings) · `copy-post-link.module` (JS + menus).
 Full human documentation: `docs/mods.md`.
+
+
+STYLEABLE CLASSES (selectors you may style)
+Если токенов мало — стилизуйте классы (мод-CSS подключается последним и перебивает стили приложения при равной специфичности):
+`.tx-dock` (нижняя панель), `.tx-glass` (пилюли шапки), `.tx-search-main`, `.tx-tabs`, `.tx-bubble` / `.tx-bubble.is-out` (пост, сообщение),
+`.tx-group` / `.tx-row` (настройки), `.tx-menu`, `.tx-ctx-reactions`, `.tx-dialog`, `.tx-btn`, `.tx-reaction`, `.tx-mainbar` (верхняя панель ленты),
+`.tx-titlebar`, `.tx-mod-card`. Экраны: `#screen-wall`, `#screen-settings`, `#screen-profile`, `#screen-thread`, `#screen-channel`.
+
+THE MOD THE USER WANTS:

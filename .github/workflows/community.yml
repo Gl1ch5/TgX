@@ -1,0 +1,18 @@
+name: Community mods
+
+on:
+  pull_request:
+    paths: ['community/**', 'tools/community.mjs']
+  push:
+    paths: ['community/**', 'tools/community.mjs']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate every mod in community/mods
+        run: node tools/community.mjs --check

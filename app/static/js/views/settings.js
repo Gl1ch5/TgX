@@ -21,7 +21,7 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { ext } from '../core/ext.js';
-import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial } from '../core/mods.js';
+import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial, loadCommunity, installCommunity, loadAiPrompt, cleanPasted } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -45,7 +45,7 @@ function render() {
   const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage };
   el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
-  if (page === 'mods') fillOfficial();
+  if (page === 'mods') { fillOfficial(); fillCommunity(); }
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
   // a sub-page slides in from the right, going back slides the list in from the left; groups rise one by one
   if (prevPage !== null && prevPage !== page && !document.body.classList.contains('tx-reduce-motion')) {
@@ -54,6 +54,10 @@ function render() {
   }
   if (prevPage !== page) el.querySelectorAll('.tx-group, .tx-hero').forEach((g, i) => { if (i < 9) { g.style.setProperty('--i', i); g.classList.add('tx-rise'); } });
   shownPage = page;
+  if (page === 'about' && isAndroidApp()) {
+    window.__txUpdate = (json) => { try { const i = JSON.parse(json); const el = document.getElementById('upd-status'); if (el) el.textContent = `${i.name} · ${i.code}\n${i.status}`; } catch {} };
+    postNative('updateStatus');
+  }
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
   if (page === 'developer') loadDevInfo();
@@ -140,7 +144,7 @@ function aboutPage() {
       ${group(
         row({ title: APP_VERSION, sub: t('Версия') }) +
         (native ? row({ title: escapeHtml(native), sub: t('Приложение') }) : '') +
-        (isAndroidApp() ? row({ icon: 'reload', color: 'GREEN', title: t('Проверить обновления'), onclick: 'window.TelegramX.checkAppUpdate()' }) : ''),
+        (isAndroidApp() ? row({ icon: 'reload', color: 'GREEN', title: t('Проверить обновления'), sub: '<span id="upd-status" style="white-space:pre-line">…</span>', onclick: 'window.TelegramX.checkAppUpdate()' }) : ''),
       )}
       ${group(
         row({ icon: 'user', color: 'BLUE', title: '@' + AUTHOR.telegram, sub: t('Автор · Telegram'), onclick: `window.open('https://t.me/${AUTHOR.telegram}', '_blank', 'noopener')` }) +
@@ -446,6 +450,7 @@ function extraRows() {
   return group(items.map((it, i) => row({ icon: it.icon || 'st-features', color: it.color || 'PURPLE', title: escapeHtml(it.title || it.label || ''), sub: it.sub ? escapeHtml(it.sub) : '', onclick: `window.__txSettingsExt[${i}].run()` })).join(''));
 }
 
+const COMMUNITY_REPO_URL = 'https://github.com/Gl1ch5/TgX/tree/main/community';
 const MODS_DOCS_URL = 'https://telex-web.ru/mods.html';
 const modKind = (m) => (m.parts.some((p) => p.type === 'js' || p.type === 'html') ? (m.parts.some((p) => p.type === 'theme') ? t('Тема + код') : t('Мод')) : t('Тема'));
 
@@ -507,7 +512,14 @@ function modsPage() {
         { title: t('Установка'), hint: t('Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.') },
       )}
       <div id="mod-official"></div>
+      <div id="mod-community"></div>
       <div class="tx-group"><div class="tx-group-title">${t('Установленные')}</div>${list.length ? `<div class="tx-mod-grid">${cards}</div>` : `<div class="tx-group-hint" style="padding:6px 22px 18px;margin:0">${t('Модов пока нет')}</div>`}</div>
+      ${group(
+        row({ icon: 'code', color: 'PURPLE', title: t('Скопировать промпт для нейросети'), sub: t('Вставьте его в нейросеть и опишите нужный мод'), onclick: 'window.TelegramX.copyAiPrompt()' }) +
+        row({ icon: 'copy', color: 'GREEN', title: t('Вставить мод из буфера'), sub: t('Готовый файл от нейросети — одним нажатием'), onclick: 'window.TelegramX.installFromClipboard()' }),
+        { title: t('Мод с помощью нейросети'), hint: t('1. Нажмите «Скопировать промпт». 2. Вставьте его в нейросеть и допишите, какой мод нужен. 3. Скопируйте ответ нейросети и нажмите «Вставить мод из буфера».') },
+      )}
+      ${group(row({ icon: 'add', color: 'ORANGE', title: t('Опубликовать свой мод'), sub: t('Репозиторий сообщества на GitHub'), onclick: `window.open('${COMMUNITY_REPO_URL}', '_blank', 'noopener')` }))}
       <input type="file" id="mod-file" accept=".module,.json,.js,.html,application/json,text/*" hidden onchange="window.TelegramX.installModFile(this)" />
     </div>`;
 }
@@ -538,6 +550,68 @@ async function fillOfficial() {
       </div>`;
   }).join('');
   box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div><div class="tx-mod-grid">${cards}</div></div>`;
+}
+
+/** "Community": mods published by pull request to the repository. They are not verified. */
+async function fillCommunity() {
+  const box = document.getElementById('mod-community');
+  if (!box) return;
+  let list;
+  try { list = await loadCommunity(); } catch { return; }
+  if (!document.getElementById('mod-community') || !list.length) return;
+  const have = new Map(listMods().map((m) => [m.manifest.id, m.manifest.version]));
+  const cards = list.map((c) => {
+    const cur = have.get(c.id);
+    const upToDate = cur != null && cur === c.version;
+    const ic = modIcon(c.icon);
+    const nm = modL(c.name) || c.id;
+    const pic = ic.img ? `<span class="tx-mod-pic is-img"><img src="${escapeHtml(ic.img)}" alt=""></span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(ic.emoji || nm.slice(0, 1)))}</span>`;
+    return `
+      <div class="tx-mod-card is-tile"${cur != null ? ` onclick="window.TelegramX.openSettingsPage('mod:${c.id}')"` : ''}>
+        <span class="tx-mod-top">${pic}</span>
+        <span class="tx-mod-name">${escapeHtml(nm)}</span>
+        <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
+        <span class="tx-mod-desc">${escapeHtml(modL(c.description) || '')}</span>
+        <button class="tx-mod-get ${upToDate ? 'is-done' : ''}" onclick="event.stopPropagation(); ${upToDate ? `window.TelegramX.openSettingsPage('mod:${c.id}')` : `window.TelegramX.installCommunity('${c.id}')`}">${cur == null ? t('Установить') : upToDate ? t('Открыть') : t('Обновить')}</button>
+      </div>`;
+  }).join('');
+  box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Сообщество')}</div><div class="tx-mod-grid">${cards}</div></div><div class="tx-group-hint" style="margin-top:-6px">${t('Моды сообщества не проверяются проектом: ставьте только то, чему доверяете.')}</div>`;
+}
+
+export function installCommunityMod(id) { runInstall(installCommunity(id)); }
+
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0'; document.body.append(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch { return false; }
+}
+
+export async function copyAiPrompt() {
+  try {
+    const ok = await copyToClipboard(await loadAiPrompt());
+    showToast(ok ? t('Промпт скопирован — вставьте его в нейросеть') : t('Не удалось скопировать'));
+  } catch { showToast(t('Не удалось скопировать')); }
+}
+
+/** Reads the clipboard (through the Android app when there is one), cleans markdown/chatter around the file and installs it. */
+export function installFromClipboard() {
+  const install = (text) => {
+    if (!text || !String(text).trim()) { showToast(t('Буфер обмена пуст')); return; }
+    runInstall(Promise.resolve().then(() => installMod(parseBundle(cleanPasted(text)))));
+  };
+  if (isAndroidApp()) {
+    window.__txClip = install;
+    if (postNative('clipboard')) return;
+  }
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    navigator.clipboard.readText().then(install, () => { document.getElementById('mod-paste')?.classList.remove('tx-hidden'); showToast(t('Вставьте мод в поле ниже')); });
+  } else {
+    document.getElementById('mod-paste')?.classList.remove('tx-hidden');
+    showToast(t('Вставьте мод в поле ниже'));
+  }
 }
 
 export function installOfficialMod(id) { runInstall(installOfficial(id)); }

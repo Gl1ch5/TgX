@@ -1700,6 +1700,46 @@
   "plural": false
  },
  {
+  "key": "Скопировать промпт для нейросети",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставьте его в нейросеть и опишите нужный мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить мод из буфера",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Готовый файл от нейросети — одним нажатием",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод с помощью нейросети",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "1. Нажмите «Скопировать промпт». 2. Вставьте его в нейросеть и допишите, какой мод нужен. 3. Скопируйте ответ нейросети и нажмите «Вставить мод из буфера».",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Опубликовать свой мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Репозиторий сообщества на GitHub",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Обновить",
   "where": "js/views/settings.js",
   "plural": false
@@ -1711,6 +1751,36 @@
  },
  {
   "key": "Официальные моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщество",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Моды сообщества не проверяются проектом: ставьте только то, чему доверяете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Промпт скопирован — вставьте его в нейросеть",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось скопировать",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Буфер обмена пуст",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставьте мод в поле ниже",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1891,11 +1961,6 @@
  },
  {
   "key": "Диагностика скопирована",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Не удалось скопировать",
   "where": "js/views/settings.js",
   "plural": false
  },

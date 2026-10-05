@@ -54,6 +54,7 @@
   ]
 }</code></pre>
 <p><b>2. Один исходник с аннотацией</b> — первая строка-комментарий с <code>@manifest {json}</code>, остальное — тело. Тело, начинающееся с <code>&lt;</code>, — HTML (скрипты внутри выполняются), JSON с ключами темы — тема, иначе — JS-модуль. Примеры: <code>// @manifest {…}</code>, <code>&lt;!-- @manifest {…} --&gt;</code>.</p>
+<p><b>3. Один большой файл с секциями</b> — после строки <code>@manifest</code> каждая часть начинается строкой-комментарием <code>@part js|css|html|theme|json|text [имя]</code> (<code>// @part css</code>, <code>/* @part js */</code>, <code>&lt;!-- @part html --&gt;</code>). Так в одном файле умещаются стили, разметка и код.</p>
 <p><code>id</code> — латиница/цифры/<code>._-</code>, 2–41 символ. Размер — до 1,5 МБ. Мод только из <code>theme</code>/<code>css</code> не исполняет код, поэтому ставится без предупреждения о полном доступе.</p>
 <h4 id="h-языки">Языки</h4>
 <p>Любой текст манифеста — <code>name</code>, <code>description</code>, <code>about</code>, <code>title</code>/<code>sub</code>/подписи <code>options</code> в настройках — можно задать либо строкой, либо по языкам: <code>{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }</code>. Берётся язык приложения, иначе английский. В коде: <code>tx.L({ ru: '…', en: '…' })</code>. Официальные моды переведены на все 5 языков.</p>
@@ -81,6 +82,10 @@
 <ul><li><code>tx.ui.openScreen({ title, render(box, { close }) })</code> — свой полноэкранный экран; жест «назад» закрывает его.</li><li><code>tx.ui.addDockItem({ id, title, icon, run })</code> — кнопка в нижней панели (<code>icon</code> — эмодзи, SVG-разметка или имя иконки).</li><li><code>tx.settings.addPage(...)</code> — свой экран внутри настроек.</li><li><code>tx.ui.onPost((el, post) =&gt; …)</code> — для каждой карточки поста, сейчас и при появлении новых; событие <code>post</code> для <code>tx.ext.on</code>.</li><li><code>tx.app</code> — <code>openChannel(id)</code>, <code>openThread(postId)</code>, <code>setView('wall'|'settings'|'profile')</code>, <code>openSettings(page)</code>, <code>reloadFeed()</code>, <code>lang()</code>, <code>theme()</code>.</li></ul>
 <h3 id="h-жизненный-цикл">Жизненный цикл</h3>
 <p>Мод запускается при старте приложения, если включён. Всё, что он зарегистрировал через <code>tx</code>, снимается при выключении/удалении; свои таймеры и слушатели снимайте в <code>tx.onStop</code>. Официальные моды из каталога <b>обновляются сами</b> при выходе новой версии (настройки мода сохраняются). Обновление чужого мода — переустановка файла с тем же <code>id</code>.</p>
+<h3 id="h-мод-с-помощью-нейросети">Мод с помощью нейросети</h3>
+<p>В <b>Настройки → Моды</b> внизу: «Скопировать промпт для нейросети» → вставьте его в нейросеть и допишите, какой мод нужен → скопируйте ответ → «Вставить мод из буфера». Промпт содержит всю спецификацию и жёсткие правила вывода (только файл, без пояснений).</p>
+<h3 id="h-публикация-для-всех-сообщество">Публикация для всех (сообщество)</h3>
+<p>Положите <code>&lt;id&gt;.module</code> в <code>community/mods/</code> через Pull Request — после проверки CI мод появится в приложении у всех (Настройки → Моды → Сообщество). Правила — в <a href="https://github.com/Gl1ch5/TgX/tree/main/community"><code>community/README.md</code></a>.</p>
 <h3 id="h-свой-мод-в-каталоге">Свой мод в каталоге</h3>
 <p>1. Положите файл <code>&lt;id&gt;.module</code> в <code>app/static/mods/</code> и SVG-иконку в <code>app/static/mods/icons/&lt;id&gt;.svg</code>. 2. Добавьте запись в <code>app/static/mods/catalog.json</code>: <code>{ id, file, name, version, author, icon, description, tags }</code> (<code>name</code>/<code>description</code> — по языкам). 3. Поднимите <code>version</code>, когда меняете мод — у пользователей он обновится сам. Мод из каталога получает значок проверенного.</p>
 <h3 id="h-советы">Советы</h3>
@@ -111,6 +116,12 @@
   ]
 }</code></pre>
 <p><b>B. Single annotated source</b> — first line is a comment holding <code>@manifest {one-line json}</code>, the rest is the body: <code>// @manifest {…}</code> + JS module · <code>&lt;!-- @manifest {…} --&gt;</code> + HTML · <code>/* @manifest {…} */</code> + JSON theme. Body starting with <code>&lt;</code> = HTML, JSON with <code>vars|colorThemes|wallpapers|css</code> = theme, anything else = JS module (must <code>export default function (tx)</code>).</p>
+<p><b>C. One big file with sections</b> (best for an AI: one paste, many parts). After the <code>@manifest</code> line, start every part with a comment line <code>@part js|css|html|theme|json|text [name]</code> — e.g. <code>// @part css</code>, <code>/* @part js */</code>, <code>&lt;!-- @part html --&gt;</code>, <code>// @part theme</code> (JSON), <code>// @part json table</code>:</p>
+<pre><code>// @manifest {"id":"my-mod","name":{"ru":"…","en":"…"},"version":"1.0.0","description":{…}}
+// @part css
+.tx-dock { border-radius: 14px; }
+// @part js
+export default function (tx) { /* … */ }</code></pre>
 <p>Limits: total ≤ 1.5 MB. A mod made only of <code>theme</code>/<code>css</code> parts executes no code (the user gets a lighter confirmation).</p>
 <h3 id="a-languages-and-icon-do-this-for-every-mod-you-publish">Languages and icon (do this for every mod you publish)</h3>
 <p>Any manifest text (<code>name</code>, <code>description</code>, <code>about</code>, settings <code>title</code>/<code>sub</code>, <code>options</code> labels) may be a string <b>or</b> <code>{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }</code>. Provide all five when the mod is meant for others; the app picks its language, then English. In code use <code>tx.L({ ru: '…', en: '…', … })</code>. <code>icon</code>: an emoji, or an image — <code>data:image/svg+xml;base64,…</code> / <code>https://…</code> / <code>mods/icons/&lt;id&gt;.svg</code> (official mods). Prefer a 96×96 SVG: rounded square <code>rx=22</code> with a two-colour gradient and a white stroke glyph (see <code>app/static/mods/icons/*.svg</code>).</p>

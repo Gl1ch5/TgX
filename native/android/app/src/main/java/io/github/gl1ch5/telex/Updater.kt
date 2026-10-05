@@ -15,6 +15,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.graphics.Color
@@ -77,20 +79,29 @@ class Updater(private val activity: Activity) {
         }
     }
 
-    /** Called from onCreate / onResume. `manual` = the user pressed "check for updates". */
+    private val handler = Handler(Looper.getMainLooper())
+    private var retryDelay = 20_000L
+    private var retries = 0
+
+    /**
+     * Called from onCreate / onResume / the page. `manual` = the user pressed "check for updates".
+     * The throttle only counts SUCCESSFUL checks: a failed one (no network yet right after start, VPN reconnecting…)
+     * is retried after 20 s, 40 s, 80 s … instead of silencing the updater for the next ten minutes.
+     */
     fun check(manual: Boolean = false, onStart: Boolean = false) {
         if (busy) {
             if (manual) toast("Обновление уже загружается…")
             return
         }
         val now = System.currentTimeMillis()
-        if (!manual && !onStart && now - prefs.getLong(KEY_LAST_CHECK, 0) < RESUME_EVERY_MS) return
-        prefs.edit().putLong(KEY_LAST_CHECK, now).apply()
+        if (!manual && !onStart && now - prefs.getLong(KEY_LAST_OK, 0) < RESUME_EVERY_MS) return
         busy = true
         io.execute {
             try {
                 val info = fetchInfo()
                 val local = currentVersionCode()
+                prefs.edit().putLong(KEY_LAST_OK, System.currentTimeMillis()).apply()
+                retryDelay = 20_000L; retries = 0
                 record("remote ${info.code} (${info.name}), local $local")
                 if (info.code <= local) {
                     busy = false
@@ -107,6 +118,12 @@ class Updater(private val activity: Activity) {
                 Log.w(TAG, "update check failed", e)
                 record("error: ${e.javaClass.simpleName}: ${e.message}")
                 if (manual) ui { message("Не удалось проверить обновления", "${e.message ?: e.javaClass.simpleName}\n\nПроверьте подключение к интернету и попробуйте ещё раз.") }
+                else if (retries < 6) {
+                    retries++
+                    val delay = retryDelay
+                    retryDelay = (retryDelay * 2).coerceAtMost(10 * 60_000L)
+                    handler.postDelayed({ if (!activity.isFinishing) check(onStart = true) }, delay)
+                }
             }
         }
     }
@@ -121,6 +138,7 @@ class Updater(private val activity: Activity) {
     }
 
     fun shutdown() {
+        handler.removeCallbacksAndMessages(null)
         io.shutdownNow()
         dialog?.dismiss()
         if (receiverRegistered) runCatching { activity.unregisterReceiver(installResult) }
@@ -128,6 +146,9 @@ class Updater(private val activity: Activity) {
 
     /** Short text about the last check, for diagnostics. */
     fun lastStatus(): String = prefs.getString(KEY_STATUS, "—") ?: "—"
+
+    /** JSON for the About screen: build number, version name and what the last check said. */
+    fun statusJson(): String = JSONObject().put("code", currentVersionCode()).put("name", currentVersionName()).put("status", lastStatus()).toString()
 
     // ------------------------------------------------------------------ the card
 
@@ -413,6 +434,7 @@ class Updater(private val activity: Activity) {
         const val KEY_SNOOZE_CODE = "snooze_code"
         const val KEY_SNOOZE_AT = "snooze_at"
         const val KEY_STATUS = "status"
+        const val KEY_LAST_OK = "last_ok"
         const val ACTION_INSTALL = "io.github.gl1ch5.telex.INSTALL_RESULT"
         const val VERSION_URL = "https://github.com/Gl1ch5/TgX/releases/download/nightly/version.json"
         const val APK_URL = "https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk"

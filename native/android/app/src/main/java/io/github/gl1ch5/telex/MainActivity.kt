@@ -283,6 +283,16 @@ class MainActivity : ComponentActivity() {
             updater.check(manual = true)
             return
         }
+        if (message == "clipboard") { // "Paste mod from clipboard": the WebView has no clipboard read permission, the app does
+            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val text = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString() ?: ""
+            webView.evaluateJavascript("window.__txClip && window.__txClip(${JSONObject.quote(text)})", null)
+            return
+        }
+        if (message == "updateStatus") { // About screen asks what the updater did last
+            webView.evaluateJavascript("window.__txUpdate && window.__txUpdate(${JSONObject.quote(updater.statusJson())})", null)
+            return
+        }
         if (message == "updateCheck") { // the page asks quietly (after the feed loaded): throttled, silent when nothing is new
             updater.check()
             return

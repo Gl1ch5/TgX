@@ -92,7 +92,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
-  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod,
+  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod, installCommunity: settings.installCommunityMod, copyAiPrompt: settings.copyAiPrompt, installFromClipboard: settings.installFromClipboard,
   setWorkerMode: settings.setWorkerMode,
 
   // Profile

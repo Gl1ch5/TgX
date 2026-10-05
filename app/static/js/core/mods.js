@@ -387,13 +387,35 @@ export function parseBundle(text) {
   if (!m) throw new Error(t('Неверный манифест'));
   const manifest = JSON.parse(m[1]);
   const body = src.replace(m[0], '').trim();
+  // one big file with sections: a comment line "@part js|css|html|theme|json|text [name]" starts each part
+  const marks = [...body.matchAll(/^[^\n]*@part[ \t]+(js|css|html|theme|json|text)(?:[ \t]+([A-Za-z0-9_][\w.-]*))?[^\n]*$/gm)];
+  if (marks.length) {
+    const parts = marks.map((mk, i) => {
+      const chunk = body.slice(mk.index + mk[0].length, i + 1 < marks.length ? marks[i + 1].index : undefined).trim();
+      const type = mk[1];
+      const part = { type };
+      if (mk[2]) part.name = mk[2];
+      if (type === 'theme' || type === 'json') part.data = JSON.parse(chunk); else part.code = chunk;
+      return part;
+    });
+    return { manifest, parts };
+  }
   let part;
   if (body.startsWith('<')) part = { type: 'html', code: body };
   else if (body.startsWith('{') || body.startsWith('[')) {
     const data = JSON.parse(body);
-    part = data && (data.vars || data.colorThemes || data.wallpapers || data.css) ? { type: 'theme', data } : { type: 'json', data };
+    part = data && (data.vars || data.colorThemes || data.wallpapers || data.css || data.skin) ? { type: 'theme', data } : { type: 'json', data };
   } else part = { type: 'js', code: body };
   return { manifest, parts: [part] };
+}
+
+/** What an AI (or a person) pastes is often wrapped in a markdown fence or has chatter around it: take the file out of it. */
+export function cleanPasted(text) {
+  let s = String(text).trim();
+  const fence = /```[a-z]*\n([\s\S]*?)```/i.exec(s);
+  if (fence) s = fence[1].trim();
+  const first = s.search(/[{@<\/]/);
+  return first > 0 ? s.slice(first).trim() : s;
 }
 
 export async function installMod(mod) {
@@ -404,6 +426,7 @@ export async function installMod(mod) {
   const size = JSON.stringify(parts).length + JSON.stringify(mod.manifest).length;
   if (size > MAX_CODE) throw new Error(t('Код мода слишком большой'));
   const m = mod.manifest;
+  if (!mod.trusted) { delete m.verified; delete m.official; } // only the project's own catalog may carry these marks
   const risky = parts.some((p) => p.type === 'js' || p.type === 'html');
   const ok = await confirmDialog(
     risky
@@ -486,5 +509,37 @@ export async function installOfficial(id) {
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const bundle = parseBundle(await res.text());
   bundle.manifest = { ...bundle.manifest, verified: true, official: true };
+  bundle.trusted = true;
   return installMod(bundle);
+}
+
+// ---------------------------------------------------------------- community registry (community/ in the repository)
+// Anyone can publish a mod by pull request (see community/README.md). CI validates it and builds
+// community/index.json + the files next to the app, so the app lists them here. They are NOT verified.
+
+let community = null;
+export async function loadCommunity() {
+  if (community) return community;
+  const res = await fetch('community/index.json?t=' + Math.floor(Date.now() / 600000), { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  community = (await res.json()).mods || [];
+  return community;
+}
+
+export async function installCommunity(id) {
+  const entry = (await loadCommunity()).find((m) => m.id === id);
+  if (!entry) throw new Error('not found');
+  const res = await fetch('community/mods/' + entry.file, { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const bundle = parseBundle(await res.text());
+  const { verified, official, ...rest } = bundle.manifest; // never trust these flags from a file
+  bundle.manifest = { ...rest, community: true };
+  return installMod(bundle);
+}
+
+/** The AI brief (app/static/mods/ai-prompt.txt) for the "copy prompt" button. */
+export async function loadAiPrompt() {
+  const res = await fetch('mods/ai-prompt.txt', { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.text();
 }

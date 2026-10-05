@@ -23,6 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Community mods index (community/ → app/static/community)
+        run: node tools/community.mjs
       - name: Assemble site (landing + app)
         run: |
           mkdir -p _site
