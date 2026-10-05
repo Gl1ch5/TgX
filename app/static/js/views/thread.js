@@ -73,6 +73,41 @@ export function prefetchComments(postId) {
   if (post && state.isAuth && post.comments_enabled) fetchFresh(post);
 }
 
+// Comments of the posts on screen are loaded in the background (two at a
+// time, the most recently seen first), so opening a thread is instant.
+const warmQueue = [];
+const warmedAt = new Map();
+let warming = 0;
+const WARM_TTL = 120000;
+
+export function warmComments(postId) {
+  if (!state.isAuth || warmQueue.includes(postId)) return;
+  if (Date.now() - (warmedAt.get(postId) || 0) < WARM_TTL) return;
+  warmQueue.push(postId);
+  if (warmQueue.length > 8) warmQueue.shift(); // scrolled past: forget the oldest
+  pumpWarm();
+}
+
+function pumpWarm() {
+  while (warming < 2 && warmQueue.length) {
+    const id = warmQueue.pop();
+    const post = state.posts.find((p) => p.id === id);
+    if (!post || !post.comments_enabled || !post.replies_count) continue;
+    warming++;
+    warmedAt.set(id, Date.now());
+    fetchFresh(post)
+      .then((res) => preloadAvatars(res))
+      .catch(() => warmedAt.delete(id))
+      .finally(() => { warming--; pumpWarm(); });
+  }
+}
+
+/** The first authors' photos too, so the thread doesn't open with blank circles. */
+function preloadAvatars(res) {
+  const urls = [...new Set(((res && res.comments) || []).map((c) => c.sender_avatar).filter(Boolean))].slice(0, 8);
+  urls.forEach((u) => { const img = new Image(); img.decoding = 'async'; img.src = u; });
+}
+
 async function load(older = false) {
   const t = thread;
   if (!older && t.comments === null) {
@@ -83,6 +118,8 @@ async function load(older = false) {
       t.total = cached.total;
       t.hasMore = cached.has_more;
       render();
+      // Just loaded in the background while the post was on screen: no need to ask again.
+      if (Date.now() - (warmedAt.get(t.post.id) || 0) < 20000 && !inflight.has(t.post.id)) return;
     }
   }
   try {

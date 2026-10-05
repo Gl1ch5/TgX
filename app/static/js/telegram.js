@@ -17,6 +17,7 @@ const API_HASH = '1462d961e4a7bf6b5139309255f09fd6';
 
 const LS = {
   session: 'telex.session',
+  dcKeys: 'telex.dckeys',
   seen: 'telex.seen',
   me: 'telex.me',
   channels: 'telex.channels',
@@ -65,12 +66,66 @@ class PersistentSession extends StringSession {
   constructor(value) {
     super(value);
     this.disabled = false;
+    this.dcKeys = new Map(); // dcId -> AuthKey of the other data centers (files, avatars)
   }
 
   save() {
     const value = super.save();
     if (value && !this.disabled) lsSet(LS.session, value);
     return value;
+  }
+
+  /**
+   * GramJS forgets the keys of non-home DCs, so every start (and every
+   * reconnect) generated a new one: a multi-second Diffie-Hellman in JS that
+   * blocks the Telegram thread. Keep them, bound to this account.
+   */
+  /** Id of the home key: other DCs' keys are authorized for this account only. */
+  get owner() {
+    const id = this.authKey && this.authKey.keyId;
+    return id ? String(id) : '';
+  }
+
+  async loadDcKeys() {
+    const saved = lsGet(LS.dcKeys, null);
+    if (!saved) return;
+    if (!this.authKey) await this.load(); // GramJS only does this inside connect()
+    if (!this.authKey || !this.authKey.getKey()) return;
+    await withTimeout(this.authKey.waitForKey(), 2000).catch(() => {}); // keyId is computed asynchronously
+    const Key = this.authKey.constructor;
+    if (!saved || !this.owner || saved.owner !== this.owner || !Key) return;
+    for (const [dc, b64] of Object.entries(saved.keys || {})) {
+      try {
+        const key = new Key();
+        await key.setKey(Buffer.from(b64, 'base64'));
+        this.dcKeys.set(Number(dc), key);
+      } catch {}
+    }
+  }
+
+  persistDcKeys() {
+    if (this.disabled || !this.owner) return;
+    const keys = {};
+    this.dcKeys.forEach((k, dc) => {
+      const raw = k && k.getKey && k.getKey();
+      if (raw) keys[dc] = Buffer.from(raw).toString('base64');
+    });
+    lsSet(LS.dcKeys, { owner: this.owner, keys });
+  }
+
+  getAuthKey(dcId) {
+    if (dcId && dcId !== this.dcId) return this.dcKeys.get(Number(dcId));
+    return super.getAuthKey(dcId);
+  }
+
+  setAuthKey(authKey, dcId) {
+    if (dcId && dcId !== this.dcId) {
+      if (authKey && authKey.getKey && authKey.getKey()) this.dcKeys.set(Number(dcId), authKey);
+      else this.dcKeys.delete(Number(dcId));
+      this.persistDcKeys();
+      return;
+    }
+    super.setAuthKey(authKey, dcId);
   }
 }
 
@@ -204,6 +259,7 @@ class TelegramService {
     this.connecting = (async () => {
       if (!this.client) {
         const session = new PersistentSession(lsGet(LS.session, ''));
+        await session.loadDcKeys().catch(() => {});
         this.client = new TelegramClient(session, API_ID, API_HASH, {
           connectionRetries: 5,
           useWSS: true,
@@ -275,7 +331,7 @@ class TelegramService {
     }
     this.client = null;
     this.authorized = false;
-    [LS.me, LS.channels, LS.posts, LS.seen].forEach(lsDel);
+    [LS.me, LS.channels, LS.posts, LS.seen, LS.dcKeys].forEach(lsDel);
     lsSet(LS.session, str);
   }
 
@@ -320,6 +376,7 @@ class TelegramService {
     if (this.client) this.client.session.disabled = true;
     lsDel(LS.session);
     lsDel(LS.me);
+    lsDel(LS.dcKeys);
     this.authorized = false;
   }
 
@@ -388,7 +445,8 @@ class TelegramService {
     let tail = `${photo.photoId}/${photo.dcId || 0}`;
     if (ctx) {
       this.peerContext = this.peerContext || new Map();
-      this.peerContext.set(key, ctx);
+      // A real comment beats the channel post the person was only listed under.
+      if (!ctx.weak || !this.peerContext.has(key)) this.peerContext.set(key, ctx);
       // The message the person was seen in travels inside the URL, so the photo
       // can still be fetched after a reload (when the user object is gone).
       const ctxKey = this.peerKeyOf(ctx.peer);
@@ -956,7 +1014,7 @@ class TelegramService {
     return peers.slice(0, 3).map((p) => {
       const key = p.userId != null ? `u${p.userId}` : `c${p.channelId || p.chatId}`;
       const e = people && people.get(key);
-      return e ? { id: Number(e.id), name: e.title || utils.getDisplayName(e), avatar: this.avatarUrl(e, false, { peer: msg.peerId, msgId: msg.id }) } : null;
+      return e ? { id: Number(e.id), name: e.title || utils.getDisplayName(e), avatar: this.avatarUrl(e, false, { peer: msg.peerId, msgId: msg.id, weak: true }) } : null;
     }).filter(Boolean);
   }
 
@@ -1271,17 +1329,24 @@ class TelegramService {
     if (!refresh && !offsetId && this.comments.has(key)) return this.comments.get(key);
     const client = await this.getClient();
     const entity = await this.channelEntity(channelId);
-    const replies = await client.getMessages(entity, { replyTo: msgId, limit, offsetId: offsetId || undefined });
+    // One raw request: every author comes with the response. (GramJS getMessages +
+    // getSender asked Telegram again for each "min" author: dozens of extra calls,
+    // FLOOD_WAIT and ~20 s before the thread opened.)
+    const res = await client.invoke(new Api.messages.GetReplies({
+      peer: entity, msgId, offsetId: offsetId || 0, offsetDate: 0, addOffset: 0, limit, maxId: 0, minId: 0, hash: bigInt.zero,
+    }));
+    const people = new Map();
+    for (const u of res.users || []) { people.set(`u${u.id}`, u); this.rememberEntity(u); }
+    for (const c of res.chats || []) { people.set(`c${c.id}`, c); this.rememberEntity(c); }
+    const replies = (res.messages || []).filter((m) => m instanceof Api.Message);
     const myId = this.me ? Number(this.me.id) : null;
     const byId = new Map();
     const list = [];
-    // Authors missing from the response are resolved in parallel, not one by one.
-    const senders = await Promise.all(replies.map((r) => (r && (r.message || r.media)
-      ? (r.sender || (r.getSender ? r.getSender().catch(() => null) : null))
-      : null)));
-    for (const [i, r] of replies.entries()) {
-      if (!r || (!r.message && !r.media)) continue;
-      const sender = senders[i];
+    for (const r of replies) {
+      if (!r.message && !r.media) continue;
+      const from = r.fromId || r.peerId; // anonymous admins post as the chat itself
+      const fromKey = this.peerKeyOf(from);
+      const sender = (fromKey && people.get(fromKey)) || (fromKey && this.entities.get(fromKey)) || null;
       const path = `${Number(r.peerId.channelId || 0)}/${r.id}`;
       this.commentMsgs.set(path, r);
       const reply = r.replyTo;
@@ -1305,7 +1370,7 @@ class TelegramService {
       list.push(item);
     }
     list.sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
-    const result = { comments: list, total: replies.total ?? list.length, has_more: replies.length >= limit };
+    const result = { comments: list, total: res.count ?? list.length, has_more: replies.length >= limit };
     if (!offsetId) this.comments.set(key, result);
     return result;
   }

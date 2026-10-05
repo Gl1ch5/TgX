@@ -147,7 +147,7 @@ function developerPage() {
       )}
       ${group(
         switchRow({ icon: 'st-power', color: 'ORANGE_DEEP', title: 'Telegram в отдельном потоке', sub: workerMode ? 'Включено — загрузка не тормозит интерфейс' : 'Как в Telegram Web A: быстрее при прокрутке', checked: p.workerMode, onchange: "window.TelegramX.setWorkerMode(this.checked)" }),
-        { title: 'Экспериментально', hint: 'Клиент Telegram (сеть, расшифровка, загрузка медиа) работает в отдельном потоке и не мешает интерфейсу. Применяется после перезапуска. Если что-то сломается — выключите.' },
+        { title: 'Производительность', hint: 'Клиент Telegram (сеть, расшифровка, загрузка медиа) работает в отдельном потоке и не мешает интерфейсу. Применяется после перезапуска. Если что-то сломается — выключите.' },
       )}
       ${group(
         row({ icon: 'download', color: 'BLUE', title: 'Экспорт логов', sub: `<span id="dev-logs">${logCount()}</span> записей + сведения об устройстве`, onclick: 'window.TelegramX.devExportLogs()' }) +

@@ -27,6 +27,12 @@ const shims = {
       contents: (await readFile(a.path, 'utf8')).replace(/if \(typeof alert !== "undefined"\) \{[\s\S]*?\}\n/, ''),
       loader: 'js',
     }));
+    // Connections to other DCs (files, avatars) closed after 30 s idle; reopening
+    // them on every scroll pause costs a handshake. Keep them for 10 minutes.
+    build.onLoad({ filter: /telegram[\\/]client[\\/]telegramBaseClient\.js$/ }, async (a) => ({
+      contents: (await readFile(a.path, 'utf8')).replace('EXPORTED_SENDER_RELEASE_TIMEOUT = 30000', 'EXPORTED_SENDER_RELEASE_TIMEOUT = 600000'),
+      loader: 'js',
+    }));
   },
 };
 

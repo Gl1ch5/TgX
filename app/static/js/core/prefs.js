@@ -6,6 +6,9 @@
 
 const KEY = 'telex.prefs';
 
+// Bumped when a default changes for everyone (saved prefs keep the old value otherwise).
+const MIGRATION = 1;
+
 export const ACCENTS = [
   { id: 'blue', fill: '#5a83f3', text: '#7595ff' },
   { id: 'classic', fill: '#3e88f7', text: '#62a5ff' },
@@ -29,7 +32,7 @@ const DEFAULTS = {
   syncRead: true,         // mark posts read in Telegram when seen on the wall
   bubbleRadius: 17,       // Telegram default message corner radius
   glass: true,            // backdrop blur under bars (off = solid, faster)
-  workerMode: false,      // experimental: GramJS in a Web Worker (applies after reload)
+  workerMode: true,       // GramJS in a Web Worker (applies after reload)
   devOverlay: false,      // developer: connection/ping badge
   devVerbose: false,      // developer: GramJS debug logging
 };
@@ -39,7 +42,13 @@ const listeners = new Set();
 
 function load() {
   try {
-    return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') };
+    const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    if ((saved.migration || 0) < MIGRATION && Object.keys(saved).length) {
+      saved.workerMode = true; // 3.12: worker mode is the default
+      saved.migration = MIGRATION;
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch {}
+    }
+    return { ...DEFAULTS, migration: MIGRATION, ...saved };
   } catch {
     return { ...DEFAULTS };
   }

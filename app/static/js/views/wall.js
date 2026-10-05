@@ -16,6 +16,7 @@ import { createPostCardElement, VERIFIED_BADGE_SVG } from '../components/postCar
 import { avatarHtml } from '../components/avatar.js';
 import { hydrateStickers } from '../components/sticker.js';
 import { observeAutoplay } from '../components/autoplay.js';
+import { warmComments } from './thread.js';
 
 const $ = (id) => document.getElementById(id);
 const show = (el, on) => el && el.classList.toggle('tx-hidden', !on);
@@ -161,8 +162,29 @@ const seenObserver = new IntersectionObserver((entries) => {
   }
 }, { threshold: 0.5 });
 
+// Posts that stay on screen get their comments loaded in the background.
+const warmTimers = new Map();
+const warmObserver = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    const el = e.target;
+    if (e.isIntersecting) {
+      if (!warmTimers.has(el)) {
+        warmTimers.set(el, setTimeout(() => {
+          warmTimers.delete(el);
+          warmComments(el.dataset.post);
+        }, 500));
+      }
+    } else if (warmTimers.has(el)) {
+      clearTimeout(warmTimers.get(el));
+      warmTimers.delete(el);
+    }
+  }
+}, { threshold: 0.3 });
+
 function track(card) {
-  if (state.isAuth) seenObserver.observe(card);
+  if (!state.isAuth) return;
+  seenObserver.observe(card);
+  if (card.dataset.post && card.querySelector('.tx-comments-row')) warmObserver.observe(card);
 }
 
 // ---------------- Feed ----------------
@@ -173,6 +195,9 @@ export function renderPosts() {
   container.innerHTML = '';
   seenTimers.forEach(clearTimeout);
   seenTimers.clear();
+  warmTimers.forEach(clearTimeout);
+  warmTimers.clear();
+  warmObserver.disconnect();
   appendPosts(state.posts);
 }
 
