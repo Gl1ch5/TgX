@@ -1925,17 +1925,17 @@
   "plural": false
  },
  {
+  "key": "Главная",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Каталог",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
   "key": "Установленные",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Сообщество",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2000,12 +2000,12 @@
   "plural": false
  },
  {
-  "key": "Опубликовать свой мод",
+  "key": "Опубликовать в каталог",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": "Репозиторий сообщества на GitHub",
+  "key": "Ваши моды увидят все пользователи TeleX: можно оценивать, ставить лайки и устанавливать в один клик.",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2121,6 +2121,11 @@
  },
  {
   "key": "Официальные моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщество",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2415,6 +2420,181 @@
   "plural": false
  },
  {
+  "key": "Моды TeleX",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Установлено: {a}",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "В каталоге: {a}",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Рекомендуем",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Для вас",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Категории",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Популярное",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Новинки",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать».",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Каталог сообщества недоступен, показаны официальные моды.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Инструменты",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод не найден",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Оценок: {a}",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Установок",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Автопроверка сервера",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Ваша оценка",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Моды из каталога сообщества не проверяются проектом: ставьте только то, чему доверяете.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Убрать из каталога",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Пожаловаться",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Спасибо за оценку",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Пожаловаться на мод",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Если мод опасен или нарушает правила, он будет скрыт после нескольких жалоб.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Жалоба отправлена",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Убрать из каталога?",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод пропадёт из каталога для всех. На ваших устройствах он останется.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Убрать",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод убран из каталога",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Своих модов пока нет. Установите мод из файла или создайте его с помощью нейросети.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "в каталоге",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Опубликовать",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Опубликовать «{a}»?",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод станет доступен всем в каталоге TeleX: его смогут находить, оценивать и устанавливать. Публикуйте только свою работу и не добавляйте в код ничего вредного.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод обновлён в каталоге",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Мод опубликован",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
+  "key": "Каталог недоступен. Попробуйте позже.",
+  "where": "js/views/store.js",
+  "plural": false
+ },
+ {
   "key": "нет комментариев",
   "where": "js/views/thread.js",
   "plural": false
@@ -2521,11 +2701,6 @@
  },
  {
   "key": "все ваши каналы",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Популярное",
   "where": "index.html",
   "plural": false
  },

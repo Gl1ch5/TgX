@@ -1,5 +1,5 @@
 {
- "build": "a0ceed6adb",
+ "build": "d5311fec48",
  "files": [
   "./",
   "index.html",
@@ -52,6 +52,7 @@
   "js/core/modsApi.js",
   "js/core/nav.js",
   "js/core/prefs.js",
+  "js/core/store.js",
   "js/emoji-data.js",
   "js/emoji.js",
   "js/i18n.js",
@@ -75,6 +76,7 @@
   "js/views/channel.js",
   "js/views/profile.js",
   "js/views/settings.js",
+  "js/views/store.js",
   "js/views/thread.js",
   "js/views/wall.js",
   "icons/1000017092.svg",

@@ -1,0 +1,10 @@
+{
+  "name": "telex-mod-store-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mod store API for TeleX: publish, search, likes, ratings, downloads, recommendations. No dependencies.",
+  "main": "index.js",
+  "scripts": { "start": "node index.js", "test": "node test.js" },
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

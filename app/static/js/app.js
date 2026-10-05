@@ -31,6 +31,7 @@ import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import { APP_VERSION } from './version.js';
 import { tgDialog } from './core/dialog.js';
+import * as storeUi from './views/store.js';
 import { maybeOnboard, resetOnboarding } from './components/onboarding.js';
 import { startMods, reapplyModVars, listMods, disableAllMods } from './core/mods.js';
 import { ext } from './core/ext.js';
@@ -96,7 +97,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
-  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod, installPreset: settings.installPresetMod, setModsTab: settings.setModsTab, setModsQuery: settings.setModsQuery, setModsCat: settings.setModsCat, installCommunity: settings.installCommunityMod, copyAiPrompt: settings.copyAiPrompt, installFromClipboard: settings.installFromClipboard,
+  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet, installOfficial: settings.installOfficialMod, installPreset: settings.installPresetMod, setModsTab: settings.setModsTab, fillSetsInto: settings.fillSetsInto, storeInstall: storeUi.storeInstall, storeLike: storeUi.storeLike, storeRate: storeUi.storeRate, storeReport: storeUi.storeReport, storeUnpublish: storeUi.storeUnpublish, storePublish: storeUi.storePublish, setModsQuery: settings.setModsQuery, setModsCat: settings.setModsCat, installCommunity: settings.installCommunityMod, copyAiPrompt: settings.copyAiPrompt, installFromClipboard: settings.installFromClipboard,
   setWorkerMode: settings.setWorkerMode,
 
   // Profile

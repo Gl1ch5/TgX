@@ -23,6 +23,8 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { ext } from '../core/ext.js';
+import * as storeUi from './store.js';
+import { storeOnline } from '../core/store.js';
 import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modPicHtml, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, loadPresets, installPreset, installOfficial, loadCommunity, installCommunity, loadAiPrompt, cleanPasted } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
@@ -45,10 +47,14 @@ function render() {
   if (!el) return;
   const prevPage = shownPage;
   const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage, ai: aiPage };
-  el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : page.startsWith('set:') ? () => setPage(page.slice(4)) : rootPage))();
+  el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : page.startsWith('set:') ? () => setPage(page.slice(4)) : page.startsWith('store:') ? () => storeUi.storePage() : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
   if (page === 'mods') { initModsSwipe(); requestAnimationFrame(() => placeModTabs(prevPage === 'mods')); }
-  if (page === 'mods') { if (modsTab === 'catalog') { fillSets(); fillOfficial(); } if (modsTab === 'community') fillCommunity(); }
+  if (page === 'mods') {
+    if (modsTab === 'home') storeUi.fillHome();
+    if (modsTab === 'catalog') { fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat).then(() => { if (storeOnline() === false) fillCommunity(); }); }
+  }
+  if (page.startsWith('store:')) storeUi.fillStorePage(page.slice(6));
   if (page.startsWith('set:')) fillSet(page.slice(4));
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
   // a sub-page slides in from the right, going back slides the list in from the left; groups rise one by one
@@ -528,10 +534,10 @@ function extPage(key) {
   return `${titleBar(pg ? pg.title : '', { back: true })}<div class="tx-page"><div id="xp-box"></div></div>`;
 }
 
-let modsTab = 'catalog';
+let modsTab = 'home';
 let modsQuery = '';
 let modsCat = 'all';
-const modsTabs = () => [['catalog', t('Каталог')], ['installed', t('Установленные')], ['community', t('Сообщество')], ['create', t('Создать')]];
+const modsTabs = () => [['home', t('Главная')], ['catalog', t('Каталог')], ['installed', t('Установленные')], ['create', t('Создать')]];
 const MOD_CATS = () => [['all', t('Все')], ['theme', t('Темы')], ['feed', t('Лента')], ['widget', t('Виджеты')], ['ai', t('ИИ')]];
 
 export function setModsTab(tab, dir = 0) {
@@ -596,8 +602,8 @@ function initModsSwipe() {
   }, { passive: true });
 }
 
-export function setModsQuery(q) { modsQuery = String(q || '').trim().toLowerCase(); fillSets(); fillOfficial(); }
-export function setModsCat(c) { modsCat = c; document.querySelectorAll('.tx-chipbar button').forEach((b) => b.classList.toggle('is-active', b.dataset.c === c)); fillSets(); fillOfficial(); }
+export function setModsQuery(q) { modsQuery = String(q || '').trim().toLowerCase(); fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat); }
+export function setModsCat(c) { modsCat = c; document.querySelectorAll('.tx-chipbar button').forEach((b) => b.classList.toggle('is-active', b.dataset.c === c)); fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat); }
 
 function modsPage() {
   const list = listMods();
@@ -621,10 +627,12 @@ function modsPage() {
   }).join('');
   const tabs = `<nav class="tx-tabs tx-glass tx-modtabs"><i class="tx-tab-ind"></i>${modsTabs().map(([id, label]) => `<button class="tx-tab ${modsTab === id ? 'is-active' : ''}" onclick="window.TelegramX.setModsTab('${id}')">${escapeHtml(label)}${id === 'installed' && list.length ? ` <span class="tx-badge">${list.length}</span>` : ''}</button>`).join('')}</nav>`;
   let body = '';
-  if (modsTab === 'catalog') {
+  if (modsTab === 'home') {
+    body = `<div id="mod-home"></div>`;
+  } else if (modsTab === 'catalog') {
     body = `<label class="tx-search tx-modsearch"><i class="icon icon-search"></i><input type="search" id="mod-q" placeholder="${t('Поиск модов')}" value="${escapeHtml(modsQuery)}" autocomplete="off" oninput="window.TelegramX.setModsQuery(this.value)"></label>
       <div class="tx-chipbar" data-noswipe>${MOD_CATS().map(([c, label]) => `<button data-c="${c}" class="${modsCat === c ? 'is-active' : ''}" onclick="window.TelegramX.setModsCat('${c}')">${escapeHtml(label)}</button>`).join('')}</div>
-      <div id="mod-sets"></div><div id="mod-official"></div>`;
+      <div id="mod-sets"></div><div id="mod-official"></div><div id="mod-store"></div><div id="mod-community"></div>`;
   } else if (modsTab === 'installed') {
     body = list.length
       ? `<div class="tx-group tx-instlist">${list.map((m) => {
@@ -633,10 +641,10 @@ function modsPage() {
         return `<div class="tx-setrow" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">${modThumb(m).replace('class="tx-mod-pic', 'class="tx-mod-pic')}<span class="tx-setrow-t"><b>${escapeHtml(modL(mf.name))}</b><small>${sub}</small></span><span class="tx-mod-acts" onclick="event.stopPropagation()"><label class="tx-switch"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label></span></div>`;
       }).join('')}</div>`
       : `<div class="tx-modempty"><span class="tx-modempty-ic"><i class="icon icon-tools"></i></span><b>${t('Модов пока нет')}</b><span>${t('Откройте «Каталог» и установите первый мод.')}</span><button class="tx-btn" onclick="window.TelegramX.setModsTab('catalog')">${t('Открыть каталог')}</button></div>`;
-  } else if (modsTab === 'community') {
-    body = `<div id="mod-community"></div>${group(row({ icon: 'add', color: 'ORANGE', title: t('Опубликовать свой мод'), sub: t('Репозиторий сообщества на GitHub'), onclick: `window.open('${COMMUNITY_REPO_URL}', '_blank', 'noopener')` }))}`;
   } else {
     body = `
+      <div class="tx-group"><div class="tx-group-title">${t('Опубликовать в каталог')}</div>${storeUi.publishList()}</div>
+      <div class="tx-group-hint" style="margin-top:-6px">${t('Ваши моды увидят все пользователи TeleX: можно оценивать, ставить лайки и устанавливать в один клик.')}</div>
       ${group(
         row({ icon: 'code', color: 'PURPLE', title: t('Скопировать промпт для нейросети'), sub: t('Вставьте его в нейросеть и опишите нужный мод'), onclick: 'window.TelegramX.copyAiPrompt()' }) +
         row({ icon: 'copy', color: 'GREEN', title: t('Вставить мод из буфера'), sub: t('Готовый файл от нейросети — одним нажатием'), onclick: 'window.TelegramX.installFromClipboard()' }),
@@ -696,13 +704,14 @@ async function fillSet(id) {
     ${pending ? `<div class="tx-setbar"><button class="tx-btn" onclick="window.TelegramX.installPreset('${p.id}')">${t('Установить всё')} · ${pending}</button></div>` : `<div class="tx-group-hint" style="text-align:center">${t('Весь набор уже установлен')}</div>`}`;
 }
 
-async function fillSets() {
-  const box = document.getElementById('mod-sets');
+export async function fillSetsInto(id) { return fillSets(id, true); }
+async function fillSets(boxId = 'mod-sets', force = false) {
+  const box = document.getElementById(boxId);
   if (!box) return;
   let sets, cat;
   try { sets = await loadPresets(); cat = await loadCatalog(); } catch { return; }
-  if (!document.getElementById('mod-sets')) return;
-  if (!sets.length || modsQuery || modsCat !== 'all') { box.innerHTML = ''; return; }
+  if (!document.getElementById(boxId)) return;
+  if (!sets.length || (!force && (modsQuery || modsCat !== 'all'))) { box.innerHTML = ''; return; }
   const cards = sets.map((p) => {
     const icons = p.mods.map((mid) => cat.find((c) => c.id === mid)).filter(Boolean).slice(0, 4).map((c) => {
       const ic = modIcon(c.icon);
@@ -973,6 +982,8 @@ export function rerenderSettings() {
     window.scrollTo({ top: y });
   }
 }
+
+storeUi.bindStore(() => rerenderSettings());
 
 export function filterWallChannels(q) {
   channelFilter = q.toLowerCase().trim();

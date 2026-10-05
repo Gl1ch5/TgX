@@ -1,0 +1,56 @@
+name: Deploy mod store API
+
+# Installs / updates the mod store API (server/) on your own server over SSH.
+# Secrets: DEPLOY_HOST, DEPLOY_USER and DEPLOY_PASSWORD or DEPLOY_SSH_KEY (see server/README.md).
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'Public domain of the API (its DNS A record must point to the server), e.g. api.telex-web.ru'
+        required: false
+        default: 'api.telex-web.ru'
+      email:
+        description: 'E-mail for the HTTPS certificate (Let''s Encrypt); empty = skip HTTPS'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: API tests
+        run: node server/test.js
+      - name: Check secrets
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER_: ${{ secrets.DEPLOY_USER }}
+        run: |
+          [ -n "$HOST" ] && [ -n "$USER_" ] || { echo "::error::Add the secrets DEPLOY_HOST and DEPLOY_USER (and DEPLOY_PASSWORD or DEPLOY_SSH_KEY)"; exit 1; }
+      - name: Copy and install on the server
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER_: ${{ secrets.DEPLOY_USER }}
+          PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DOMAIN: ${{ inputs.domain }}
+          EMAIL: ${{ inputs.email }}
+        run: |
+          set -e
+          mkdir -p ~/.ssh
+          OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=20"
+          if [ -n "$SSH_KEY" ]; then
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key; chmod 600 ~/.ssh/deploy_key
+            SSH="ssh $OPTS -i ~/.ssh/deploy_key"; SCP="scp $OPTS -i ~/.ssh/deploy_key"
+          else
+            sudo apt-get install -y -qq sshpass
+            export SSHPASS="$PASSWORD"
+            SSH="sshpass -e ssh $OPTS"; SCP="sshpass -e scp $OPTS"
+          fi
+          $SSH "$USER_@$HOST" 'rm -rf /tmp/telex-api && mkdir -p /tmp/telex-api'
+          $SCP server/index.js server/package.json server/install.sh "$USER_@$HOST:/tmp/telex-api/"
+          SUDO=""; [ "$USER_" = root ] || SUDO="sudo"
+          $SSH "$USER_@$HOST" "cd /tmp/telex-api && $SUDO env DOMAIN='$DOMAIN' EMAIL='$EMAIL' bash install.sh"

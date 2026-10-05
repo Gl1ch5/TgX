@@ -1,0 +1,35 @@
+// Smoke test of the API: node test.js  (starts its own server on a temp port and data dir)
+const { spawn } = require('node:child_process');
+const os = require('node:os'); const fs = require('node:fs'); const path = require('node:path');
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'telex-api-'));
+const srv = spawn(process.execPath, [path.join(__dirname, 'index.js')], { env: { ...process.env, PORT: '18787', DATA_DIR: dir, ADMIN_TOKEN: 'adm' }, stdio: ['ignore', 'pipe', 'inherit'] });
+const base = 'http://127.0.0.1:18787/api';
+const dev = 'device_aaaaaaaaaaaaaaaa'; const dev2 = 'device_bbbbbbbbbbbbbbbb'; const tok = 'tok_' + 'x'.repeat(30);
+const call = async (m, p, body, h = {}) => { const r = await fetch(base + p, { method: m, headers: { 'content-type': 'application/json', 'x-device': dev, ...h }, body: body ? JSON.stringify(body) : undefined }); const t = await r.text(); let j; try { j = JSON.parse(t); } catch { j = t; } return [r.status, j]; };
+let fails = 0; const ok = (c, msg) => { console.log((c ? 'ok   ' : 'FAIL ') + msg); if (!c) fails++; };
+const mod = (id, extra = '') => `// @manifest {"id":"${id}","name":"Mod ${id}","version":"1.0.0","tags":["theme"],"description":"d"}\n// @part js\nexport default function (tx) { ${extra} }`;
+(async () => {
+  await new Promise((r) => setTimeout(r, 600));
+  let [s, j] = await call('GET', '/health'); ok(s === 200 && j.ok, 'health');
+  [s, j] = await call('POST', '/mods', { module: mod('alpha') }, { 'x-author-token': tok }); ok(s === 201 && j.mod.id === 'alpha', 'publish');
+  [s, j] = await call('POST', '/mods', { module: mod('alpha') }, { 'x-author-token': 'tok_' + 'y'.repeat(30) }); ok(s === 403, 'foreign token cannot overwrite');
+  [s, j] = await call('POST', '/mods', { module: mod('alpha', 'tx.toast("v2")') }, { 'x-author-token': tok }); ok(s === 200 && j.updated, 'owner updates');
+  [s, j] = await call('POST', '/mods', { module: mod('evil', 'localStorage.getItem("telex.session")') }, { 'x-author-token': tok }); ok(s === 400, 'session stealer rejected');
+  [s, j] = await call('POST', '/mods', { module: mod('warn', 'eval("1")') }, { 'x-author-token': tok }); ok(s === 201 && j.mod.flags.length === 1, 'eval flagged');
+  [s, j] = await call('POST', '/mods', { module: 'garbage' }, { 'x-author-token': tok }); ok(s === 400, 'invalid file rejected');
+  [s, j] = await call('POST', '/mods/alpha/like', { on: true }); ok(s === 200 && j.likes === 1, 'like');
+  [s, j] = await call('POST', '/mods/alpha/like', { on: true }); ok(j.likes === 1, 'like is idempotent per device');
+  [s, j] = await call('POST', '/mods/alpha/like', { on: true }, { 'x-device': dev2 }); ok(j.likes === 2, 'second device likes');
+  [s, j] = await call('POST', '/mods/alpha/rate', { value: 5 }); [s, j] = await call('POST', '/mods/alpha/rate', { value: 3 }, { 'x-device': dev2 }); ok(j.rating === 4 && j.ratings === 2, 'rating average');
+  [s, j] = await call('POST', '/mods/alpha/download'); [s, j] = await call('POST', '/mods/alpha/download'); ok(j.downloads === 1, 'download counted once per device/day');
+  [s, j] = await call('GET', '/mods?q=alpha'); ok(j.total === 1 && j.items[0].likes === 2, 'search');
+  [s, j] = await call('GET', '/mods?category=theme&sort=new'); ok(j.total === 2, 'category filter');
+  [s, j] = await call('GET', '/mods/alpha/file'); ok(typeof j === 'string' && j.includes('tx.toast("v2")'), 'file download');
+  [s, j] = await call('GET', '/home?installed=alpha'); ok(Array.isArray(j.featured) && j.recommended.every((m) => m.id !== 'alpha'), 'home excludes installed from recommendations');
+  [s, j] = await call('GET', '/mods/alpha'); ok(j.liked === true && j.myRating === 5, 'detail has my like and rating');
+  for (const d of ['device_cccccccccccccccc', 'device_dddddddddddddddd', 'device_eeeeeeeeeeeeeeee']) await call('POST', '/mods/warn/report', { reason: 'bad' }, { 'x-device': d });
+  [s, j] = await call('GET', '/mods/warn'); ok(s === 404, 'three reports hide a mod');
+  [s, j] = await call('DELETE', '/mods/alpha', null, { 'x-author-token': tok }); ok(s === 200, 'owner deletes');
+  srv.kill(); fs.rmSync(dir, { recursive: true, force: true });
+  console.log(fails ? `${fails} FAILED` : 'ALL GOOD'); process.exit(fails ? 1 : 0);
+})();

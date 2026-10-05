@@ -4,7 +4,7 @@
   "description": "TeleX — Telegram web client. Dev tooling only: the app itself is static files in app/static.",
   "scripts": {
     "serve": "python3 -m http.server 8765 --directory app/static",
-    "test": "node tools/build-preload.mjs --check && node tools/build-precache.mjs --check && node tools/test/smoke.cjs",
+    "test": "node server/test.js && node tools/build-preload.mjs --check && node tools/build-precache.mjs --check && node tools/test/smoke.cjs",
     "i18n": "node tools/i18n/extract.mjs && node tools/i18n/build.mjs",
     "build:gramjs": "cd tools/gramjs && npm ci && node build.mjs ../../app/static/js/vendor/gramjs.js",
     "precache": "node tools/build-preload.mjs && node tools/build-precache.mjs"

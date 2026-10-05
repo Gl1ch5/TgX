@@ -429,8 +429,6 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Готовый файл от нейросети — одним нажатием ‖ The ready file from the AI — in one tap ‖ El archivo listo de la IA, con un toque ‖ O arquivo pronto da IA, com um toque ‖ Готовий файл від нейромережі — одним дотиком
 Мод с помощью нейросети ‖ A mod made by an AI ‖ Un mod hecho con IA ‖ Um mod feito por IA ‖ Мод за допомогою нейромережі
 1. Нажмите «Скопировать промпт». 2. Вставьте его в нейросеть и допишите, какой мод нужен. 3. Скопируйте ответ нейросети и нажмите «Вставить мод из буфера». ‖ 1. Tap "Copy the prompt". 2. Paste it into an AI and add which mod you need. 3. Copy the AI's answer and tap "Paste mod from clipboard". ‖ 1. Toca «Copiar el prompt». 2. Pégalo en una IA y añade qué mod necesitas. 3. Copia la respuesta de la IA y toca «Pegar mod del portapapeles». ‖ 1. Toque em «Copiar o prompt». 2. Cole em uma IA e acrescente qual mod você precisa. 3. Copie a resposta da IA e toque em «Colar mod da área de transferência». ‖ 1. Натисніть «Скопіювати промпт». 2. Вставте його в нейромережу й допишіть, який мод потрібен. 3. Скопіюйте відповідь нейромережі й натисніть «Вставити мод із буфера».
-Опубликовать свой мод ‖ Publish your mod ‖ Publicar tu mod ‖ Publicar seu mod ‖ Опублікувати свій мод
-Репозиторий сообщества на GitHub ‖ Community repository on GitHub ‖ Repositorio de la comunidad en GitHub ‖ Repositório da comunidade no GitHub ‖ Репозиторій спільноти на GitHub
 Сообщество ‖ Community ‖ Comunidad ‖ Comunidade ‖ Спільнота
 Моды сообщества не проверяются проектом: ставьте только то, чему доверяете. ‖ Community mods are not reviewed by the project: install only what you trust. ‖ El proyecto no revisa los mods de la comunidad: instala solo lo que merezca tu confianza. ‖ O projeto não revisa os mods da comunidade: instale apenas o que merece confiança. ‖ Моди спільноти проєкт не перевіряє: ставте лише те, чому довіряєте.
 Промпт скопирован — вставьте его в нейросеть ‖ Prompt copied — paste it into an AI ‖ Prompt copiado: pégalo en una IA ‖ Prompt copiado — cole em uma IA ‖ Промпт скопійовано — вставте його в нейромережу
@@ -516,3 +514,40 @@ Groq не принял этот ключ. Проверьте, что скопи�
 ИИ ‖ AI ‖ IA ‖ IA ‖ ШІ
 Поиск модов ‖ Search mods ‖ Buscar mods ‖ Buscar mods ‖ Пошук модів
 Ничего не найдено ‖ Nothing found ‖ No se encontró nada ‖ Nada encontrado ‖ Нічого не знайдено
+Главная ‖ Home ‖ Inicio ‖ Início ‖ Головна
+Опубликовать в каталог ‖ Publish to the catalog ‖ Publicar en el catálogo ‖ Publicar no catálogo ‖ Опублікувати в каталог
+Ваши моды увидят все пользователи TeleX: можно оценивать, ставить лайки и устанавливать в один клик. ‖ Everyone in TeleX will see your mods: they can rate, like and install them in one tap. ‖ Todos los usuarios de TeleX verán tus mods: podrán valorarlos, darles me gusta e instalarlos con un toque. ‖ Todos os usuários do TeleX verão seus mods: poderão avaliar, curtir e instalar com um toque. ‖ Ваші моди побачать усі користувачі TeleX: можна оцінювати, ставити вподобайки й встановлювати одним дотиком.
+Моды TeleX ‖ TeleX mods ‖ Mods de TeleX ‖ Mods do TeleX ‖ Моди TeleX
+Установлено: {a} ‖ Installed: {a} ‖ Instalados: {a} ‖ Instalados: {a} ‖ Встановлено: {a}
+В каталоге: {a} ‖ In the catalog: {a} ‖ En el catálogo: {a} ‖ No catálogo: {a} ‖ У каталозі: {a}
+Рекомендуем ‖ Featured ‖ Destacados ‖ Em destaque ‖ Рекомендуємо
+Для вас ‖ For you ‖ Para ti ‖ Para você ‖ Для вас
+Категории ‖ Categories ‖ Categorías ‖ Categorias ‖ Категорії
+Новинки ‖ New ‖ Novedades ‖ Novidades ‖ Новинки
+В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать». ‖ There are no community mods yet. Publish the first one on the Create tab. ‖ Aún no hay mods de la comunidad. Publica el primero en la pestaña Crear. ‖ Ainda não há mods da comunidade. Publique o primeiro na aba Criar. ‖ У каталозі поки немає модів спільноти. Опублікуйте перший на вкладці «Створити».
+Каталог сообщества недоступен, показаны официальные моды. ‖ The community catalog is unavailable; showing official mods. ‖ El catálogo de la comunidad no está disponible; se muestran los mods oficiales. ‖ O catálogo da comunidade está indisponível; mostrando os mods oficiais. ‖ Каталог спільноти недоступний, показано офіційні моди.
+Инструменты ‖ Tools ‖ Herramientas ‖ Ferramentas ‖ Інструменти
+Мод не найден ‖ Mod not found ‖ Mod no encontrado ‖ Mod não encontrado ‖ Мод не знайдено
+Оценок: {a} ‖ Ratings: {a} ‖ Valoraciones: {a} ‖ Avaliações: {a} ‖ Оцінок: {a}
+Установок ‖ Installs ‖ Instalaciones ‖ Instalações ‖ Встановлень
+Автопроверка сервера ‖ Server auto-check ‖ Revisión automática del servidor ‖ Verificação automática do servidor ‖ Автоперевірка сервера
+Ваша оценка ‖ Your rating ‖ Tu valoración ‖ Sua avaliação ‖ Ваша оцінка
+Моды из каталога сообщества не проверяются проектом: ставьте только то, чему доверяете. ‖ Mods from the community catalog are not reviewed by the project: install only what you trust. ‖ El proyecto no revisa los mods del catálogo de la comunidad: instala solo lo que merezca tu confianza. ‖ O projeto não revisa os mods do catálogo da comunidade: instale apenas o que você confia. ‖ Моди з каталогу спільноти не перевіряються проєктом: встановлюйте лише те, чому довіряєте.
+Убрать из каталога ‖ Remove from the catalog ‖ Quitar del catálogo ‖ Remover do catálogo ‖ Прибрати з каталогу
+Пожаловаться ‖ Report ‖ Denunciar ‖ Denunciar ‖ Поскаржитися
+Спасибо за оценку ‖ Thanks for rating ‖ Gracias por valorar ‖ Obrigado pela avaliação ‖ Дякуємо за оцінку
+Пожаловаться на мод ‖ Report this mod ‖ Denunciar este mod ‖ Denunciar este mod ‖ Поскаржитися на мод
+Если мод опасен или нарушает правила, он будет скрыт после нескольких жалоб. ‖ If a mod is dangerous or breaks the rules, it is hidden after several reports. ‖ Si un mod es peligroso o infringe las reglas, se oculta tras varias denuncias. ‖ Se um mod for perigoso ou violar as regras, ele é ocultado após várias denúncias. ‖ Якщо мод небезпечний або порушує правила, його буде приховано після кількох скарг.
+Жалоба отправлена ‖ Report sent ‖ Denuncia enviada ‖ Denúncia enviada ‖ Скаргу надіслано
+Убрать из каталога? ‖ Remove from the catalog? ‖ ¿Quitar del catálogo? ‖ Remover do catálogo? ‖ Прибрати з каталогу?
+Мод пропадёт из каталога для всех. На ваших устройствах он останется. ‖ The mod disappears from the catalog for everyone. It stays on your devices. ‖ El mod desaparecerá del catálogo para todos. Seguirá en tus dispositivos. ‖ O mod sairá do catálogo para todos. Continuará nos seus dispositivos. ‖ Мод зникне з каталогу для всіх. На ваших пристроях він залишиться.
+Убрать ‖ Remove ‖ Quitar ‖ Remover ‖ Прибрати
+Мод убран из каталога ‖ Mod removed from the catalog ‖ Mod quitado del catálogo ‖ Mod removido do catálogo ‖ Мод прибрано з каталогу
+Своих модов пока нет. Установите мод из файла или создайте его с помощью нейросети. ‖ You have no mods of your own yet. Install one from a file or create it with a neural network. ‖ Aún no tienes mods propios. Instala uno desde un archivo o créalo con una red neuronal. ‖ Você ainda não tem mods próprios. Instale um de um arquivo ou crie com uma rede neural. ‖ Власних модів поки немає. Встановіть мод із файлу або створіть його за допомогою нейромережі.
+в каталоге ‖ in the catalog ‖ en el catálogo ‖ no catálogo ‖ у каталозі
+Опубликовать ‖ Publish ‖ Publicar ‖ Publicar ‖ Опублікувати
+Опубликовать «{a}»? ‖ Publish “{a}”? ‖ ¿Publicar «{a}»? ‖ Publicar «{a}»? ‖ Опублікувати «{a}»?
+Мод станет доступен всем в каталоге TeleX: его смогут находить, оценивать и устанавливать. Публикуйте только свою работу и не добавляйте в код ничего вредного. ‖ The mod becomes available to everyone in the TeleX catalog: people can find, rate and install it. Publish only your own work and put nothing harmful in the code. ‖ El mod estará disponible para todos en el catálogo de TeleX: podrán encontrarlo, valorarlo e instalarlo. Publica solo tu trabajo y no añadas nada dañino. ‖ O mod ficará disponível para todos no catálogo do TeleX: poderão encontrá-lo, avaliá-lo e instalá-lo. Publique só o seu trabalho e não ponha nada prejudicial no código. ‖ Мод стане доступним усім у каталозі TeleX: його зможуть знаходити, оцінювати й встановлювати. Публікуйте лише власну роботу й не додавайте в код нічого шкідливого.
+Мод обновлён в каталоге ‖ Mod updated in the catalog ‖ Mod actualizado en el catálogo ‖ Mod atualizado no catálogo ‖ Мод оновлено в каталозі
+Мод опубликован ‖ Mod published ‖ Mod publicado ‖ Mod publicado ‖ Мод опубліковано
+Каталог недоступен. Попробуйте позже. ‖ The catalog is unavailable. Try again later. ‖ El catálogo no está disponible. Inténtalo más tarde. ‖ O catálogo está indisponível. Tente mais tarde. ‖ Каталог недоступний. Спробуйте пізніше.
