@@ -49,6 +49,12 @@ function storeRow(m, i) {
   return `<div class="tx-setrow" onclick="window.TelegramX.openSettingsPage('store:${m.id}')"><span class="tx-rank">${i + 1}</span>${modPicHtml(m.icon, m.name)}<span class="tx-setrow-t"><b>${escapeHtml(L(m.name))}</b><small class="tx-stats">${statLine(m)}</small></span><button class="tx-mod-get ${st === 'open' ? 'is-done' : ''}" onclick="event.stopPropagation(); ${act}">${label}</button></div>`;
 }
 
+/** Shared look of every mod page (installed, official, store): hero + stat tiles. */
+export function detailHero({ pic, name, verified, sub, tags = [] }) {
+  return `<div class="tx-mdhero">${pic.replace('class="tx-mod-pic', 'class="tx-mod-pic is-big')}<h2>${escapeHtml(name)}${verified ? ' <i class="tx-verified"></i>' : ''}</h2><small>${escapeHtml(sub || '')}</small>${tags.length ? `<div class="tx-mod-tags">${tags.map((x) => `<span class="tx-mod-tag">${escapeHtml(String(x))}</span>`).join('')}</div>` : ''}</div>`;
+}
+export const statTiles = (items) => `<div class="tx-bigstats">${items.map(([v, l]) => `<div><b>${escapeHtml(String(v))}</b><small>${escapeHtml(l)}</small></div>`).join('')}</div>`;
+
 const section = (title, body, more = '') => `<div class="tx-sec"><div class="tx-sec-h"><b>${escapeHtml(title)}</b>${more}</div>${body}</div>`;
 
 // ---------------------------------------------------------------- home tab
@@ -56,25 +62,28 @@ const section = (title, body, more = '') => `<div class="tx-sec"><div class="tx-
 export async function fillHome() {
   const box = document.getElementById('mod-home');
   if (!box) return;
-  let home = null;
-  try { home = await store.storeHome(); } catch {}
-  if (!document.getElementById('mod-home')) return;
   const mods = listMods();
   const catCards = (cats) => `<div class="tx-catgrid">${cats.map((c) => `<button onclick="window.TelegramX.setModsCat('${c.id}'); window.TelegramX.setModsTab('catalog')"><i class="icon icon-${CAT_ICON[c.id] || 'tools'}"></i><b>${escapeHtml(CAT_NAME()[c.id] || c.id)}</b>${c.count != null ? `<small>${c.count}</small>` : ''}</button>`).join('')}</div>`;
-  let html = `<div class="tx-modhero"><span class="tx-modhero-ic"><i class="icon icon-tools"></i></span><div><b>${t('Моды TeleX')}</b><small>${t('Установлено: {a}', { a: mods.filter((m) => m.enabled).length })}${home ? ' · ' + t('В каталоге: {a}', { a: home.total }) : ''}</small></div></div><div id="home-sets"></div>`;
-  if (home && home.total) {
-    if (home.featured.length) html += section(t('Рекомендуем'), `<div class="tx-hscroll" data-noswipe>${home.featured.map(storeMini).join('')}</div>`);
-    if (home.recommended.length) html += section(t('Для вас'), `<div class="tx-hscroll" data-noswipe>${home.recommended.map(storeMini).join('')}</div>`);
-    html += section(t('Категории'), catCards(home.categories));
-    if (home.trending.length) html += `<div class="tx-sec"><div class="tx-sec-h"><b>${t('Популярное')}</b></div><div class="tx-group tx-instlist">${home.trending.slice(0, 8).map(storeRow).join('')}</div></div>`;
-    if (home.newest.length) html += section(t('Новинки'), `<div class="tx-hscroll" data-noswipe>${home.newest.map(storeMini).join('')}</div>`);
-  } else {
-    // offline or the store is empty: the built-in catalog speaks for itself
-    html += `${catCards(['theme', 'feed', 'widget', 'ai'].map((id) => ({ id })))}`;
-    html += `<div class="tx-group-hint" style="text-align:center">${home ? t('В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать».') : t('Каталог сообщества недоступен, показаны официальные моды.')}</div>`;
-  }
-  box.innerHTML = html;
-  window.TelegramX.fillSetsInto('home-sets');
+  const hero = (home) => `<div class="tx-modhero"><span class="tx-modhero-ic"><i class="icon icon-tools"></i></span><div><b>${t('Моды TeleX')}</b><small>${t('Установлено: {a}', { a: mods.filter((m) => m.enabled).length })}${home ? ' · ' + t('В каталоге: {a}', { a: home.total }) : ''}</small></div></div><div id="home-sets"></div>`;
+  const draw = (home) => {
+    let html = hero(home);
+    if (home && home.total) {
+      if (home.featured.length) html += section(t('Рекомендуем'), `<div class="tx-hscroll" data-noswipe>${home.featured.map(storeMini).join('')}</div>`);
+      if (home.recommended.length) html += section(t('Для вас'), `<div class="tx-hscroll" data-noswipe>${home.recommended.map(storeMini).join('')}</div>`);
+      html += section(t('Категории'), catCards(home.categories));
+      if (home.trending.length) html += `<div class="tx-sec"><div class="tx-sec-h"><b>${t('Популярное')}</b></div><div class="tx-group tx-instlist">${home.trending.slice(0, 8).map(storeRow).join('')}</div></div>`;
+      if (home.newest.length) html += section(t('Новинки'), `<div class="tx-hscroll" data-noswipe>${home.newest.map(storeMini).join('')}</div>`);
+    } else {
+      html += catCards(['theme', 'feed', 'widget', 'ai'].map((id) => ({ id })));
+      if (home) html += `<div class="tx-group-hint" style="text-align:center">${t('В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать».')}</div>`;
+    }
+    box.innerHTML = html;
+    window.TelegramX.fillSetsInto('home-sets');
+  };
+  draw(null); // shown at once; the store sections replace it when the server answers (or from the 45 s cache)
+  let home = null;
+  try { home = await store.storeHome(); } catch {}
+  if (home && document.getElementById('mod-home')) draw(home);
 }
 
 const CAT_ICON = { theme: 'brush', feed: 'channel', widget: 'clock', ai: 'ai', tools: 'tools' };
@@ -108,9 +117,8 @@ export async function fillStorePage(id) {
   const act = st === 'open' ? `window.TelegramX.openSettingsPage('mod:${m.id}')` : `window.TelegramX.storeInstall('${m.id}')`;
   const my = m.myRating || 0;
   box.innerHTML = `
-    <div class="tx-mod-hero">${modPicHtml(m.icon, m.name).replace('class="tx-mod-pic', 'class="tx-mod-pic is-big')}</div>
-    <div class="tx-mod-meta"><div class="tx-mod-title">${escapeHtml(L(m.name))}</div><div class="tx-mod-by">${escapeHtml(m.author || '')} · v${escapeHtml(m.version)}</div></div>
-    <div class="tx-bigstats"><div><b>${stars(m.rating)}</b><small>${t('Оценок: {a}', { a: m.ratings })}</small></div><div><b>${num(m.downloads)}</b><small>${t('Установок')}</small></div><div><b>${num(m.likes)}</b><small>${t('Нравится')}</small></div></div>
+    ${detailHero({ pic: modPicHtml(m.icon, m.name), name: L(m.name), sub: `${m.author || ''} · v${m.version}`, tags: m.tags })}
+    ${statTiles([[stars(m.rating), t('Оценок: {a}', { a: m.ratings })], [num(m.downloads), t('Установок')], [num(m.likes), t('Нравится')]])}
     <div class="tx-store-actions"><button class="tx-btn" onclick="${act}">${label}</button><button class="tx-btn tx-btn-ghost ${m.liked ? 'is-on' : ''}" onclick="window.TelegramX.storeLike('${m.id}', ${!m.liked})"><i class="icon icon-${m.liked ? 'heart' : 'heart-outline'}"></i></button></div>
     ${m.flags && m.flags.length ? `<div class="tx-dialog-note is-warn" style="margin:12px 0"><b>${t('Автопроверка сервера')}</b>${escapeHtml(m.flags.join(', '))}</div>` : ''}
     <div class="tx-mod-lead">${escapeHtml(L(m.description) || '')}</div>
@@ -149,7 +157,7 @@ export function publishList() {
   if (!own.length) return `<div class="tx-group-hint" style="padding:6px 22px 14px">${t('Своих модов пока нет. Установите мод из файла или создайте его с помощью нейросети.')}</div>`;
   return `<div class="tx-group tx-instlist">${own.map((m) => {
     const mf = m.manifest;
-    return `<div class="tx-setrow">${modPicHtml(mf.icon, mf.name)}<span class="tx-setrow-t"><b>${escapeHtml(L(mf.name))}</b><small>v${escapeHtml(mf.version || '1.0.0')}${mine.has(mf.id) ? ' · ' + t('в каталоге') : ''}</small></span><button class="tx-mod-get ${mine.has(mf.id) ? 'is-done' : ''}" onclick="window.TelegramX.storePublish('${mf.id}')">${mine.has(mf.id) ? t('Обновить') : t('Опубликовать')}</button></div>`;
+    return `<div class="tx-setrow" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">${modPicHtml(mf.icon, mf.name)}<span class="tx-setrow-t"><b>${escapeHtml(L(mf.name))}</b><small>v${escapeHtml(mf.version || '1.0.0')}${mine.has(mf.id) ? ' · ' + t('в каталоге') : ''}</small></span><button class="tx-mod-get ${mine.has(mf.id) ? 'is-done' : ''}" onclick="event.stopPropagation(); window.TelegramX.storePublish('${mf.id}')">${mine.has(mf.id) ? t('Обновить') : t('Опубликовать')}</button></div>`;
   }).join('')}</div>`;
 }
 

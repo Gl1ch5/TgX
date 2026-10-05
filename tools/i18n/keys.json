@@ -1945,7 +1945,7 @@
   "plural": false
  },
  {
-  "key": "Установленные",
+  "key": "Мои",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1976,16 +1976,6 @@
  },
  {
   "key": "ИИ",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Настройки мода",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Удалить",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2130,6 +2120,11 @@
   "plural": false
  },
  {
+  "key": "Настройки мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Официальные моды",
   "where": "js/views/settings.js",
   "plural": false
@@ -2180,7 +2175,47 @@
   "plural": false
  },
  {
+  "key": "Официальный",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сторонний",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Тип",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Источник",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Включён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Работает сейчас",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Выключен",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод не найден",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2481,11 +2516,6 @@
  },
  {
   "key": "Инструменты",
-  "where": "js/views/store.js",
-  "plural": false
- },
- {
-  "key": "Мод не найден",
   "where": "js/views/store.js",
   "plural": false
  },

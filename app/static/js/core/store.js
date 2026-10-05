@@ -41,7 +41,15 @@ async function call(method, path, body, { timeout = 5000, raw = false } = {}) {
 
 const installedIds = () => listMods().map((m) => m.manifest.id).join(',');
 
-export const storeHome = () => call('GET', `/home?installed=${encodeURIComponent(installedIds())}`);
+let homeCache = null;
+/** The home screen data; answers from a 45 s cache so switching tabs is instant. */
+export async function storeHome() {
+  const key = installedIds();
+  if (homeCache && homeCache.key === key && Date.now() - homeCache.at < 45000) return homeCache.data;
+  const data = await call('GET', `/home?installed=${encodeURIComponent(key)}`);
+  homeCache = { key, at: Date.now(), data };
+  return data;
+}
 export const storeList = ({ q = '', category = 'all', sort = 'popular', limit = 40, offset = 0 } = {}) => call('GET', `/mods?q=${encodeURIComponent(q)}&category=${category}&sort=${sort}&limit=${limit}&offset=${offset}`);
 export const storeGet = (id) => call('GET', `/mods/${encodeURIComponent(id)}`);
 export const storeFile = (id) => call('GET', `/mods/${encodeURIComponent(id)}/file`, null, { raw: true, timeout: 15000 });

@@ -411,7 +411,6 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Установка ‖ Installation ‖ Instalación ‖ Instalação ‖ Встановлення
 Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете. ‖ A mod can change the theme, wallpapers and message colours and add items to menus and settings. A mod with code gets full access to the app and the account: install only what you trust. ‖ Un mod puede cambiar el tema, los fondos y los colores de los mensajes y añadir elementos a menús y ajustes. Un mod con código tiene acceso total a la app y a la cuenta: instala solo lo que merezca tu confianza. ‖ Um mod pode mudar o tema, os papéis de parede e as cores das mensagens e adicionar itens a menus e configurações. Um mod com código tem acesso total ao app e à conta: instale apenas o que merece confiança. ‖ Мод може змінити тему, шпалери й кольори повідомлень, додати пункти в меню та налаштування. Мод із кодом отримує повний доступ до застосунку й акаунта: ставте лише те, чому довіряєте.
 Модов пока нет ‖ No mods yet ‖ Aún no hay mods ‖ Ainda não há mods ‖ Модів поки немає
-Установленные ‖ Installed ‖ Instalados ‖ Instalados ‖ Встановлені
 Мод установлен ‖ Mod installed ‖ Mod instalado ‖ Mod instalado ‖ Мод встановлено
 Удалить мод? ‖ Delete the mod? ‖ ¿Eliminar el mod? ‖ Excluir o mod? ‖ Видалити мод?
 Не показывать канал в ленте ‖ Hide this channel from the feed ‖ No mostrar este canal en el muro ‖ Não mostrar este canal no mural ‖ Не показувати цей канал у стрічці
@@ -553,3 +552,10 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Каталог недоступен. Попробуйте позже. ‖ The catalog is unavailable. Try again later. ‖ El catálogo no está disponible. Inténtalo más tarde. ‖ O catálogo está indisponível. Tente mais tarde. ‖ Каталог недоступний. Спробуйте пізніше.
 Анонимная статистика ‖ Anonymous statistics ‖ Estadísticas anónimas ‖ Estatísticas anônimas ‖ Анонімна статистика
 Случайный номер установки раз в сутки, чтобы считать пользователей. Без аккаунта и данных ‖ A random install number once a day, to count users. No account, no data ‖ Un número aleatorio de instalación una vez al día para contar usuarios. Sin cuenta ni datos ‖ Um número aleatório de instalação uma vez por dia, para contar usuários. Sem conta nem dados ‖ Випадковий номер встановлення раз на добу, щоб рахувати користувачів. Без акаунта й даних
+Мои ‖ Mine ‖ Mis mods ‖ Meus ‖ Мої
+Официальный ‖ Official ‖ Oficial ‖ Oficial ‖ Офіційний
+Сторонний ‖ Third-party ‖ De terceros ‖ De terceiros ‖ Сторонній
+Тип ‖ Type ‖ Tipo ‖ Tipo ‖ Тип
+Источник ‖ Source ‖ Origen ‖ Origem ‖ Джерело
+Работает сейчас ‖ Running now ‖ Funcionando ahora ‖ Em execução ‖ Працює зараз
+Выключен ‖ Off ‖ Desactivado ‖ Desativado ‖ Вимкнено

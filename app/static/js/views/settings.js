@@ -47,14 +47,12 @@ function render() {
   if (!el) return;
   const prevPage = shownPage;
   const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage, ai: aiPage };
-  el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : page.startsWith('set:') ? () => setPage(page.slice(4)) : page.startsWith('store:') ? () => storeUi.storePage() : rootPage))();
+  el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : page.startsWith('set:') ? () => setPage(page.slice(4)) : page.startsWith('store:') ? () => storeUi.storePage() : page.startsWith('official:') ? officialPage : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
   if (page === 'mods') { initModsSwipe(); requestAnimationFrame(() => placeModTabs(prevPage === 'mods')); }
-  if (page === 'mods') {
-    if (modsTab === 'home') storeUi.fillHome();
-    if (modsTab === 'catalog') { fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat).then(() => { if (storeOnline() === false) fillCommunity(); }); }
-  }
+  if (page === 'mods') afterModsBody();
   if (page.startsWith('store:')) storeUi.fillStorePage(page.slice(6));
+  if (page.startsWith('official:')) fillOfficialPage(page.slice(9));
   if (page.startsWith('set:')) fillSet(page.slice(4));
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
   // a sub-page slides in from the right, going back slides the list in from the left; groups rise one by one
@@ -540,7 +538,7 @@ function extPage(key) {
 let modsTab = 'home';
 let modsQuery = '';
 let modsCat = 'all';
-const modsTabs = () => [['home', t('Главная')], ['catalog', t('Каталог')], ['installed', t('Установленные')], ['create', t('Создать')]];
+const modsTabs = () => [['home', t('Главная')], ['catalog', t('Каталог')], ['installed', t('Мои')], ['create', t('Создать')]];
 const MOD_CATS = () => [['all', t('Все')], ['theme', t('Темы')], ['feed', t('Лента')], ['widget', t('Виджеты')], ['ai', t('ИИ')]];
 
 export function setModsTab(tab, dir = 0) {
@@ -548,10 +546,15 @@ export function setModsTab(tab, dir = 0) {
   const order = modsTabs().map((x) => x[0]);
   if (!dir) dir = order.indexOf(tab) > order.indexOf(modsTab) ? 1 : -1;
   modsTab = tab;
-  window.scrollTo({ top: 0 });
-  rerenderSettings();
   const pg = document.querySelector('#screen-settings .tx-page');
-  if (pg && !document.body.classList.contains('tx-reduce-motion')) pg.animate([{ opacity: 0, transform: `translateX(${dir * 36}px)` }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  if (page !== 'mods' || !pg) { rerenderSettings(); return; }
+  // only the body is replaced: no full settings re-render, so switching stays instant
+  pg.innerHTML = modsBody();
+  document.querySelectorAll('.tx-modtabs .tx-tab').forEach((b) => b.classList.toggle('is-active', b.dataset.tab === tab));
+  placeModTabs(true);
+  window.scrollTo({ top: 0 });
+  afterModsBody();
+  if (!document.body.classList.contains('tx-reduce-motion')) pg.animate([{ opacity: 0, transform: `translateX(${dir * 24}px)` }, { opacity: 1, transform: 'none' }], { duration: 200, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
 }
 
 /** The sliding indicator of the mod tabs (same look as the feed tabs). */
@@ -608,27 +611,8 @@ function initModsSwipe() {
 export function setModsQuery(q) { modsQuery = String(q || '').trim().toLowerCase(); fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat); }
 export function setModsCat(c) { modsCat = c; document.querySelectorAll('.tx-chipbar button').forEach((b) => b.classList.toggle('is-active', b.dataset.c === c)); fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat); }
 
-function modsPage() {
+function modsBody() {
   const list = listMods();
-  const cards = list.map((m) => {
-    const mf = m.manifest;
-    const sub = [modKind(m), mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).map(escapeHtml).join(' · ');
-    return `
-      <div class="tx-mod-card is-tile" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">
-        <span class="tx-mod-top">
-          ${modThumb(m)}
-          <span class="tx-mod-acts" onclick="event.stopPropagation()">
-            <button class="tx-mod-gear" title="${t('Настройки мода')}" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')"><i class="icon icon-settings"></i></button>
-            <button class="tx-mod-del" title="${t('Удалить')}" onclick="window.TelegramX.deleteMod('${mf.id}')"><i class="icon icon-delete"></i></button>
-            <label class="tx-switch"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label>
-          </span>
-        </span>
-        <span class="tx-mod-name">${escapeHtml(modL(mf.name))}</span>
-        <span class="tx-mod-sub">${sub}</span>
-        ${mf.description ? `<span class="tx-mod-desc">${escapeHtml(modL(mf.description))}</span>` : ''}
-      </div>`;
-  }).join('');
-  const tabs = `<nav class="tx-tabs tx-glass tx-modtabs"><i class="tx-tab-ind"></i>${modsTabs().map(([id, label]) => `<button class="tx-tab ${modsTab === id ? 'is-active' : ''}" onclick="window.TelegramX.setModsTab('${id}')">${escapeHtml(label)}${id === 'installed' && list.length ? ` <span class="tx-badge">${list.length}</span>` : ''}</button>`).join('')}</nav>`;
   let body = '';
   if (modsTab === 'home') {
     body = `<div id="mod-home"></div>`;
@@ -665,10 +649,24 @@ function modsPage() {
       ${group(row({ icon: 'faq', color: 'PURPLE', title: t('Документация по созданию модов'), sub: 'telex-web.ru/mods.html', onclick: `window.open('${MODS_DOCS_URL}', '_blank', 'noopener')` }))}
       <input type="file" id="mod-file" accept=".module,.json,.js,.html,application/json,text/*" hidden onchange="window.TelegramX.installModFile(this)" />`;
   }
+  return body;
+}
+
+function modsTabsHtml() {
+  const list = listMods();
+  return `<nav class="tx-tabs tx-modtabs"><i class="tx-tab-ind"></i>${modsTabs().map(([id, label]) => `<button class="tx-tab ${modsTab === id ? 'is-active' : ''}" data-tab="${id}" onclick="window.TelegramX.setModsTab('${id}')">${escapeHtml(label)}${id === 'installed' && list.length ? ` <span class="tx-badge">${list.length}</span>` : ''}</button>`).join('')}</nav>`;
+}
+
+function afterModsBody() {
+  if (modsTab === 'home') storeUi.fillHome();
+  if (modsTab === 'catalog') { fillSets(); fillOfficial(); storeUi.fillStoreList(modsQuery, modsCat).then(() => { if (storeOnline() === false) fillCommunity(); }); }
+}
+
+function modsPage() {
   return `
-    <div class="tx-modhead">${titleBar(t('Моды'), { back: true })}${tabs}</div>
+    <div class="tx-modhead">${titleBar(t('Моды'), { back: true })}${modsTabsHtml()}</div>
     <div class="tx-page">
-      ${body}
+      ${modsBody()}
     </div>`;
 }
 
@@ -695,7 +693,7 @@ async function fillSet(id) {
     const ic = modIcon(c.icon);
     const nm = modL(c.name);
     const pic = modPicHtml(c.icon, nm);
-    return `<div class="tx-setrow">${pic}<span class="tx-setrow-t"><b>${escapeHtml(nm)} <i class="tx-verified"></i></b><small>${escapeHtml(modL(c.description) || '')}</small></span><button class="tx-mod-get ${upToDate ? 'is-done' : ''}" onclick="${upToDate ? `window.TelegramX.openSettingsPage('mod:${c.id}')` : `window.TelegramX.installOfficial('${c.id}')`}">${cur ? (upToDate ? t('Открыть') : t('Обновить')) : t('Установить')}</button></span></div>`;
+    return `<div class="tx-setrow" onclick="window.TelegramX.openSettingsPage('${cur ? 'mod' : 'official'}:${c.id}')">${pic}<span class="tx-setrow-t"><b>${escapeHtml(nm)} <i class="tx-verified"></i></b><small>${escapeHtml(modL(c.description) || '')}</small></span><button class="tx-mod-get ${upToDate ? 'is-done' : ''}" onclick="event.stopPropagation(); ${upToDate ? `window.TelegramX.openSettingsPage('mod:${c.id}')` : `window.TelegramX.installOfficial('${c.id}')`}">${cur ? (upToDate ? t('Открыть') : t('Обновить')) : t('Установить')}</button></span></div>`;
   }).join('');
   box.innerHTML = `
     <div class="tx-sethero" style="--c1:${escapeHtml(p.c1 || '#7c5cff')};--c2:${escapeHtml(p.c2 || '#2fc1e6')}">
@@ -748,7 +746,7 @@ async function fillOfficial() {
     const nm = modL(c.name);
     const pic = modPicHtml(c.icon, nm);
     return `
-      <div class="tx-mod-card is-tile"${cur != null ? ` onclick="window.TelegramX.openSettingsPage('mod:${c.id}')"` : ''}>
+      <div class="tx-mod-card is-tile" onclick="window.TelegramX.openSettingsPage('${cur != null ? 'mod' : 'official'}:${c.id}')">
         <span class="tx-mod-top">${pic}${cur != null ? `<span class="tx-mod-acts"><button class="tx-mod-gear" title="${t('Настройки мода')}" onclick="event.stopPropagation(); window.TelegramX.openSettingsPage('mod:${c.id}')"><i class="icon icon-settings"></i></button></span>` : ''}</span>
         <span class="tx-mod-name">${escapeHtml(nm)} <i class="tx-verified"></i></span>
         <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
@@ -851,27 +849,46 @@ function modPage(id) {
   if (!m) return modsPage();
   const mf = m.manifest;
   const shots = (Array.isArray(mf.preview) ? mf.preview : [mf.preview]).filter((u) => u && /^(https:|data:image\/)/.test(u));
-  const hero = shots.length > 1
-    ? `<div class="tx-mod-shots">${shots.map((u) => `<img src="${escapeHtml(u)}" alt="" loading="lazy">`).join('')}</div>`
-    : `<div class="tx-mod-hero">${modThumb(m, { big: true })}</div>`;
-  const tags = (mf.tags || []).map((x) => `<span class="tx-mod-tag">${escapeHtml(String(x))}</span>`).join('');
   const schema = (mf.settings || []).filter((d) => d && d.key);
+  const source = mf.official ? t('Официальный') : t('Сторонний');
   return `
-    ${titleBar(modL(mf.name), { back: true })}
+    <div class="tx-modhead">${titleBar(t('Мод'), { back: true })}</div>
     <div class="tx-page">
-      ${hero}
-      <div class="tx-mod-meta">
-        <div class="tx-mod-title">${escapeHtml(modL(mf.name))}${mf.verified ? ' <i class="tx-verified"></i>' : ''}</div>
-        <div class="tx-mod-by">${[modKind(m), mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).map(escapeHtml).join(' · ')}</div>
-        ${tags ? `<div class="tx-mod-tags">${tags}</div>` : ''}
-        ${mf.description ? `<p class="tx-mod-lead">${escapeHtml(modL(mf.description))}</p>` : ''}
-        ${mf.about ? `<p class="tx-mod-about">${escapeHtml(modL(mf.about)).replace(/\n/g, '<br>')}</p>` : ''}
-      </div>
-      ${group(switchRow({ icon: 'st-features', color: 'PURPLE', title: t('Включён'), checked: !!m.enabled, onchange: `window.TelegramX.toggleMod('${id}', this.checked)` }))}
+      ${storeUi.detailHero({ pic: modThumb(m), name: modL(mf.name), verified: mf.verified, sub: [mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).join(' · '), tags: mf.tags || [] })}
+      ${storeUi.statTiles([[modKind(m), t('Тип')], [mf.version || '1.0.0', t('Версия')], [source, t('Источник')]])}
+      ${shots.length > 1 ? `<div class="tx-mod-shots" data-noswipe>${shots.map((u) => `<img src="${escapeHtml(u)}" alt="" loading="lazy">`).join('')}</div>` : ''}
+      ${mf.description || mf.about ? `<div class="tx-group tx-mdtext">${mf.description ? `<p class="tx-mod-lead">${escapeHtml(modL(mf.description))}</p>` : ''}${mf.about ? `<p class="tx-mod-about">${escapeHtml(modL(mf.about)).replace(/\n/g, '<br>')}</p>` : ''}</div>` : ''}
+      ${group(switchRow({ icon: 'st-features', color: 'PURPLE', title: t('Включён'), sub: m.enabled ? t('Работает сейчас') : t('Выключен'), checked: !!m.enabled, onchange: `window.TelegramX.toggleMod('${id}', this.checked)` }))}
       ${schema.length ? `<div class="tx-group"><div class="tx-group-title">${t('Настройки мода')}</div>${schema.map((d) => modControl(m, d)).join('')}</div>` : ''}
       <div id="mod-custom"></div>
       ${group(row({ icon: 'delete', color: 'RED', title: t('Удалить'), danger: true, onclick: `window.TelegramX.deleteMod('${id}')` }))}
     </div>`;
+}
+
+/** A page for an official mod that is not installed yet (settings page "official:<id>"). */
+function officialPage() {
+  return `<div class="tx-modhead">${titleBar(t('Мод'), { back: true })}</div><div class="tx-page" id="off-box"><div class="tx-modempty"><span>${t('Загрузка…')}</span></div></div>`;
+}
+async function fillOfficialPage(id) {
+  const box = document.getElementById('off-box');
+  if (!box) return;
+  let c; let bundle = null;
+  try { c = (await loadCatalog()).find((x) => x.id === id); } catch {}
+  if (!c) { box.innerHTML = `<div class="tx-modempty"><b>${t('Мод не найден')}</b></div>`; return; }
+  try { bundle = parseBundle(await (await fetch('mods/' + c.file)).text()); } catch {}
+  if (!document.getElementById('off-box')) return;
+  const mf = (bundle && bundle.manifest) || c;
+  const cur = listMods().find((m) => m.manifest.id === id);
+  const upToDate = cur && cur.manifest.version === c.version;
+  const label = cur ? (upToDate ? t('Открыть') : t('Обновить')) : t('Установить');
+  const act = upToDate ? `window.TelegramX.openSettingsPage('mod:${id}')` : `window.TelegramX.installOfficial('${id}')`;
+  const kinds = (c.tags || []).join(', ') || t('Мод');
+  box.innerHTML = `
+    ${storeUi.detailHero({ pic: modPicHtml(c.icon, c.name), name: modL(c.name), verified: true, sub: `${c.author || 'TeleX'} · v${c.version}`, tags: c.tags || [] })}
+    ${storeUi.statTiles([[kinds, t('Тип')], [c.version || '1.0.0', t('Версия')], [t('Официальный'), t('Источник')]])}
+    <div class="tx-store-actions"><button class="tx-btn" onclick="${act}">${label}</button></div>
+    <div class="tx-group tx-mdtext"><p class="tx-mod-lead">${escapeHtml(modL(c.description) || '')}</p>${mf.about ? `<p class="tx-mod-about">${escapeHtml(modL(mf.about)).replace(/\n/g, '<br>')}</p>` : ''}</div>
+    ${mf.permissions && mf.permissions.includes('ai') ? `<div class="tx-group-hint">${t('Мод использует ИИ через ваш ключ Groq.')}</div>` : ''}`;
 }
 
 export function modSet(id, key, value) { modConfigSet(id, key, value); }
