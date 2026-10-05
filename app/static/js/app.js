@@ -23,6 +23,7 @@ import { isStoryOpen, closeStoryViewer, storyKey } from './components/storyViewe
 import {
   openAuthModal, closeAuthModal, switchAuthTab, generateQRLogin,
   submitQRPassword, sendPhoneCode, submitPhoneCode, submitPhonePassword,
+  authBack, authNext, authPickCountry, authQr, authResend,
 } from './components/authModal.js';
 import { initWallpaperEngine, applyWallpaper, openWallpaperModal, closeWallpaperModal, WALLPAPERS } from './components/wallpaperTheme.js';
 import * as wall from './views/wall.js';
@@ -166,6 +167,11 @@ window.TelegramX = {
   sendPhoneCode,
   submitPhoneCode,
   submitPhonePassword,
+  authBack,
+  authNext,
+  authPickCountry,
+  authQr,
+  authResend,
 };
 
 // ---------------- Init ----------------

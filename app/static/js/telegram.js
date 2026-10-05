@@ -582,10 +582,10 @@ class TelegramService {
     return { status: 'success', user: await this.getMe() };
   }
 
-  async requestPhoneCode(phone) {
+  async requestPhoneCode(phone, forceSms = false) {
     const client = await this.getClient();
     this.phone = phone.replace(/[\s()-]/g, '');
-    const res = await client.sendCode({ apiId: API_ID, apiHash: API_HASH }, this.phone);
+    const res = await client.sendCode({ apiId: API_ID, apiHash: API_HASH }, this.phone, !!forceSms);
     this.phoneCodeHash = res.phoneCodeHash;
     return { status: 'code_sent', phone: this.phone, via_app: res.isCodeViaApp };
   }

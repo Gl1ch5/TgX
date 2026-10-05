@@ -32,8 +32,8 @@ export const api = {
     telegram.cancelQrLogin();
   },
 
-  requestCode(phone) {
-    return safe(() => telegram.requestPhoneCode(phone));
+  requestCode(phone, forceSms = false) {
+    return safe(() => telegram.requestPhoneCode(phone, forceSms));
   },
 
   signInCode(code) {

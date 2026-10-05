@@ -9,6 +9,7 @@
 @import url('tx/viewer.css');
 @import url('tx/stories.css');
 @import url('tx/profile.css');
+@import url('tx/auth.css');
 @import url('tx/icons-android.css');
 
 /* Modals (auth, wallpapers) in the same glass style */
@@ -24,8 +25,8 @@
 .tg-quote { border-left-color: var(--tx-accent) !important; background: var(--tx-accent-soft) !important; border-radius: 6px !important; }
 
 /* Modals (auth, wallpapers): dim + spring in, like Telegram sheets */
-#auth-modal:not(.hidden), #wallpaper-modal:not(.hidden) { animation: tx-dim-in 0.2s ease-out both; }
-#auth-modal:not(.hidden) > div, #wallpaper-modal:not(.hidden) > div { animation: tx-sheet-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+#wallpaper-modal:not(.hidden) { animation: tx-dim-in 0.2s ease-out both; }
+#wallpaper-modal:not(.hidden) > div { animation: tx-sheet-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
 @keyframes tx-dim-in { from { background-color: rgba(0, 0, 0, 0); backdrop-filter: blur(0); } }
 @keyframes tx-sheet-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } }
 #toast { transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease !important; }
