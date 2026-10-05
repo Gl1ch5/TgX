@@ -470,6 +470,76 @@
   "plural": false
  },
  {
+  "key": "Не удалось сохранить",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный манифест",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный id мода",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "У мода нет названия",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверные права",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Отмена",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ОК",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Мод «{a}» не запустился",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "В моде нет ни кода, ни темы",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Код мода слишком большой",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Этот мод не проверен.",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить тему «{a}»?",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
   "key": "Пользователь",
   "where": "js/telegram-chat.js",
   "plural": false
@@ -1095,6 +1165,11 @@
   "plural": false
  },
  {
+  "key": "Моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Закладки",
   "where": "js/views/settings.js",
   "plural": false
@@ -1465,6 +1540,11 @@
   "plural": false
  },
  {
+  "key": "Моды тем",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Углы блоков с сообщениями",
   "where": "js/views/settings.js",
   "plural": false
@@ -1531,6 +1611,81 @@
  },
  {
   "key": "Настройки чатов сброшены",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Включено: {a} из {b}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Темы и расширения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Тема + код",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установить из файла",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": ".json или .js",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить ссылку или JSON",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка https://… или JSON мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установка",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Модов пока нет",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установленные",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод установлен",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить мод?",
   "where": "js/views/settings.js",
   "plural": false
  },

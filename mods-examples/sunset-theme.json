@@ -1,0 +1,23 @@
+{
+  "manifest": { "id": "sunset-theme", "name": "Sunset", "version": "1.0.0", "author": "TeleX", "type": "theme", "description": "Warm colours, orange bubbles, gradient wallpaper" },
+  "theme": {
+    "vars": {
+      "dark": { "--tx-bg": "#140c0a" },
+      "light": { "--tx-bg": "#fbf1ea" }
+    },
+    "wallpapers": [
+      { "id": "dusk", "name": "Dusk", "kind": "fill", "colors": ["#3a1c4a", "#e0643a"], "rotation": 45, "intensity": 0 }
+    ],
+    "colorThemes": [
+      {
+        "id": "sunset", "emoji": "🌇", "accent": "orange",
+        "out": { "dark": ["#cf4339", "#e08a35"], "light": ["#e0483f", "#f09a3a"] },
+        "wallpapers": {
+          "dark": { "kind": "fill", "colors": ["#2a1030", "#8a3a2a"], "rotation": 45 },
+          "light": { "kind": "fill", "colors": ["#ffd9b8", "#ffb48a"], "rotation": 45 }
+        }
+      }
+    ],
+    "apply": "sunset"
+  }
+}

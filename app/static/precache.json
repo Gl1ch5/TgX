@@ -1,10 +1,11 @@
 {
- "build": "90fda3d7d1",
+ "build": "20fef53bc8",
  "files": [
   "./",
   "index.html",
   "chat/index.html",
   "css/animations.css",
+  "css/fonts.css",
   "css/telegram-icons.css",
   "css/telegram-theme.css",
   "css/telex.css",
@@ -14,6 +15,7 @@
   "css/tx/icons-android.css",
   "css/tx/layout.css",
   "css/tx/light.css",
+  "css/tx/mods.css",
   "css/tx/post.css",
   "css/tx/profile.css",
   "css/tx/settings.css",
@@ -40,6 +42,8 @@
   "js/components/wallpaperTheme.js",
   "js/core/colorThemes.js",
   "js/core/devtools.js",
+  "js/core/ext.js",
+  "js/core/mods.js",
   "js/core/nav.js",
   "js/core/prefs.js",
   "js/emoji-data.js",
@@ -674,6 +678,15 @@
   "icons/tabs/tab_chats.json",
   "icons/tabs/tab_contacts.json",
   "icons/tabs/tab_settings.json",
-  "icons/telex.svg"
+  "icons/telex.svg",
+  "fonts/LICENSE-roboto",
+  "fonts/roboto-cyrillic-400-italic.woff2",
+  "fonts/roboto-cyrillic-400-normal.woff2",
+  "fonts/roboto-cyrillic-500-normal.woff2",
+  "fonts/roboto-cyrillic-700-normal.woff2",
+  "fonts/roboto-latin-400-italic.woff2",
+  "fonts/roboto-latin-400-normal.woff2",
+  "fonts/roboto-latin-500-normal.woff2",
+  "fonts/roboto-latin-700-normal.woff2"
  ]
 }

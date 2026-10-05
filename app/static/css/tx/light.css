@@ -80,6 +80,7 @@ html[data-theme='light'] .tx-menu { background: rgba(255, 255, 255, 0.98); box-s
 html[data-theme='light'] .tx-menu-gap { background: rgba(0, 0, 0, 0.06); }
 html[data-theme='light'] .liquid-glass { background: rgba(255, 255, 255, 0.98) !important; border-color: rgba(0, 0, 0, 0.08) !important; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2); }
 html[data-theme='light'] .tx-switch span { background: #c9ccd1; }
+html[data-theme='light'] .tx-switch input:checked + span { background: var(--tx-accent-fill); }
 html[data-theme='light'] .tx-slider input[type=range] { background: linear-gradient(to right, var(--tx-accent-fill) var(--p, 50%), rgba(0, 0, 0, 0.14) var(--p, 50%)); }
 html[data-theme='light'] .tx-wave i { background: rgba(0, 0, 0, 0.3); }
 html[data-theme='light'] .tx-progress { background: rgba(0, 0, 0, 0.15); }

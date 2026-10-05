@@ -6,6 +6,8 @@
 
 import { showToast } from '../utils.js';
 import { t } from '../i18n.js';
+import { COLOR_THEMES, registerColorThemes, themeWallpaper } from '../core/colorThemes.js';
+import { getPrefs, resolvedTheme } from '../core/prefs.js';
 
 export const WALLPAPERS = [
   {
@@ -104,27 +106,68 @@ function wallFill(w) {
   return c.map((col, i) => `radial-gradient(circle at ${at[i]}, ${col} 0, transparent 70%)`).join(', ') + `, ${c[0]}`;
 }
 
+/** Add (or replace) a real wallpaper — from Telegram or a mod. Returns its id. */
+export function registerWallpaper(w, id = w.id, { name = '', hidden = false } = {}) {
+  const fill = wallFill(w);
+  const entry = { ...w, id, name: name || w.name || t('Обои'), gradient: fill, light: fill, svg: w.kind === 'pattern' ? w.url : null, remote: true, hidden };
+  const i = WALLPAPERS.findIndex((x) => x.id === id);
+  if (i >= 0) WALLPAPERS[i] = entry;
+  else WALLPAPERS.splice(Math.max(0, WALLPAPERS.findIndex((x) => x.id === 'oled')), 0, entry);
+  return id;
+}
+export function unregisterWallpapers(prefix) {
+  for (let i = WALLPAPERS.length - 1; i >= 0; i--) if (WALLPAPERS[i].id.startsWith(prefix)) WALLPAPERS.splice(i, 1);
+}
+
+/** Wallpapers shown in the picker: Telegram's own when we have them, else the built-in set. */
+export function pickerWallpapers() {
+  const real = WALLPAPERS.some((w) => w.remote && !w.hidden && w.id.startsWith('tg'));
+  return WALLPAPERS.filter((w) => !w.hidden && (w.id === 'oled' || (real ? w.remote : true)));
+}
+
 function useRemote(list) {
   if (!Array.isArray(list) || !list.length) return false;
-  const oled = BUILTIN.find((w) => w.id === 'oled');
-  const mapped = list.map((w, i) => {
-    const fill = wallFill(w);
-    return { ...w, name: w.name || `${t('Обои')} ${i + 1}`, gradient: fill, light: fill, svg: w.kind === 'pattern' ? w.url : null, remote: true };
-  });
-  WALLPAPERS.splice(0, WALLPAPERS.length, ...mapped, oled);
+  unregisterWallpapers('tg');
+  list.forEach((w, i) => registerWallpaper(w, w.id, { name: `${t('Обои')} ${i + 1}` }));
   return true;
 }
 
-/** Fetch the account's real wallpapers once (cached for the next start), then redraw. */
+const THEMES_KEY = 'tgx_chat_themes';
+
+/** Telegram's chat themes → the colour-theme carousel (day and night wallpapers/colours of each). */
+function useThemes(list) {
+  if (!Array.isArray(list) || !list.length) return false;
+  unregisterWallpapers('th:');
+  const themes = list.map((th) => {
+    const wp = {};
+    const out = {};
+    for (const mode of ['dark', 'light']) {
+      const v = th[mode] || th[mode === 'dark' ? 'light' : 'dark'];
+      out[mode] = (v && v.out && v.out.length ? v.out : null);
+      if (v && v.wallpaper) wp[mode] = registerWallpaper(v.wallpaper, `th:${th.emoticon}:${mode}`, { name: th.emoticon, hidden: true });
+    }
+    const base = BUILTIN_OUT;
+    return { id: 'tg:' + th.emoticon, emoji: th.emoticon, accent: null, wp, out: { dark: out.dark || base.dark, light: out.light || base.light } };
+  });
+  // the first tile is Telegram's default look: the first real wallpaper, the standard blue bubbles
+  const first = WALLPAPERS.find((w) => w.remote && !w.hidden && w.id.startsWith('tg'));
+  themes.unshift({ id: 'classic', emoji: '🎨', accent: 'blue', wp: first ? first.id : 'FOks2P6KCFIMAAAAyFz5S74pfKo', out: BUILTIN_OUT });
+  registerColorThemes(themes, 'telegram');
+  return true;
+}
+const BUILTIN_OUT = { dark: ['#5a86c4', '#568fc3'], light: ['#4a80f5', '#5b8df7'] };
+
+/** Fetch the account's real wallpapers and chat themes once (cached for the next start), then redraw. */
 export async function loadRemoteWallpapers() {
-  try { useRemote(JSON.parse(localStorage.getItem(REMOTE_KEY) || 'null')); } catch {}
+  try { useRemote(JSON.parse(localStorage.getItem(REMOTE_KEY) || 'null')); useThemes(JSON.parse(localStorage.getItem(THEMES_KEY) || 'null')); } catch {}
   try {
     const { telegram } = await import('../tg.js');
     if (!telegram.hasSession || !telegram.hasSession()) return;
-    const list = await telegram.getWallpapers();
-    if (!useRemote(list)) return;
-    localStorage.setItem(REMOTE_KEY, JSON.stringify(list));
+    const [walls, themes] = await Promise.all([telegram.getWallpapers().catch(() => null), telegram.getChatThemes().catch(() => null)]);
+    if (useRemote(walls)) localStorage.setItem(REMOTE_KEY, JSON.stringify(walls));
+    if (useThemes(themes)) localStorage.setItem(THEMES_KEY, JSON.stringify(themes));
     refreshWallpaper();
+    document.dispatchEvent(new Event('tx:themes'));
     const grid = document.getElementById('wallpaper-grid-list');
     if (grid) renderWallpaperList();
   } catch (e) { console.warn('[TeleX] wallpapers', e); }
@@ -217,6 +260,11 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
 
 /** Re-draw the wallpaper (the theme changed). */
 export function refreshWallpaper() {
+  // A colour theme that has its own day/night wallpapers keeps them in step with the mode.
+  const auto = localStorage.getItem('tgx_wp_auto');
+  const theme = auto && COLOR_THEMES.find((c) => c.id === auto);
+  const id = theme && themeWallpaper(theme, resolvedTheme(getPrefs()));
+  if (id && WALLPAPERS.some((w) => w.id === id)) localStorage.setItem('tgx_wallpaper', id);
   applyWallpaper(localStorage.getItem('tgx_wallpaper') || WALLPAPERS[0].id, false);
 }
 
@@ -239,12 +287,13 @@ export function renderWallpaperList() {
   const currentId = localStorage.getItem('tgx_wallpaper') || 'FOks2P6KCFIMAAAAyFz5S74pfKo';
 
   container.innerHTML = '';
-  WALLPAPERS.forEach(wp => {
+  pickerWallpapers().forEach(wp => {
     const isCur = wp.id === currentId;
     const item = document.createElement('div');
     item.setAttribute('data-wp-id', wp.id);
     item.className = `wallpaper-item-card relative h-36 rounded-2xl cursor-pointer overflow-hidden border border-white/15 transition transform hover:scale-102 flex flex-col justify-end p-2.5 shadow-xl ${isCur ? 'ring-2 ring-[#3390ec]' : ''}`;
     item.onclick = () => {
+      localStorage.removeItem('tgx_wp_auto'); // a hand-picked wallpaper stops following the theme
       applyWallpaper(wp.id, true);
     };
 

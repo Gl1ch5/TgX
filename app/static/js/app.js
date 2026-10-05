@@ -29,6 +29,8 @@ import { initWallpaperEngine, applyWallpaper, openWallpaperModal, closeWallpaper
 import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
+import { startMods, reapplyModVars } from './core/mods.js';
+import { ext } from './core/ext.js';
 import * as profile from './views/profile.js';
 import * as channel from './views/channel.js';
 import { captureLogs, initDevtools, postNative } from './core/devtools.js';
@@ -89,6 +91,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
+  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod,
   setWorkerMode: settings.setWorkerMode,
 
   // Profile
@@ -191,6 +194,8 @@ async function initApp() {
   translateTree(document.body);
   applyAppearance();
   initWallpaperEngine();
+  document.addEventListener('tx:themes', () => { applyAppearance(); reapplyModVars(); settings.rerenderSettings(); });
+  startMods();
   // "Auto" theme follows the device live (sunset → dark, sunrise → light).
   try {
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
@@ -204,7 +209,7 @@ async function initApp() {
   postNative('theme:' + resolvedTheme());
   api.warmUp();
   initDock();
-  window.addEventListener('tx:view', (e) => setDockActive(e.detail.view, e.detail.prev));
+  window.addEventListener('tx:view', (e) => { setDockActive(e.detail.view, e.detail.prev); ext.emit('view', e.detail.view); });
 
   onPrefsChange((p, key) => {
     applyAppearance(p);

@@ -385,3 +385,34 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Скрытый отправитель ‖ Hidden sender ‖ Remitente oculto ‖ Remetente oculto ‖ Прихований відправник
 Сообщение недоступно ‖ Message unavailable ‖ Mensaje no disponible ‖ Mensagem indisponível ‖ Повідомлення недоступне
 Полноценный клиент Telegram ‖ Full Telegram client ‖ Cliente completo de Telegram ‖ Cliente completo do Telegram ‖ Повноцінний клієнт Telegram
+Не удалось сохранить ‖ Could not save ‖ No se pudo guardar ‖ Não foi possível salvar ‖ Не вдалося зберегти
+Неверный манифест ‖ Invalid manifest ‖ Manifiesto no válido ‖ Manifesto inválido ‖ Неправильний маніфест
+Неверный id мода ‖ Invalid mod id ‖ ID de mod no válido ‖ ID de mod inválido ‖ Неправильний id моду
+У мода нет названия ‖ The mod has no name ‖ El mod no tiene nombre ‖ O mod não tem nome ‖ У моду немає назви
+Неверные права ‖ Invalid permissions ‖ Permisos no válidos ‖ Permissões inválidas ‖ Неправильні права
+Отмена ‖ Cancel ‖ Cancelar ‖ Cancelar ‖ Скасувати
+ОК ‖ OK ‖ OK ‖ OK ‖ ОК
+Мод «{a}» не запустился ‖ The mod "{a}" failed to start ‖ El mod «{a}» no se inició ‖ O mod «{a}» não iniciou ‖ Мод «{a}» не запустився
+В моде нет ни кода, ни темы ‖ The mod has neither code nor a theme ‖ El mod no tiene código ni tema ‖ O mod não tem código nem tema ‖ У моді немає ні коду, ні теми
+Код мода слишком большой ‖ The mod code is too large ‖ El código del mod es demasiado grande ‖ O código do mod é grande demais ‖ Код моду надто великий
+Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b} ‖ The mod "{a}" will get full access to the app and your account. Install only mods you trust.{b} ‖ El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b} ‖ O mod «{a}» terá acesso total ao app e à sua conta. Instale apenas mods em que confia.{b} ‖ Мод «{a}» отримає повний доступ до застосунку й вашого акаунта. Ставте лише моди, яким довіряєте.{b}
+Этот мод не проверен. ‖ This mod has not been reviewed. ‖ Este mod no ha sido revisado. ‖ Este mod não foi revisado. ‖ Цей мод не перевірено.
+Установить тему «{a}»? ‖ Install the theme "{a}"? ‖ ¿Instalar el tema «{a}»? ‖ Instalar o tema «{a}»? ‖ Встановити тему «{a}»?
+Установить ‖ Install ‖ Instalar ‖ Instalar ‖ Встановити
+Моды ‖ Mods ‖ Mods ‖ Mods ‖ Моди
+Моды тем ‖ Theme mods ‖ Mods de temas ‖ Mods de temas ‖ Моди тем
+Включено: {a} из {b} ‖ Enabled: {a} of {b} ‖ Activados: {a} de {b} ‖ Ativados: {a} de {b} ‖ Увімкнено: {a} з {b}
+Темы и расширения ‖ Themes and extensions ‖ Temas y extensiones ‖ Temas e extensões ‖ Теми та розширення
+Тема + код ‖ Theme + code ‖ Tema + código ‖ Tema + código ‖ Тема + код
+Мод ‖ Mod ‖ Mod ‖ Mod ‖ Мод
+Удалить ‖ Delete ‖ Eliminar ‖ Excluir ‖ Видалити
+Установить из файла ‖ Install from a file ‖ Instalar desde un archivo ‖ Instalar de um arquivo ‖ Встановити з файлу
+.json или .js ‖ .json or .js ‖ .json o .js ‖ .json ou .js ‖ .json або .js
+Вставить ссылку или JSON ‖ Paste a link or JSON ‖ Pegar enlace o JSON ‖ Colar link ou JSON ‖ Вставити посилання або JSON
+Ссылка https://… или JSON мода ‖ https://… link or mod JSON ‖ Enlace https://… o JSON del mod ‖ Link https://… ou JSON do mod ‖ Посилання https://… або JSON моду
+Установка ‖ Installation ‖ Instalación ‖ Instalação ‖ Встановлення
+Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете. ‖ A mod can change the theme, wallpapers and message colours and add items to menus and settings. A mod with code gets full access to the app and the account: install only what you trust. ‖ Un mod puede cambiar el tema, los fondos y los colores de los mensajes y añadir elementos a menús y ajustes. Un mod con código tiene acceso total a la app y a la cuenta: instala solo lo que merezca tu confianza. ‖ Um mod pode mudar o tema, os papéis de parede e as cores das mensagens e adicionar itens a menus e configurações. Um mod com código tem acesso total ao app e à conta: instale apenas o que merece confiança. ‖ Мод може змінити тему, шпалери й кольори повідомлень, додати пункти в меню та налаштування. Мод із кодом отримує повний доступ до застосунку й акаунта: ставте лише те, чому довіряєте.
+Модов пока нет ‖ No mods yet ‖ Aún no hay mods ‖ Ainda não há mods ‖ Модів поки немає
+Установленные ‖ Installed ‖ Instalados ‖ Instalados ‖ Встановлені
+Мод установлен ‖ Mod installed ‖ Mod instalado ‖ Mod instalado ‖ Мод встановлено
+Удалить мод? ‖ Delete the mod? ‖ ¿Eliminar el mod? ‖ Excluir o mod? ‖ Видалити мод?

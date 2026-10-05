@@ -520,6 +520,25 @@ export function installChat(TelegramService, helpers) {
     return out;
   };
 
+  /** The chat colour themes Telegram offers (emoji themes), each with a day and a night variant. */
+  P.getChatThemes = async function getChatThemes() {
+    const client = await this.getClient();
+    const res = await client.invoke(new Api.account.GetChatThemes({ hash: 0 }));
+    const hex = (n) => '#' + (n >>> 0 & 0xffffff).toString(16).padStart(6, '0');
+    const out = [];
+    for (const th of res.themes || []) {
+      const emoticon = th.emoticon || (th.theme && th.theme.emoticon);
+      if (!emoticon) continue;
+      const settings = th.settings || (th.theme && th.theme.settings) || [];
+      const pick = (dark) => settings.find((x) => (x.baseTheme instanceof Api.BaseThemeNight || x.baseTheme instanceof Api.BaseThemeTinted) === dark);
+      const variant = (x) => (x ? { accent: hex(x.accentColor), out: (x.messageColors || []).map(hex), wallpaper: this.formatWallpaper(x.wallpaper) } : null);
+      const dark = variant(pick(true));
+      const light = variant(pick(false));
+      if (dark || light) out.push({ emoticon, dark, light });
+    }
+    return out;
+  };
+
   /** Wallpaper and message colours of a chat: its own wallpaper, else the wallpaper of its chat theme. */
   P.chatAppearance = async function chatAppearance(key) {
     const { client, entity, peer } = await this.chatInput(key);

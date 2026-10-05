@@ -10,7 +10,7 @@ import { api } from '../api.js';
 import { showToast, escapeHtml, formatPhone, formatChatTime } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs, setPref, setChannelExcluded, isChannelExcluded, ACCENTS, applyAppearance, resolvedTheme } from '../core/prefs.js';
-import { COLOR_THEMES, NAME_COLORS, NAME_COLORS_DAY, outGradient } from '../core/colorThemes.js';
+import { COLOR_THEMES, NAME_COLORS, NAME_COLORS_DAY, outGradient, themeWallpaper } from '../core/colorThemes.js';
 import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
 import { titleBar, group, row, switchRow, slider, segments, radioRow } from '../components/ui.js';
@@ -20,6 +20,8 @@ import { APP_VERSION, AUTHOR, REPO_URL } from '../version.js';
 import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
+import { ext } from '../core/ext.js';
+import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -37,7 +39,7 @@ export function openSettingsPage(name) {
 function render() {
   const el = root();
   if (!el) return;
-  const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage };
+  const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage };
   el.innerHTML = (pages[page] || rootPage)();
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
@@ -75,7 +77,8 @@ function rootPage() {
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
         row({ icon: 'st-chat', color: 'GREEN', title: 'Telegram You', sub: t('Полноценный клиент Telegram'), onclick: "location.href='../../telegram-you/'" }) +
-        row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" })
+        row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" }) +
+        row({ icon: 'st-features', color: 'PURPLE', title: t('Моды'), sub: modsSummary(), onclick: "window.TelegramX.openSettingsPage('mods')" }),
       )}
 
       ${group(
@@ -87,6 +90,7 @@ function rootPage() {
         row({ icon: 'st-faq', color: 'BLUE', title: t('О TeleX'), sub: t('Версия {a}', {a: APP_VERSION}), onclick: "window.TelegramX.openSettingsPage('about')" }) +
         row({ icon: 'st-features', color: 'PURPLE', title: t('Для разработчиков'), sub: t('Сессия, диагностика, логи'), onclick: "window.TelegramX.openSettingsPage('developer')" }),
       )}
+      ${extraRows()}
       <div class="tx-settings-foot">${t('TeleX {a} · автор', {a: APP_VERSION})} <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
     </div>
     <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" hidden onchange="window.TelegramX.uploadProfilePhoto(this)" />`;
@@ -250,7 +254,7 @@ function previewBand() {
 
 function themeTile(c, selected) {
   const day = dayMode();
-  const wp = WALLPAPERS.find((w) => w.id === c.wp) || WALLPAPERS[0];
+  const wp = WALLPAPERS.find((w) => w.id === themeWallpaper(c, day ? 'light' : 'dark')) || WALLPAPERS[0];
   const bg = day && wp.light ? wp.light : wp.gradient;
   return `
     <button class="tx-theme-tile ${selected ? 'is-active' : ''}" onclick="window.TelegramX.setColorTheme('${c.id}')" aria-label="${c.id}" style="${wp.remote ? '' : `background:${bg}`}">
@@ -283,6 +287,7 @@ function chatPage() {
         <div class="tx-theme-strip">${COLOR_THEMES.map((c) => themeTile(c, c.id === p.colorTheme)).join('')}</div>
         ${row({ avatar: glyph(day ? ICONS.moon : ICONS.sun), title: day ? t('Переключить на ночную тему') : t('Переключить на дневную тему'), onclick: 'window.TelegramX.toggleDayNight()', accent: true })}
         ${row({ avatar: glyph('<i class="icon icon-brush"></i>'), title: t('Настройки темы'), onclick: "window.TelegramX.openSettingsPage('theme')", accent: true })}
+        ${row({ avatar: glyph('<i class="icon icon-st-features"></i>'), title: t('Моды тем'), onclick: "window.TelegramX.openSettingsPage('mods')", accent: true })}
       </div>
 
       <div class="tx-group tx-group-flush">
@@ -368,8 +373,9 @@ export function setColorTheme(id) {
   const c = COLOR_THEMES.find((x) => x.id === id);
   if (!c) return;
   setPref('colorTheme', id);
-  setPref('accent', c.accent);
-  localStorage.setItem('tgx_wallpaper', c.wp);
+  if (c.accent) setPref('accent', c.accent);
+  const wpId = themeWallpaper(c, dayMode() ? 'light' : 'dark');
+  if (wpId) { localStorage.setItem('tgx_wallpaper', wpId); localStorage.setItem('tgx_wp_auto', c.id); } else localStorage.removeItem('tgx_wp_auto');
   refreshTheme();
 }
 
@@ -400,14 +406,88 @@ export function openChatSettingsMenu(event) {
 function resetChatSettings() {
   setPref('textSize', 16);
   setPref('bubbleRadius', 17);
-  setPref('colorTheme', 'classic');
+  setPref('colorTheme', COLOR_THEMES[0].id);
   setPref('accent', 'blue');
   setPref('nameColor', 'auto');
   setPref('theme', 'auto');
-  localStorage.setItem('tgx_wallpaper', COLOR_THEMES[0].wp);
+  localStorage.setItem('tgx_wallpaper', themeWallpaper(COLOR_THEMES[0], dayMode() ? 'light' : 'dark') || 'FOks2P6KCFIMAAAAyFz5S74pfKo');
+  localStorage.setItem('tgx_wp_auto', COLOR_THEMES[0].id);
   refreshTheme();
   postNative('theme:' + resolvedTheme());
   showToast(t('Настройки чатов сброшены'));
+}
+
+// ---------------- Mods ----------------
+
+function modsSummary() {
+  const list = listMods();
+  const on = list.filter((m) => m.enabled).length;
+  return list.length ? t('Включено: {a} из {b}', { a: on, b: list.length }) : t('Темы и расширения');
+}
+
+/** Rows that mods add to the settings screen (ext point "settings"). */
+function extraRows() {
+  const items = ext.menu('settings', {});
+  if (!items.length) return '';
+  window.__txSettingsExt = items;
+  return group(items.map((it, i) => row({ icon: it.icon || 'st-features', color: it.color || 'PURPLE', title: escapeHtml(it.title || it.label || ''), sub: it.sub ? escapeHtml(it.sub) : '', onclick: `window.__txSettingsExt[${i}].run()` })).join(''));
+}
+
+function modsPage() {
+  const list = listMods();
+  const rows = list.map((m) => {
+    const mf = m.manifest;
+    const kind = m.theme && !m.code ? t('Тема') : m.theme ? t('Тема + код') : t('Мод');
+    const sub = [kind, mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).map(escapeHtml).join(' · ');
+    return group(
+      switchRow({ icon: m.theme ? 'brush' : 'st-features', color: m.theme ? 'PINK' : 'PURPLE', title: escapeHtml(mf.name), sub: sub + (mf.description ? '<br>' + escapeHtml(mf.description) : ''), checked: !!m.enabled, onchange: `window.TelegramX.toggleMod('${mf.id}', this.checked)` }) +
+      row({ icon: 'delete', color: 'RED', title: t('Удалить'), danger: true, onclick: `window.TelegramX.deleteMod('${mf.id}')` }),
+    );
+  }).join('');
+  return `
+    ${titleBar(t('Моды'), { back: true })}
+    <div class="tx-page">
+      ${group(
+        row({ icon: 'download', color: 'BLUE', title: t('Установить из файла'), sub: t('.json или .js'), onclick: "document.getElementById('mod-file').click()" }) +
+        row({ icon: 'copy', color: 'GREEN', title: t('Вставить ссылку или JSON'), onclick: "document.getElementById('mod-paste').classList.toggle('tx-hidden')" }) +
+        `<div id="mod-paste" class="tx-hidden">
+          <label class="tx-field"><textarea id="mod-text" rows="6" placeholder="${t('Ссылка https://… или JSON мода')}" autocomplete="off" spellcheck="false"></textarea></label>
+          <div style="padding:0 16px 14px"><button class="tx-btn" style="width:100%" onclick="window.TelegramX.installModText()">${t('Установить')}</button></div>
+        </div>`,
+        { title: t('Установка'), hint: t('Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.') },
+      )}
+      ${list.length ? rows : group(`<div class="tx-group-hint" style="padding:14px 0">${t('Модов пока нет')}</div>`, { title: t('Установленные') })}
+      <input type="file" id="mod-file" accept=".json,.js,application/json,text/javascript" hidden onchange="window.TelegramX.installModFile(this)" />
+    </div>`;
+}
+
+async function runInstall(promise) {
+  try {
+    if (await promise) showToast(t('Мод установлен'));
+  } catch (e) {
+    showToast(String(e && e.message || e));
+  }
+  rerenderSettings();
+}
+
+export function installModFile(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file) return;
+  runInstall(file.text().then((txt) => installMod(parseBundle(txt))));
+}
+
+export function installModText() {
+  const el = document.getElementById('mod-text');
+  const v = el && el.value.trim();
+  if (!v) return;
+  runInstall(/^https:\/\/\S+$/.test(v) ? installFromUrl(v) : Promise.resolve().then(() => installMod(parseBundle(v))));
+}
+
+export function toggleMod(id, on) { setModEnabled(id, on); rerenderSettings(); }
+
+export async function deleteMod(id) {
+  if (await confirmDialog(t('Удалить мод?'), t('Удалить'))) { removeMod(id); rerenderSettings(); }
 }
 
 function dataPage() {

@@ -11,6 +11,7 @@ import { showToast, haptic } from '../utils.js';
 import { quickReactionButtons, sendReaction } from './reactions.js';
 import { hydrateStickers } from './sticker.js';
 import { t, locale } from '../i18n.js';
+import { ext } from '../core/ext.js';
 
 const QUICK_REACTION = '👍';
 let lastTap = 0;
@@ -91,6 +92,8 @@ export function openPostMenu(postId, event) {
       { sep: true },
       { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(post.tg_url, '_blank', 'noopener') },
     );
+    const extra = ext.menu('post', { post });
+    if (extra.length) items.push({ sep: true }, ...extra.map((it) => ({ icon: it.icon || 'next', label: it.label, run: () => it.run({ post }) })));
     const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post) });
     hydrateStickers(ctx);
   }, 290);
