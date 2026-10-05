@@ -4,51 +4,65 @@
  * Images are cached in Cache Storage; documents are streamed in chunks via Range.
  */
 
+/**
+ * TeleX service worker.
+ *  1. The whole app (html/css/js/icons) is precached on install (precache.json, built by
+ *     tools/build-precache.mjs) and served cache-first: the interface opens instantly, offline,
+ *     and inside the Android/Windows apps. A new release changes BUILD → a new worker installs the
+ *     new files in the background and they are used from the next start (no half-updated mix:
+ *     the cache is replaced as a whole).
+ *  2. Emoji, wallpapers and other big static files are cached the first time they are used.
+ *  3. "media/…" URLs (avatars, photos, video/audio) are answered by asking the open page to
+ *     download them from Telegram via GramJS. Images are cached; documents are streamed (Range).
+ */
+
 const MEDIA_CACHE = 'telex-media-v1';
+const BUILD = '90fda3d7d1'; // replaced by tools/build-precache.mjs: changes with every file → a new worker
 const SW_VERSION = '3.14.0';
 const CACHEABLE = new Set(['avatar', 'avatarbig', 'photo', 'thumb', 'webpage', 'cemoji', 'cmedia', 'cthumb', 'storythumb', 'photofull', 'wallpaper']);
 const STREAMED = new Set(['doc', 'story']);
 
-const APP_CACHE = `telex-app-${SW_VERSION}`;
+const APP_CACHE = `telex-app-${BUILD}`;
 
-self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('install', (event) => {
+  event.waitUntil((async () => {
+    const cache = await caches.open(APP_CACHE);
+    try {
+      const list = await (await fetch('precache.json', { cache: 'no-store' })).json();
+      // addAll is all-or-nothing; fall back to one by one so a single missing file never blocks the update.
+      try { await cache.addAll(list.files); } catch { await Promise.all(list.files.map((f) => cache.add(f).catch(() => {}))); }
+    } catch {}
+    await self.skipWaiting();
+  })());
+});
+
 self.addEventListener('activate', (event) => event.waitUntil((async () => {
-  // Drop app-code caches of older releases (media cache is kept).
+  // Drop app caches of older builds (the media cache is kept).
   const keys = await caches.keys();
   await Promise.all(keys.filter((k) => k.startsWith('telex-app-') && k !== APP_CACHE).map((k) => caches.delete(k)));
   await self.clients.claim();
 })()));
 
-/**
- * App code: always try the network first (so a release never mixes with stale
- * modules), but give up after a few seconds on a bad connection and use the
- * copy saved from the last successful load. Works offline too.
- */
-async function appCode(request) {
+/** Static app file: cache first (it is precached); files not listed (emoji, wallpapers) are cached when first used. */
+async function appFile(request) {
   const cache = await caches.open(APP_CACHE);
-  const network = fetch(request, { cache: 'no-cache' }).then((res) => {
-    if (res.ok && res.type === 'basic') cache.put(request, res.clone()).catch(() => {});
-    return res;
-  });
-  network.catch(() => {});
-  const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 3500));
-  try {
-    const first = await Promise.race([network, timeout]);
-    if (first) return first;
-    const cached = await cache.match(request);
-    return cached || await network;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    throw new Error('offline');
-  }
+  const hit = await cache.match(request, { ignoreSearch: true });
+  if (hit) return hit;
+  const res = await fetch(request);
+  if (res.ok && res.type === 'basic') cache.put(request, res.clone()).catch(() => {});
+  return res;
 }
 
-// App code (HTML/CSS/JS) is always revalidated with the server, so a new
-// release never mixes with stale cached modules. Stable assets (emoji,
-// wallpapers, vendor bundles) keep using the normal HTTP cache.
-const STABLE = /\/(emoji|wallpapers|js\/vendor)\//;
-const APP_CODE = /(\.(js|css|html)$|\/$)/;
+// Tap on a notification: focus the app and open the chat/channel.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const client = all.find((c) => c.visibilityState === 'visible') || all[0];
+    if (client) await client.focus();
+    else await self.clients.openWindow(self.registration.scope);
+  })());
+});
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
@@ -59,25 +73,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(serveMedia(event, url.pathname.slice(scope.pathname.length + 'media/'.length)));
     return;
   }
-
-  if (STABLE.test(url.pathname)) {
-    event.respondWith(stableAsset(event.request));
-    return;
-  }
-  if (APP_CODE.test(url.pathname)) {
-    event.respondWith(appCode(event.request));
-  }
+  // Everything else under the scope is the app itself. It must be answered here: inside the
+  // Android WebView a request the worker passes through bypasses the native asset interceptor.
+  if (url.pathname.startsWith(scope.pathname)) event.respondWith(appFile(event.request));
 });
-
-/** Emoji, wallpapers and vendor bundles: cache-first (they only change with a release). */
-async function stableAsset(request) {
-  const cache = await caches.open(APP_CACHE);
-  const hit = await cache.match(request);
-  if (hit) return hit;
-  const res = await fetch(request);
-  if (res.ok && res.type === 'basic') cache.put(request, res.clone()).catch(() => {});
-  return res;
-}
 
 async function pageClient(event) {
   const own = event.clientId && await self.clients.get(event.clientId);

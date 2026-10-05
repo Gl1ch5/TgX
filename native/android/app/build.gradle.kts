@@ -56,6 +56,19 @@ android {
     }
 }
 
+// The web app is packed into the APK (assets/web) and answered locally for https://telex-web.ru/app/static/…
+// (see AppAssets): the interface opens instantly and works offline. The origin stays the same, so the
+// Telegram session in localStorage / IndexedDB is kept.
+val webOut = layout.buildDirectory.dir("generated/web")
+val copyWeb by tasks.registering(Copy::class) {
+    from(rootProject.projectDir.resolve("../../app/static")) {
+        exclude("**/*.md", "**/*.map")
+    }
+    into(webOut.map { it.dir("web") })
+}
+android.sourceSets.getByName("main").assets.srcDir(webOut)
+tasks.configureEach { if (name.startsWith("merge") && name.endsWith("Assets")) dependsOn(copyWeb) }
+
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-ktx:1.9.3")

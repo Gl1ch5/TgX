@@ -2,7 +2,7 @@
   "name": "telex-desktop",
   "productName": "TeleX",
   "version": "1.0.0",
-  "description": "TeleX desktop: the live TeleX web app in a native window",
+  "description": "TeleX desktop: the TeleX web app packed into a native window",
   "author": "Gl1ch5",
   "license": "MIT",
   "repository": {
@@ -12,11 +12,12 @@
   "private": true,
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "node scripts/copy-web.js && electron .",
     "icons": "node scripts/make-icons.js",
-    "dist:win": "electron-builder --win nsis portable --x64 --publish never",
-    "dist:dir": "electron-builder --dir --publish never",
-    "smoke": "electron scripts/smoke.js"
+    "dist:win": "node scripts/copy-web.js && electron-builder --win nsis portable --x64 --publish never",
+    "dist:dir": "node scripts/copy-web.js && electron-builder --dir --publish never",
+    "smoke": "electron scripts/smoke.js",
+    "web": "node scripts/copy-web.js"
   },
   "devDependencies": {
     "electron": "44.5.1",
@@ -32,6 +33,7 @@
     },
     "files": [
       "src/**/*",
+      "web/**/*",
       "build/icon.png",
       "package.json"
     ],

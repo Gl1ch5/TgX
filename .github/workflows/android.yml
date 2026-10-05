@@ -5,6 +5,7 @@ on:
     branches: [main, ccr-297b0b47-05qrmt]
     paths:
       - 'native/android/**'
+      - 'app/static/**'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 

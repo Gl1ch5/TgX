@@ -14,7 +14,7 @@ import { COLOR_THEMES, NAME_COLORS, NAME_COLORS_DAY, outGradient } from '../core
 import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
 import { titleBar, group, row, switchRow, slider, segments, radioRow } from '../components/ui.js';
-import { WALLPAPERS, applyWallpaper, refreshWallpaper, openWallpaperModal } from '../components/wallpaperTheme.js';
+import { WALLPAPERS, applyWallpaper, refreshWallpaper, openWallpaperModal, wallPreviewHtml } from '../components/wallpaperTheme.js';
 import { openPopup } from '../components/postMenu.js';
 import { APP_VERSION, AUTHOR, REPO_URL } from '../version.js';
 import { workerMode } from '../tg.js';
@@ -232,8 +232,8 @@ function previewBand() {
   const me = state.user || { id: 5, name: 'Pavel' };
   const first = escapeHtml(String(me.name || 'Pavel').split(' ')[0]);
   return `
-    <div class="tx-cp" style="background:${bg}">
-      ${wp.svg ? `<div class="tx-cp-pattern" style="background-image:url('${wp.svg}')"></div>` : ''}
+    <div class="tx-cp" style="${wp.remote ? '' : `background:${bg}`}">
+      ${wp.remote ? `<div style="position:absolute;inset:0;overflow:hidden">${wallPreviewHtml(wp, day, 200)}</div>` : wp.svg ? `<div class="tx-cp-pattern" style="background-image:url('${wp.svg}')"></div>` : ''}
       <div class="tx-cp-msg">
         <div class="tx-cp-bubble">
           <div class="tx-cp-quote"><b style="color:var(--tx-green)">${first}</b><span>${parseEmojis(t('Доброе утро! 👋'))}</span></div>
@@ -253,8 +253,8 @@ function themeTile(c, selected) {
   const wp = WALLPAPERS.find((w) => w.id === c.wp) || WALLPAPERS[0];
   const bg = day && wp.light ? wp.light : wp.gradient;
   return `
-    <button class="tx-theme-tile ${selected ? 'is-active' : ''}" onclick="window.TelegramX.setColorTheme('${c.id}')" aria-label="${c.id}" style="background:${bg}">
-      ${wp.svg ? `<span class="tx-cp-pattern" style="background-image:url('${wp.svg}')"></span>` : ''}
+    <button class="tx-theme-tile ${selected ? 'is-active' : ''}" onclick="window.TelegramX.setColorTheme('${c.id}')" aria-label="${c.id}" style="${wp.remote ? '' : `background:${bg}`}">
+      ${wp.remote ? wallPreviewHtml(wp, day, 90) : wp.svg ? `<span class="tx-cp-pattern" style="background-image:url('${wp.svg}')"></span>` : ''}
       <span class="tx-theme-out" style="background:${outGradient(c, day ? 'light' : 'dark')}"></span>
       <span class="tx-theme-in"></span>
       <span class="tx-theme-emoji">${parseEmojis(c.emoji)}</span>

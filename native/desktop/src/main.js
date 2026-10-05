@@ -1,5 +1,7 @@
 'use strict';
-// TeleX desktop shell: opens the live web app (always up to date) in a native window.
+// TeleX desktop shell: the web app is packed into the installer (web/) and answered locally for
+// https://telex-web.ru/app/static/…, so it opens at once and works offline; the origin is unchanged,
+// so the Telegram session is kept.
 const path = require('path');
 const fs = require('fs');
 const { app, BrowserWindow, session, shell, nativeTheme, Menu, net } = require('electron');
@@ -219,12 +221,35 @@ if (!app.requestSingleInstanceLock()) {
     }
   }
 
+  // ---- The packed web app ----------------------------------------------------------
+  const WEB_ROOT = path.join(__dirname, '..', 'web');
+  const MIME = { html: 'text/html', js: 'text/javascript', mjs: 'text/javascript', css: 'text/css', json: 'application/json', webmanifest: 'application/json',
+    svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', woff2: 'font/woff2', wasm: 'application/wasm' };
+  function servePackedApp(ses) {
+    if (!fs.existsSync(path.join(WEB_ROOT, 'index.html'))) return; // dev checkout without a copy: use the network
+    ses.protocol.handle('https', async (req) => {
+      const u = new URL(req.url);
+      const prefix = new URL(APP_URL);
+      if (req.method === 'GET' && u.origin === prefix.origin && u.pathname.startsWith(prefix.pathname)) {
+        let rel = decodeURIComponent(u.pathname.slice(prefix.pathname.length));
+        if (!rel || rel.endsWith('/')) rel += 'index.html';
+        const file = path.join(WEB_ROOT, rel);
+        if (!rel.startsWith('media/') && file.startsWith(WEB_ROOT) && fs.existsSync(file) && fs.statSync(file).isFile()) {
+          const ext = path.extname(file).slice(1).toLowerCase();
+          return new Response(fs.readFileSync(file), { headers: { 'content-type': MIME[ext] || 'application/octet-stream', 'cache-control': 'no-cache' } });
+        }
+      }
+      return net.fetch(req, { bypassCustomProtocolHandlers: true });
+    });
+  }
+
   app.whenReady().then(async () => {
     nativeTheme.themeSource = 'dark';
     Menu.setApplicationMenu(null);
     const ses = session.fromPartition(PARTITION);
     configureSession(ses);
     await migrateLegacyStorage(ses).catch(() => {});
+    servePackedApp(ses);
     createWindow();
     app.on('activate', () => { if (!win) createWindow(); });
   });

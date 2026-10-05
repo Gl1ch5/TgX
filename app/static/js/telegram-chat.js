@@ -507,6 +507,19 @@ export function installChat(TelegramService, helpers) {
     return out;
   };
 
+  /** The wallpapers Telegram offers this account (real colours, rotation, pattern intensity). */
+  P.getWallpapers = async function getWallpapers() {
+    const client = await this.getClient();
+    const res = await client.invoke(new Api.account.GetWallPapers({ hash: 0n }));
+    const out = [];
+    for (const wp of res.wallpapers || []) {
+      const f = this.formatWallpaper(wp);
+      if (!f || f.kind === 'image') continue; // photo wallpapers are heavy; patterns and fills only
+      out.push({ id: 'tg' + String(wp.id), slug: wp.slug || '', ...f });
+    }
+    return out;
+  };
+
   /** Wallpaper and message colours of a chat: its own wallpaper, else the wallpaper of its chat theme. */
   P.chatAppearance = async function chatAppearance(key) {
     const { client, entity, peer } = await this.chatInput(key);

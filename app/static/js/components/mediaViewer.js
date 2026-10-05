@@ -50,7 +50,7 @@ export function openViewer(postId, index = 0) {
     </div>
     <div class="tx-viewer-counter"></div>
     <div class="tx-viewer-stage"></div>
-    <button class="tx-viewer-nav prev" data-act="prev"><i class="icon icon-arrow-left"></i></button>
+    <button class="tx-viewer-nav prev" data-act="prev"><i class="icon icon-arrow-right" style="transform:scaleX(-1)"></i></button>
     <button class="tx-viewer-nav next" data-act="next"><i class="icon icon-arrow-right"></i></button>
     <div class="tx-viewer-bottom">
       <div class="tx-viewer-caption post-text"></div>

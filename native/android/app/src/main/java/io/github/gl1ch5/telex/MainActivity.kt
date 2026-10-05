@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private lateinit var downloads: Downloads
     private lateinit var updater: Updater
+    private lateinit var appAssets: AppAssets
 
     private val startedAt = SystemClock.uptimeMillis()
     private var firstPaint = false
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
 
         downloads = Downloads(this)
         updater = Updater(this)
+        appAssets = AppAssets(this)
         root = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
         webView = WebView(this).apply {
             setBackgroundColor(Color.BLACK) // no white flash before the page paints
@@ -219,7 +221,7 @@ class MainActivity : ComponentActivity() {
             }
             if (WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST)) {
                 controller.setServiceWorkerClient(object : ServiceWorkerClientCompat() {
-                    override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+                    override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = appAssets.intercept(request.url)
                 })
             }
         } catch (e: Exception) {
@@ -300,6 +302,9 @@ class MainActivity : ComponentActivity() {
                 else -> openExternal(uri).let { true } // tg:, intent:, mailto:, tel:, …
             }
         }
+
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+            if (request.method == "GET") appAssets.intercept(request.url) else null
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             firstPaint = true

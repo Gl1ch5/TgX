@@ -5,6 +5,7 @@ on:
     branches: [main, ccr-297b0b47-05qrmt]
     paths:
       - 'native/desktop/**'
+      - 'app/static/**'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
 
@@ -38,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Build installer and portable exe
-        run: npx electron-builder --win nsis portable --x64 --publish never
+        run: npm run dist:win
 
       - name: Check outputs
         shell: pwsh

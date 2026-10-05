@@ -90,7 +90,75 @@ export const WALLPAPERS = [
   },
 ];
 
+// ---- the wallpapers Telegram offers this account (real colours and pattern intensity) ----
+const BUILTIN = WALLPAPERS.slice();
+const REMOTE_KEY = 'tgx_wp_remote';
+
+function wallFill(w) {
+  const c = w.colors || [];
+  if (!c.length) return '#000';
+  if (c.length === 1) return c[0];
+  if (c.length === 2) return `linear-gradient(${(w.rotation || 0) + 180}deg, ${c[0]}, ${c[1]})`;
+  // Telegram's 3/4-colour "freeform" gradient, approximated with corner glows
+  const at = ['18% 12%', '86% 30%', '14% 88%', '82% 86%'];
+  return c.map((col, i) => `radial-gradient(circle at ${at[i]}, ${col} 0, transparent 70%)`).join(', ') + `, ${c[0]}`;
+}
+
+function useRemote(list) {
+  if (!Array.isArray(list) || !list.length) return false;
+  const oled = BUILTIN.find((w) => w.id === 'oled');
+  const mapped = list.map((w, i) => {
+    const fill = wallFill(w);
+    return { ...w, name: w.name || `${t('Обои')} ${i + 1}`, gradient: fill, light: fill, svg: w.kind === 'pattern' ? w.url : null, remote: true };
+  });
+  WALLPAPERS.splice(0, WALLPAPERS.length, ...mapped, oled);
+  return true;
+}
+
+/** Fetch the account's real wallpapers once (cached for the next start), then redraw. */
+export async function loadRemoteWallpapers() {
+  try { useRemote(JSON.parse(localStorage.getItem(REMOTE_KEY) || 'null')); } catch {}
+  try {
+    const { telegram } = await import('../tg.js');
+    if (!telegram.hasSession || !telegram.hasSession()) return;
+    const list = await telegram.getWallpapers();
+    if (!useRemote(list)) return;
+    localStorage.setItem(REMOTE_KEY, JSON.stringify(list));
+    refreshWallpaper();
+    const grid = document.getElementById('wallpaper-grid-list');
+    if (grid) renderWallpaperList();
+  } catch (e) { console.warn('[TeleX] wallpapers', e); }
+}
+
+/** Fill + pattern of a wallpaper into two layers (shared by the page background, the picker and the previews). */
+function paintWall(wp, day, canvas, pattern, scale = 1) {
+  if (wp.remote) {
+    const neg = wp.intensity != null && wp.intensity < 0;
+    const op = Math.abs(wp.intensity == null ? 50 : wp.intensity) / 100;
+    canvas.style.background = neg ? '#000' : wp.gradient;
+    if (wp.svg) {
+      const u = `url("${wp.svg}")`;
+      pattern.style.cssText += `;filter:none;background:${neg ? wp.gradient : '#000'};-webkit-mask:${u} center top/${scale === 1 ? 'min(100%,640px) auto' : '120px auto'} repeat;mask:${u} center top/${scale === 1 ? 'min(100%,640px) auto' : '120px auto'} repeat;opacity:${op}`;
+    } else { pattern.style.cssText += ';-webkit-mask:none;mask:none;background:none;opacity:0'; }
+    return;
+  }
+  canvas.style.background = day && wp.light ? wp.light : wp.gradient;
+}
+
+/** Two stacked layers (fill + pattern) for a small preview of a wallpaper. */
+export function wallPreviewHtml(wp, day, size = 120) {
+  if (wp.remote) {
+    const neg = wp.intensity != null && wp.intensity < 0;
+    const op = Math.abs(wp.intensity == null ? 50 : wp.intensity) / 100;
+    const u = wp.svg ? `url('${wp.svg}')` : '';
+    return `<span style="position:absolute;inset:0;background:${neg ? '#000' : wp.gradient}"></span>` + (u ? `<span style="position:absolute;inset:0;background:${neg ? wp.gradient : '#000'};-webkit-mask:${u} center top/${size}px auto repeat;mask:${u} center top/${size}px auto repeat;opacity:${op}"></span>` : '');
+  }
+  const bg = day && wp.light ? wp.light : wp.gradient;
+  return `<span style="position:absolute;inset:0;background:${bg}"></span>` + (wp.svg ? `<span style="position:absolute;inset:0;background:url('${wp.svg}') center/${size}px auto repeat;opacity:.35"></span>` : '');
+}
+
 export function initWallpaperEngine() {
+  loadRemoteWallpapers();
   const savedId = localStorage.getItem('tgx_wallpaper') || 'FOks2P6KCFIMAAAAyFz5S74pfKo';
   applyWallpaper(savedId, false);
 }
@@ -120,7 +188,11 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
   bgCanvas.style.background = day && wp.light ? wp.light : wp.gradient;
 
   // Set vector pattern
-  if (wp.svg) {
+  if (wp.remote) {
+    bgPattern.style.cssText = '';
+    paintWall(wp, day, bgCanvas, bgPattern);
+  } else if (wp.svg) {
+    bgPattern.style.cssText = '';
     bgPattern.style.backgroundImage = `url("${wp.svg}")`;
     bgPattern.style.backgroundSize = '360px auto';
     bgPattern.style.opacity = day ? 0.1 : wp.patternOpacity || 0.28;
@@ -177,11 +249,7 @@ export function renderWallpaperList() {
     };
 
     item.innerHTML = `
-      <!-- Background Canvas Preview -->
-      <div class="absolute inset-0 z-0" style="background: ${wp.gradient};"></div>
-      ${wp.svg ? `
-        <div class="absolute inset-0 z-0 bg-repeat bg-center" style="background-image: url('${wp.svg}'); background-size: 200px auto; opacity: 0.35;"></div>
-      ` : ''}
+      ${wallPreviewHtml(wp, document.documentElement.dataset.theme === 'light', 200)}
 
       <!-- Active Checkmark Badge -->
       <div class="wp-active-check ${isCur ? '' : 'hidden'} absolute top-2 right-2 w-5 h-5 rounded-full bg-[#3390ec] text-white flex items-center justify-center shadow-lg z-10">
