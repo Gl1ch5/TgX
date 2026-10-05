@@ -71,7 +71,7 @@
 .tx-pill-sub { font-size: 14px; color: var(--tx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Plain (black) header used by settings/profile */
-.tx-titlebar { display: flex; align-items: center; gap: 4px; height: 56px; padding-top: var(--tx-safe-top); }
+.tx-titlebar { display: flex; align-items: center; gap: 4px; height: calc(56px + var(--tx-safe-top)); padding-top: var(--tx-safe-top); box-sizing: border-box; }
 .tx-titlebar h1 { flex: 1; margin: 0 0 0 8px; font-size: 22px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tx-icon-btn {
   width: 44px; height: 44px; border-radius: 50%;

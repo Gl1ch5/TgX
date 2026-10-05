@@ -16,8 +16,8 @@
 button.tx-row:active, label.tx-row:active { background: rgba(255, 255, 255, 0.05); }
 label.tx-row { cursor: pointer; }
 .tx-row-body { flex: 1; min-width: 0; }
-.tx-row-title { display: block; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-row-sub { display: block; font-size: 14.5px; color: var(--tx-text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-row-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 17px; line-height: 1.3; overflow: hidden; overflow-wrap: anywhere; }
+.tx-row-sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 14.5px; color: var(--tx-text-2); margin-top: 2px; overflow: hidden; overflow-wrap: anywhere; }
 .tx-row-sub.wrap { white-space: normal; }
 .tx-row-value { font-size: 16px; color: var(--tx-accent); flex-shrink: 0; }
 .tx-row.is-danger .tx-row-title { color: var(--tx-red); }

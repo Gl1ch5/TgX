@@ -12,9 +12,11 @@ import { quickReactionButtons, sendReaction } from './reactions.js';
 import { hydrateStickers } from './sticker.js';
 import { t, locale } from '../i18n.js';
 import { ext } from '../core/ext.js';
+import { setChannelExcluded } from '../core/prefs.js';
 
 const QUICK_REACTION = '👍';
 let lastTap = 0;
+let openedAt = 0;
 
 export function closeMenus() {
   document.querySelectorAll('.tx-ctx, .tx-ctx-backdrop').forEach((m) => {
@@ -31,12 +33,13 @@ function findPost(postId) {
 }
 
 /** Generic popup anchored to an element: optional reaction strip + menu items. */
-export function openPopup(anchor, { reactionsHtml = '', items = [], header = null }) {
+export function openPopup(anchor, { reactionsHtml = '', items = [], header = null, onFastDismiss = null }) {
   closeMenus();
   haptic(6);
   const backdrop = document.createElement('div');
   backdrop.className = 'tx-ctx-backdrop';
-  backdrop.onclick = closeMenus;
+  const born = Date.now();
+  backdrop.onclick = () => { closeMenus(); if (onFastDismiss && Date.now() - born < 320) onFastDismiss(); };
 
   const ctx = document.createElement('div');
   ctx.className = 'tx-ctx';
@@ -74,12 +77,12 @@ export function openPostMenu(postId, event) {
   const now = Date.now();
   if (now - lastTap < 300) return; // second tap of a double tap
   lastTap = now;
+  openedAt = now;
 
   const post = findPost(postId);
   if (!post) return;
   const anchor = event.currentTarget || document.getElementById(`post-card-${postId}`);
-  setTimeout(() => {
-    if (Date.now() - lastTap < 280) return;
+  {
     const tx = window.TelegramX;
     const items = [];
     if (post.comments_enabled) items.push({ icon: 'reply', label: t('Ответить'), run: () => tx.openThread(post.id) });
@@ -90,13 +93,26 @@ export function openPostMenu(postId, event) {
       { icon: 'forward', label: t('Переслать в «Избранное»'), run: () => tx.forwardToSaved(post.channel_id, post.msg_id) },
       { icon: post.is_favorite ? 'favorite-filled' : 'favorite', label: post.is_favorite ? t('Убрать из закладок') : t('В закладки'), run: () => tx.togglePostFavorite(post.id) },
       { sep: true },
+      { icon: 'mute', label: t('Не показывать канал в ленте'), run: () => hideChannel(post) },
       { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(post.tg_url, '_blank', 'noopener') },
     );
     const extra = ext.menu('post', { post });
     if (extra.length) items.push({ sep: true }, ...extra.map((it) => ({ icon: it.icon || 'next', label: it.label, run: () => it.run({ post }) })));
-    const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post) });
+    const ctx = openPopup(anchor, { reactionsHtml: quickReactionButtons(post.id), items, header: menuHeader(post), onFastDismiss: () => quickReact(post.id) });
     hydrateStickers(ctx);
-  }, 290);
+  }
+}
+
+/** Take the post's channel off the feed: its posts fold away at once; "Wall" in settings brings it back. */
+function hideChannel(post) {
+  setChannelExcluded(post.channel_id, true);
+  document.querySelectorAll(`[id^="post-card-${post.channel_id}_"]`).forEach((el) => {
+    el.style.transition = 'opacity .2s, transform .2s';
+    el.style.opacity = '0';
+    el.style.transform = 'scale(0.96)';
+    setTimeout(() => el.remove(), 220);
+  });
+  showToast(t('Канал скрыт из ленты. Вернуть: Настройки → Стена'));
 }
 
 export function quickReact(postId, event) {

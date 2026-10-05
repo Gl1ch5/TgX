@@ -330,7 +330,17 @@
   "plural": false
  },
  {
+  "key": "Не показывать канал в ленте",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
   "key": "Открыть в Telegram",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Канал скрыт из ленты. Вернуть: Настройки → Стена",
   "where": "js/components/postMenu.js",
   "plural": false
  },
@@ -1635,17 +1645,12 @@
   "plural": false
  },
  {
-  "key": "Удалить",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
   "key": "Установить из файла",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": ".json или .js",
+  "key": "Файл .module",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1670,12 +1675,27 @@
   "plural": false
  },
  {
+  "key": "Установленные",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Модов пока нет",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": "Установленные",
+  "key": "Включён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
   "where": "js/views/settings.js",
   "plural": false
  },

@@ -407,7 +407,6 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Мод ‖ Mod ‖ Mod ‖ Mod ‖ Мод
 Удалить ‖ Delete ‖ Eliminar ‖ Excluir ‖ Видалити
 Установить из файла ‖ Install from a file ‖ Instalar desde un archivo ‖ Instalar de um arquivo ‖ Встановити з файлу
-.json или .js ‖ .json or .js ‖ .json o .js ‖ .json ou .js ‖ .json або .js
 Вставить ссылку или JSON ‖ Paste a link or JSON ‖ Pegar enlace o JSON ‖ Colar link ou JSON ‖ Вставити посилання або JSON
 Ссылка https://… или JSON мода ‖ https://… link or mod JSON ‖ Enlace https://… o JSON del mod ‖ Link https://… ou JSON do mod ‖ Посилання https://… або JSON моду
 Установка ‖ Installation ‖ Instalación ‖ Instalação ‖ Встановлення
@@ -416,3 +415,8 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Установленные ‖ Installed ‖ Instalados ‖ Instalados ‖ Встановлені
 Мод установлен ‖ Mod installed ‖ Mod instalado ‖ Mod instalado ‖ Мод встановлено
 Удалить мод? ‖ Delete the mod? ‖ ¿Eliminar el mod? ‖ Excluir o mod? ‖ Видалити мод?
+Не показывать канал в ленте ‖ Hide this channel from the feed ‖ No mostrar este canal en el muro ‖ Não mostrar este canal no mural ‖ Не показувати цей канал у стрічці
+Канал скрыт из ленты. Вернуть: Настройки → Стена ‖ Channel hidden from the feed. To bring it back: Settings → Feed ‖ Canal oculto del muro. Para volver a verlo: Ajustes → Muro ‖ Canal oculto do mural. Para reativar: Configurações → Mural ‖ Канал приховано зі стрічки. Повернути: Налаштування → Стрічка
+Файл .module ‖ A .module file ‖ Archivo .module ‖ Arquivo .module ‖ Файл .module
+Включён ‖ Enabled ‖ Activado ‖ Ativado ‖ Увімкнено
+Настройки мода ‖ Mod settings ‖ Ajustes del mod ‖ Configurações do mod ‖ Налаштування моду

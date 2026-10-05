@@ -408,7 +408,6 @@ export const EN = {
   "Мод": "Mod",
   "Удалить": "Delete",
   "Установить из файла": "Install from a file",
-  ".json или .js": ".json or .js",
   "Вставить ссылку или JSON": "Paste a link or JSON",
   "Ссылка https://… или JSON мода": "https://… link or mod JSON",
   "Установка": "Installation",
@@ -417,4 +416,9 @@ export const EN = {
   "Установленные": "Installed",
   "Мод установлен": "Mod installed",
   "Удалить мод?": "Delete the mod?",
+  "Не показывать канал в ленте": "Hide this channel from the feed",
+  "Канал скрыт из ленты. Вернуть: Настройки → Стена": "Channel hidden from the feed. To bring it back: Settings → Feed",
+  "Файл .module": "A .module file",
+  "Включён": "Enabled",
+  "Настройки мода": "Mod settings",
 };

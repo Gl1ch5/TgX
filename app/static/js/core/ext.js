@@ -5,7 +5,8 @@
 //            'post'     (menu of a post on the feed: ctx { post })     → { label, icon, run }
 //            'settings' (extra rows on the settings screen)            → { title, sub, icon, color, run }
 //            ext.addMenu('post', ({ post }) => [{ label, icon, run }], owner)
-//   hooks  — async pipelines that may change or cancel a value (ext.run)
+//   hooks  — pipelines that may change a value: ext.run (async, may cancel) and ext.pipe (sync, rendering):
+//            'postText' (the finished HTML of a post → HTML)
 //   events — fire-and-forget notifications: 'view' (the screen changed), 'themechange'
 //
 // `owner` is 'core' or a mod id; ext.removeOwner(id) unplugs everything a mod added.
@@ -36,6 +37,15 @@ export const ext = {
     for (const { owner, fn } of list(hooks, name)) {
       try { v = await fn(v, ctx); } catch (e) { console.warn(`[ext] hook ${name} (${owner})`, e); continue; }
       if (v == null) return null;
+    }
+    return v;
+  },
+
+  /** Synchronous pipeline for rendering code (hooks added with addHook; async hooks are skipped here). */
+  pipe(name, value, ctx) {
+    let v = value;
+    for (const { owner, fn } of list(hooks, name)) {
+      try { const r = fn(v, ctx); if (typeof r === 'string') v = r; } catch (e) { console.warn(`[ext] pipe ${name} (${owner})`, e); }
     }
     return v;
   },

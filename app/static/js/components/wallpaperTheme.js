@@ -96,7 +96,7 @@ export const WALLPAPERS = [
 const BUILTIN = WALLPAPERS.slice();
 const REMOTE_KEY = 'tgx_wp_remote';
 
-function wallFill(w) {
+export function wallFill(w) {
   const c = w.colors || [];
   if (!c.length) return '#000';
   if (c.length === 1) return c[0];

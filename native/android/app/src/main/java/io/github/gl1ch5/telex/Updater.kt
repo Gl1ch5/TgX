@@ -8,6 +8,15 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import org.json.JSONObject
@@ -31,6 +40,10 @@ class Updater(private val activity: Activity) {
     private val prefs = activity.getSharedPreferences("updater", Context.MODE_PRIVATE)
     private var pendingApk: File? = null
     private var busy = false
+    private var card: View? = null
+    private var cardTitle: TextView? = null
+    private var cardBar: ProgressBar? = null
+    private var cardSub: TextView? = null
 
     /** Called from onCreate / onResume. `manual` = user pressed "check for updates". */
     fun check(manual: Boolean = false) {
@@ -53,8 +66,8 @@ class Updater(private val activity: Activity) {
                     if (manual) ui { toast("У вас последняя версия TeleX") }
                     return@execute
                 }
-                ui { toast("Загружается TeleX $name…") }
-                val apk = download(apkUrl)
+                ui { showCard(name) }
+                val apk = try { download(apkUrl) } finally { ui { hideCard() } }
                 busy = false
                 ui { offerInstall(apk, name) }
             } catch (e: Exception) {
@@ -125,13 +138,72 @@ class Updater(private val activity: Activity) {
         val tmp = File(dir, "TeleX.apk.part")
         val conn = open(url)
         try {
-            conn.inputStream.use { input -> tmp.outputStream().use { input.copyTo(it, 64 * 1024) } }
+            val total = conn.contentLengthLong
+            conn.inputStream.use { input ->
+                tmp.outputStream().use { out ->
+                    val buf = ByteArray(64 * 1024)
+                    var done = 0L
+                    var lastUi = 0L
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        out.write(buf, 0, n)
+                        done += n
+                        val now = System.currentTimeMillis()
+                        if (now - lastUi > 120) { lastUi = now; ui { updateCard(done, total) } }
+                    }
+                    ui { updateCard(done, total) }
+                }
+            }
         } finally {
             conn.disconnect()
         }
         val apk = File(dir, "TeleX.apk")
         if (!tmp.renameTo(apk)) throw IllegalStateException("rename failed")
         return apk
+    }
+
+    // ------------------------------------------------------------- progress card
+
+    private fun dp(v: Int) = (v * activity.resources.displayMetrics.density).toInt()
+
+    /** A card above the bottom bar: "Loading TeleX 1.2" + progress bar + "12.3 of 28 MB". */
+    private fun showCard(name: String) {
+        hideCard()
+        val host = activity.findViewById<ViewGroup>(android.R.id.content) ?: return
+        val title = TextView(activity).apply { setTextColor(Color.WHITE); textSize = 15f; text = "Загрузка TeleX $name" }
+        val bar = ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply { isIndeterminate = true; max = 1000 }
+        val sub = TextView(activity).apply { setTextColor(0xFF9A9AA0.toInt()); textSize = 13f; text = "Подготовка…" }
+        val box = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(14), dp(18), dp(14))
+            background = GradientDrawable().apply { setColor(0xF2202022.toInt()); cornerRadius = dp(20).toFloat() }
+            elevation = dp(8).toFloat()
+            addView(title)
+            addView(bar, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(18)).apply { topMargin = dp(6) })
+            addView(sub)
+        }
+        host.addView(box, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM).apply {
+            setMargins(dp(16), 0, dp(16), dp(110))
+        })
+        card = box; cardTitle = title; cardBar = bar; cardSub = sub
+    }
+
+    private fun updateCard(done: Long, total: Long) {
+        val bar = cardBar ?: return
+        val mb = { b: Long -> String.format(java.util.Locale.US, "%.1f", b / 1048576.0) }
+        if (total > 0) {
+            bar.isIndeterminate = false
+            bar.progress = (done * 1000 / total).toInt()
+            cardSub?.text = "${mb(done)} из ${mb(total)} МБ · ${done * 100 / total}%"
+        } else {
+            cardSub?.text = "${mb(done)} МБ"
+        }
+    }
+
+    private fun hideCard() {
+        card?.let { (it.parent as? ViewGroup)?.removeView(it) }
+        card = null; cardTitle = null; cardBar = null; cardSub = null
     }
 
     private fun httpText(url: String): String {

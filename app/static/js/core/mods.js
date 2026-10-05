@@ -1,14 +1,17 @@
 // Mods: extensions that run inside TeleX with full access to its API (no sandbox, on purpose).
 //
-//  A mod is a JSON bundle  { manifest, code?, theme? }:
-//    manifest — { id, name, version, description?, author?, type?: 'theme' | 'mod', permissions?, verified? }
-//    theme    — declarative theme, needs no code (see docs/mods.md):
-//               { vars: { all, dark, light }, css, colorThemes: [...], wallpapers: [...], apply }
-//    code     — an ES module with `export default function (tx) { … }` (loaded with import()).
-//  Both parts may be present. The price of full access is trust: the installer warns the user, and
-//  `manifest.verified` is reserved for the review process that will check mods before they are listed.
+//  A mod is a `.module` file — plain text, and it may contain anything:
+//    1. JSON bundle  { "manifest": {...}, "parts": [ { "type": "js|html|css|theme|json|text", "name"?, "code"|"data" } ] }
+//       (old shape { manifest, code, theme } is understood too)
+//    2. one annotated source file: the first comment line says  @manifest {json}, the rest is the body;
+//       the body is an HTML page/fragment when it starts with "<", a theme when it is JSON with theme keys,
+//       and a JS module otherwise.
+//  manifest — { id, name, version, author?, description?, about?, icon?, preview?, tags?, settings?, verified? }
+//    preview  — image (https:// or data: URL) or a list of them, shown on the mod card;
+//    settings — schema of the mod's own settings: [{ key, type: switch|text|number|select|color, title, sub?, default, min?, max?, options? }]
+//  The price of full access is trust: the installer warns, and `manifest.verified` is reserved for the review process.
 //
-//  tx = { mod, S, api, t, toast, confirm, escapeHtml, ext, theme, settings, storage }
+//  tx = { mod, S, api, t, toast, confirm, escapeHtml, ext, theme, config, settings, storage, data, root }
 import { ext } from './ext.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
@@ -19,8 +22,16 @@ import { registerColorThemes, unregisterColorThemes, COLOR_THEMES } from './colo
 import { registerWallpaper, unregisterWallpapers, refreshWallpaper, applyWallpaper } from '../components/wallpaperTheme.js';
 
 const KEY = 'telex.mods';
-const MAX_CODE = 500000;
-const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } };
+const MAX_CODE = 1500000;
+/** Old entries had { code, theme }; new ones have parts[]. */
+function normalize(m) {
+  if (m.parts) return m;
+  const parts = [];
+  if (m.theme) parts.push({ type: 'theme', data: m.theme });
+  if (m.code) parts.push({ type: 'js', code: m.code });
+  return { manifest: m.manifest, parts, enabled: m.enabled };
+}
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || '[]').map(normalize); } catch { return []; } };
 const save = (list) => { try { localStorage.setItem(KEY, JSON.stringify(list)); } catch { showToast(t('Не удалось сохранить')); } };
 
 /** What each running mod has plugged in, so disabling removes all of it. */
@@ -111,6 +122,14 @@ function stop(id) {
   const r = running.get(id);
   if (!r) { ext.removeOwner(id); return; }
   r.styles.forEach((s) => s.remove());
+  (r.roots || []).forEach((n) => n.remove());
+  configListeners.delete(id);
+  renderers.delete(id);
+  (observers.get(id) || []).forEach((o) => o.disconnect());
+  observers.delete(id);
+  document.querySelectorAll(`[data-mod-inject="${id}"]`).forEach((n) => n.remove());
+  for (const k of [...pages.keys()]) if (k.startsWith(id + ':')) pages.delete(k);
+  if (window.TeleXMods) delete window.TeleXMods[id];
   unregisterColorThemes(id);
   unregisterWallpapers(`mod:${id}:`);
   running.delete(id);
@@ -121,9 +140,48 @@ function stop(id) {
   document.dispatchEvent(new Event('tx:themes'));
 }
 
-function makeApi(manifest) {
+const pages = new Map();            // 'modId:pageId' -> page definition (settings screens added by mods)
+export const modPage = (key) => pages.get(key);
+const observers = new Map();        // id -> MutationObserver[]
+function watchSelector(id, selector, fn) {
+  const seen = new WeakSet();
+  const scan = (root) => {
+    const list = root.nodeType === 1 && root.matches(selector) ? [root] : [];
+    list.push(...(root.querySelectorAll ? root.querySelectorAll(selector) : []));
+    for (const el of list) if (!seen.has(el)) { seen.add(el); try { fn(el); } catch (e) { console.warn(`[mods] ${id} watch`, e); } }
+  };
+  scan(document.body);
+  const mo = new MutationObserver((recs) => { for (const r of recs) r.addedNodes.forEach((n) => { if (n.nodeType === 1) scan(n); }); });
+  mo.observe(document.body, { childList: true, subtree: true });
+  observers.set(id, [...(observers.get(id) || []), mo]);
+}
+const configListeners = new Map(); // id -> Map(key -> [fn])
+const renderers = new Map();       // id -> [fn(container)]
+
+const storeOf = (id) => { try { return JSON.parse(localStorage.getItem(`telex.mod.${id}`) || '{}'); } catch { return {}; } };
+const writeStore = (id, d) => { try { localStorage.setItem(`telex.mod.${id}`, JSON.stringify(d)); } catch {} };
+
+/** Value of one of the mod's own settings (falls back to the default from the manifest). */
+export function modConfigGet(mod, key) {
+  const d = storeOf(mod.manifest.id);
+  if (key in d) return d[key];
+  const def = (mod.manifest.settings || []).find((x) => x.key === key);
+  return def ? def.default : null;
+}
+export function modConfigSet(id, key, value) {
+  const d = storeOf(id);
+  d[key] = value;
+  writeStore(id, d);
+  const ls = configListeners.get(id);
+  for (const fn of [...((ls && ls.get(key)) || []), ...((ls && ls.get('*')) || [])]) { try { fn(value, key); } catch (e) { console.warn(`[mods] ${id} config`, e); } }
+}
+export const modRenderers = (id) => renderers.get(id) || [];
+
+function makeApi(mod) {
+  const manifest = mod.manifest;
   const id = manifest.id;
-  const store = () => { try { return JSON.parse(localStorage.getItem(`telex.mod.${id}`) || '{}'); } catch { return {}; } };
+  const dataParts = {};
+  for (const p of mod.parts) if (p.type === 'json' || p.type === 'text') dataParts[p.name || p.type] = p.data !== undefined ? p.data : p.code;
   return {
     mod: manifest,
     S: state, api, t, toast: showToast, confirm: (text, ok) => confirmDialog(text, ok || t('ОК')), escapeHtml,
@@ -133,35 +191,81 @@ function makeApi(manifest) {
       on: (name, fn) => ext.on(name, fn, id),
     },
     theme: themeApi(id),
-    settings: { addRow: (row) => ext.addMenu('settings', () => [row], id) },
-    storage: {
-      get: (k) => store()[k] ?? null,
-      set: (k, v) => { const d = store(); d[k] = v; try { localStorage.setItem(`telex.mod.${id}`, JSON.stringify(d)); } catch {} },
+    /** The mod's own settings (schema in manifest.settings): get(key), set(key, value), on(key | '*', fn), render(fn(container)) for a custom block */
+    config: {
+      get: (k) => modConfigGet(mod, k),
+      set: (k, v) => modConfigSet(id, k, v),
+      on: (k, fn) => { const m = configListeners.get(id) || new Map(); configListeners.set(id, m); m.set(k, [...(m.get(k) || []), fn]); },
+      render: (fn) => renderers.set(id, [...(renderers.get(id) || []), fn]),
     },
+    settings: {
+      addRow: (row) => ext.addMenu('settings', () => [row], id),
+      /** A whole screen in the settings: { id, title, sub?, icon?, color?, render(box) } — gets a row in the settings list. */
+      addPage: (pg) => {
+        pages.set(`${id}:${pg.id}`, pg);
+        ext.addMenu('settings', () => [{ title: pg.title, sub: pg.sub, icon: pg.icon, color: pg.color, run: () => window.TelegramX.openSettingsPage(`xp:${id}:${pg.id}`) }], id);
+      },
+    },
+    /** Reach into any screen: watch(selector, fn) runs for present and future elements, inject(selector, html, where) adds markup. */
+    ui: {
+      watch: (selector, fn) => watchSelector(id, selector, fn),
+      inject: (selector, html, where = 'beforeend') => {
+        const put = (el) => { if (!el.querySelector(`[data-mod-inject="${id}"]`) || where !== 'beforeend') { const tpl = document.createElement('template'); tpl.innerHTML = `<span data-mod-inject="${id}" style="display:contents">${html}</span>`; el.insertAdjacentElement(where, tpl.content.firstChild); } };
+        watchSelector(id, selector, put);
+      },
+      root: () => document.getElementById('app') || document.body,
+    },
+    storage: {
+      get: (k) => storeOf(id)[k] ?? null,
+      set: (k, v) => { const d = storeOf(id); d[k] = v; writeStore(id, d); },
+    },
+    data: dataParts,
   };
+}
+
+/** Run the scripts of an HTML part (innerHTML does not execute them). */
+function mountHtml(id, html, tx, r) {
+  const root = document.createElement('div');
+  root.className = 'tx-mod-root';
+  root.dataset.mod = id;
+  root.innerHTML = html;
+  (window.TeleXMods = window.TeleXMods || {})[id] = tx;
+  document.body.append(root);
+  r.roots.push(root);
+  for (const old of [...root.querySelectorAll('script')]) {
+    const sc = document.createElement('script');
+    for (const a of old.attributes) sc.setAttribute(a.name, a.value);
+    sc.textContent = old.textContent;
+    old.replaceWith(sc);
+  }
 }
 
 async function start(mod) {
   const id = mod.manifest.id;
   stop(id);
-  running.set(id, { vars: {}, styles: [], themes: null });
-  const tx = makeApi(mod.manifest);
+  running.set(id, { vars: {}, styles: [], roots: [], themes: null });
+  const r = running.get(id);
+  const tx = makeApi(mod);
   try {
-    const th = mod.theme;
-    if (th) {
-      if (th.vars) for (const mode of ['all', 'dark', 'light']) if (th.vars[mode]) tx.theme.setVars(th.vars[mode], mode);
-      if (th.css) tx.theme.addCss(th.css);
-      (th.wallpapers || []).forEach((w) => tx.theme.addWallpaper(w));
-      (th.colorThemes || []).forEach((c) => tx.theme.addColorTheme(c));
-      if (th.apply && mod.justInstalled) tx.theme.select(th.apply);
-    }
-    if (typeof mod.code === 'string' && mod.code) {
-      const url = URL.createObjectURL(new Blob([mod.code], { type: 'text/javascript' }));
-      try {
-        const m = await import(/* @vite-ignore */ url);
-        if (typeof m.default !== 'function') throw new Error('export default function (tx) is missing');
-        await m.default(tx);
-      } finally { URL.revokeObjectURL(url); }
+    for (const part of mod.parts) {
+      if (part.type === 'theme') {
+        const th = part.data;
+        if (th.vars) for (const mode of ['all', 'dark', 'light']) if (th.vars[mode]) tx.theme.setVars(th.vars[mode], mode);
+        if (th.css) tx.theme.addCss(th.css);
+        (th.wallpapers || []).forEach((w) => tx.theme.addWallpaper(w));
+        (th.colorThemes || []).forEach((c) => tx.theme.addColorTheme(c));
+        if (th.apply && mod.justInstalled) tx.theme.select(th.apply);
+      } else if (part.type === 'css') {
+        tx.theme.addCss(part.code);
+      } else if (part.type === 'html') {
+        mountHtml(id, part.code, tx, r);
+      } else if (part.type === 'js') {
+        const url = URL.createObjectURL(new Blob([part.code], { type: 'text/javascript' }));
+        try {
+          const m = await import(/* @vite-ignore */ url);
+          if (typeof m.default === 'function') await m.default(tx);
+        } finally { URL.revokeObjectURL(url); }
+      }
     }
     applyVars();
     refreshWallpaper();
@@ -174,29 +278,49 @@ async function start(mod) {
 
 // ---------------------------------------------------------------- install / manage
 
-/** Parse a bundle from text: JSON, or a .js module whose first line is  // @manifest {json}  */
+const BODY_TYPES = new Set(['js', 'html', 'css', 'theme', 'json', 'text']);
+
+/** Parse the text of a .module file (see the header of this file for the shapes). */
 export function parseBundle(text) {
-  const src = String(text).trim();
-  if (src.startsWith('{')) return JSON.parse(src);
-  const m = /^\s*\/\/\s*@manifest\s+(\{.*\})\s*$/m.exec(src);
+  const src = String(text).replace(/^\uFEFF/, '').trim();
+  if (src.startsWith('{')) {
+    const o = JSON.parse(src);
+    if (o.manifest && Array.isArray(o.parts)) {
+      for (const p of o.parts) if (!BODY_TYPES.has(p.type)) throw new Error(t('Неверный манифест'));
+      return { manifest: o.manifest, parts: o.parts };
+    }
+    if (o.manifest) return normalize(o);
+  }
+  // annotated source: the manifest sits in the first comment line carrying "@manifest"
+  const m = /^[^\n]*@manifest\s+(\{.*\})[^\n]*$/m.exec(src);
   if (!m) throw new Error(t('Неверный манифест'));
-  return { manifest: JSON.parse(m[1]), code: src };
+  const manifest = JSON.parse(m[1]);
+  const body = src.replace(m[0], '').trim();
+  let part;
+  if (body.startsWith('<')) part = { type: 'html', code: body };
+  else if (body.startsWith('{') || body.startsWith('[')) {
+    const data = JSON.parse(body);
+    part = data && (data.vars || data.colorThemes || data.wallpapers || data.css) ? { type: 'theme', data } : { type: 'json', data };
+  } else part = { type: 'js', code: body };
+  return { manifest, parts: [part] };
 }
 
 export async function installMod(mod) {
   const err = validateManifest(mod && mod.manifest);
   if (err) throw new Error(err);
-  if (!mod.code && !mod.theme) throw new Error(t('В моде нет ни кода, ни темы'));
-  if (mod.code != null && (typeof mod.code !== 'string' || mod.code.length > MAX_CODE)) throw new Error(t('Код мода слишком большой'));
+  const parts = mod.parts || [];
+  if (!parts.length) throw new Error(t('В моде нет ни кода, ни темы'));
+  const size = JSON.stringify(parts).length + JSON.stringify(mod.manifest).length;
+  if (size > MAX_CODE) throw new Error(t('Код мода слишком большой'));
   const m = mod.manifest;
-  const risky = !!mod.code;
+  const risky = parts.some((p) => p.type === 'js' || p.type === 'html');
   const ok = await confirmDialog(
     risky
       ? t('Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}', { a: m.name, b: m.verified ? '' : ' ' + t('Этот мод не проверен.') })
       : t('Установить тему «{a}»?', { a: m.name }),
     t('Установить'));
   if (!ok) return false;
-  const entry = { manifest: m, code: mod.code || null, theme: mod.theme || null, enabled: true };
+  const entry = { manifest: m, parts, enabled: true };
   save([...load().filter((x) => x.manifest.id !== m.id), entry]);
   await start({ ...entry, justInstalled: true });
   document.dispatchEvent(new Event('tx:mods'));

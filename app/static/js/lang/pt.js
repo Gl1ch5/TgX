@@ -408,7 +408,6 @@ export const PT = {
   "Мод": "Mod",
   "Удалить": "Excluir",
   "Установить из файла": "Instalar de um arquivo",
-  ".json или .js": ".json ou .js",
   "Вставить ссылку или JSON": "Colar link ou JSON",
   "Ссылка https://… или JSON мода": "Link https://… ou JSON do mod",
   "Установка": "Instalação",
@@ -417,4 +416,9 @@ export const PT = {
   "Установленные": "Instalados",
   "Мод установлен": "Mod instalado",
   "Удалить мод?": "Excluir o mod?",
+  "Не показывать канал в ленте": "Não mostrar este canal no mural",
+  "Канал скрыт из ленты. Вернуть: Настройки → Стена": "Canal oculto do mural. Para reativar: Configurações → Mural",
+  "Файл .module": "Arquivo .module",
+  "Включён": "Ativado",
+  "Настройки мода": "Configurações do mod",
 };

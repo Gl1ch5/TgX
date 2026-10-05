@@ -91,7 +91,7 @@ window.TelegramX = {
   devImportSession: settings.devImportSession,
   devHardReload: settings.devHardReload,
   checkAppUpdate: settings.checkAppUpdate,
-  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod,
+  installModFile: settings.installModFile, installModText: settings.installModText, toggleMod: settings.toggleMod, deleteMod: settings.deleteMod, modSet: settings.modSet,
   setWorkerMode: settings.setWorkerMode,
 
   // Profile

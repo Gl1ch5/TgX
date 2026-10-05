@@ -6,6 +6,7 @@
 
 import { parseEmojis, emojifyHtml, escapeHtml } from './emoji.js';
 import { t, locale } from './i18n.js';
+import { ext } from './core/ext.js';
 
 export { escapeHtml };
 
@@ -100,11 +101,11 @@ function linkifyText(html, { urls }) {
 }
 
 export function formatPostText(rawText, htmlText) {
-  if (htmlText) {
-    return emojifyHtml(linkifyText(htmlText, { urls: false }).replace(/\n/g, '<br/>'));
-  }
-  if (!rawText) return '';
-  return emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
+  let out;
+  if (htmlText) out = emojifyHtml(linkifyText(htmlText, { urls: false }).replace(/\n/g, '<br/>'));
+  else if (!rawText) return '';
+  else out = emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
+  return ext.pipe('postText', out, { rawText }); // mods may rewrite the finished HTML of a post
 }
 
 const WEEKDAYS = [t('вс'), t('пн'), t('вт'), t('ср'), t('чт'), t('пт'), t('сб')];
