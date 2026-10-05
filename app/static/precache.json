@@ -1,5 +1,5 @@
 {
- "build": "a5252697b7",
+ "build": "c1de190b81",
  "files": [
   "./",
   "index.html",
@@ -19,6 +19,7 @@
   "css/tx/post.css",
   "css/tx/profile.css",
   "css/tx/settings.css",
+  "css/tx/skin.css",
   "css/tx/stories.css",
   "css/tx/thread.css",
   "css/tx/tokens.css",

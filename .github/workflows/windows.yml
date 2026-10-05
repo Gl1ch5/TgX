@@ -38,8 +38,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The app compares this build number with version-win.json of the nightly release (see src/updates.js).
+      - name: Build number
+        shell: bash
+        run: |
+          code=$(( $(date +%s) / 60 ))
+          echo "{\"versionCode\": $code, \"versionName\": \"${{ github.run_number }}\", \"setup\": \"https://github.com/${{ github.repository }}/releases/download/nightly/TeleX-Setup.exe\"}" > dist-version.json
+          cp dist-version.json src/build-info.json
+
       - name: Build installer and portable exe
         run: npm run dist:win
+
+      - name: Version file for the update notice
+        shell: bash
+        run: cp dist-version.json dist/version-win.json
 
       - name: Check outputs
         shell: pwsh
@@ -55,6 +67,7 @@ jobs:
           path: |
             native/desktop/dist/TeleX-Setup.exe
             native/desktop/dist/TeleX-Portable.exe
+            native/desktop/dist/version-win.json
           if-no-files-found: error
 
       # Shared "nightly" pre-release (the Android workflow uploads there too):
@@ -70,3 +83,4 @@ jobs:
           files: |
             native/desktop/dist/TeleX-Setup.exe
             native/desktop/dist/TeleX-Portable.exe
+            native/desktop/dist/version-win.json

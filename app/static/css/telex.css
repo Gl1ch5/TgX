@@ -13,6 +13,7 @@
 @import url('tx/mods.css');
 @import url('tx/light.css');
 @import url('tx/icons-android.css');
+@import url('tx/skin.css'); /* last: mods restyle everything through it */
 
 /* Modals (auth, wallpapers) in the same glass style */
 .liquid-glass {

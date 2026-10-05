@@ -423,6 +423,6 @@ export const ES = {
   "Настройки мода": "Ajustes del mod",
   "Официальные моды": "Mods oficiales",
   "Обновить": "Actualizar",
-  "Установлено": "Instalado",
   "Документация по созданию модов": "Cómo crear mods",
+  "Открыть": "Abrir",
 };

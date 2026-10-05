@@ -122,9 +122,27 @@ function themeApi(id) {
     setWallpaper(wid) { localStorage.removeItem('tgx_wp_auto'); applyWallpaper(`mod:${id}:${wid}`, false); redraw(); },
     /** Select a colour theme (own or Telegram's) by id. */
     select(themeId) { window.TelegramX && window.TelegramX.setColorTheme(COLOR_THEMES.some((c) => c.id === themeId) ? themeId : `${id}:${themeId}`); },
+    /**
+     * Skin tokens (--sk-*, see css/tx/skin.css): turns the skin layer on and sets the tokens for 'all' | 'dark' | 'light'.
+     * With the skin on, every main surface of the app is drawn from them.
+     */
+    setSkin(tokens, mode = 'all') { r.skin = true; api2.setVars(tokens, mode); syncSkin(); },
+    /** Accent colour of the whole app from one hex (text, fill, soft background, links, reactions). Optional second value for day mode. */
+    setAccent(hex, dayHex) {
+      const set = (h, mode) => {
+        const n = parseInt(String(h).replace('#', ''), 16);
+        const rgb = `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+        api2.setVars({ '--tx-accent': h, '--tx-accent-fill': h, '--tx-link': h, '--tx-accent-soft': `rgba(${rgb}, 0.16)`, '--tx-reaction': `rgba(${rgb}, 0.14)` }, mode);
+      };
+      if (dayHex) { set(hex, 'dark'); set(dayHex, 'light'); } else set(hex, 'all');
+    },
     mode: modeNow,
   };
   return api2;
+}
+
+function syncSkin() {
+  document.documentElement.classList.toggle('tx-skin', [...running.values()].some((r) => r.skin));
 }
 
 function stop(id) {
@@ -144,6 +162,7 @@ function stop(id) {
   unregisterWallpapers(`mod:${id}:`);
   running.delete(id);
   ext.removeOwner(id);
+  syncSkin();
   applyVars();
   applyAppearance();
   refreshWallpaper();
@@ -165,6 +184,33 @@ function watchSelector(id, selector, fn) {
   mo.observe(document.body, { childList: true, subtree: true });
   observers.set(id, [...(observers.get(id) || []), mo]);
 }
+function openModScreen(id, { title = '', render } = {}) {
+  const el = document.createElement('div');
+  el.className = 'tx-mod-screen';
+  el.dataset.mod = id;
+  el.innerHTML = `<div class="tx-titlebar"><button class="tx-icon-btn" data-close title="${t('Назад')}"><i class="icon icon-arrow-left"></i></button><h1>${escapeHtml(L(title) || '')}</h1></div><div class="tx-mod-screen-box tx-page"></div>`;
+  const box = el.querySelector('.tx-mod-screen-box');
+  document.body.append(el);
+  el.animate([{ transform: 'translateX(32px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 280, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  let closed = false;
+  let viaBack = false;
+  const onPop = () => { viaBack = true; close(); };
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    window.removeEventListener('popstate', onPop);
+    el.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(32px)' }], { duration: 200, easing: 'ease-in' }).finished.then(() => el.remove(), () => el.remove());
+    if (!viaBack) history.back();
+  };
+  history.pushState({ ...(history.state || {}), modScreen: id }, '');
+  window.addEventListener('popstate', onPop);
+  el.querySelector('[data-close]').onclick = close;
+  const me = running.get(id);
+  if (me) me.cleanups.push(() => { viaBack = true; close(); });
+  try { render && render(box, { close }); } catch (e) { console.warn(`[mods] ${id} screen`, e); }
+  return { close, box };
+}
+
 const configListeners = new Map(); // id -> Map(key -> [fn])
 const renderers = new Map();       // id -> [fn(container)]
 
@@ -226,6 +272,37 @@ function makeApi(mod) {
         watchSelector(id, selector, put);
       },
       root: () => document.getElementById('app') || document.body,
+      /** Called for every post card, now and as they appear: fn(element, post). */
+      onPost: (fn) => {
+        const run = (el) => { const post = state.posts.find((p) => `post-card-${p.id}` === el.id); try { fn(el, post || null); } catch (e) { console.warn(`[mods] ${id} onPost`, e); } };
+        watchSelector(id, '[id^="post-card-"]', run);
+      },
+      /** A full-screen page of your own: openScreen({ title, render(box) }) → { close(), box }. The back button/gesture closes it. */
+      openScreen: (opts) => openModScreen(id, opts),
+      /** A button in the bottom bar: addDockItem({ id, title, icon: emoji | svg markup | 'icon-name', run }). */
+      addDockItem: (item) => {
+        watchSelector(id, '.tx-dock', (dock) => {
+          if (dock.querySelector(`[data-mod-dock="${id}:${item.id}"]`)) return;
+          const b = document.createElement('button');
+          b.className = 'tx-dock-tab tx-mod-dock';
+          b.dataset.modDock = `${id}:${item.id}`;
+          const ic = /^</.test(item.icon || '') ? item.icon : /^[a-z0-9-]+$/.test(item.icon || '') ? `<i class="icon icon-${item.icon}"></i>` : `<span style="font-size:22px;line-height:1">${item.icon || '•'}</span>`;
+          b.innerHTML = `<span class="tx-tab-icon">${ic}</span><span class="tx-tab-label">${escapeHtml(L(item.title) || '')}</span>`;
+          b.onclick = () => item.run && item.run();
+          dock.append(b);
+        });
+      },
+    },
+    /** App navigation and helpers. */
+    app: {
+      openChannel: (cid) => window.TelegramX && window.TelegramX.openChannelPage && window.TelegramX.openChannelPage(cid),
+      openThread: (pid) => window.TelegramX && window.TelegramX.openThread && window.TelegramX.openThread(pid),
+      setView: (v) => window.TelegramX && window.TelegramX.setView(v),
+      openSettings: (page) => window.TelegramX && window.TelegramX.openSettingsPage(page),
+      reloadFeed: () => window.TelegramX && window.TelegramX.refreshFeed && window.TelegramX.refreshFeed(),
+      version: () => document.documentElement.dataset.appVersion || '',
+      lang: () => lang(),
+      theme: () => modeNow(),
     },
     storage: {
       get: (k) => storeOf(id)[k] ?? null,
@@ -262,7 +339,9 @@ async function start(mod) {
     for (const part of mod.parts) {
       if (part.type === 'theme') {
         const th = part.data;
+        if (th.accent) tx.theme.setAccent(th.accent, th.accentDay);
         if (th.vars) for (const mode of ['all', 'dark', 'light']) if (th.vars[mode]) tx.theme.setVars(th.vars[mode], mode);
+        if (th.skin) for (const mode of ['all', 'dark', 'light']) if (th.skin[mode]) tx.theme.setSkin(th.skin[mode], mode);
         if (th.css) tx.theme.addCss(th.css);
         (th.wallpapers || []).forEach((w) => tx.theme.addWallpaper(w));
         (th.colorThemes || []).forEach((c) => tx.theme.addColorTheme(c));
@@ -363,7 +442,26 @@ export async function installFromUrl(url) {
 
 export const reapplyModVars = () => applyVars();
 
+/** Official mods follow the catalog: a newer version is installed quietly at start (settings of the mod are kept). */
+async function updateOfficial() {
+  try {
+    const cat = await loadCatalog();
+    for (const e of load()) {
+      const c = e.manifest.official && cat.find((x) => x.id === e.manifest.id);
+      if (!c || c.version === e.manifest.version) continue;
+      const res = await fetch('mods/' + c.file, { cache: 'no-cache' });
+      if (!res.ok) continue;
+      const b = parseBundle(await res.text());
+      const entry = { manifest: { ...b.manifest, verified: true, official: true }, parts: b.parts, enabled: e.enabled };
+      save([...load().filter((x) => x.manifest.id !== entry.manifest.id), entry]);
+      if (entry.enabled) await start(entry);
+      document.dispatchEvent(new Event('tx:mods'));
+    }
+  } catch (e) { console.warn('[mods] catalog update', e); }
+}
+
 export function startMods() {
+  setTimeout(updateOfficial, 4000);
   load().filter((m) => m.enabled).forEach((m) => { start(m); });
   // the app redraws its own variables on theme changes: put the mods' ones back on top
   onPrefsChange(() => setTimeout(applyVars, 0));

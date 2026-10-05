@@ -1645,6 +1645,16 @@
   "plural": false
  },
  {
+  "key": "Настройки мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Документация по созданию модов",
   "where": "js/views/settings.js",
   "plural": false
@@ -1695,7 +1705,7 @@
   "plural": false
  },
  {
-  "key": "Установлено",
+  "key": "Открыть",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1706,16 +1716,6 @@
  },
  {
   "key": "Включён",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Настройки мода",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Удалить",
   "where": "js/views/settings.js",
   "plural": false
  },

@@ -44,6 +44,16 @@ Provide all five when the mod is meant for others; the app picks its language, t
 `icon`: an emoji, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
 rounded square `rx=22` with a two-colour gradient and a white stroke glyph (see `app/static/mods/icons/*.svg`).
 
+## Restyling the whole app (skin tokens)
+
+`tx.theme.setSkin({ '--sk-card-bg': '…', … }, 'all'|'dark'|'light')` (or a theme part `"skin": { "dark": {…}, "light": {…} }`) turns on the skin layer
+(`app/static/css/tx/skin.css`): every main surface is then drawn from tokens — `--sk-card-{bg,border,shadow,filter,radius}`, `--sk-bubble-{in,out,radius}`,
+`--sk-bar-{bg,border,shadow,filter,radius}` (dock, pills, tabs, search), `--sk-menu-{bg,border,shadow,filter,radius}`, `--sk-dialog-{bg,radius}`,
+`--sk-button-{bg,text,radius}`, `--sk-chip-{bg,radius}`, `--sk-highlight`, `--sk-overlay`, `--sk-separator`, `--sk-field-bg`. Set both day and night.
+Accent of the whole app: `tx.theme.setAccent(hex, dayHex?)`. For anything the tokens do not reach, add CSS (`tx.theme.addCss`) using the classes listed in `docs/mods.md`.
+New UI: `tx.ui.openScreen({ title, render(box) })`, `tx.ui.addDockItem({ id, title, icon, run })`, `tx.settings.addPage`, `tx.ui.onPost((el, post) => …)`, `tx.app.*` (navigation).
+Official catalog: `app/static/mods/catalog.json` + `<id>.module` + `icons/<id>.svg`; bump `version` and installed copies update themselves.
+
 ## Settings schema (`manifest.settings[]`)
 
 `{ key, type, title, sub?, default, … }` with `type`: `switch` (bool) · `number` (`min`,`max`,`step`) · `select` (`options`: `["a","b"]` or `[["value","Label"]]`) ·

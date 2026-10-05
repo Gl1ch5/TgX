@@ -29,6 +29,7 @@ import { initWallpaperEngine, applyWallpaper, openWallpaperModal, closeWallpaper
 import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
+import { APP_VERSION } from './version.js';
 import { startMods, reapplyModVars } from './core/mods.js';
 import { ext } from './core/ext.js';
 import * as profile from './views/profile.js';
@@ -191,6 +192,7 @@ window.TelegramX = {
 
 async function initApp() {
   applyDocumentLanguage();
+  document.documentElement.dataset.appVersion = APP_VERSION;
   translateTree(document.body);
   applyAppearance();
   initWallpaperEngine();

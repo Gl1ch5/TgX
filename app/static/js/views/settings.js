@@ -483,6 +483,7 @@ function modsPage() {
         <span class="tx-mod-top">
           ${modThumb(m)}
           <span class="tx-mod-acts" onclick="event.stopPropagation()">
+            <button class="tx-mod-gear" title="${t('Настройки мода')}" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')"><i class="icon icon-settings"></i></button>
             <button class="tx-mod-del" title="${t('Удалить')}" onclick="window.TelegramX.deleteMod('${mf.id}')"><i class="icon icon-delete"></i></button>
             <label class="tx-switch"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label>
           </span>
@@ -521,17 +522,19 @@ async function fillOfficial() {
   const have = new Map(listMods().map((m) => [m.manifest.id, m.manifest.version]));
   const cards = list.map((c) => {
     const cur = have.get(c.id);
-    const state = cur == null ? t('Установить') : cur !== c.version ? t('Обновить') : t('Установлено');
+    const upToDate = cur != null && cur === c.version;
+    const state = cur == null ? t('Установить') : !upToDate ? t('Обновить') : t('Открыть');
+    const act = upToDate ? `window.TelegramX.openSettingsPage('mod:${c.id}')` : `window.TelegramX.installOfficial('${c.id}')`;
     const ic = modIcon(c.icon);
     const nm = modL(c.name);
     const pic = ic.img ? `<span class="tx-mod-pic is-img"><img src="${escapeHtml(ic.img)}" alt=""></span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(ic.emoji || nm.slice(0, 1)))}</span>`;
     return `
-      <div class="tx-mod-card is-tile">
-        <span class="tx-mod-top">${pic}</span>
+      <div class="tx-mod-card is-tile"${cur != null ? ` onclick="window.TelegramX.openSettingsPage('mod:${c.id}')"` : ''}>
+        <span class="tx-mod-top">${pic}${cur != null ? `<span class="tx-mod-acts"><button class="tx-mod-gear" title="${t('Настройки мода')}" onclick="event.stopPropagation(); window.TelegramX.openSettingsPage('mod:${c.id}')"><i class="icon icon-settings"></i></button></span>` : ''}</span>
         <span class="tx-mod-name">${escapeHtml(nm)} <i class="tx-verified"></i></span>
         <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
         <span class="tx-mod-desc">${escapeHtml(modL(c.description) || '')}</span>
-        <button class="tx-mod-get ${cur != null && cur === c.version ? 'is-done' : ''}" ${cur != null && cur === c.version ? 'disabled' : ''} onclick="window.TelegramX.installOfficial('${c.id}')">${state}</button>
+        <button class="tx-mod-get ${upToDate ? 'is-done' : ''}" onclick="event.stopPropagation(); ${act}">${state}</button>
       </div>`;
   }).join('');
   box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div><div class="tx-mod-grid">${cards}</div></div>`;

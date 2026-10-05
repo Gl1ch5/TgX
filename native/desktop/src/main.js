@@ -251,6 +251,7 @@ if (!app.requestSingleInstanceLock()) {
     await migrateLegacyStorage(ses).catch(() => {});
     servePackedApp(ses);
     createWindow();
+    setTimeout(() => require('./updates').checkForUpdate(win), 6000);
     app.on('activate', () => { if (!win) createWindow(); });
   });
 

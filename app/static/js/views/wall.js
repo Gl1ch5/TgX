@@ -6,6 +6,7 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
+import { ext } from '../core/ext.js';
 import { showToast, formatNumber, escapeHtml } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs, isChannelExcluded } from '../core/prefs.js';
@@ -138,6 +139,20 @@ export function renderUnread() {
   });
 }
 
+let tabsObserver = null;
+
+/** Put the sliding pill under the active tab (called on switch and whenever a tab changes size, e.g. its badge appears). */
+function placeIndicator(animate = true) {
+  const nav = $('feed-tabs');
+  const ind = nav && nav.querySelector('.tx-tab-ind');
+  const active = nav && nav.querySelector('.tx-tab.is-active');
+  if (!ind || !active || !active.offsetWidth) return;
+  if (!animate) ind.style.transition = 'none';
+  ind.style.width = `${active.offsetWidth}px`;
+  ind.style.transform = `translateX(${active.offsetLeft - 4}px)`;
+  if (!animate) requestAnimationFrame(() => { ind.style.transition = ''; });
+}
+
 function updateTabs() {
   const nav = $('feed-tabs');
   if (!nav) return;
@@ -146,14 +161,15 @@ function updateTabs() {
   // a pill slides under the active tab
   let ind = nav.querySelector('.tx-tab-ind');
   if (!ind) { ind = document.createElement('i'); ind.className = 'tx-tab-ind'; nav.prepend(ind); nav.classList.add('has-ind'); }
-  if (active) {
-    const first = !ind.dataset.ready;
-    if (first) ind.style.transition = 'none';
-    ind.style.width = `${active.offsetWidth}px`;
-    ind.style.transform = `translateX(${active.offsetLeft - 4}px)`;
-    if (first) { ind.dataset.ready = '1'; requestAnimationFrame(() => { ind.style.transition = ''; }); }
-    if (nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
+  if (!tabsObserver && window.ResizeObserver) {
+    // a badge appearing or changing width resizes its tab: the pill follows without animating
+    tabsObserver = new ResizeObserver(() => placeIndicator(false));
+    nav.querySelectorAll('.tx-tab').forEach((t) => tabsObserver.observe(t));
   }
+  const first = !ind.dataset.ready;
+  placeIndicator(!first);
+  ind.dataset.ready = '1';
+  if (active && nav.scrollWidth > nav.clientWidth) nav.scrollTo({ left: active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2, behavior: reduceMotion() ? 'auto' : 'smooth' });
 }
 
 // ---------------- Seen tracking (marks posts read in Telegram) ----------------
@@ -270,6 +286,7 @@ export function appendPosts(posts) {
   cards.forEach((c) => frag.appendChild(c));
   container.appendChild(frag);
   cards.forEach(track);
+  cards.forEach((c, i) => ext.emit('post', { el: c, post: posts[i] }));
   hydrateStickers(container);
   observeAutoplay(container);
 }
@@ -532,8 +549,8 @@ export function initFeedSwipe() {
     if (c) { c.style.transition = 'transform .22s cubic-bezier(.2,.9,.3,1), opacity .22s'; c.style.transform = ''; c.style.opacity = ''; setTimeout(() => { c.style.transition = ''; }, 240); }
     if (!live) return;
     live = false;
-    const fast = Math.abs(dx) / Math.max(1, Date.now() - t0) > 0.45;
-    if (Math.abs(dx) > (fast ? 40 : 90)) stepFeedTab(dx < 0 ? 1 : -1);
+    const fast = Math.abs(dx) / Math.max(1, Date.now() - t0) > 0.3;
+    if (Math.abs(dx) > (fast ? 22 : 48)) stepFeedTab(dx < 0 ? 1 : -1);
   };
   area.addEventListener('touchend', end, { passive: true });
   area.addEventListener('touchcancel', end, { passive: true });

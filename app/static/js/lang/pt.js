@@ -423,6 +423,6 @@ export const PT = {
   "Настройки мода": "Configurações do mod",
   "Официальные моды": "Mods oficiais",
   "Обновить": "Atualizar",
-  "Установлено": "Instalado",
   "Документация по созданию модов": "Como criar mods",
+  "Открыть": "Abrir",
 };

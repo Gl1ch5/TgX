@@ -24,3 +24,4 @@ promo/build/
 out/
 node_modules/
 native/desktop/web/
+native/desktop/src/build-info.json

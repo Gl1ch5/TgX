@@ -52,3 +52,10 @@
 .tx-mod-card.is-tile .tx-mod-name { font-size: 15.5px; }
 .tx-mod-card.is-tile .tx-mod-desc { -webkit-line-clamp: 3; font-size: 13px; }
 .tx-mod-card.is-tile .tx-mod-get { margin-top: 8px; width: 100%; }
+.tx-mod-gear { width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--tx-accent); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .3s cubic-bezier(.3,1.4,.5,1), background .16s; }
+.tx-mod-gear:active { transform: rotate(60deg) scale(.9); background: var(--tx-accent-soft); }
+.tx-mod-gear .icon { font-size: 20px; }
+.tx-mod-acts { flex-direction: row !important; align-items: center; gap: 2px; flex-wrap: wrap; justify-content: flex-end; }
+.tx-mod-card.is-tile .tx-switch { margin-left: 4px; }
+.tx-mod-screen { position: fixed; inset: 0; z-index: 150; background: var(--tx-bg); overflow-y: auto; padding: 0 12px calc(24px + var(--tx-safe-bottom)); }
+.tx-mod-screen .tx-titlebar { position: sticky; top: 0; z-index: 2; background: var(--tx-bg); }

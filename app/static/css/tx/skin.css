@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Skin layer — component tokens for mods.
+
+   Off by default: nothing here applies until <html> has the class "tx-skin"
+   (a mod turns it on with tx.theme.setSkin(...) / a theme part with "skin").
+   With the class on, every main surface of the app is drawn from the --sk-*
+   tokens below, in day and night mode, so a mod changes the whole look by
+   setting tokens — no need to know the class names.
+
+   Surfaces:   card (settings groups, post and message bubbles) · bar (dock, header pills,
+               tabs, search) · menu (context menu, reactions strip) · dialog · button · chip · field
+   Every surface has: bg, border, shadow, filter (backdrop-filter), radius, highlight (inner top light).
+   ========================================================================== */
+html.tx-skin {
+  --sk-card-bg: var(--tx-surface);
+  --sk-card-border: transparent;
+  --sk-card-shadow: none;
+  --sk-card-filter: none;
+  --sk-card-radius: 26px;
+  --sk-bubble-radius: var(--tx-bubble-radius);
+  --sk-bubble-in: var(--tx-bubble);
+  --sk-bubble-out: var(--tx-bubble-out);
+  --sk-bar-bg: var(--tx-glass);
+  --sk-bar-border: var(--tx-glass-border);
+  --sk-bar-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  --sk-bar-filter: var(--tx-glass-blur);
+  --sk-bar-radius: 999px;
+  --sk-menu-bg: var(--tx-surface-2);
+  --sk-menu-border: transparent;
+  --sk-menu-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  --sk-menu-filter: none;
+  --sk-menu-radius: 18px;
+  --sk-dialog-bg: var(--tx-surface);
+  --sk-dialog-radius: 22px;
+  --sk-highlight: transparent;
+  --sk-button-bg: var(--tx-accent-fill);
+  --sk-button-text: #fff;
+  --sk-button-radius: 999px;
+  --sk-chip-bg: var(--tx-reaction);
+  --sk-chip-radius: 999px;
+  --sk-field-bg: transparent;
+  --sk-overlay: rgba(0, 0, 0, 0.45);
+  --sk-separator: var(--tx-separator);
+}
+
+/* cards */
+html.tx-skin .tx-group,
+html.tx-skin .tx-pf-card,
+html.tx-skin .tx-bubble:not(.is-out):not(.is-sticker) {
+  background: var(--sk-card-bg);
+  border: 1px solid var(--sk-card-border);
+  box-shadow: var(--sk-card-shadow), inset 0 1px 0 var(--sk-highlight);
+  -webkit-backdrop-filter: var(--sk-card-filter);
+  backdrop-filter: var(--sk-card-filter);
+}
+html.tx-skin .tx-group { border-radius: var(--sk-card-radius); }
+html.tx-skin .tx-bubble.is-out {
+  background: var(--sk-bubble-out);
+  box-shadow: inset 0 1px 0 var(--sk-highlight), var(--sk-card-shadow);
+}
+html.tx-skin .tx-bubble:not(.is-sticker) { border-radius: var(--sk-bubble-radius); }
+html.tx-skin .tx-bubble:not(.is-out):not(.is-sticker) { background: var(--sk-bubble-in); }
+html.tx-skin .tx-row, html.tx-skin .tx-comments-row, html.tx-skin .tx-field + .tx-field { border-color: var(--sk-separator); }
+html.tx-skin .tx-field input, html.tx-skin .tx-field textarea { background: var(--sk-field-bg); }
+
+/* bars */
+html.tx-skin .tx-dock,
+html.tx-skin .tx-glass,
+html.tx-skin .tx-search-main,
+html.tx-skin .tx-search,
+html.tx-skin .tx-pill-tabs,
+html.tx-skin .tx-composer-field,
+html.tx-skin .tx-circle,
+html.tx-skin .tx-side-btn {
+  background: var(--sk-bar-bg);
+  border: 1px solid var(--sk-bar-border);
+  box-shadow: var(--sk-bar-shadow), inset 0 1px 0 var(--sk-highlight);
+  -webkit-backdrop-filter: var(--sk-bar-filter);
+  backdrop-filter: var(--sk-bar-filter);
+}
+html.tx-skin .tx-dock, html.tx-skin .tx-glass, html.tx-skin .tx-search-main, html.tx-skin .tx-pill-tabs { border-radius: var(--sk-bar-radius); }
+
+/* menus */
+html.tx-skin .tx-menu,
+html.tx-skin .tx-ctx-reactions,
+html.tx-skin .tx-emoji-pop {
+  background: var(--sk-menu-bg);
+  border: 1px solid var(--sk-menu-border);
+  box-shadow: var(--sk-menu-shadow), inset 0 1px 0 var(--sk-highlight);
+  -webkit-backdrop-filter: var(--sk-menu-filter);
+  backdrop-filter: var(--sk-menu-filter);
+}
+html.tx-skin .tx-menu { border-radius: var(--sk-menu-radius); }
+html.tx-skin .tx-ctx-backdrop, html.tx-skin .tx-dialog-back { background: var(--sk-overlay); }
+
+/* dialogs */
+html.tx-skin .tx-dialog {
+  background: var(--sk-dialog-bg);
+  border: 1px solid var(--sk-menu-border);
+  border-radius: var(--sk-dialog-radius);
+  box-shadow: var(--sk-menu-shadow), inset 0 1px 0 var(--sk-highlight);
+  -webkit-backdrop-filter: var(--sk-menu-filter);
+  backdrop-filter: var(--sk-menu-filter);
+}
+
+/* buttons, chips */
+html.tx-skin .tx-btn, html.tx-skin .tx-mod-get:not(.is-done) { background: var(--sk-button-bg); color: var(--sk-button-text); border-radius: var(--sk-button-radius); }
+html.tx-skin .tx-reaction, html.tx-skin .tx-tab-ind, html.tx-skin .tx-mod-tag { background: var(--sk-chip-bg); border-radius: var(--sk-chip-radius); }
+html.tx-skin .tx-reaction.is-chosen { background: var(--tx-accent-fill); }
+
+/* day mode defaults: light glass instead of dark glass */
+html.tx-skin[data-theme='light'] {
+  --sk-bar-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  --sk-menu-bg: rgba(255, 255, 255, 0.98);
+  --sk-menu-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
