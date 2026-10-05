@@ -7,6 +7,7 @@
 import { state } from '../state.js';
 import { api } from '../api.js';
 import { ext } from '../core/ext.js';
+import { postNative } from '../core/devtools.js';
 import { showToast, formatNumber, escapeHtml } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs, isChannelExcluded } from '../core/prefs.js';
@@ -333,6 +334,7 @@ function showNewPostsPill(count, apply) {
 }
 
 let feedToken = 0;
+let updateAsked = false;
 let loadingView = '';
 const viewKey = () => `${state.feedType}|${state.activeChannelId}|${state.searchQuery}`;
 
@@ -400,6 +402,7 @@ export async function loadFeed(forceRefresh = false) {
     }
   }
 
+  if (!updateAsked && state.posts.length) { updateAsked = true; postNative('updateCheck'); } // Android app: look for a new version (tiny request, throttled natively)
   if (refreshAfterCache && token === feedToken) loadFeed(true);
 }
 
