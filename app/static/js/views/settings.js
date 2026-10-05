@@ -13,6 +13,8 @@ import { getPrefs, setPref, setChannelExcluded, isChannelExcluded, ACCENTS, appl
 import { COLOR_THEMES, NAME_COLORS, NAME_COLORS_DAY, outGradient, themeWallpaper } from '../core/colorThemes.js';
 import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
+import { tgDialog } from '../core/dialog.js';
+import { getKey, setKey, hasKey, testKey, looksLikeKey, GROQ_KEYS_URL } from '../core/groq.js';
 import { titleBar, group, row, switchRow, slider, segments, radioRow } from '../components/ui.js';
 import { WALLPAPERS, applyWallpaper, refreshWallpaper, openWallpaperModal, wallPreviewHtml, wallFill as wallFillCss } from '../components/wallpaperTheme.js';
 import { openPopup } from '../components/postMenu.js';
@@ -42,7 +44,7 @@ function render() {
   const el = root();
   if (!el) return;
   const prevPage = shownPage;
-  const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage };
+  const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage, ai: aiPage };
   el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
   if (page === 'mods') { fillOfficial(); fillCommunity(); }
@@ -95,7 +97,8 @@ function rootPage() {
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
         row({ icon: 'st-chat', color: 'GREEN', title: 'Telegram You', sub: t('Полноценный клиент Telegram'), onclick: "window.open('https://gl1ch5.github.io/Telegram-YOU/', '_blank', 'noopener')" }) +
         row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" }) +
-        row({ icon: 'st-features', color: 'PURPLE', title: t('Моды'), sub: modsSummary(), onclick: "window.TelegramX.openSettingsPage('mods')" }),
+        row({ icon: 'st-features', color: 'PURPLE', title: t('Моды'), sub: modsSummary(), onclick: "window.TelegramX.openSettingsPage('mods')" }) +
+        row({ icon: 'st-stars', color: 'GREEN', title: t('Ключ Groq'), sub: hasKey() ? t('Подключён · проверка модов включена') : t('Бесплатный ключ для умных функций'), onclick: "window.TelegramX.openSettingsPage('ai')" }),
       )}
 
       ${group(
@@ -111,6 +114,46 @@ function rootPage() {
       <div class="tx-settings-foot">${t('TeleX {a} · автор', {a: APP_VERSION})} <a href="https://t.me/${AUTHOR.telegram}" target="_blank" rel="noopener">@${AUTHOR.telegram}</a></div>
     </div>
     <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" hidden onchange="window.TelegramX.uploadProfilePhoto(this)" />`;
+}
+
+function aiPage() {
+  const p = getPrefs();
+  const k = getKey();
+  return `
+    ${titleBar(t('Ключ Groq'), { back: true })}
+    <div class="tx-page">
+      ${group(
+        `<label class="tx-field"><input id="ai-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="gsk_…" value="${escapeHtml(k)}"></label>
+         <div id="ai-msg" class="tx-group-hint" style="margin:0;padding:0 18px 8px;min-height:18px"></div>
+         <div style="padding:0 16px 14px;display:flex;gap:10px"><button class="tx-btn" style="flex:1" onclick="window.TelegramX.aiKeySave()">${t('Сохранить')}</button>${k ? `<button class="tx-btn" style="flex:1;background:var(--tx-surface-2);color:var(--tx-red)" onclick="window.TelegramX.aiKeyClear()">${t('Удалить ключ')}</button>` : ''}</div>`,
+        { title: t('API-ключ'), hint: t('Ключ хранится только на этом устройстве и отправляется только в Groq. Бесплатный план: регистрация без карты.') },
+      )}
+      ${group(row({ icon: 'download', color: 'BLUE', title: t('Получить бесплатный ключ'), sub: 'console.groq.com/keys', onclick: `window.open('${GROQ_KEYS_URL}', '_blank', 'noopener')` }))}
+      ${group(
+        switchRow({ icon: 'st-features', color: 'PURPLE', title: t('Проверять моды перед установкой'), sub: t('ИИ ищет опасный код и то, что ломает интерфейс'), checked: p.aiReview !== false, onchange: "window.TelegramX.setPref('aiReview', this.checked)" }),
+        { hint: hasKey() ? '' : t('Работает, когда добавлен ключ.') },
+      )}
+    </div>`;
+}
+
+export async function aiKeySave() {
+  const input = document.getElementById('ai-key');
+  const msg = document.getElementById('ai-msg');
+  const val = (input && input.value || '').trim();
+  if (!val) { setKey(''); showToast(t('Ключ удалён')); rerenderSettings(); return; }
+  if (!looksLikeKey(val)) { msg.style.color = 'var(--tx-red)'; msg.textContent = t('Ключ начинается с gsk_ — скопируйте его целиком.'); return; }
+  msg.style.color = ''; msg.textContent = t('Проверяем ключ…');
+  const res = await testKey(val);
+  if (res === 'invalid') { msg.style.color = 'var(--tx-red)'; msg.textContent = t('Groq не принял этот ключ. Проверьте, что скопировали его полностью.'); return; }
+  setKey(val);
+  showToast(res === 'ok' ? t('Ключ сохранён') : t('Ключ сохранён, но проверить его сейчас не удалось'));
+  rerenderSettings();
+}
+
+export function aiKeyClear() {
+  setKey('');
+  showToast(t('Ключ удалён'));
+  rerenderSettings();
 }
 
 function powerPage() {
@@ -794,7 +837,7 @@ export function updatePref(key, value) {
 }
 
 export async function terminateSession(hash) {
-  if (!confirm(t('Завершить этот сеанс?'))) return;
+  if (!(await tgDialog({ title: t('Завершить сеанс'), text: t('Завершить этот сеанс?'), ok: t('Завершить'), danger: true }))) return;
   const res = await api.terminateSession(hash);
   showToast(res.status === 'success' ? t('Сеанс завершён') : t('Ошибка: ') + (res.message || ''));
   loadSessions();
@@ -843,13 +886,13 @@ export function devClearLogs() {
   showToast(t('Логи очищены'));
 }
 
-export function devExportSession() {
+export async function devExportSession() {
   const value = api.exportSession();
   if (!value) {
     showToast(t('Вы не вошли в Telegram'));
     return;
   }
-  if (!confirm(t('Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её?'))) return;
+  if (!(await tgDialog({ title: t('Строка сессии'), text: t('Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её?'), ok: t('Скопировать'), danger: true }))) return;
   navigator.clipboard.writeText(value).then(() => showToast(t('Сессия скопирована. Храните её в секрете'))).catch(() => showToast(t('Не удалось скопировать')));
 }
 

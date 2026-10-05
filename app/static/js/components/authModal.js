@@ -380,6 +380,7 @@ function onLoggedIn(user, message) {
   closeAuthModal();
   showToast(message);
   window.TelegramX.refreshFeed().then(() => window.TelegramX.startLive());
+  setTimeout(() => window.TelegramX.maybeOnboard && window.TelegramX.maybeOnboard(), 600);
 }
 
 // Kept for older callers.

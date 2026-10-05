@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..',
 const indexPath = path.join(root, 'index.html');
 const html = fs.readFileSync(indexPath, 'utf8');
 // Order matters; skin.css is last on purpose: mods restyle everything through it.
-const order = ['tokens', 'layout', 'avatar', 'dock', 'post', 'thread', 'settings', 'viewer', 'stories', 'profile', 'auth', 'mods', 'light', 'icons-android', 'skin'].map((n) => `css/tx/${n}.css`);
+const order = ['tokens', 'layout', 'avatar', 'dock', 'post', 'thread', 'settings', 'viewer', 'stories', 'profile', 'auth', 'mods', 'onboarding', 'light', 'icons-android', 'skin'].map((n) => `css/tx/${n}.css`);
 for (const f of order) if (!fs.existsSync(path.join(root, f))) { console.error('missing ' + f); process.exit(1); }
 
 const seen = new Set();

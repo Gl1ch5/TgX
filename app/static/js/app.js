@@ -30,6 +30,8 @@ import * as wall from './views/wall.js';
 import * as thread from './views/thread.js';
 import * as settings from './views/settings.js';
 import { APP_VERSION } from './version.js';
+import { tgDialog } from './core/dialog.js';
+import { maybeOnboard, resetOnboarding } from './components/onboarding.js';
 import { startMods, reapplyModVars, listMods, disableAllMods } from './core/mods.js';
 import { ext } from './core/ext.js';
 import * as profile from './views/profile.js';
@@ -47,6 +49,8 @@ let wallDirty = false;
 let rerenderWall = false;
 
 window.TelegramX = {
+  maybeOnboard,
+  aiKeySave: settings.aiKeySave, aiKeyClear: settings.aiKeyClear,
   state,
   api,
   showToast,
@@ -289,6 +293,7 @@ async function initApp() {
     await wall.loadChannels();
     startLive();
     loadStories(true);
+    maybeOnboard();
   }
 }
 
@@ -444,8 +449,9 @@ async function clearMediaCache() {
 }
 
 async function logoutTelegram() {
-  if (!confirm(t('Выйти из Telegram на этом устройстве?'))) return;
+  if (!(await tgDialog({ title: t('Выйти'), text: t('Выйти из Telegram на этом устройстве?'), ok: t('Выйти'), danger: true }))) return;
   await api.logout();
+  resetOnboarding();
   Object.assign(state, { isAuth: false, user: null, posts: [], channels: [], cachedComments: {}, activeChannelId: null, feedType: 'all' });
   profile.resetProfile();
   wall.renderPosts();

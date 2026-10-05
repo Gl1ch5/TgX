@@ -1,5 +1,5 @@
 {
- "build": "4ef60efaab",
+ "build": "5a3bd08342",
  "files": [
   "./",
   "index.html",
@@ -16,6 +16,7 @@
   "css/tx/layout.css",
   "css/tx/light.css",
   "css/tx/mods.css",
+  "css/tx/onboarding.css",
   "css/tx/post.css",
   "css/tx/profile.css",
   "css/tx/settings.css",
@@ -33,6 +34,7 @@
   "js/components/countries.js",
   "js/components/dock.js",
   "js/components/mediaViewer.js",
+  "js/components/onboarding.js",
   "js/components/postCard.js",
   "js/components/postMenu.js",
   "js/components/reactions.js",
@@ -43,7 +45,9 @@
   "js/components/wallpaperTheme.js",
   "js/core/colorThemes.js",
   "js/core/devtools.js",
+  "js/core/dialog.js",
   "js/core/ext.js",
+  "js/core/groq.js",
   "js/core/mods.js",
   "js/core/nav.js",
   "js/core/prefs.js",

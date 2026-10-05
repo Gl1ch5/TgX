@@ -1,0 +1,51 @@
+/* First-run sheet (theme / language / Groq key) and Telegram-style dialogs */
+.tx-onb-back { position: fixed; inset: 0; z-index: 190; display: flex; align-items: flex-end; justify-content: center; background: var(--sk-overlay, rgba(0, 0, 0, 0.5)); animation: tx-dim-in 0.22s ease-out both; transition: opacity 0.2s; }
+.tx-onb-back.is-out { opacity: 0; pointer-events: none; }
+.tx-onb { width: min(100%, 460px); max-height: 92dvh; overflow-y: auto; box-sizing: border-box; background: var(--tx-surface); color: var(--tx-text); border-radius: 26px 26px 0 0; padding: 8px 20px calc(18px + var(--tx-safe-bottom)); animation: tx-onb-up 0.34s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@media (min-width: 560px) { .tx-onb-back { align-items: center; } .tx-onb { border-radius: 26px; padding-bottom: 18px; } }
+@keyframes tx-onb-up { from { transform: translateY(40px); opacity: 0; } }
+.tx-onb-grab { width: 36px; height: 4px; border-radius: 2px; background: var(--tx-separator); margin: 4px auto 12px; }
+.tx-onb-dots { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.tx-onb-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--tx-separator); transition: all 0.2s; }
+.tx-onb-dots i.on { width: 18px; border-radius: 3px; background: var(--tx-accent-fill); }
+.tx-onb h2 { margin: 0 0 6px; font-size: 22px; font-weight: 600; text-align: center; }
+.tx-onb-sub { margin: 0 0 16px; text-align: center; font-size: 14.5px; line-height: 1.4; color: var(--tx-text-2); }
+.tx-onb-themes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tx-onb-theme { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 6px; border-radius: 16px; border: 2px solid transparent; background: var(--tx-surface-2); font-size: 13px; font-weight: 500; text-align: center; transition: border-color 0.15s, transform 0.15s; }
+.tx-onb-theme:active { transform: scale(0.97); }
+.tx-onb-theme.is-on { border-color: var(--tx-accent-fill); }
+.tx-onb-pv { width: 100%; height: 76px; border-radius: 10px; box-sizing: border-box; padding: 8px; display: flex; flex-direction: column; gap: 5px; box-shadow: inset 0 0 0 1px var(--tx-separator); }
+.tx-onb-pv i { display: block; height: 14px; width: 62%; border-radius: 7px; }
+.tx-onb-list { display: flex; flex-direction: column; border-radius: 16px; background: var(--tx-surface-2); overflow: hidden; }
+.tx-onb-opt { display: flex; align-items: baseline; gap: 8px; padding: 13px 16px; text-align: left; position: relative; }
+.tx-onb-opt + .tx-onb-opt { border-top: 1px solid var(--tx-separator); }
+.tx-onb-opt b { font-size: 16px; font-weight: 500; }
+.tx-onb-opt small { font-size: 13px; color: var(--tx-hint); }
+.tx-onb-opt i { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--tx-hint); box-sizing: border-box; align-self: center; }
+.tx-onb-opt.is-on i { border-color: var(--tx-accent-fill); background: radial-gradient(var(--tx-accent-fill) 0 42%, transparent 46%); }
+.tx-onb-field { display: block; border-radius: 14px; background: var(--tx-surface-2); padding: 0 14px; }
+.tx-onb-field input { width: 100%; box-sizing: border-box; background: none; border: 0; outline: 0; color: var(--tx-text); font: 16px var(--tx-font); padding: 14px 0; }
+.tx-onb-err { min-height: 18px; margin: 6px 4px 0; font-size: 13px; color: var(--tx-red); }
+.tx-onb-link { display: block; margin: 4px auto 0; padding: 10px 14px; font-size: 15px; font-weight: 500; color: var(--tx-accent); border-radius: 12px; }
+.tx-onb-note { margin: 6px 0 0; text-align: center; font-size: 12.5px; color: var(--tx-hint); }
+.tx-onb-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
+.tx-onb-btns button { padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; color: var(--tx-accent); }
+.tx-onb-btns .is-main { background: var(--tx-accent-fill); color: var(--sk-button-text, #fff); }
+.tx-onb-btns button:disabled { opacity: 0.5; }
+
+/* Telegram-style dialog (like the update dialog of the Android app) */
+.tx-dialog { width: min(100%, 340px); border-radius: 22px; padding: 22px 22px 8px; background: var(--sk-dialog-bg, var(--tx-surface)); }
+.tx-dialog-back.is-out { opacity: 0; transition: opacity 0.14s; }
+.tx-dialog-icon { margin-bottom: 14px; }
+.tx-dialog-icon img, .tx-dialog-icon .tx-mod-thumb { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; }
+.tx-dialog-title { margin: 0 0 8px; font-size: 20px; font-weight: 600; line-height: 1.25; }
+.tx-dialog p { margin: 0 0 14px; font-size: 15.5px; line-height: 1.42; color: var(--tx-text-2); }
+.tx-dialog-note { margin: 0 0 14px; padding: 10px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4; background: var(--tx-surface-2); color: var(--tx-text); }
+.tx-dialog-note.is-warn { background: rgba(232, 138, 53, 0.16); }
+.tx-dialog-note.is-bad { background: rgba(255, 91, 91, 0.16); }
+.tx-dialog-note b { display: block; margin-bottom: 4px; }
+.tx-dialog-note ul { margin: 4px 0 0; padding-left: 18px; }
+.tx-dialog-btns { gap: 2px; }
+.tx-dialog-btns button { text-transform: uppercase; letter-spacing: 0.4px; font-size: 14px; font-weight: 600; }
+.tx-dialog-btns .is-danger { color: var(--tx-red); }
+.tx-dialog-spin { display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: -3px; border-radius: 50%; border: 2px solid var(--tx-separator); border-top-color: var(--tx-accent); animation: tx-spin 0.8s linear infinite; }

@@ -15,9 +15,11 @@
 import { ext } from './ext.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
+import { tgDialog } from './dialog.js';
+import { hasKey, reviewMod } from './groq.js';
 import { t, lang } from '../i18n.js';
 import { showToast, escapeHtml } from '../utils.js';
-import { onPrefsChange, applyAppearance, resolvedTheme } from './prefs.js';
+import { getPrefs, onPrefsChange, applyAppearance, resolvedTheme } from './prefs.js';
 import { registerColorThemes, unregisterColorThemes, COLOR_THEMES } from './colorThemes.js';
 import { registerWallpaper, unregisterWallpapers, refreshWallpaper, applyWallpaper } from '../components/wallpaperTheme.js';
 
@@ -58,19 +60,8 @@ export function validateManifest(m) {
 
 // ---------------------------------------------------------------- confirm dialog
 
-export function confirmDialog(text, okLabel) {
-  return new Promise((resolve) => {
-    const el = document.createElement('div');
-    el.className = 'tx-dialog-back';
-    el.innerHTML = `<div class="tx-dialog" role="dialog"><p>${escapeHtml(text)}</p><div class="tx-dialog-btns"><button data-v="0">${t('Отмена')}</button><button data-v="1" class="is-main">${escapeHtml(okLabel)}</button></div></div>`;
-    el.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-v]');
-      if (!b && e.target !== el) return;
-      el.remove();
-      resolve(!!b && b.dataset.v === '1');
-    });
-    document.body.append(el);
-  });
+export function confirmDialog(text, okLabel, opts = {}) {
+  return tgDialog({ text, ok: okLabel, ...opts });
 }
 
 // ---------------------------------------------------------------- theme layer
@@ -486,6 +477,24 @@ export function cleanPasted(text) {
   return first > 0 ? s.slice(first).trim() : s;
 }
 
+function modIconHtml(m) {
+  const i = modIcon(m.icon);
+  if (i.img) return `<img src="${escapeHtml(i.img)}" alt="">`;
+  return i.emoji ? `<span class="tx-mod-thumb" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--tx-surface-2)">${escapeHtml(i.emoji)}</span>` : '';
+}
+
+/** Reviews the mod with the user's Groq key (if any) behind a small progress dialog; null when there is no key or the check failed. */
+async function reviewWithProgress(mod) {
+  if (!hasKey() || getPrefs().aiReview === false) return null;
+  const ac = new AbortController();
+  const el = document.createElement('div');
+  el.className = 'tx-dialog-back';
+  el.innerHTML = `<div class="tx-dialog" role="status"><h3 class="tx-dialog-title"><span class="tx-dialog-spin"></span>${escapeHtml(t('Проверяем мод…'))}</h3><p>${escapeHtml(t('ИИ ищет ошибки и опасный код. Это занимает несколько секунд.'))}</p><div class="tx-dialog-btns"><button data-v="0">${escapeHtml(t('Пропустить'))}</button></div></div>`;
+  el.addEventListener('click', (e) => { if (e.target.closest('[data-v]')) ac.abort(); });
+  document.body.append(el);
+  try { return await reviewMod(mod, { signal: ac.signal }); } finally { el.remove(); }
+}
+
 export async function installMod(mod) {
   const err = validateManifest(mod && mod.manifest);
   if (err) throw new Error(err);
@@ -496,11 +505,23 @@ export async function installMod(mod) {
   const m = mod.manifest;
   if (!mod.trusted) { delete m.verified; delete m.official; } // only the project's own catalog may carry these marks
   const risky = parts.some((p) => p.type === 'js' || p.type === 'html');
-  const ok = await confirmDialog(
-    risky
-      ? t('Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}', { a: L(m.name), b: m.verified ? '' : ' ' + t('Этот мод не проверен.') })
-      : t('Установить тему «{a}»?', { a: L(m.name) }),
-    t('Установить'));
+  const review = await reviewWithProgress(mod);
+  let body = '';
+  let note = '';
+  if (risky) body = (escapeHtml(t('Мод получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.') + (m.verified ? '' : ' ' + t('Этот мод не проверен.'))));
+  else body = escapeHtml(t('Тема меняет только оформление и не выполняет код.'));
+  if (review) {
+    const cls = review.verdict === 'ok' ? '' : review.verdict === 'bad' ? ' is-bad' : ' is-warn';
+    const head = review.verdict === 'ok' ? t('ИИ-проверка: проблем не найдено') : review.verdict === 'bad' ? t('ИИ-проверка: опасный код') : t('ИИ-проверка: есть замечания');
+    note = `<div class="tx-dialog-note${cls}"><b>${escapeHtml(head)}</b>${escapeHtml(review.summary)}${review.issues.length ? '<ul>' + review.issues.map((i) => `<li>${escapeHtml(i)}</li>`).join('') + '</ul>' : ''}</div>`;
+  }
+  const ok = await tgDialog({
+    title: risky ? t('Установить мод «{a}»?', { a: L(m.name) }) : t('Установить тему «{a}»?', { a: L(m.name) }),
+    icon: modIconHtml(m),
+    html: `<p>${body}</p>${note}`,
+    ok: review && review.verdict === 'bad' ? t('Всё равно установить') : t('Установить'),
+    danger: !!review && review.verdict === 'bad',
+  });
   if (!ok) return false;
   const entry = { manifest: m, parts, enabled: true };
   save([...load().filter((x) => x.manifest.id !== m.id), entry]);

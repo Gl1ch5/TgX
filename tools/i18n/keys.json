@@ -280,6 +280,91 @@
   "plural": false
  },
  {
+  "key": "Оформление",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Выберите тему. Её можно изменить позже в настройках.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Язык",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Приложение перезагрузится, чтобы применить язык.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ Groq (по желанию)",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Бесплатный ключ нужен для умных функций. Сначала — проверка модов на ошибки и опасный код перед установкой.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Получить бесплатный ключ",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ хранится только на этом устройстве и отправляется только в Groq.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Готово",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Пропустить",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Это бесплатно",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ Groq абсолютно бесплатный: регистрация занимает минуту, банковская карта не нужна. С ним TeleX проверяет моды перед установкой, а умные функции работают быстрее и удобнее.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Получить ключ",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ начинается с gsk_ — скопируйте его целиком.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Groq не принял этот ключ. Проверьте, что скопировали его полностью.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ сохранён",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ сохранён, но проверить его сейчас не удалось",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
   "key": "Подтверждённый",
   "where": "js/components/postCard.js",
   "plural": false
@@ -495,6 +580,16 @@
   "plural": false
  },
  {
+  "key": "ОК",
+  "where": "js/core/dialog.js",
+  "plural": false
+ },
+ {
+  "key": "Отмена",
+  "where": "js/core/dialog.js",
+  "plural": false
+ },
+ {
   "key": "Не удалось сохранить",
   "where": "js/core/mods.js",
   "plural": false
@@ -520,17 +615,17 @@
   "plural": false
  },
  {
-  "key": "Отмена",
-  "where": "js/core/mods.js",
-  "plural": false
- },
- {
-  "key": "ОК",
-  "where": "js/core/mods.js",
-  "plural": false
- },
- {
   "key": "Мод «{a}» не запустился",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Проверяем мод…",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ ищет ошибки и опасный код. Это занимает несколько секунд.",
   "where": "js/core/mods.js",
   "plural": false
  },
@@ -545,7 +640,7 @@
   "plural": false
  },
  {
-  "key": "Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}",
+  "key": "Мод получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.",
   "where": "js/core/mods.js",
   "plural": false
  },
@@ -555,7 +650,37 @@
   "plural": false
  },
  {
+  "key": "Тема меняет только оформление и не выполняет код.",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ-проверка: проблем не найдено",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ-проверка: опасный код",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ-проверка: есть замечания",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить мод «{a}»?",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
   "key": "Установить тему «{a}»?",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Всё равно установить",
   "where": "js/core/mods.js",
   "plural": false
  },
@@ -940,6 +1065,11 @@
   "plural": false
  },
  {
+  "key": "Покинуть канал",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
   "key": "Покинуть канал «{a}»? Он пропадёт со стены и из Telegram.",
   "where": "js/views/channel.js",
   "plural": false
@@ -951,11 +1081,6 @@
  },
  {
   "key": "Показать на стене",
-  "where": "js/views/channel.js",
-  "plural": false
- },
- {
-  "key": "Покинуть канал",
   "where": "js/views/channel.js",
   "plural": false
  },
@@ -1195,7 +1320,17 @@
   "plural": false
  },
  {
-  "key": "Язык",
+  "key": "Ключ Groq",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Подключён · проверка модов включена",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Бесплатный ключ для умных функций",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1236,6 +1371,46 @@
  },
  {
   "key": "TeleX {a} · автор",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить ключ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "API-ключ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ хранится только на этом устройстве и отправляется только в Groq. Бесплатный план: регистрация без карты.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Проверять моды перед установкой",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ ищет опасный код и то, что ломает интерфейс",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Работает, когда добавлен ключ.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ключ удалён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Проверяем ключ…",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1920,7 +2095,17 @@
   "plural": false
  },
  {
+  "key": "Завершить сеанс",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Завершить этот сеанс?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Завершить",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -1995,7 +2180,17 @@
   "plural": false
  },
  {
+  "key": "Строка сессии",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скопировать",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2181,11 +2376,6 @@
  },
  {
   "key": "Выберите оригинальный фон Telegram с векторным паттерном или глубокий OLED Black.",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Готово",
   "where": "index.html",
   "plural": false
  },

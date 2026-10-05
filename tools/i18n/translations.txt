@@ -395,7 +395,6 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Мод «{a}» не запустился ‖ The mod "{a}" failed to start ‖ El mod «{a}» no se inició ‖ O mod «{a}» não iniciou ‖ Мод «{a}» не запустився
 В моде нет ни кода, ни темы ‖ The mod has neither code nor a theme ‖ El mod no tiene código ni tema ‖ O mod não tem código nem tema ‖ У моді немає ні коду, ні теми
 Код мода слишком большой ‖ The mod code is too large ‖ El código del mod es demasiado grande ‖ O código do mod é grande demais ‖ Код моду надто великий
-Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b} ‖ The mod "{a}" will get full access to the app and your account. Install only mods you trust.{b} ‖ El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b} ‖ O mod «{a}» terá acesso total ao app e à sua conta. Instale apenas mods em que confia.{b} ‖ Мод «{a}» отримає повний доступ до застосунку й вашого акаунта. Ставте лише моди, яким довіряєте.{b}
 Этот мод не проверен. ‖ This mod has not been reviewed. ‖ Este mod no ha sido revisado. ‖ Este mod não foi revisado. ‖ Цей мод не перевірено.
 Установить тему «{a}»? ‖ Install the theme "{a}"? ‖ ¿Instalar el tema «{a}»? ‖ Instalar o tema «{a}»? ‖ Встановити тему «{a}»?
 Установить ‖ Install ‖ Instalar ‖ Instalar ‖ Встановити
@@ -441,3 +440,43 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Отключить все моды ‖ Turn off all mods ‖ Desactivar todos los mods ‖ Desativar todos os mods ‖ Вимкнути всі моди
 Моды отключены ‖ Mods turned off ‖ Mods desactivados ‖ Mods desativados ‖ Моди вимкнено
 Моды отключены автоматически: приложение не запускалось. Включите нужные в Настройки → Моды. ‖ Mods were turned off automatically: the app failed to start. Turn the ones you need back on in Settings → Mods. ‖ Los mods se desactivaron automáticamente: la app no se iniciaba. Activa los que necesites en Ajustes → Mods. ‖ Os mods foram desativados automaticamente: o app não iniciava. Ative os que precisar em Configurações → Mods. ‖ Моди вимкнено автоматично: застосунок не запускався. Увімкніть потрібні в Налаштування → Моди.
+
+API-ключ ‖ API key ‖ Clave API ‖ Chave de API ‖ API-ключ
+Groq не принял этот ключ. Проверьте, что скопировали его полностью. ‖ Groq did not accept this key. Make sure you copied it completely. ‖ Groq no aceptó esta clave. Comprueba que la copiaste completa. ‖ O Groq não aceitou esta chave. Verifique se você a copiou por inteiro. ‖ Groq не прийняв цей ключ. Переконайтеся, що скопіювали його повністю.
+Бесплатный ключ для умных функций ‖ A free key for smart features ‖ Una clave gratuita para funciones inteligentes ‖ Uma chave gratuita para recursos inteligentes ‖ Безкоштовний ключ для розумних функцій
+Бесплатный ключ нужен для умных функций. Сначала — проверка модов на ошибки и опасный код перед установкой. ‖ A free key powers smart features. First of all: checking mods for errors and dangerous code before installing. ‖ Una clave gratuita activa las funciones inteligentes. Primero: revisar los mods en busca de errores y código peligroso antes de instalarlos. ‖ Uma chave gratuita ativa os recursos inteligentes. Primeiro: verificar mods quanto a erros e código perigoso antes de instalar. ‖ Безкоштовний ключ потрібен для розумних функцій. Спершу — перевірка модів на помилки та небезпечний код перед встановленням.
+Всё равно установить ‖ Install anyway ‖ Instalar de todos modos ‖ Instalar mesmo assim ‖ Все одно встановити
+Выберите тему. Её можно изменить позже в настройках. ‖ Pick a theme. You can change it later in settings. ‖ Elige un tema. Puedes cambiarlo más tarde en los ajustes. ‖ Escolha um tema. Você pode mudá-lo depois nas configurações. ‖ Оберіть тему. Її можна змінити пізніше в налаштуваннях.
+Завершить сеанс ‖ End session ‖ Cerrar sesión ‖ Encerrar sessão ‖ Завершити сеанс
+Завершить ‖ End ‖ Cerrar ‖ Encerrar ‖ Завершити
+ИИ ищет опасный код и то, что ломает интерфейс ‖ AI looks for dangerous code and anything that breaks the interface ‖ La IA busca código peligroso y lo que rompe la interfaz ‖ A IA procura código perigoso e o que quebra a interface ‖ ШІ шукає небезпечний код і те, що ламає інтерфейс
+ИИ ищет ошибки и опасный код. Это занимает несколько секунд. ‖ AI is looking for errors and dangerous code. It takes a few seconds. ‖ La IA busca errores y código peligroso. Tarda unos segundos. ‖ A IA procura erros e código perigoso. Leva alguns segundos. ‖ ШІ шукає помилки та небезпечний код. Це займає кілька секунд.
+ИИ-проверка: есть замечания ‖ AI review: some remarks ‖ Revisión por IA: hay observaciones ‖ Revisão por IA: há observações ‖ Перевірка ШІ: є зауваження
+ИИ-проверка: опасный код ‖ AI review: dangerous code ‖ Revisión por IA: código peligroso ‖ Revisão por IA: código perigoso ‖ Перевірка ШІ: небезпечний код
+ИИ-проверка: проблем не найдено ‖ AI review: no problems found ‖ Revisión por IA: sin problemas ‖ Revisão por IA: nenhum problema encontrado ‖ Перевірка ШІ: проблем не знайдено
+Ключ Groq (по желанию) ‖ Groq key (optional) ‖ Clave de Groq (opcional) ‖ Chave do Groq (opcional) ‖ Ключ Groq (за бажанням)
+Ключ Groq абсолютно бесплатный: регистрация занимает минуту, банковская карта не нужна. С ним TeleX проверяет моды перед установкой, а умные функции работают быстрее и удобнее. ‖ A Groq key is completely free: signing up takes a minute and needs no bank card. With it TeleX checks mods before installing, and smart features become faster and more convenient. ‖ La clave de Groq es totalmente gratuita: registrarse lleva un minuto y no hace falta tarjeta. Con ella TeleX revisa los mods antes de instalarlos y las funciones inteligentes van más rápido y mejor. ‖ A chave do Groq é totalmente gratuita: o cadastro leva um minuto e não precisa de cartão. Com ela o TeleX verifica os mods antes de instalar e os recursos inteligentes ficam mais rápidos e práticos. ‖ Ключ Groq абсолютно безкоштовний: реєстрація займає хвилину, банківська картка не потрібна. З ним TeleX перевіряє моди перед встановленням, а розумні функції працюють швидше й зручніше.
+Ключ Groq ‖ Groq key ‖ Clave de Groq ‖ Chave do Groq ‖ Ключ Groq
+Ключ начинается с gsk_ — скопируйте его целиком. ‖ The key starts with gsk_ — copy it in full. ‖ La clave empieza por gsk_: cópiala completa. ‖ A chave começa com gsk_ — copie-a por inteiro. ‖ Ключ починається з gsk_ — скопіюйте його повністю.
+Ключ сохранён ‖ Key saved ‖ Clave guardada ‖ Chave salva ‖ Ключ збережено
+Ключ сохранён, но проверить его сейчас не удалось ‖ Key saved, but it could not be verified right now ‖ Clave guardada, pero no se pudo verificar ahora ‖ Chave salva, mas não foi possível verificá-la agora ‖ Ключ збережено, але перевірити його зараз не вдалося
+Ключ удалён ‖ Key removed ‖ Clave eliminada ‖ Chave removida ‖ Ключ видалено
+Ключ хранится только на этом устройстве и отправляется только в Groq. Бесплатный план: регистрация без карты. ‖ The key is stored only on this device and sent only to Groq. Free plan: sign-up without a card. ‖ La clave se guarda solo en este dispositivo y se envía solo a Groq. Plan gratuito: registro sin tarjeta. ‖ A chave fica apenas neste dispositivo e é enviada só ao Groq. Plano gratuito: cadastro sem cartão. ‖ Ключ зберігається лише на цьому пристрої й надсилається лише в Groq. Безкоштовний план: реєстрація без картки.
+Ключ хранится только на этом устройстве и отправляется только в Groq. ‖ The key is stored only on this device and sent only to Groq. ‖ La clave se guarda solo en este dispositivo y se envía solo a Groq. ‖ A chave fica apenas neste dispositivo e é enviada só ao Groq. ‖ Ключ зберігається лише на цьому пристрої й надсилається лише в Groq.
+Мод получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете. ‖ The mod gets full access to the app and your account. Install only mods you trust. ‖ El mod tendrá acceso total a la app y a tu cuenta. Instala solo mods de confianza. ‖ O mod terá acesso total ao app e à sua conta. Instale apenas mods em que confia. ‖ Мод отримає повний доступ до застосунку та вашого акаунта. Встановлюйте лише моди, яким довіряєте.
+Оформление ‖ Appearance ‖ Apariencia ‖ Aparência ‖ Оформлення
+Подключён · проверка модов включена ‖ Connected · mod review is on ‖ Conectada · revisión de mods activada ‖ Conectada · revisão de mods ativada ‖ Підключено · перевірку модів увімкнено
+Получить бесплатный ключ ‖ Get a free key ‖ Obtener una clave gratuita ‖ Obter uma chave gratuita ‖ Отримати безкоштовний ключ
+Получить ключ ‖ Get a key ‖ Obtener clave ‖ Obter chave ‖ Отримати ключ
+Приложение перезагрузится, чтобы применить язык. ‖ The app will reload to apply the language. ‖ La app se recargará para aplicar el idioma. ‖ O app será recarregado para aplicar o idioma. ‖ Застосунок перезавантажиться, щоб застосувати мову.
+Проверяем ключ… ‖ Checking the key… ‖ Comprobando la clave… ‖ Verificando a chave… ‖ Перевіряємо ключ…
+Проверяем мод… ‖ Reviewing the mod… ‖ Revisando el mod… ‖ Verificando o mod… ‖ Перевіряємо мод…
+Проверять моды перед установкой ‖ Review mods before installing ‖ Revisar mods antes de instalar ‖ Verificar mods antes de instalar ‖ Перевіряти моди перед встановленням
+Пропустить ‖ Skip ‖ Omitir ‖ Pular ‖ Пропустити
+Работает, когда добавлен ключ. ‖ Works once a key is added. ‖ Funciona cuando se añade una clave. ‖ Funciona quando uma chave é adicionada. ‖ Працює, коли додано ключ.
+Скопировать ‖ Copy ‖ Copiar ‖ Copiar ‖ Копіювати
+Строка сессии ‖ Session string ‖ Cadena de sesión ‖ String de sessão ‖ Рядок сесії
+Тема меняет только оформление и не выполняет код. ‖ A theme only changes the look and runs no code. ‖ Un tema solo cambia el aspecto y no ejecuta código. ‖ Um tema só muda a aparência e não executa código. ‖ Тема змінює лише оформлення й не виконує код.
+Удалить ключ ‖ Remove key ‖ Eliminar clave ‖ Remover chave ‖ Видалити ключ
+Установить мод «{a}»? ‖ Install the mod “{a}”? ‖ ¿Instalar el mod «{a}»? ‖ Instalar o mod «{a}»? ‖ Встановити мод «{a}»?
+Это бесплатно ‖ It's free ‖ Es gratis ‖ É grátis ‖ Це безкоштовно

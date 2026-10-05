@@ -7,6 +7,7 @@
  */
 
 import { state } from '../state.js';
+import { tgDialog } from '../core/dialog.js';
 import { api } from '../api.js';
 import { escapeHtml, formatNumber, showToast } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
@@ -234,7 +235,7 @@ export function openChannelDiscussion() {
 
 export async function leaveChannelConfirm(channelId = cur && cur.id) {
   const ch = state.channels.find((x) => x.id === Number(channelId)) || {};
-  if (!confirm(t('Покинуть канал «{a}»? Он пропадёт со стены и из Telegram.', {a: ch.title || t('канал')}))) return;
+  if (!(await tgDialog({ title: t('Покинуть канал'), text: t('Покинуть канал «{a}»? Он пропадёт со стены и из Telegram.', {a: ch.title || t('канал')}), ok: t('Покинуть'), danger: true }))) return;
   const res = await api.leaveChannel(Number(channelId));
   if (res.status !== 'success') {
     showToast(t('Не удалось: ') + (res.message || t('ошибка')));
