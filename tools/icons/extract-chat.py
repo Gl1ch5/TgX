@@ -31,6 +31,7 @@ profile_newmsg profile_phone profile_video
 msg_emoji_recent msg_emoji_smiles msg_emoji_cat msg_emoji_food msg_emoji_activities msg_emoji_travel
 msg_emoji_objects msg_emoji_flags msg_emoji_stickers
 attach_send calls_video calls_menu_phone filled_fab_compose_32 input_mic_pressed input_video_pressed
+input_reply input_forward input_clear msg_panel_clear group_edit
 '''.split()
 
 

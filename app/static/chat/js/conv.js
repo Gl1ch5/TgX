@@ -106,13 +106,17 @@ function buildShell() {
     <div class="cx-msgs" id="cx-msgs"><div class="spacer"></div><div class="cx-loading" id="cx-ld">…</div></div>
     <div id="cx-selbar" class="cx-selbar tx-hidden"><button class="cx-pill" data-a="selreply">${t('Ответить')} ${I.reply}</button><button class="cx-pill" data-a="selfwd">${t('Переслать')} ${I.forward}</button></div>
     <button class="cx-jump cx-pill tx-hidden" id="cx-jump" aria-label="${t('Вниз')}">${I.down}</button>
-    <div id="cx-ctx"></div>
     ${readonly ? `<div class="cx-ro"><button class="cx-pill" style="padding:12px 28px;font-size:16px;font-weight:500;color:var(--tx-accent)" data-a="mute">${d.muted ? t('Включить звук') : t('Выключить звук')}</button></div>` : `
     <div class="cx-comp">
-      <div class="cx-field cx-pill"><button class="cx-icon" id="cx-emo" data-a="emoji" aria-label="${t('Эмодзи')}">${I.smile}</button>
-        <textarea id="cx-input" rows="1" placeholder="${t('Сообщение')}" enterkeyhint="send"></textarea>
-        <button class="cx-icon" data-a="attach" aria-label="${t('Прикрепить')}">${I.attach}</button></div>
-      <button class="cx-send" id="cx-send" data-a="send" aria-label="${t('Отправить')}">${I.mic}</button>
+      <div class="cx-box">
+        <div id="cx-ctx"></div>
+        <div class="cx-field">
+          <button class="cx-fi" id="cx-emo" data-a="emoji" aria-label="${t('Эмодзи')}">${I.smile}</button>
+          <textarea id="cx-input" rows="1" placeholder="${t('Сообщение')}" enterkeyhint="send"></textarea>
+          <button class="cx-fi" data-a="attach" aria-label="${t('Прикрепить')}">${I.attach}</button>
+          <button class="cx-send" id="cx-send" data-a="send" aria-label="${t('Отправить')}">${I.mic}</button>
+        </div>
+      </div>
       <input type="file" id="cx-file" multiple hidden>
     </div><div id="cx-panel" class="cx-panel tx-hidden"></div>`}`;
   const box = el().querySelector('#cx-msgs');
@@ -479,8 +483,8 @@ function chatMenu(x, y) {
 
 // ---------------------------------------------------------------- composer
 function fit(inp) {
-  inp.style.height = '56px';
-  inp.style.height = Math.min(140, Math.max(56, inp.scrollHeight)) + 'px';
+  inp.style.height = '50px';
+  inp.style.height = Math.min(150, Math.max(50, inp.scrollHeight)) + 'px';
 }
 let typingSent = 0;
 let videoMode = false;
@@ -506,7 +510,7 @@ function ctxBar() {
   const box = el().querySelector('#cx-ctx');
   if (!box) return;
   const c = cur.edit || cur.reply;
-  box.innerHTML = c ? `<div class="cx-ctx cx-pill"><span class="ico">${cur.edit ? I.edit : I.replyBar}</span><div><b>${cur.edit ? t('Редактирование') : t('В ответ {a}', { a: escapeHtml(c.out ? t('себе') : c.senderName || '') })}</b><span>${escapeHtml(c.text || mediaLabel(c))}</span></div><button class="cx-icon" data-a="cancel" style="width:40px;height:40px">${I.close}</button></div>` : '';
+  box.innerHTML = c ? `<div class="cx-ctx"><span class="ico">${cur.edit ? I.editBar : I.replyBar}</span><div><b>${cur.edit ? t('Редактирование') : t('В ответ {a}', { a: escapeHtml(c.out ? t('себе') : c.senderName || '') })}</b><span>${escapeHtml(c.text || mediaLabel(c))}</span></div><button class="cx-fi" data-a="cancel" aria-label="${t('Отмена')}">${I.panelClose}</button></div>` : '';
 }
 function cancelCtx() {
   if (!cur) return;

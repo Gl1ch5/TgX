@@ -175,18 +175,6 @@ body.cx { font-family: var(--tx-font); color: var(--tx-text); }
 @keyframes cxdots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75%, 100% { content: '...'; } }
 
 /* ---------- composer ---------- */
-.cx-comp { position: relative; z-index: 6; flex: none; padding: 6px 8px calc(8px + var(--tx-safe-bottom)); display: flex; align-items: flex-end; gap: 8px; }
-.cx-field { flex: 1; min-width: 0; display: flex; align-items: flex-end; border-radius: 26px; padding: 0 4px; min-height: 52px; box-sizing: border-box; }
-.cx-field textarea { flex: 1; min-width: 0; resize: none; border: 0; outline: 0; background: none; color: var(--tx-text); font: inherit; font-size: 17px; line-height: 1.3; padding: 14px 4px; max-height: 140px; height: 56px; box-sizing: border-box; }
-.cx-field textarea::placeholder { color: var(--tx-hint); }
-.cx-field .cx-icon { width: 48px; height: 52px; border-radius: 26px; color: var(--tx-text-2); }
-.cx-send { width: 52px; height: 52px; border-radius: 50%; background: var(--tx-accent-fill); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3); }
-.cx-send svg { width: 26px; height: 26px; }
-.cx-ctx { position: relative; z-index: 6; display: flex; align-items: center; gap: 10px; margin: 0 8px 4px; padding: 6px 6px 6px 14px; border-radius: 22px; }
-.cx-ctx .bar { width: 3px; align-self: stretch; border-radius: 2px; background: var(--tx-accent); }
-.cx-ctx div { flex: 1; min-width: 0; }
-.cx-ctx b { display: block; font-size: 14px; color: var(--tx-accent); font-weight: 500; }
-.cx-ctx span { display: block; font-size: 14px; color: var(--tx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cx-ro { text-align: center; padding: 16px; color: var(--tx-text-2); position: relative; z-index: 6; }
 
 /* ---------- menu, viewer, toast ---------- */
@@ -261,12 +249,6 @@ body.cx { font-family: var(--tx-font); color: var(--tx-text); }
 .cx-msg .cx-bubble { will-change: transform; }
 .cx-msg.swipe-ready::after { content: ''; }
 
-.cx-ctx { align-items: center; padding: 8px 6px 8px 16px; border-radius: 26px; }
-.cx-ctx .ico { color: var(--tx-accent); display: flex; }
-.cx-ctx .ico svg { width: 28px; height: 28px; }
-.cx-ctx > div { margin-left: 4px; }
-.cx-ctx b { font-size: 16px; }
-.cx-ctx span:not(.ico) { font-size: 16px; }
 
 .cx-panel { position: relative; z-index: 6; flex: none; height: min(46vh, 380px); display: flex; flex-direction: column; background: var(--cx-list-bg); border-top: 1px solid var(--cx-row-sep); }
 .cx-panel .body { flex: 1; min-height: 0; overflow-y: auto; }
@@ -339,13 +321,10 @@ body.cx { font-family: var(--tx-font); color: var(--tx-text); }
 .cx-saved-ic .ic { width: 30px; height: 30px; color: #fff; }
 .cx-arch-ic .ic { width: 30px; height: 30px; color: #fff; }
 .cx-fab .ic { width: 26px; height: 26px; }
-.cx-send .ic { width: 26px; height: 26px; }
 .cx-selbar .ic { width: 26px; height: 26px; }
 .cx-doc-ic .ic { width: 24px; height: 24px; }
 .cx-profile .acts .ic { width: 26px; height: 26px; }
 .cx-profile .info i .ic { width: 24px; height: 24px; }
-.cx-ctx .ico .ic { width: 28px; height: 28px; }
-.cx-field .cx-icon .ic { color: var(--tx-text-2); }
 .cx-pinbar .cx-icon .ic { color: var(--tx-text-2); }
 .cx-jump .ic { width: 26px; height: 26px; }
 
@@ -355,10 +334,25 @@ body.cx { font-family: var(--tx-font); color: var(--tx-text); }
 .cx-tab .tabi svg path { fill: currentColor !important; }
 .cx-tab .tabi .tx-avatar { width: 26px; height: 26px; font-size: 11px; }
 
-/* composer like Telegram for Android: the round button sits inside the right end of the pill */
-.cx-comp { display: block; padding: 6px 8px calc(8px + var(--tx-safe-bottom)); }
-.cx-comp .cx-field { width: 100%; box-sizing: border-box; padding-right: 58px; position: relative; min-height: 56px; }
-.cx-comp .cx-send { position: absolute; right: 12px; bottom: calc(10px + var(--tx-safe-bottom)); width: 54px; height: 54px; box-shadow: none; }
-.cx-comp .cx-field .cx-icon { height: 56px; }
-.cx-comp .cx-field textarea { padding-top: 16px; padding-bottom: 16px; min-height: 56px; }
-.cx-send .ic { width: 30px; height: 30px; }
+
+/* ---------- composer: Telegram for Android (one dark capsule, round button inside its right end) ---------- */
+:root { --cx-comp-bg: #161617; --cx-comp-border: rgba(255, 255, 255, 0.09); --cx-comp-icon: #9b9ba0; }
+:root[data-theme='light'] { --cx-comp-bg: #ffffff; --cx-comp-border: rgba(0, 0, 0, 0.07); --cx-comp-icon: #8a8a8f; }
+.cx-comp { position: relative; z-index: 6; flex: none; padding: 6px 8px calc(10px + var(--tx-safe-bottom)); }
+.cx-box { background: var(--cx-comp-bg); border: 1px solid var(--cx-comp-border); border-radius: 29px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25); overflow: hidden; }
+.cx-field { display: flex; align-items: flex-end; min-height: 56px; padding: 3px; box-sizing: border-box; }
+.cx-field textarea { flex: 1; min-width: 0; resize: none; border: 0; outline: 0; background: none; color: var(--tx-text); font: inherit; font-size: 18px; line-height: 24px; padding: 13px 2px 13px 4px; height: 50px; max-height: 150px; box-sizing: border-box; caret-color: var(--tx-accent); }
+.cx-field textarea::placeholder { color: var(--cx-comp-icon); }
+.cx-fi { width: 50px; height: 50px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--cx-comp-icon); }
+.cx-fi .ic { width: 28px; height: 28px; }
+.cx-fi:active { background: rgba(127, 127, 127, 0.16); }
+.cx-send { width: 50px; height: 50px; flex: none; margin-left: 2px; border-radius: 50%; background: var(--tx-accent-fill); color: #fff; display: flex; align-items: center; justify-content: center; }
+.cx-send .ic { width: 28px; height: 28px; }
+.cx-send:active { transform: scale(0.94); }
+.cx-ctx { display: flex; align-items: center; gap: 12px; padding: 8px 3px 0 16px; }
+.cx-ctx .ico { color: var(--tx-accent); display: flex; flex: none; }
+.cx-ctx .ico .ic { width: 30px; height: 30px; }
+.cx-ctx div { flex: 1; min-width: 0; }
+.cx-ctx b { display: block; font-size: 16px; color: var(--tx-accent); font-weight: 500; }
+.cx-ctx div > span { display: block; font-size: 16px; color: var(--tx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-ctx .cx-fi .ic { width: 24px; height: 24px; }

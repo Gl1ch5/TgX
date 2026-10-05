@@ -75,7 +75,7 @@ const FILES = {
   pin: 'msg_pin_mini.webp', pinO: 'msg_pin.webp', unpin: 'msg_unpin.webp', pinlist: 'msg_pinnedlist.webp',
   mute: 'list_mute.webp', check: 'msg_check_s.webp', clock: 'msg_recent.webp',
   saved: 'chats_saved.webp', archive: 'chats_archive_box.webp',
-  reply: 'menu_reply.svg', replyBar: 'menu_reply.svg', copy: 'msg_copy.webp', edit: 'msg_edit.webp', trash: 'msg_delete.png',
+  reply: 'menu_reply.svg', replyBar: 'input_reply.webp', editBar: 'group_edit.webp', panelClose: 'input_clear.webp', copy: 'msg_copy.webp', edit: 'msg_edit.webp', trash: 'msg_delete.png',
   forward: 'msg_forward.webp', share: 'msg_forward.webp', select: 'msg_select.webp', down: 'msg_reactions_expand.webp',
   bell: 'msg_unmute.webp', bellFill: 'msg_mute.webp', sound: 'msg_unmute.webp', soundOff: 'msg_mute.webp',
   broom: 'msg_clear.webp', image: 'msg_background.webp', block: 'msg_block.webp', gift: 'menu_gift.webp',
