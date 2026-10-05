@@ -234,6 +234,7 @@ function mediaHtml(m) {
   if (x.type === 'photo') return `<span class="cx-media" data-view="${escapeHtml(mu(x.full_url))}" data-kind="photo" ${ratio} ${prev}><img src="${escapeHtml(mu(x.url))}" alt="" loading="lazy" ${ratio}></span>`;
   if (x.type === 'sticker') return `<span class="cx-sticker"><img src="${escapeHtml(mu(x.thumb_url || x.url))}" alt="" loading="lazy"></span>`;
   if (x.type === 'gif') return `<span class="cx-media" ${ratio}><video src="${escapeHtml(mu(x.url))}" autoplay loop muted playsinline></video></span>`;
+  if (x.type === 'video' && x.round) return `<span class="cx-round" data-view="${escapeHtml(mu(x.url))}" data-kind="video">${x.thumb_url ? `<img src="${escapeHtml(mu(x.thumb_url))}" alt="" loading="lazy">` : ''}<span class="play">${I.play}</span><em>${Math.floor((x.duration || 0) / 60)}:${String((x.duration || 0) % 60).padStart(2, '0')}</em></span>`;
   if (x.type === 'video') return `<span class="cx-media" data-view="${escapeHtml(mu(x.url))}" data-kind="video" ${ratio} ${prev}>${x.thumb_url ? `<img src="${escapeHtml(mu(x.thumb_url))}" alt="" loading="lazy" ${ratio}>` : '<div style="aspect-ratio:16/10"></div>'}<span class="play">${I.play}</span></span>`;
   if (x.type === 'audio') {
     const bars = (x.waveform && x.waveform.length ? x.waveform : Array.from({ length: 36 }, (_, i) => 8 + ((i * 7) % 18))).map((v) => `<i style="height:${Math.max(3, Math.round((v / 31) * 26))}px"></i>`).join('');
@@ -253,7 +254,7 @@ function bubbleHtml(m, prev, next, group) {
   const last = !sameRun(m, next);
   const x = m.media && m.media[0];
   const onlyMedia = x && !m.text && (x.type === 'photo' || x.type === 'video' || x.type === 'gif');
-  const sticker = x && x.type === 'sticker';
+  const sticker = x && (x.type === 'sticker' || (x.type === 'video' && x.round));
   const cls = ['cx-bubble', last ? 'cont' : '', sticker ? 'sticker' : '', onlyMedia ? 'ovl' : ''].join(' ');
   const showName = group && !m.out && first && !sticker;
   const read = m.out && m.id > 0 && m.id <= cur.dlg.readOutboxMaxId;

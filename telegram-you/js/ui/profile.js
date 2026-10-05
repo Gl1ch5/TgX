@@ -88,12 +88,17 @@ function renderShared() {
     box.innerHTML = list.map((m) => { const x = m.media && m.media[0]; if (!x) return ''; const src = x.type === 'photo' ? x.url : (x.thumb_url || x.url); return `<span class="cell"><img src="${escapeHtml(mu(src))}" alt="" loading="lazy">${x.type === 'video' ? `<i>${I.play}</i>` : ''}</span>`; }).join('');
   } else if (tab === 'links') {
     box.className = 'shared';
-    box.innerHTML = list.map((m) => `<a class="cx-set" href="${escapeHtml((m.webpage && m.webpage.url) || '#')}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;height:auto;padding:12px 16px;flex-direction:column;align-items:flex-start;gap:2px"><b>${escapeHtml((m.webpage && (m.webpage.title || m.webpage.site_name)) || m.text.slice(0, 60))}</b><span style="color:var(--tx-accent);font-size:14px">${escapeHtml((m.webpage && m.webpage.display_url) || '')}</span></a>`).join('');
+    box.innerHTML = list.map((m) => { const w = m.webpage || {}; const title = w.title || w.site_name || m.text.slice(0, 60); return `<a class="cx-lnk" href="${escapeHtml(w.url || '#')}" target="_blank" rel="noopener noreferrer"><span class="lt tx-peer-${peerTone(title)}">${escapeHtml((w.site_name || title || '?')[0].toUpperCase())}</span><span class="lb"><b>${escapeHtml(title)}</b>${w.description ? `<span>${escapeHtml(w.description.slice(0, 90))}</span>` : ''}<em>${escapeHtml(w.display_url || w.url || '')}</em></span></a>`; }).join('');
+  } else if (tab === 'music') {
+    box.className = 'shared';
+    box.innerHTML = list.map((m) => { const x = m.media && m.media[0]; if (!x) return ''; const dur = `${Math.floor((x.duration || 0) / 60)}:${String((x.duration || 0) % 60).padStart(2, '0')}`; return `<a class="cx-fil mus" href="${escapeHtml(mu(x.url))}"><span class="ft play">${I.play}</span><span class="fb"><b>${escapeHtml(x.title || x.filename || t('Файл'))}</b><span>${escapeHtml([x.performer, dur].filter(Boolean).join(' · '))}</span></span></a>`; }).join('');
   } else {
     box.className = 'shared';
-    box.innerHTML = list.map((m) => { const x = m.media && m.media[0]; return `<a class="cx-set" href="${escapeHtml(mu(x ? x.url : '#'))}" style="text-decoration:none;color:inherit">${I.file}<span>${escapeHtml(x ? (x.filename || x.title || t('Файл')) : '')}</span><em>${msgTime(m.date)}</em></a>`; }).join('');
+    box.innerHTML = list.map((m) => { const x = m.media && m.media[0]; const name = x ? (x.filename || x.title || t('Файл')) : ''; const ext = (name.split('.').pop() || '').slice(0, 4).toUpperCase(); const size = x && x.size ? `${(x.size / 1048576).toFixed(x.size > 1048576 ? 1 : 2)} MB` : ''; return `<a class="cx-fil" href="${escapeHtml(mu(x ? x.url : '#'))}"><span class="ft tx-peer-${peerTone(ext)}">${escapeHtml(ext || '?')}</span><span class="fb"><b>${escapeHtml(name)}</b><span>${[size, msgTime(m.date)].filter(Boolean).join(' · ')}</span></span></a>`; }).join('');
   }
 }
+
+const peerTone = (s) => [...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % 7;
 
 function moreMenu(x, y) {
   const i = state.info;
