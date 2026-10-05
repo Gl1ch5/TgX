@@ -156,7 +156,138 @@ export default function (tx) { /* … */ }</code></pre>
 <p>1. Find the markup you want to change in <code>app/static/js/**</code> (templates are template-literals) and the styles in <code>app/static/css/tx/*.css</code>.    Class prefix <code>tx-</code>; screens: <code>#screen-wall</code>, <code>#screen-settings</code>, <code>#screen-profile</code>, <code>#screen-thread</code>, <code>#screen-channel</code>; dock <code>.tx-dock</code>. 2. Restyle with <code>css</code>/<code>vars</code> parts (no code). Add behaviour with <code>tx.ui.watch(selector, fn)</code>. Add markup with <code>tx.ui.inject</code>. 3. The UI re-renders often — never rely on a node surviving; use <code>watch</code>, not a one-off <code>querySelector</code>. 4. Use theme variables (<code>var(--tx-accent)</code>, <code>var(--tx-surface)</code>, <code>var(--tx-text)</code>) so the mod works in day and night mode.</p>
 <h3 id="a-checklist-before-you-hand-the-file-over">Checklist before you hand the file over</h3>
 <ul><li><code>id</code> valid and unique; <code>name</code>, <code>version</code>, <code>description</code> filled; <code>about</code> explains how to use it.</li><li>Works in light and dark theme; no hard-coded fonts; touch targets ≥ 40 px (it also runs on phones).</li><li>Settings declared in <code>manifest.settings</code> with sane defaults; code reads them via <code>tx.config</code>, never assumes a value.</li><li>No network calls to unknown hosts; no secrets; no use of <code>tx.api</code> beyond what the mod needs (the user's account is at stake).</li><li>Valid JSON (bundle shape) — validate with <code>node -e "JSON.parse(require('fs').readFileSync('x.module','utf8'))"</code>.</li><li>Test: serve <code>app/static</code> (<code>python3 -m http.server 8801 --directory app/static</code>), open <code>index.html?fake=1</code>, Settings → Mods → paste the file.</li></ul>
-<p>Working examples: <code>mods-examples/sunset-theme.module</code> (JSON bundle, theme) · <code>clock-widget.module</code> (HTML + settings) · <code>copy-post-link.module</code> (JS + menus). Full human documentation: <code>docs/mods.md</code>.</p></section>
+<p>Working examples: <code>mods-examples/sunset-theme.module</code> (JSON bundle, theme) · <code>clock-widget.module</code> (HTML + settings) · <code>copy-post-link.module</code> (JS + menus). Full human documentation: <code>docs/mods.md</code>.</p>
+<p>This part explains *how to do it well and why*. A mod that ignores it can overlap the phone's status bar, cover the bottom bar, become unreadable in day mode or (worst case) make the app unusable. The app has an emergency switch (⋮ menu → "Disable all mods", and automatic safe mode after 2 failed starts), but a good mod never needs it.</p>
+<h3 id="a-1-the-golden-rules-why-mods-break-the-app">1. The golden rules (why mods break the app)</h3>
+<p>1. <b>Never use <code>position: fixed</code> / <code>absolute</code> with <code>top: 0</code>, <code>top: 8px</code>, <code>left: 0; right: 0; height: 100%</code> for something small.</b> On a phone the app is edge-to-edge:    the status bar (clock, battery) is drawn *over* the top of the page. Everything near <code>top: 0</code> hides behind it or collides with it. The real height is <code>var(--tx-safe-top)</code> (≈ 24–48 px, 0 on desktop).    The same at the bottom: the gesture bar is <code>var(--tx-safe-bottom)</code>, and the app's own dock lives in the bottom ~72 px.    → Prefer a <b>slot</b> (<code>tx.ui.add('topbar'|'dock'|'fab'|'post.footer'…)</code>): the app places it correctly on every device.    → If you really need a floating element: <code>top: calc(var(--tx-safe-top) + 64px)</code> (below the title bar) or <code>bottom: calc(var(--tx-dock-h) + 24px + var(--tx-safe-bottom))</code> (above the dock). 2. <b>Never cover the whole screen</b> with a transparent/translucent layer, never set <code>pointer-events: auto</code> on something full-screen, never put <code>overflow: hidden</code> on <code>html</code>/<code>body</code>/<code>#app</code>.    A floating widget must be small and may carry <code>pointer-events: none</code> unless it is a button. 3. <b>Never hide or restyle the elements the user needs to leave the screen</b> (<code>.tx-dock</code>, <code>.tx-mainbar</code>, the ⋮ button, settings rows) with <code>display: none</code> or <code>visibility: hidden</code>. 4. <b>Do not use hard-coded colours</b> (<code>#000</code>, <code>#fff</code>, <code>white</code>) for text or surfaces. The app has day and night modes; use the variables from section 3. A white clock on a white day background is invisible. 5. <b>Do not touch <code>html</code>, <code>body</code>, <code>#app</code>, <code>.tx-screen</code> layout properties</b> (<code>display</code>, <code>position</code>, <code>height</code>, <code>transform</code>, <code>filter</code>, <code>overflow</code>, <code>zoom</code>). <code>transform</code>/<code>filter</code> on an ancestor breaks every <code>position: fixed</code> child (the dock jumps, the viewer shifts).    <code>backdrop-filter</code> on a large element is expensive: ≤ 3 per screen, never on a scrolling list item. 6. <b>Never write a global rule without a prefix.</b> <code>div { … }</code>, <code>button { … }</code>, <code>* { … }</code>, <code>.icon { … }</code> restyle the whole app. Always scope: <code>.tx-mod-&lt;id&gt; …</code> for your own elements, or an exact app selector. 7. <b>Clean up.</b> Timers (<code>setInterval</code>), global listeners (<code>window.addEventListener</code>), observers: register them with <code>tx.onStop(() =&gt; clearInterval(t))</code>. Everything made through <code>tx.ui.*</code> / <code>tx.theme.*</code> is removed automatically. 8. <b>Handle errors.</b> Wrap network/JSON code in <code>try/catch</code>; a mod that throws at start is rejected and removed. Never block: no <code>alert</code>, no endless loops, no synchronous XHR. 9. <b>Touch targets ≥ 40×40 px</b>, text ≥ 13 px. Test at a width of 360 px. 10. <b>One concern per mod.</b> A weather widget must not also restyle the dock.</p>
+<h3 id="a-2-the-layout-of-the-app-so-that-you-know-where-things-are">2. The layout of the app (so that you know where things are)</h3>
+<pre><code>┌──────────────── phone ────────────────┐
+│ status bar (OS)      ← var(--tx-safe-top) tall, drawn over the page; NOTHING of yours here
+├───────────────────────────────────────┤
+│ .tx-mainbar        56 px: stories stack · "TeleX" · search 🔍 · ⋮     ← slot 'topbar' (end side)
+│ #header-search-bar search field                                         ← slot 'search'
+│ #feed-tabs         All · Media · Popular · Favorites                    ← slot 'tabs'
+│ ┌ post card (.tx-bubble) ───────────┐
+│ │ header: avatar · channel · time   │ ← slot 'post.header'
+│ │ text, photo/video, buttons        │
+│ │ footer: reactions · views · share │ ← slot 'post.footer' (below text) / 'post.actions' (by share)
+│ └───────────────────────────────────┘
+│ …scrolls…                                          [fab]  ← slot 'fab', ~(dock + 28 px) above the bottom
+│   (  Feed   Settings   Profile  )  .tx-dock, 60 px + var(--tx-safe-bottom)   ← slot 'dock'
+└───────────────────────────────────────┘</code></pre>
+<p>Column width on desktop: <code>--tx-column-w</code> = 680 px, centred. Screens: <code>#screen-wall</code> (feed), <code>#screen-settings</code>, <code>#screen-profile</code>, <code>#screen-thread</code> (comments), <code>#screen-channel</code>. Only one screen is visible at a time; the app sets <code>data-view="wall|settings|…"</code> on <code>#app</code>.</p>
+<p><b>Stacking order (z-index)</b> — stay *below* what must stay on top:</p>
+<div class="tbl"><table><thead><tr><th>layer</th><th>z-index</th></tr></thead><tbody><tr><td>wallpaper</td><td>0–1</td></tr><tr><td>app content <code>.tx-app</code></td><td>10</td></tr><tr><td>sticky header / tabs</td><td>29–31</td></tr><tr><td>dock</td><td>39–40</td></tr><tr><td>fab, floating buttons</td><td>38–45</td></tr><tr><td>media viewer</td><td>80</td></tr><tr><td>mod full-screen page (<code>openScreen</code>)</td><td>150</td></tr><tr><td>dialogs / confirm</td><td>200</td></tr><tr><td>stories viewer</td><td>300</td></tr><tr><td>toast</td><td>400</td></tr></tbody></table></div>
+<p>A widget that must float over the feed: <code>z-index: 35</code> (above content and headers, below the dock). Never above 100 unless it is a dialog the user can close.</p>
+<h3 id="a-3-colours-and-tokens-the-real-values">3. Colours and tokens (the real values)</h3>
+<p>Use <code>var(--token)</code> — the value changes with day/night mode, accent and wallpaper theme.</p>
+<div class="tbl"><table><thead><tr><th>token</th><th>night (default)</th><th>day</th><th>use for</th></tr></thead><tbody><tr><td><code>--tx-bg</code></td><td><code>#000000</code></td><td><code>#f0f0f5</code></td><td>page background</td></tr><tr><td><code>--tx-surface</code></td><td><code>#1c1c1d</code></td><td><code>#ffffff</code></td><td>cards, settings groups</td></tr><tr><td><code>--tx-surface-2</code></td><td><code>#262628</code></td><td><code>#f2f2f6</code></td><td>menus, inputs, secondary cards</td></tr><tr><td><code>--tx-bubble</code></td><td><code>#212123</code></td><td><code>#ffffff</code></td><td>incoming post/message bubble</td></tr><tr><td><code>--tx-bubble-out</code></td><td>gradient/<code>#2b3e63</code></td><td>gradient</td><td>outgoing bubble</td></tr><tr><td><code>--tx-glass</code></td><td><code>rgba(34,34,36,.72)</code></td><td><code>rgba(255,255,255,.8)</code></td><td>translucent bars (use with <code>backdrop-filter: var(--tx-glass-blur)</code>)</td></tr><tr><td><code>--tx-glass-border</code></td><td><code>rgba(255,255,255,.075)</code></td><td><code>rgba(0,0,0,.08)</code></td><td>1 px borders of glass</td></tr><tr><td><code>--tx-separator</code></td><td><code>rgba(255,255,255,.08)</code></td><td><code>rgba(0,0,0,.09)</code></td><td>divider lines</td></tr><tr><td><code>--tx-text</code></td><td><code>#ffffff</code></td><td><code>#000000</code></td><td>main text</td></tr><tr><td><code>--tx-text-2</code></td><td><code>#9d9da3</code></td><td><code>#707579</code></td><td>secondary text, subtitles</td></tr><tr><td><code>--tx-hint</code></td><td><code>#6e6e74</code></td><td><code>#9a9ea4</code></td><td>hints, placeholders</td></tr><tr><td><code>--tx-accent</code></td><td><code>#7595ff</code></td><td><code>#3a6fe6</code></td><td>links, active icons, accent text</td></tr><tr><td><code>--tx-accent-fill</code></td><td><code>#5a83f3</code></td><td>same</td><td>filled buttons, active tab</td></tr><tr><td><code>--tx-accent-soft</code></td><td>accent @16 %</td><td>accent @12 %</td><td>soft highlight behind accent items</td></tr><tr><td><code>--tx-red</code> / <code>--tx-green</code></td><td><code>#ff5b5b</code> / <code>#4fbf6a</code></td><td><code>#e5484d</code> / <code>#2f9e44</code></td><td>danger / success</td></tr><tr><td><code>--tx-bubble-radius</code></td><td><code>17px</code></td><td></td><td>corner radius of cards</td></tr><tr><td><code>--tx-safe-top</code>, <code>--tx-safe-bottom</code></td><td>status bar / gesture bar height</td><td></td><td><b>insets — always add them to fixed positions</b></td></tr><tr><td><code>--tx-dock-h</code></td><td><code>64px</code></td><td></td><td>dock height</td></tr><tr><td><code>--tx-font</code></td><td>Roboto stack</td><td></td><td>font: <code>font-family: var(--tx-font)</code></td></tr></tbody></table></div>
+<p>Accent presets (<code>tx.theme.setAccent(fill, day)</code>): blue <code>#5a83f3</code>/<code>#3a6fe6</code> (default), classic <code>#3e88f7</code>, violet <code>#8774e1</code>, cyan <code>#2fa9c7</code>, green <code>#4fae4e</code>, orange <code>#e88a35</code>, pink <code>#d9608f</code>.</p>
+<p><b>Rules for choosing colours</b></p>
+<ul><li>Text on <code>--tx-surface</code>: <code>--tx-text</code>; secondary: <code>--tx-text-2</code>. Never put <code>--tx-text-2</code> on an accent fill.</li><li>A custom colour needs a day and a night variant. In a theme part: <code>vars: { dark: {…}, light: {…} }</code>; in CSS: <code>:root[data-theme='light'] .x { … }</code>; in code: <code>tx.theme.mode()</code> returns <code>'dark'|'light'</code>.</li><li>Contrast ≥ 4.5:1 for text. Text on a photo/wallpaper needs a translucent surface behind it (<code>background: var(--tx-glass)</code>), not just a colour.</li><li>Keep the accent as the *one* bright colour. Do not use more than 2–3 hues in one mod.</li><li>A translucent surface = <code>var(--tx-glass)</code> + <code>backdrop-filter: var(--tx-glass-blur)</code> + <code>border: 1px solid var(--tx-glass-border)</code>.</li></ul>
+<h3 id="a-4-skin-tokens-restyle-the-whole-app-without-selectors">4. Skin tokens — restyle the whole app without selectors</h3>
+<p>When a mod wants a new *look* (glass, neon, paper, flat…), set <b>skin tokens</b> instead of writing CSS for dozens of classes. <code>tx.theme.setSkin(tokens, 'all'|'dark'|'light')</code> turns on the layer; every card, bar, menu, dialog and button then reads these tokens. Unset tokens keep the default.</p>
+<div class="tbl"><table><thead><tr><th>group</th><th>tokens</th><th>affects</th></tr></thead><tbody><tr><td>card</td><td><code>--sk-card-bg</code>, <code>-border</code>, <code>-shadow</code>, <code>-filter</code>, <code>-radius</code></td><td>settings groups, post bubbles, profile cards</td></tr><tr><td>bubble</td><td><code>--sk-bubble-in</code>, <code>--sk-bubble-out</code>, <code>--sk-bubble-radius</code></td><td>message/post bubbles</td></tr><tr><td>bar</td><td><code>--sk-bar-bg</code>, <code>-border</code>, <code>-shadow</code>, <code>-filter</code>, <code>-radius</code></td><td>dock, header pills, tabs, search</td></tr><tr><td>menu</td><td><code>--sk-menu-bg</code>, <code>-border</code>, <code>-shadow</code>, <code>-filter</code>, <code>-radius</code></td><td>context menu, reactions strip</td></tr><tr><td>dialog</td><td><code>--sk-dialog-bg</code>, <code>--sk-dialog-radius</code></td><td>confirm dialogs, sheets</td></tr><tr><td>button</td><td><code>--sk-button-bg</code>, <code>--sk-button-text</code>, <code>--sk-button-radius</code></td><td>filled buttons</td></tr><tr><td>chip</td><td><code>--sk-chip-bg</code>, <code>--sk-chip-radius</code></td><td>reactions, small pills</td></tr><tr><td>misc</td><td><code>--sk-highlight</code> (inner top light), <code>--sk-overlay</code> (dim behind dialogs), <code>--sk-separator</code>, <code>--sk-field-bg</code></td><td></td></tr></tbody></table></div>
+<p>Always give <b>both</b> modes — a skin that only looks right at night is a bug:</p>
+<pre><code>tx.theme.setSkin({ '--sk-card-bg': 'rgba(28,28,32,.55)', '--sk-card-filter': 'blur(18px) saturate(160%)', '--sk-card-border': 'rgba(255,255,255,.08)', '--sk-card-radius': '22px' }, 'dark');
+tx.theme.setSkin({ '--sk-card-bg': 'rgba(255,255,255,.62)', '--sk-card-filter': 'blur(18px) saturate(160%)', '--sk-card-border': 'rgba(0,0,0,.06)', '--sk-card-radius': '22px' }, 'light');</code></pre>
+<p>If a mod has *setting*s that change a token (blur strength, radius, accent), re-apply in <code>tx.config.on('*', apply)</code>.</p>
+<h3 id="a-5-choosing-the-right-kind-of-mod-and-why">5. Choosing the right kind of mod (and why)</h3>
+<div class="tbl"><table><thead><tr><th>Idea</th><th>Kind</th><th>Why this and not another</th></tr></thead><tbody><tr><td>New colours / wallpaper / look</td><td><b>theme part</b> (<code>vars</code>, <code>colorThemes</code>, <code>wallpapers</code>, <code>skin</code>)</td><td>no code → can't crash; shown in Settings → Chat settings</td></tr><tr><td>Small live info (clock, weather, counters)</td><td><b>slot</b> <code>topbar</code> or <code>post.header</code> with <code>html</code>/<code>render</code></td><td>the app positions it; no overlap with the status bar</td></tr><tr><td>A button that does one thing</td><td><b>slot</b> <code>dock</code> / <code>topbar</code> / <code>fab</code> with <code>icon</code>, <code>title</code>, <code>run</code></td><td>consistent look, 40 px target, removed on disable</td></tr><tr><td>Extra info on every post</td><td><code>post.footer</code> / <code>post.header</code> / <code>post.actions</code> or <code>ui.onPost</code></td><td>re-applied for posts loaded later (scrolling)</td></tr><tr><td>Hide / mark posts</td><td><code>ui.onPost</code> + a setting with the words</td><td>runs for every post, including new ones</td></tr><tr><td>Change post text</td><td><code>ext.addHook('postText', html =&gt; …)</code></td><td>sync, before render; returns the new HTML</td></tr><tr><td>Own page (notes, stats, list)</td><td><code>ui.openScreen</code> (+ a dock or topbar button) or <code>settings.addPage</code></td><td>a screen over the app with a back arrow; never inject into other screens</td></tr><tr><td>Per-mod options</td><td><code>manifest.settings</code></td><td>the app renders the controls and persists the values</td></tr><tr><td>Floating widget</td><td>an <code>html</code> part — <b>only</b> with the safe-area rules of section 1</td><td>last resort</td></tr></tbody></table></div>
+<h3 id="a-6-recipes-complete-copy-paste-safe">6. Recipes (complete, copy-paste-safe)</h3>
+<p>All recipes are sectioned <code>.module</code> files. Keep your own file in the same shape.</p>
+<h4 id="a-6-1-clock-in-the-top-bar-the-correct-way-no-overlap-with-the-status-bar">6.1 Clock in the top bar (the correct way — no overlap with the status bar)</h4>
+<pre><code>// @manifest {"id":"topbar-clock","name":{"ru":"Часы","en":"Clock","es":"Reloj","pt":"Relógio","uk":"Годинник"},"version":"1.0.0","author":"you","description":{"ru":"Часы в шапке ленты","en":"A clock in the feed header","es":"Un reloj en la cabecera","pt":"Um relógio no cabeçalho","uk":"Годинник у шапці стрічки"},"icon":"🕒","tags":["widget"],"settings":[{"key":"h24","type":"switch","title":{"ru":"24-часовой формат","en":"24-hour format","es":"Formato 24 h","pt":"Formato 24 h","uk":"24-годинний формат"},"default":true}]}
+// @part js
+export default function (tx) {
+  function fmt() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: !tx.config.get('h24') });
+  }
+  tx.ui.add('topbar', {
+    id: 'clock',
+    html: '&lt;span class="tx-mod-clock" style="font:500 15px var(--tx-font);color:var(--tx-text-2);padding:0 6px"&gt;&lt;/span&gt;',
+    render: function (host) {
+      var span = host.querySelector('.tx-mod-clock') || host;
+      var tick = function () { span.textContent = fmt(); };
+      tick();
+      var timer = setInterval(tick, 15000);
+      tx.onStop(function () { clearInterval(timer); });
+    },
+  });
+}</code></pre>
+<p>Why this is right: the slot puts the clock *inside* the 56 px bar that already sits below the status bar, uses theme colours, and stops its timer.</p>
+<h4 id="a-6-2-a-tool-button-a-result-dialog">6.2 A tool button + a result dialog</h4>
+<pre><code>// @manifest {"id":"post-counter","name":{"ru":"Счётчик постов","en":"Post counter","es":"Contador","pt":"Contador","uk":"Лічильник"},"version":"1.0.0","author":"you","description":{"ru":"Показывает, сколько постов загружено","en":"Shows how many posts are loaded","es":"Muestra cuántas publicaciones hay","pt":"Mostra quantas publicações há","uk":"Показує, скільки дописів завантажено"},"icon":"🔢"}
+// @part js
+export default function (tx) {
+  tx.ui.add('fab', {
+    id: 'count', icon: '🔢', title: 'Posts',
+    run: function () { tx.toast(String((tx.S.posts || []).length)); },
+  });
+}</code></pre>
+<h4 id="a-6-3-filter-hide-posts-containing-words">6.3 Filter: hide posts containing words</h4>
+<pre><code>// @manifest {"id":"word-filter","name":{"ru":"Фильтр слов","en":"Word filter","es":"Filtro","pt":"Filtro","uk":"Фільтр слів"},"version":"1.0.0","author":"you","description":{"ru":"Скрывает посты с заданными словами","en":"Hides posts with chosen words","es":"Oculta publicaciones","pt":"Oculta publicações","uk":"Ховає дописи"},"icon":"🚫","settings":[{"key":"words","type":"text","title":{"ru":"Слова через запятую","en":"Words, comma separated","es":"Palabras","pt":"Palavras","uk":"Слова через кому"},"default":""}]}
+// @part js
+export default function (tx) {
+  function words() {
+    return String(tx.config.get('words') || '').toLowerCase().split(',').map(function (w) { return w.trim(); }).filter(Boolean);
+  }
+  function check(el, post) {
+    var text = String((post &amp;&amp; (post.text || post.message)) || el.textContent || '').toLowerCase();
+    el.style.display = words().some(function (w) { return text.indexOf(w) &gt;= 0; }) ? 'none' : '';
+  }
+  tx.ui.onPost(check);
+  tx.onStop(function () { document.querySelectorAll('.tx-bubble[style*="display: none"]').forEach(function (e) { e.style.display = ''; }); });
+}</code></pre>
+<h4 id="a-6-4-post-footer-reading-time">6.4 Post footer: reading time</h4>
+<pre><code>// @manifest {"id":"read-time","name":{"ru":"Время чтения","en":"Reading time","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання"},"version":"1.0.0","author":"you","description":{"ru":"Время чтения под постом","en":"Reading time under a post","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання під дописом"},"icon":"⏱️"}
+// @part js
+export default function (tx) {
+  tx.ui.add('post.footer', {
+    id: 'rt',
+    render: function (el, ctx) {
+      var words = String((ctx.post &amp;&amp; ctx.post.text) || '').split(/\s+/).filter(Boolean).length;
+      if (words &lt; 40) { el.style.display = 'none'; return; }
+      el.style.cssText = 'font-size:12px;color:var(--tx-hint);padding:2px 0';
+      el.textContent = '⏱ ' + Math.max(1, Math.round(words / 200)) + ' min';
+    },
+  });
+}</code></pre>
+<h4 id="a-6-5-own-page-with-saved-data-notebook">6.5 Own page with saved data (notebook)</h4>
+<pre><code>// @manifest {"id":"notebook","name":{"ru":"Блокнот","en":"Notebook","es":"Cuaderno","pt":"Caderno","uk":"Блокнот"},"version":"1.0.0","author":"you","description":{"ru":"Заметки в приложении","en":"Notes inside the app","es":"Notas","pt":"Notas","uk":"Нотатки"},"icon":"📝"}
+// @part js
+export default function (tx) {
+  tx.ui.addDockItem({
+    id: 'notes', title: 'Notes', icon: '📝',
+    run: function () {
+      tx.ui.openScreen({
+        title: 'Notes',
+        render: function (box) {
+          box.innerHTML = '&lt;textarea class="tx-mod-notes" style="width:100%;min-height:50vh;box-sizing:border-box;padding:14px;border-radius:16px;border:1px solid var(--tx-separator);background:var(--tx-surface);color:var(--tx-text);font:16px var(--tx-font);resize:vertical"&gt;&lt;/textarea&gt;';
+          var ta = box.querySelector('textarea');
+          ta.value = tx.storage.get('text') || '';
+          ta.addEventListener('input', function () { tx.storage.set('text', ta.value); });
+        },
+      });
+    },
+  });
+}</code></pre>
+<h4 id="a-6-6-theme-with-skin-glass-look-day-night">6.6 Theme with skin (glass look, day + night)</h4>
+<pre><code>// @manifest {"id":"my-glass","name":{"ru":"Стекло","en":"Glass","es":"Cristal","pt":"Vidro","uk":"Скло"},"version":"1.0.0","author":"you","description":{"ru":"Полупрозрачные карточки","en":"Translucent cards","es":"Tarjetas translúcidas","pt":"Cartões translúcidos","uk":"Напівпрозорі картки"},"icon":"🪟","tags":["theme"]}
+// @part theme
+{ "skin": {
+    "dark":  { "--sk-card-bg": "rgba(28,28,32,.55)", "--sk-card-filter": "blur(18px) saturate(160%)", "--sk-card-border": "rgba(255,255,255,.08)", "--sk-bar-bg": "rgba(30,30,34,.6)" },
+    "light": { "--sk-card-bg": "rgba(255,255,255,.62)", "--sk-card-filter": "blur(18px) saturate(160%)", "--sk-card-border": "rgba(0,0,0,.06)", "--sk-bar-bg": "rgba(255,255,255,.7)" }
+  } }</code></pre>
+<h4 id="a-6-7-a-floating-widget-only-if-a-slot-does-not-fit-safe-area-aware">6.7 A floating widget, only if a slot does not fit (safe-area aware)</h4>
+<pre><code>// @manifest {"id":"float-note","name":"Floating note","version":"1.0.0","author":"you","description":"A small note card above the dock","icon":"📌"}
+// @part html
+&lt;div class="tx-mod-float" style="position:fixed;z-index:35;left:12px;bottom:calc(var(--tx-dock-h) + 24px + var(--tx-safe-bottom));max-width:60vw;padding:8px 12px;border-radius:14px;background:var(--tx-glass);border:1px solid var(--tx-glass-border);backdrop-filter:var(--tx-glass-blur);color:var(--tx-text);font:14px var(--tx-font);pointer-events:none"&gt;Hello&lt;/div&gt;</code></pre>
+<p>Note <code>bottom</code> includes the dock and the gesture inset, <code>pointer-events:none</code> lets taps through, theme colours, small size.</p>
+<h3 id="a-7-pitfalls-we-have-seen-do-not-repeat">7. Pitfalls we have seen (do NOT repeat)</h3>
+<ul><li><b>Clock stuck over the status bar</b>: <code>position:fixed; top:8px; right:8px</code> → under/over the OS status bar. Use slot <code>topbar</code>, or <code>top: calc(var(--tx-safe-top) + 64px)</code>.</li><li><b>Header "dimmed"</b>: a full-width <code>position:fixed; top:0</code> gradient/overlay laid over the header. Never overlay the top bar; use the <code>--sk-bar-*</code> tokens to change its look.</li><li><b>Everything unreadable in day mode</b>: hard-coded <code>color:#fff</code>. Use <code>var(--tx-text)</code>.</li><li><b>Dock disappears / jumps</b>: <code>transform</code>, <code>filter</code>, <code>perspective</code> or <code>will-change: transform</code> set on <code>#app</code>, <code>.tx-screen</code> or <code>body</code>. Do not.</li><li><b>Mod works once, then vanishes</b>: the app re-renders; a one-off <code>document.querySelector(...).append(...)</code> is lost. Use <code>tx.ui.add</code>, <code>tx.ui.watch</code>, <code>tx.ui.onPost</code>.</li><li><b>Code breaks after copying from chat</b>: backtick template literals and <code>${}</code> get mangled. Use <code>'a' + b</code>. Put the whole file in ONE code block.</li><li><b>Mod slows the feed</b>: work per post must be O(1); no <code>querySelectorAll('*')</code>, no layout reads in loops, no network call per post.</li><li><b><code>display:flex</code> on <code>.tx-hidden</code></b> etc.: do not override <code>.tx-hidden</code>, <code>.hidden</code>, <code>[hidden]</code>.</li></ul>
+<h3 id="a-8-self-review-checklist-do-it-before-answering">8. Self-review checklist (do it before answering)</h3>
+<p>1. Every element I add is inside a slot, or is <code>position:fixed</code> with safe-area maths and <code>z-index ≤ 45</code>, small, and does not cover the title bar, status bar or dock. 2. No selector without a <code>.tx-mod-…</code> prefix or an exact app class; no <code>*</code>, no bare tags. 3. All colours are <code>var(--tx-…)</code>/<code>var(--sk-…)</code>, or have a day and a night variant. 4. Timers/listeners are cleaned in <code>tx.onStop</code>. 5. Errors are caught; no use of undocumented <code>tx</code> methods. 6. Manifest is complete (5 languages, icon, version, description); the file is valid (JSON parses / JS module has <code>export default function (tx)</code>). 7. The whole answer is ONE code block; no template literals. 8. Imagine the user installs it on a phone at 360 px width in day mode: is anything covered, cut off or invisible? If unsure, use a slot.</p></section>
   </main>
 </body>
 </html>

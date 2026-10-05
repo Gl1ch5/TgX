@@ -79,6 +79,7 @@ html.tx-skin .tx-side-btn {
   backdrop-filter: var(--sk-bar-filter);
 }
 html.tx-skin .tx-dock, html.tx-skin .tx-glass, html.tx-skin .tx-search-main, html.tx-skin .tx-pill-tabs { border-radius: var(--sk-bar-radius); }
+html.tx-skin .tx-empty-card.tx-glass { border-radius: var(--sk-card-radius); }
 
 /* menus */
 html.tx-skin .tx-menu,

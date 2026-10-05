@@ -56,7 +56,7 @@ function md(src, idPrefix) {
 }
 
 const people = md(fs.readFileSync(path.join(root, 'docs/mods.md'), 'utf8').replace(/^# .*\n/, ''), 'h-');
-const agents = md(fs.readFileSync(path.join(root, 'docs/mods-for-agents.md'), 'utf8').replace(/^# .*\n/, ''), 'a-');
+const agents = md(fs.readFileSync(path.join(root, 'docs/mods-for-agents.md'), 'utf8').replace(/^# .*\n/, '') + '\n\n' + fs.readFileSync(path.join(root, 'docs/mods-design.md'), 'utf8').replace(/^# .*\n/, '').replace(/^## /gm, '## '), 'a-');
 
 const html = `<!doctype html>
 <html lang="ru">
@@ -105,7 +105,7 @@ const html = `<!doctype html>
 fs.writeFileSync(path.join(root, 'mods.html'), html);
 
 // The prompt people copy in the app (Mods → "Copy prompt for an AI"): the agent brief + hard output rules.
-const brief = fs.readFileSync(path.join(root, 'docs/mods-for-agents.md'), 'utf8');
+const brief = fs.readFileSync(path.join(root, 'docs/mods-for-agents.md'), 'utf8') + '\n\n' + fs.readFileSync(path.join(root, 'docs/mods-design.md'), 'utf8');
 const classes = fs.readFileSync(path.join(root, 'docs/mods.md'), 'utf8').split('## Поверхности, которые можно менять напрямую')[1]?.split('## ')[0] || '';
 const prompt = `You write mods for TeleX, a web client for Telegram. A mod is ONE text file with the extension .module that the user pastes into the app (Settings → Mods → "Paste mod from clipboard").
 Below is the complete specification. Read it, then build exactly the mod the user asks for at the end of this message.
@@ -118,6 +118,7 @@ HARD RULES FOR YOUR ANSWER
 - Fill the manifest completely: id, name, version, author, description, about (all texts for ru, en, es, pt, uk), icon (an emoji or a 96x96 SVG data URL), tags and settings if the mod has options.
 - The mod must work in day and night mode and on a phone. Use the app's CSS variables and skin tokens, not hard-coded colours.
 - Use only the documented API. Do not invent tx methods.
+- NEVER place anything with position:fixed/absolute near the top or bottom edge without var(--tx-safe-top) / var(--tx-safe-bottom); prefer slots. Read the section about layout and the "Pitfalls" list before writing code. Re-check your file against the self-review checklist at the end of the specification.
 
 SPECIFICATION
 ${brief}
