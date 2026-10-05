@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Original soundtrack for the TeleX trailers (no samples, no licensed music).
+"""Sound effects only for the TeleX trailers (no music: it is added on TikTok / YouTube).
 
 120 bpm, A minor (Am - F - C - G). Intro riser, drop when the phone appears,
 whooshes on every scene cut, drums out for the final title.
@@ -152,55 +152,16 @@ CHORDS = [(57, [57, 60, 64, 69]), (53, [53, 57, 60, 65]), (48, [48, 52, 55, 60])
 BAR = 4 * BEAT
 print('synthesizing', FMT, END, 's')
 
-K, C, HH, OH = kick(), clap(), noise_hit(0.06, 70), noise_hit(0.25, 14)
-
-# pads all the way through (quiet in the intro)
-bar = 0
-t = 0.0
-while t < END - 0.5:
-    root, chord = CHORDS[bar % 4]
-    gain = 0.24 if t < DROP else 0.36
-    both(t, pad(chord, BAR), gain)
-    if DROP <= t < CTA:
-        for b in range(4):  # bass on every beat, octave jump on the "and"
-            both(t + b * BEAT, bass(root - 12, BEAT * 0.9), 0.26)
-            both(t + b * BEAT + BEAT / 2, bass(root, BEAT * 0.45), 0.14)
-    bar += 1
-    t += BAR
 
 # intro: ticking hats + riser into the drop
-for i in range(int(DROP / (BEAT / 2))):
-    both(i * BEAT / 2, HH, 0.12 + 0.1 * (i * BEAT / 2) / DROP, pan=0.3 if i % 2 else -0.3)
-both(DROP - 2.0, riser(2.0), 0.35)
-
-# drums from the drop to the title
-beat = DROP
-while beat < CTA - 0.01:
-    both(beat, K, 0.9)
-    both(beat + BEAT / 2, OH, 0.16, pan=0.25)
-    for q in (0.25, 0.75):
-        both(beat + BEAT * q, HH, 0.08, pan=-0.3)
-    n = round((beat - DROP) / BEAT)
-    if n % 2 == 1:
-        both(beat, C, 0.42)
-    beat += BEAT
-
-# arpeggio over the main part
-arp = [69, 72, 76, 79, 76, 72]
-i = 0
-x = DROP
-while x < CTA:
-    root, chord = CHORDS[int(x / BAR) % 4]
-    note = chord[i % 4] + 12
-    both(x, pluck(note, 0.4), 0.17, pan=0.4 if i % 2 else -0.4)
-    i += 1
-    x += BEAT / 2
+both(DROP - 2.0, riser(2.0), 0.5)
+both(DROP, kick(0.9), 0.9)           # one impact when the phone arrives
 
 # cuts
 for c in CUTS:
-    both(c - 0.35, whoosh(0.6, up=True), 0.28)
+    both(c - 0.35, whoosh(0.6, up=True), 0.5)
 
-# title: impact + bell chord, drums out
+# title: impact + bell chord
 both(CTA, kick(0.9), 1.0)
 both(CTA, noise_hit(1.2, 3, hp=0.3), 0.25)
 for k, n in enumerate([81, 84, 88, 93]):
@@ -214,7 +175,7 @@ for i in range(int((END - 1.2) * SR), N):
 
 peak = max(max(abs(v) for v in L), max(abs(v) for v in R)) or 1
 out = array.array('h', (int(32000 * math.tanh(1.1 * v / peak)) for pair in zip(L, R) for v in pair))
-path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build', f'music-{FMT}.wav')
+path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'build', f'sfx-{FMT}.wav')
 with wave.open(path, 'wb') as w:
     w.setnchannels(2)
     w.setsampwidth(2)

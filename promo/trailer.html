@@ -56,7 +56,17 @@
 <script>
 const F = new URLSearchParams(location.search).get('f') === 'h' ? 'h' : 'v';
 const W = F === 'v' ? 1080 : 1920, H = F === 'v' ? 1920 : 1080;
-const SHOTS = 'build/shots/';
+const LNG = new URLSearchParams(location.search).get('l') === 'en' ? 'en' : 'ru';
+const SHOTS = `build/shots-${LNG}/`;
+const TXT = LNG === 'en' ? {
+  feed: ['One', ' feed', ' —', '\n', '<a>all your channels</a>'], comments: ['Comments', '\n', '<a>instantly</a>'], react: ['Reactions', '\n', 'in <a>one tap</a>'],
+  story: ['Stories', '\n', '<a>of channels and friends</a>'], channel: ['Channels', '\n', '<a>like in Telegram</a>'], viewer: ['Photos and video', '\n', '<a>full screen</a>'], desktop: ['And on <a>desktop</a>'],
+  hook1a: '100 channels', hook1b: 'in Telegram?', hook2a: 'Read them in', hook2b: 'one feed', tag: 'All your Telegram channels in one feed', chips: ['Browser', 'Android', 'Windows', 'Free'],
+} : {
+  feed: ['Одна', ' стена', ' —', '\n', '<a>все каналы</a>'], comments: ['Комментарии', '\n', '<a>сразу</a>'], react: ['Реакции', '\n', 'в <a>одно касание</a>'],
+  story: ['Истории', '\n', '<a>каналов и друзей</a>'], channel: ['Каналы —', '\n', '<a>как в Telegram</a>'], viewer: ['Фото и видео', '\n', '<a>на весь экран</a>'], desktop: ['И на <a>компьютере</a>'],
+  hook1a: '100 каналов', hook1b: 'в Telegram?', hook2a: 'Читай их', hook2b: 'одной лентой', tag: 'Все каналы Telegram — одной лентой', chips: ['Браузер', 'Android', 'Windows', 'Бесплатно'],
+};
 const stage = document.getElementById('stage');
 stage.style.width = W + 'px'; stage.style.height = H + 'px';
 
@@ -82,13 +92,9 @@ const T = V ? {
 const DURATION = V ? 31 : 35;
 
 const CAPS = [
-  { at: T.feed, text: ['Одна', ' стена', ' —', '\n', '<a>все каналы</a>'] },
-  { at: T.comments, text: ['Комментарии', '\n', '<a>сразу</a>'] },
-  { at: T.react, text: ['Реакции', '\n', 'в <a>одно касание</a>'] },
-  { at: T.story, text: ['Истории', '\n', '<a>каналов и друзей</a>'] },
-  { at: T.channel, text: ['Каналы —', '\n', '<a>как в Telegram</a>'] },
-  { at: T.viewer, text: ['Фото и видео', '\n', '<a>на весь экран</a>'] },
-  ...(T.desktop ? [{ at: T.desktop, text: ['И на <a>компьютере</a>'] }] : []),
+  { at: T.feed, text: TXT.feed }, { at: T.comments, text: TXT.comments }, { at: T.react, text: TXT.react },
+  { at: T.story, text: TXT.story }, { at: T.channel, text: TXT.channel }, { at: T.viewer, text: TXT.viewer },
+  ...(T.desktop ? [{ at: T.desktop, text: TXT.desktop }] : []),
 ];
 
 // ---------------------------------------------------------------- background
@@ -155,8 +161,8 @@ const capBox = (c) => {
 const caps = CAPS.map(capBox);
 
 // hook
-const hook = el('div', 'cap', stage, '<span class="w">100 каналов</span><br><span class="w">в Telegram?</span>');
-const hook2 = el('div', 'cap', stage, '<span class="w">Читай их</span><br><span class="w accent">одной лентой</span>');
+const hook = el('div', 'cap', stage, `<span class="w">${TXT.hook1a}</span><br><span class="w">${TXT.hook1b}</span>`);
+const hook2 = el('div', 'cap', stage, `<span class="w">${TXT.hook2a}</span><br><span class="w accent">${TXT.hook2b}</span>`);
 [hook, hook2].forEach((e) => Object.assign(e.style, V
   ? { left: '60px', right: '60px', top: '700px', fontSize: '128px', textAlign: 'center' }
   : { left: '0', right: '0', top: '330px', fontSize: '150px', textAlign: 'center' }));
@@ -176,9 +182,9 @@ const floats = AV.map((emoji, i) => {
 // CTA
 const icon = '../app/static/icons/telex.svg';
 const logo = el('div', 'logo', stage, `<img src="${icon}"><span>TeleX</span>`);
-const tagline = el('div', 'sub', stage, 'Все каналы Telegram — одной лентой');
+const tagline = el('div', 'sub', stage, TXT.tag);
 const pill = el('div', 'pill', stage, '🌐 telex-web.ru');
-const chips = el('div', 'chips', stage, ['Браузер', 'Android', 'Windows', 'Бесплатно'].map((c) => `<span class="chip">${c}</span>`).join(''));
+const chips = el('div', 'chips', stage, TXT.chips.map((c) => `<span class="chip">${c}</span>`).join(''));
 if (V) {
   Object.assign(logo.style, { left: 0, right: 0, justifyContent: 'center', top: '560px', fontSize: '190px' });
   Object.assign(tagline.style, { left: '80px', right: '80px', top: '820px', fontSize: '54px', textAlign: 'center' });
