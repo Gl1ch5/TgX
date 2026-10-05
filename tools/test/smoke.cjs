@@ -87,6 +87,12 @@ const ok = (msg) => console.log('  ✓', msg);
         await scan(`settings/${p}`);
         if (shotsDir && p === 'chat') await page.screenshot({ path: path.join(shotsDir, `chat-${code}-${scheme}.png`) });
       }
+      // the root settings list must offer the language page (a missing "+" once hid this row)
+      await page.evaluate(() => window.TelegramX.openSettingsPage('root'));
+      await page.waitForTimeout(150);
+      const rows = await page.evaluate(() => [...document.querySelectorAll('#settings-root .tx-row')].map((e) => e.getAttribute('onclick') || ''));
+      rows.some((r) => r.includes("openSettingsPage('language')")) ? ok('settings lists the language row') : fail(`${label}: no language row in settings`);
+      rows.some((r) => r.includes("openSettingsPage('chat')")) ? ok('settings lists chat settings') : fail(`${label}: no chat settings row`);
       await page.evaluate(() => window.TelegramX.setView('profile'));
       await page.waitForTimeout(200);
       await scan('profile');
