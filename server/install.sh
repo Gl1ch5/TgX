@@ -34,8 +34,51 @@ fi
 # --- user, code, data
 id -u telex >/dev/null 2>&1 || useradd --system --home "$DATA" --shell /usr/sbin/nologin telex
 mkdir -p "$APP" "$DATA"
-cp "$SRC/index.js" "$SRC/package.json" "$APP/"
+cp "$SRC/index.js" "$SRC/package.json" "$SRC/install.sh" "$SRC/update.sh" "$APP/"
 chown -R telex:telex "$DATA"
+
+# --- self-update: keep a clone of the repository, a timer pulls changes of server/ every 5 minutes
+REPO_DIR="$(cd "$SRC/.." && pwd)"
+if [ -d "$REPO_DIR/.git" ] && [ "$REPO_DIR" != /opt/telex-api-src ]; then
+  BRANCH_NOW="$(git -C "$REPO_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo main)"
+  [ "$BRANCH_NOW" = HEAD ] && BRANCH_NOW=main
+  REPO_NOW="$(git -C "$REPO_DIR" remote get-url origin 2>/dev/null || echo https://github.com/Gl1ch5/TgX)"
+  rm -rf /opt/telex-api-src && cp -a "$REPO_DIR" /opt/telex-api-src
+else
+  BRANCH_NOW=""; REPO_NOW=""
+fi
+if [ ! -f /etc/telex-api.update ] || [ -n "$BRANCH_NOW" ]; then
+  {
+    echo "REPO=${REPO_NOW:-https://github.com/Gl1ch5/TgX}"
+    echo "BRANCH=${BRANCH_NOW:-main}"
+    echo "DOMAIN=$DOMAIN"; echo "EMAIL=$EMAIL"; echo "TLS_HOST=$TLS_HOST"; echo "PUBLIC_PORT=$PUBLIC_PORT"
+  } > /etc/telex-api.update
+fi
+cat > /etc/systemd/system/telex-api-update.service <<UNIT
+[Unit]
+Description=Update the TeleX mod store API from GitHub
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/telex-api/update.sh
+UNIT
+cat > /etc/systemd/system/telex-api-update.timer <<UNIT
+[Unit]
+Description=Check GitHub for a new TeleX mod store API
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now telex-api-update.timer >/dev/null
+(git -C /opt/telex-api-src rev-parse HEAD 2>/dev/null || true) > "$APP/.deployed"
+
 
 if [ ! -f "$ENVF" ]; then
   umask 077

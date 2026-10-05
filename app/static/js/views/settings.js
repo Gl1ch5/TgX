@@ -210,6 +210,9 @@ function aboutPage() {
         row({ icon: 'code', color: 'GRAY', title: 'github.com/' + AUTHOR.github, sub: t('Исходный код'), onclick: `window.open('${REPO_URL}', '_blank', 'noopener')` }),
         { hint: t('TeleX — неофициальный клиент. Работает напрямую с серверами Telegram, сессия хранится только на вашем устройстве.') },
       )}
+      ${group(
+        switchRow({ icon: 'stats', color: 'CYAN', title: t('Анонимная статистика'), sub: t('Случайный номер установки раз в сутки, чтобы считать пользователей. Без аккаунта и данных'), checked: getPrefs().anonStats !== false, onchange: "window.TelegramX.setPref('anonStats', this.checked)" }),
+      )}
     </div>`;
 }
 

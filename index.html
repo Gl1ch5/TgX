@@ -55,6 +55,7 @@
           <a class="btn btn-ghost" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-Setup.exe"><span class="ico" style="--i:url(../app/static/icons/android/settings_devices.svg)"></span>Windows</a>
         </div>
         <p class="fine">Бесплатно · открытый код · вход хранится только на вашем устройстве</p>
+        <p class="users" id="users" hidden><span class="users-dot"></span><b id="users-week">0</b> <span id="users-week-l">активны за неделю</span> · <b id="users-total">0</b> <span>установок всего</span></p>
       </div>
       <div class="hero-phones reveal" aria-hidden="true">
         <figure class="phone back"><img src="site/shots/stories.jpg" alt="" loading="eager" /></figure>
@@ -178,6 +179,18 @@
     </div>
   </footer>
 
+  <script>
+    // Live counter of TeleX users (anonymous installs, from the mod store server). Hidden when the server does not answer.
+    (function () {
+      fetch('https://grzxk.ru:8443/api/stats', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (s) {
+        if (!s || !s.total) return;
+        var f = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f'); };
+        document.getElementById('users-week').textContent = f(Math.max(s.week, 1));
+        document.getElementById('users-total').textContent = f(s.total);
+        document.getElementById('users').hidden = false;
+      }).catch(function () {});
+    })();
+  </script>
   <script>
     // Reveal on scroll (skipped when the user prefers less motion)
     (function () {

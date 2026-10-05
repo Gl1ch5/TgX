@@ -61,3 +61,11 @@ export function storePublish(mod, authorName) {
 export const myPublished = () => { try { return JSON.parse(localStorage.getItem('telex.store.mine') || '[]'); } catch { return []; } };
 export function rememberPublished(id) { try { const l = new Set(myPublished()); l.add(id); localStorage.setItem('telex.store.mine', JSON.stringify([...l])); } catch {} }
 export function forgetPublished(id) { try { localStorage.setItem('telex.store.mine', JSON.stringify(myPublished().filter((x) => x !== id))); } catch {} }
+
+/** Anonymous usage counter: the random device id, at most once a day, only when "anonymous statistics" is on. */
+export function storePing(enabled = true) {
+  if (!enabled) return;
+  const today = new Date().toISOString().slice(0, 10);
+  try { if (localStorage.getItem('telex.store.ping') === today) return; } catch {}
+  call('POST', '/ping', {}, { timeout: 6000 }).then(() => { try { localStorage.setItem('telex.store.ping', today); } catch {} }).catch(() => {});
+}

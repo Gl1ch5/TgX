@@ -1580,6 +1580,16 @@
   "plural": false
  },
  {
+  "key": "Анонимная статистика",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Случайный номер установки раз в сутки, чтобы считать пользователей. Без аккаунта и данных",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Соединение с Telegram",
   "where": "js/views/settings.js",
   "plural": false

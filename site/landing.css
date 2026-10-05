@@ -193,3 +193,9 @@ details p { margin: 0; padding: 0 22px 20px; color: var(--text-2); }
   .hero-phones .front { animation: none; }
   .reveal { transition: none; opacity: 1; transform: none; }
 }
+
+.users { display: inline-flex; align-items: center; gap: 8px; margin: 14px 0 0; padding: 8px 14px; border-radius: 999px; background: rgba(120, 140, 255, 0.12); font-size: 14px; color: inherit; }
+.users[hidden] { display: none; }
+.users b { font-weight: 700; }
+.users-dot { width: 8px; height: 8px; border-radius: 50%; background: #4fbf6a; box-shadow: 0 0 0 0 rgba(79, 191, 106, 0.6); animation: users-pulse 2s infinite; }
+@keyframes users-pulse { 70% { box-shadow: 0 0 0 8px rgba(79, 191, 106, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 191, 106, 0); } }

@@ -551,4 +551,6 @@ export const EN = {
   "Мод обновлён в каталоге": "Mod updated in the catalog",
   "Мод опубликован": "Mod published",
   "Каталог недоступен. Попробуйте позже.": "The catalog is unavailable. Try again later.",
+  "Анонимная статистика": "Anonymous statistics",
+  "Случайный номер установки раз в сутки, чтобы считать пользователей. Без аккаунта и данных": "A random install number once a day, to count users. No account, no data",
 };

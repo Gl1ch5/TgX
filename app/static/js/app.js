@@ -32,6 +32,7 @@ import * as settings from './views/settings.js';
 import { APP_VERSION } from './version.js';
 import { tgDialog } from './core/dialog.js';
 import * as storeUi from './views/store.js';
+import { storePing } from './core/store.js';
 import { maybeOnboard, resetOnboarding } from './components/onboarding.js';
 import { startMods, reapplyModVars, listMods, disableAllMods } from './core/mods.js';
 import { ext } from './core/ext.js';
@@ -203,6 +204,7 @@ async function initApp() {
   initWallpaperEngine();
   document.addEventListener('tx:themes', () => { applyAppearance(); reapplyModVars(); settings.rerenderSettings(); });
   startMods();
+  setTimeout(() => storePing(getPrefs().anonStats !== false), 7000);
   // "Auto" theme follows the device live (sunset → dark, sunrise → light).
   try {
     window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {

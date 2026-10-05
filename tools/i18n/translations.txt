@@ -551,3 +551,5 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Мод обновлён в каталоге ‖ Mod updated in the catalog ‖ Mod actualizado en el catálogo ‖ Mod atualizado no catálogo ‖ Мод оновлено в каталозі
 Мод опубликован ‖ Mod published ‖ Mod publicado ‖ Mod publicado ‖ Мод опубліковано
 Каталог недоступен. Попробуйте позже. ‖ The catalog is unavailable. Try again later. ‖ El catálogo no está disponible. Inténtalo más tarde. ‖ O catálogo está indisponível. Tente mais tarde. ‖ Каталог недоступний. Спробуйте пізніше.
+Анонимная статистика ‖ Anonymous statistics ‖ Estadísticas anónimas ‖ Estatísticas anônimas ‖ Анонімна статистика
+Случайный номер установки раз в сутки, чтобы считать пользователей. Без аккаунта и данных ‖ A random install number once a day, to count users. No account, no data ‖ Un número aleatorio de instalación una vez al día para contar usuarios. Sin cuenta ni datos ‖ Um número aleatório de instalação uma vez por dia, para contar usuários. Sem conta nem dados ‖ Випадковий номер встановлення раз на добу, щоб рахувати користувачів. Без акаунта й даних

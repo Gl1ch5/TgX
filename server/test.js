@@ -30,6 +30,10 @@ const mod = (id, extra = '') => `// @manifest {"id":"${id}","name":"Mod ${id}","
   for (const d of ['device_cccccccccccccccc', 'device_dddddddddddddddd', 'device_eeeeeeeeeeeeeeee']) await call('POST', '/mods/warn/report', { reason: 'bad' }, { 'x-device': d });
   [s, j] = await call('GET', '/mods/warn'); ok(s === 404, 'three reports hide a mod');
   [s, j] = await call('DELETE', '/mods/alpha', null, { 'x-author-token': tok }); ok(s === 200, 'owner deletes');
+  [s, j] = await call('POST', '/ping'); ok(s === 200, 'ping');
+  await call('POST', '/ping', null, { 'x-device': dev2 }); await call('POST', '/ping');
+  [s, j] = await call('GET', '/stats'); ok(j.total === 2 && j.day === 2, 'stats count unique devices');
+  [s, j] = await call('POST', '/ping', null, { 'x-device': 'short' }); ok(s === 400, 'ping needs a valid device id');
   srv.kill(); fs.rmSync(dir, { recursive: true, force: true });
   console.log(fails ? `${fails} FAILED` : 'ALL GOOD'); process.exit(fails ? 1 : 0);
 })();

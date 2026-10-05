@@ -15,8 +15,9 @@ const FILE = path.join(DATA_DIR, 'mods.json');
 const CATEGORIES = ['theme', 'feed', 'widget', 'ai', 'tools'];
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
-let db = { mods: {} };
+let db = { mods: {}, devices: {} };
 try { db = JSON.parse(fs.readFileSync(FILE, 'utf8')); } catch {}
+db.mods = db.mods || {}; db.devices = db.devices || {};
 let saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
@@ -32,6 +33,7 @@ const sha = (s) => crypto.createHash('sha256').update(String(s)).digest('hex');
 const day = () => new Date().toISOString().slice(0, 10);
 
 // ---------------------------------------------------------------- rate limit (per IP, in memory)
+let statsCache = null;
 const hits = new Map();
 function limited(ip, key, max, windowMs) {
   const k = `${ip}|${key}`;
@@ -137,6 +139,24 @@ async function handle(req, res) {
 
   if (!url.pathname.startsWith('/api')) return send(res, 404, { error: 'not found' });
   if (req.method === 'GET' && !parts.length || parts[0] === 'health') return send(res, 200, { ok: true, mods: visible().length });
+
+  // anonymous usage counter: one random id per install, pinged at most once a day by the app
+  if (parts[0] === 'ping' && req.method === 'POST') {
+    if (!validDevice) return send(res, 400, { error: 'Missing device id' });
+    if (limited(ip, 'ping', 120, 3600e3)) return send(res, 429, { error: 'Too many requests' });
+    const now = Date.now(); const d = db.devices[device];
+    if (d) { if (now - d.last > 3600e3) { d.last = now; d.n = (d.n || 0) + 1; save(); } }
+    else if (Object.keys(db.devices).length < 2000000) { db.devices[device] = { first: now, last: now, n: 1 }; save(); }
+    return send(res, 200, { ok: true });
+  }
+  if (parts[0] === 'stats' && req.method === 'GET') {
+    if (!statsCache || Date.now() - statsCache.at > 60e3) {
+      const now = Date.now(); let day = 0, week = 0, month = 0; const all = Object.values(db.devices);
+      for (const d of all) { const a = now - d.last; if (a < 86400e3) day++; if (a < 7 * 86400e3) week++; if (a < 30 * 86400e3) month++; }
+      statsCache = { at: now, data: { total: all.length, day, week, month, mods: visible().length } };
+    }
+    return send(res, 200, statsCache.data);
+  }
 
   if (parts[0] === 'categories') {
     const c = {}; visible().forEach((m) => { c[m.category] = (c[m.category] || 0) + 1; });

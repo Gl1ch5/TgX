@@ -35,6 +35,7 @@ const DEFAULTS = {
   bubbleRadius: 17,       // Telegram default message corner radius
   glass: true,            // backdrop blur under bars (off = solid, faster)
   workerMode: true,       // GramJS in a Web Worker (applies after reload)
+  anonStats: true,        // anonymous usage counter (a random id, once a day)
   aiReview: true,         // check mods with the user's Groq key before installing
   theme: 'auto',          // 'auto' follows the device, or 'light' / 'dark'
   colorTheme: 'classic',  // chat colour theme (outgoing bubbles, wallpaper, accent)
