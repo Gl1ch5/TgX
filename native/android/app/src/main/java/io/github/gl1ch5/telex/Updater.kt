@@ -429,7 +429,7 @@ class Updater(private val activity: Activity) {
     private companion object {
         const val TAG = "TeleXUpdater"
         const val KEY_LAST_CHECK = "last_check"
-        const val RESUME_EVERY_MS = 10 * 60 * 1000L
+        const val RESUME_EVERY_MS = 60 * 1000L
         const val SNOOZE_MS = 6 * 60 * 60 * 1000L
         const val KEY_SNOOZE_CODE = "snooze_code"
         const val KEY_SNOOZE_AT = "snooze_at"

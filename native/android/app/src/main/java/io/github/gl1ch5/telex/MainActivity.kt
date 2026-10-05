@@ -478,14 +478,14 @@ class MainActivity : ComponentActivity() {
     private val updateTick = object : Runnable {
         override fun run() {
             updater.check()
-            webView.postDelayed(this, 20 * 60 * 1000L)
+            webView.postDelayed(this, 3 * 60 * 1000L)
         }
     }
 
     override fun onResume() {
         super.onResume()
         webView.removeCallbacks(updateTick)
-        webView.postDelayed(updateTick, 20 * 60 * 1000L)
+        webView.postDelayed(updateTick, 3 * 60 * 1000L)
         webView.onResume()
         webView.resumeTimers()
         // Let the page re-check its Telegram connection after being in background.
