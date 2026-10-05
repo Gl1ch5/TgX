@@ -44,6 +44,6 @@ jobs:
         run: |
           gh release delete promo -y --cleanup-tag || true
           gh release create promo --title "TeleX promo videos" --prerelease \
-            --notes "Trailers (no music — add yours on TikTok/YouTube). vertical = 1080×1920 (TikTok/Shorts/Reels), youtube = 1920×1080; en / ru." \
+            --notes "Trailers with an original background beat and sound effects. vertical = 1080×1920 (TikTok/Shorts/Reels), youtube = 1920×1080; en / ru." \
             promo/build/TeleX-trailer-vertical-en.mp4 promo/build/TeleX-trailer-vertical-ru.mp4 \
             promo/build/TeleX-trailer-youtube-en.mp4 promo/build/TeleX-trailer-youtube-ru.mp4
