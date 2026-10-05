@@ -1945,12 +1945,42 @@
   "plural": false
  },
  {
+  "key": "Все",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Темы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Лента",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Виджеты",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Настройки мода",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
   "key": "Удалить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Поиск модов",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2081,6 +2111,11 @@
  },
  {
   "key": "Наборы модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ничего не найдено",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2486,11 +2521,6 @@
  },
  {
   "key": "все ваши каналы",
-  "where": "index.html",
-  "plural": false
- },
- {
-  "key": "Все",
   "where": "index.html",
   "plural": false
  },

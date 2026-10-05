@@ -76,13 +76,20 @@
 .tx-menu button .tx-menu-check { margin-left: auto; font-size: 18px; color: var(--tx-accent); opacity: 1; }
 
 /* ---- Mods page: tabs, uniform tiles, sets ---- */
-.tx-modtabs { position: sticky; top: calc(56px + var(--tx-safe-top)); z-index: 20; display: flex; gap: 6px; padding: 6px 4px 10px; margin: 0 -2px; overflow-x: auto; scrollbar-width: none; background: linear-gradient(var(--tx-bg) 78%, transparent); }
-.tx-modtabs::-webkit-scrollbar { display: none; }
-.tx-modtabs button { flex: 0 0 auto; height: 36px; padding: 0 15px; border-radius: 999px; background: var(--tx-surface); font-size: 14.5px; font-weight: 500; color: var(--tx-text-2); display: inline-flex; align-items: center; gap: 7px; transition: background .18s, color .18s, transform .15s; }
-.tx-modtabs button:active { transform: scale(0.96); }
-.tx-modtabs button.is-active { background: var(--tx-accent-fill); color: var(--sk-button-text, #fff); }
-.tx-modtabs button i { font-style: normal; font-size: 12px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.22); }
-.tx-modtabs button:not(.is-active) i { background: var(--tx-accent-soft); color: var(--tx-accent); }
+/* sticky header: title bar + tabs stay together (nothing scrolls under the status bar) */
+.tx-modhead { position: sticky; top: 0; z-index: 30; background: var(--tx-bg); padding-bottom: 8px; }
+.tx-modhead .tx-modtabs { margin: 0 12px; }
+.tx-modtabs .tx-tab { flex: 0 0 auto; white-space: nowrap; }
+.tx-modtabs .tx-badge { margin-left: 4px; }
+.tx-modsearch { margin: 4px 0 10px; background: var(--tx-surface); }
+.tx-modsearch input { color: var(--tx-text) !important; }
+.tx-chipbar { display: flex; gap: 6px; overflow-x: auto; padding: 0 2px 12px; scrollbar-width: none; }
+.tx-chipbar::-webkit-scrollbar { display: none; }
+.tx-chipbar button { flex: none; height: 32px; padding: 0 14px; border-radius: 999px; background: var(--tx-surface); color: var(--tx-text-2); font-size: 14px; font-weight: 500; transition: background .18s, color .18s; }
+.tx-chipbar button.is-active { background: var(--tx-accent-soft); color: var(--tx-accent); box-shadow: inset 0 0 0 1.5px var(--tx-accent); }
+.tx-instlist { padding: 4px 0; }
+.tx-instlist .tx-setrow { cursor: pointer; }
+.tx-instlist .tx-setrow:active { background: var(--tx-accent-soft); }
 .tx-modempty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 46px 28px; text-align: center; color: var(--tx-text-2); }
 .tx-modempty .emoji { width: 56px; height: 56px; }
 .tx-modempty b { font-size: 18px; color: var(--tx-text); }

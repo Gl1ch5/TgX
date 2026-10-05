@@ -510,4 +510,10 @@ export const ES = {
   "Весь набор уже установлен": "Todo el set ya está instalado",
   "Каталог": "Catálogo",
   "Создать": "Crear",
+  "Темы": "Temas",
+  "Лента": "Muro",
+  "Виджеты": "Widgets",
+  "ИИ": "IA",
+  "Поиск модов": "Buscar mods",
+  "Ничего не найдено": "No se encontró nada",
 };

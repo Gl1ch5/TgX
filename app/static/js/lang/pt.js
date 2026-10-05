@@ -510,4 +510,10 @@ export const PT = {
   "Весь набор уже установлен": "Todo o conjunto já está instalado",
   "Каталог": "Catálogo",
   "Создать": "Criar",
+  "Темы": "Temas",
+  "Лента": "Mural",
+  "Виджеты": "Widgets",
+  "ИИ": "IA",
+  "Поиск модов": "Buscar mods",
+  "Ничего не найдено": "Nada encontrado",
 };

@@ -510,3 +510,9 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Весь набор уже установлен ‖ The whole set is already installed ‖ Todo el set ya está instalado ‖ Todo o conjunto já está instalado ‖ Увесь набір уже встановлено
 Каталог ‖ Catalog ‖ Catálogo ‖ Catálogo ‖ Каталог
 Создать ‖ Create ‖ Crear ‖ Criar ‖ Створити
+Темы ‖ Themes ‖ Temas ‖ Temas ‖ Теми
+Лента ‖ Feed ‖ Muro ‖ Mural ‖ Стрічка
+Виджеты ‖ Widgets ‖ Widgets ‖ Widgets ‖ Віджети
+ИИ ‖ AI ‖ IA ‖ IA ‖ ШІ
+Поиск модов ‖ Search mods ‖ Buscar mods ‖ Buscar mods ‖ Пошук модів
+Ничего не найдено ‖ Nothing found ‖ No se encontró nada ‖ Nada encontrado ‖ Нічого не знайдено
