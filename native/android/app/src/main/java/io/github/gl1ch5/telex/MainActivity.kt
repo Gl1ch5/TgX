@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
             if (migration.needed()) migration.run { webView.loadUrl(AppConfig.START_URL) }
             else webView.loadUrl(AppConfig.START_URL)
         }
-        updater.check()
+        updater.check(onStart = true)
     }
 
     // ---------------------------------------------------------------- insets
