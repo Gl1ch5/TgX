@@ -1,0 +1,28 @@
+/* Avatars with Telegram peer colors */
+.tx-avatar {
+  width: 54px; height: 54px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff !important; font-weight: 600; font-size: 20px; user-select: none;
+  background: linear-gradient(180deg, var(--a1, #72d5fd), var(--a2, #2a9ef1));
+}
+.tx-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tx-avatar.md { width: 42px; height: 42px; font-size: 16px; }
+.tx-avatar.sm { width: 36px; height: 36px; font-size: 14px; }
+.tx-avatar.xs { width: 28px; height: 28px; font-size: 12px; }
+.tx-avatar.xl { width: 110px; height: 110px; font-size: 42px; }
+
+.tx-peer-0 { --a1: #ff885e; --a2: #ff516a; --peer: #ff7a72; }
+.tx-peer-1 { --a1: #ffcd6a; --a2: #ffa85c; --peer: #faa357; }
+.tx-peer-2 { --a1: #e0a2f3; --a2: #d669ed; --peer: #c48bff; }
+.tx-peer-3 { --a1: #a0de7e; --a2: #54cb68; --peer: #6fd27a; }
+.tx-peer-4 { --a1: #53edd6; --a2: #28c9b7; --peer: #45dbc7; }
+.tx-peer-5 { --a1: #72d5fd; --a2: #2a9ef1; --peer: #5bb9ff; }
+.tx-peer-6 { --a1: #ffa8a8; --a2: #ff719a; --peer: #ff7ab5; }
+.tx-peer-name { color: var(--peer); }
+
+.tx-avatars { display: inline-flex; align-items: center; }
+.tx-avatars .tx-avatar { box-shadow: 0 0 0 2px var(--tx-bubble); }
+.tx-avatars .tx-avatar + .tx-avatar { margin-left: -9px; }
+.tx-avatar { position: relative; }
+.tx-avatar > img { position: absolute; inset: 0; }
+.tx-avatar-ini { line-height: 1; }

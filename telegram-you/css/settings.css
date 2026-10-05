@@ -1,0 +1,138 @@
+/* Settings & profile — Telegram for Android grouped lists */
+.tx-page { padding: 0 2px 16px; }
+.tx-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 22px; }
+.tx-hero .tx-avatar { margin-bottom: 14px; }
+.tx-hero-name { font-size: 27px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.tx-hero-sub { font-size: 16.5px; color: var(--tx-text-2); margin-top: 4px; }
+.tx-hero-sub.is-online { color: var(--tx-accent); }
+
+.tx-group { background: var(--tx-surface); border-radius: 26px; padding: 6px 0; margin-bottom: 14px; overflow: hidden; }
+.tx-group-title { font-size: 16px; font-weight: 600; color: var(--tx-accent); padding: 12px 22px 4px; }
+.tx-group-hint { font-size: 14px; color: var(--tx-text-2); padding: 0 22px 14px; margin-top: -6px; line-height: 1.4; }
+.tx-row {
+  display: flex; align-items: center; gap: 20px; width: 100%; min-height: 56px; padding: 9px 22px;
+  box-sizing: border-box; text-align: left; transition: background 0.15s ease; position: relative;
+}
+button.tx-row:active, label.tx-row:active { background: rgba(255, 255, 255, 0.05); }
+label.tx-row { cursor: pointer; }
+.tx-row-body { flex: 1; min-width: 0; }
+.tx-row-title { display: block; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-row-sub { display: block; font-size: 14.5px; color: var(--tx-text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-row-sub.wrap { white-space: normal; }
+.tx-row-value { font-size: 16px; color: var(--tx-accent); flex-shrink: 0; }
+.tx-row.is-danger .tx-row-title { color: var(--tx-red); }
+.tx-row-icon {
+  width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0; box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.18);
+  display: inline-flex; align-items: center; justify-content: center; background: var(--c, #3e88f7);
+}
+.tx-row-icon .icon { font-size: 21px; color: #fff; }
+.tx-row .tx-avatar { width: 42px; height: 42px; font-size: 16px; margin: -2px 0; }
+
+/* Switch */
+.tx-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.tx-switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.tx-switch span { position: absolute; inset: 0; border-radius: 999px; background: #3a3a3d; transition: background 0.2s ease; }
+.tx-switch span::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; transition: transform 0.2s ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.tx-switch input:checked + span { background: var(--tx-accent-fill); }
+.tx-switch input:checked + span::after { transform: translateX(18px); }
+
+/* Slider */
+.tx-slider { display: flex; align-items: center; gap: 14px; padding: 6px 22px 14px; }
+.tx-slider span { font-size: 14px; color: var(--tx-text-2); min-width: 22px; text-align: center; }
+.tx-slider input[type=range] { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; outline: none;
+  background: linear-gradient(to right, var(--tx-accent-fill) var(--p, 50%), rgba(255, 255, 255, 0.18) var(--p, 50%)); }
+.tx-slider input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); cursor: pointer; }
+.tx-slider input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #fff; cursor: pointer; }
+
+/* Segmented choice */
+.tx-segments { display: flex; gap: 6px; padding: 4px 22px 14px; flex-wrap: wrap; }
+.tx-segments button { height: 36px; padding: 0 16px; border-radius: 999px; background: var(--tx-surface-2); font-size: 15px; font-weight: 500; }
+.tx-segments button.is-active { background: var(--tx-accent-soft); color: var(--tx-accent); box-shadow: inset 0 0 0 1.5px var(--tx-accent); }
+
+/* Accent palette */
+.tx-colors { display: flex; gap: 14px; padding: 6px 22px 16px; flex-wrap: wrap; }
+.tx-colors button { width: 38px; height: 38px; border-radius: 50%; background: var(--c); position: relative; }
+.tx-colors button.is-active::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; box-shadow: 0 0 0 2.5px var(--c); }
+
+/* Live preview bubble (text size / corners) */
+.tx-preview { padding: 14px 16px; border-radius: 22px; margin: 4px 0 14px; overflow: hidden; position: relative; background: #0d0d14; }
+.tx-preview .tx-msg { position: relative; z-index: 1; }
+
+/* About / developer */
+.tx-about-logo { width: 96px; height: 96px; margin-bottom: 14px; border-radius: 50%; box-shadow: 0 8px 30px rgba(90, 95, 240, 0.35); }
+.tx-settings-foot { text-align: center; font-size: 13px; color: var(--tx-hint); padding: 4px 0 18px; }
+.tx-settings-foot a { color: var(--tx-text-2); text-decoration: none; }
+.tx-dev-overlay {
+  position: fixed; z-index: 400; top: calc(var(--tx-safe-top) + 4px); left: 50%; transform: translateX(-50%);
+  padding: 3px 10px; border-radius: 999px; pointer-events: none;
+  font: 600 11px/1.4 ui-monospace, Menlo, Consolas, monospace; color: #9df29d;
+  background: rgba(0, 0, 0, 0.72); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.15);
+}
+.tx-dev-overlay.is-bad { color: #ff8a80; }
+
+/* Telegram 12 settings: filled glyphs fill the gradient square */
+.tx-row-icon .icon[class*="icon-st-"] { font-size: 30px; }
+.tx-settings-bar { justify-content: flex-end; }
+.tx-settings-bar h1 { display: none; }
+.tx-settings-avatar { margin-bottom: 14px; }
+.tx-settings-avatar .tx-avatar { margin: 0 !important; }
+.tx-cam-badge {
+  position: absolute; right: -2px; bottom: 2px; width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: var(--tx-accent-fill); box-shadow: 0 0 0 3px var(--tx-bg);
+}
+.tx-cam-badge .icon { font-size: 20px; }
+body.tx-no-glass { --tx-glass: rgba(34, 34, 36, 0.97); }
+
+/* ---- Chat settings (Telegram for Android: "Настройки чатов") ---- */
+.tx-group-flush { padding-bottom: 0; }
+.tx-slider.is-big { padding: 8px 22px 18px; }
+.tx-slider .tx-slider-val { font-size: 21px; font-weight: 500; color: var(--tx-accent); min-width: 34px; text-align: right; }
+.tx-glyph { width: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--tx-accent); }
+.tx-glyph .icon { font-size: 26px; }
+.tx-row.is-accent .tx-row-title { color: var(--tx-accent); }
+.tx-chat-settings .tx-row + .tx-row::before,
+.tx-radio-row + .tx-radio-row::before { content: ''; position: absolute; left: 76px; right: 0; top: 0; height: 1px; background: var(--tx-separator); }
+
+.tx-cp { position: relative; padding: 14px 14px 12px; overflow: hidden; display: flex; flex-direction: column; gap: 6px; margin: 2px 0 6px; }
+.tx-cp-pattern { position: absolute; inset: 0; background-size: 300px auto; opacity: 0.28; pointer-events: none; }
+:root[data-theme='light'] .tx-cp-pattern, :root[data-theme='light'] .tx-theme-tile .tx-cp-pattern { filter: invert(1); opacity: 0.1; }
+.tx-cp-msg { position: relative; display: flex; }
+.tx-cp-msg.is-out { justify-content: flex-end; }
+.tx-cp-bubble { max-width: 82%; padding: 6px 10px 6px 8px; border-radius: var(--tx-bubble-radius); border-bottom-left-radius: var(--tx-bubble-radius-small); background: var(--tx-bubble); font-size: var(--tx-text-size); color: var(--tx-text); }
+.tx-cp-bubble.is-out { color: #fff; padding: 7px 12px 6px 14px; border-radius: var(--tx-bubble-radius); border-bottom-right-radius: var(--tx-bubble-radius-small); }
+.tx-cp-quote { border-left: 3px solid var(--tx-green); background: color-mix(in srgb, var(--tx-green) 14%, transparent); border-radius: 6px; padding: 3px 8px 4px 9px; margin-bottom: 4px; display: flex; flex-direction: column; font-size: 0.94em; line-height: 1.25; }
+.tx-cp-quote b { font-weight: 500; }
+.tx-cp-text { line-height: 1.3; }
+.tx-cp-time { font-style: normal; font-size: 12px; opacity: 0.62; margin-left: 12px; float: right; margin-top: 9px; display: inline-flex; align-items: center; gap: 3px; }
+
+.tx-theme-strip { display: flex; gap: 12px; overflow-x: auto; padding: 8px 18px 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tx-theme-strip::-webkit-scrollbar { display: none; }
+.tx-theme-tile { position: relative; flex: 0 0 88px; height: 124px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--tx-separator) inset; }
+.tx-theme-tile.is-active { box-shadow: 0 0 0 3px var(--tx-accent-fill); }
+.tx-theme-tile .tx-cp-pattern { background-size: 190px auto; }
+.tx-theme-out { position: absolute; left: 18px; top: 22px; width: 62px; height: 26px; border-radius: 13px; }
+.tx-theme-in { position: absolute; left: 7px; top: 56px; width: 50px; height: 24px; border-radius: 12px; background: var(--tx-bubble); opacity: 0.9; }
+.tx-theme-emoji { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 34px; line-height: 1; }
+.tx-theme-emoji .emoji { width: 36px; height: 36px; }
+
+.tx-name-pill { display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 17px; font-weight: 500; color: var(--n); background: color-mix(in srgb, var(--n) 16%, transparent); }
+.tx-name-pill.is-big { font-size: 24px; padding: 10px 24px; }
+.tx-name-preview { display: flex; justify-content: center; padding: 18px 0 8px; }
+.tx-swatches { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 22px 22px; justify-content: center; }
+.tx-swatch { width: 46px; height: 46px; border-radius: 50%; background: var(--c); position: relative; color: #fff; font-weight: 700; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; }
+.tx-swatch.is-active::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; box-shadow: 0 0 0 2.5px var(--c); }
+
+.tx-radio { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--tx-hint); flex: none; position: relative; margin: 0 6px 0 2px; }
+.tx-radio.is-checked { border-color: var(--tx-accent); }
+.tx-radio.is-checked::after { content: ''; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--tx-accent); }
+.tx-radio-row .tx-row-title { font-size: 20px; }
+.tx-lang-search { padding: 0 2px 10px; }
+.tx-lang-search input { width: 100%; height: 46px; border-radius: 14px; border: 1px solid var(--tx-separator); background: var(--tx-surface); color: var(--tx-text); padding: 0 16px; font: inherit; font-size: 17px; outline: none; }
+.tx-slider span:empty { display: none; }
+.tx-chat-settings .tx-slider { padding: 8px 22px 16px; }
+.tx-chat-settings .tx-row { gap: 16px; }
+.tx-name-pill { font-size: 15.5px; padding: 5px 15px; }

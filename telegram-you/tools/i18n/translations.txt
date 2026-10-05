@@ -1,0 +1,398 @@
+# ru ‖ en ‖ es ‖ pt ‖ uk      (␣ = space at the edge; "#" rows are plurals: forms separated by " / ")
+Выйти ‖ Log out ‖ Cerrar sesión ‖ Sair ‖ Вийти
+Голосовое сообщение ‖ Voice message ‖ Mensaje de voz ‖ Mensagem de voz ‖ Голосове повідомлення
+Назад ‖ Back ‖ Atrás ‖ Voltar ‖ Назад
+Далее ‖ Next ‖ Siguiente ‖ Avançar ‖ Далі
+Номер телефона ‖ Phone number ‖ Número de teléfono ‖ Número de telefone ‖ Номер телефону
+Проверьте код страны и введите свой номер телефона. ‖ Please confirm your country code and enter your phone number. ‖ Confirma el código de país e introduce tu número de teléfono. ‖ Confirme o código do país e insira seu número de telefone. ‖ Перевірте код країни та введіть свій номер телефону.
+Страна ‖ Country ‖ País ‖ País ‖ Країна
+Код страны ‖ Country code ‖ Código de país ‖ Código do país ‖ Код країни
+Войти по QR-коду ‖ Log in by QR code ‖ Iniciar sesión con código QR ‖ Entrar com código QR ‖ Увійти за QR-кодом
+Введите номер телефона полностью ‖ Enter the full phone number ‖ Introduce el número de teléfono completo ‖ Digite o número de telefone completo ‖ Введіть номер телефону повністю
+Не удалось отправить код ‖ Could not send the code ‖ No se pudo enviar el código ‖ Não foi possível enviar o código ‖ Не вдалося надіслати код
+Мы отправили код через <b>Telegram</b> на другое устройство, где авторизован {a}. ‖ We've sent the code to the <b>Telegram</b> app on your other device where {a} is signed in. ‖ Hemos enviado el código a la app de <b>Telegram</b> en tu otro dispositivo, donde {a} tiene la sesión iniciada. ‖ Enviamos o código para o app do <b>Telegram</b> no outro dispositivo em que {a} está conectado. ‖ Ми надіслали код у застосунок <b>Telegram</b> на іншому пристрої, де виконано вхід з {a}.
+Мы отправили SMS с кодом на номер {a}. ‖ We've sent an SMS with the code to {a}. ‖ Hemos enviado un SMS con el código al {a}. ‖ Enviamos um SMS com o código para {a}. ‖ Ми надіслали SMS з кодом на номер {a}.
+Проверьте сообщения в Telegram ‖ Check your Telegram messages ‖ Revisa tus mensajes de Telegram ‖ Verifique suas mensagens do Telegram ‖ Перевірте повідомлення в Telegram
+Введите код ‖ Enter code ‖ Introduce el código ‖ Digite o código ‖ Введіть код
+Код ‖ Code ‖ Código ‖ Código ‖ Код
+Не получили код? ‖ Didn't get the code? ‖ ¿No recibiste el código? ‖ Não recebeu o código? ‖ Не отримали код?
+Добро пожаловать! ‖ Welcome! ‖ ¡Bienvenido! ‖ Bem-vindo! ‖ Ласкаво просимо!
+Неверный код ‖ Invalid code ‖ Código no válido ‖ Código inválido ‖ Невірний код
+Повторно запросить код можно через {a} с ‖ You can request the code again in {a} s ‖ Podrás pedir el código de nuevo en {a} s ‖ Você poderá pedir o código novamente em {a} s ‖ Повторно запросити код можна через {a} с
+Отправляем… ‖ Sending… ‖ Enviando… ‖ Enviando… ‖ Надсилаємо…
+Код отправлен ещё раз ‖ Code sent again ‖ Código enviado de nuevo ‖ Código enviado novamente ‖ Код надіслано ще раз
+Код отправлен по SMS ‖ Code sent by SMS ‖ Código enviado por SMS ‖ Código enviado por SMS ‖ Код надіслано в SMS
+Ваш пароль ‖ Your password ‖ Tu contraseña ‖ Sua senha ‖ Ваш пароль
+Включена двухэтапная аутентификация, ваш аккаунт защищён дополнительным паролем. ‖ You have enabled Two-Step Verification, so your account is protected with an additional password. ‖ Tienes activada la verificación en dos pasos, así que tu cuenta está protegida con una contraseña adicional. ‖ Você ativou a verificação em duas etapas, então sua conta está protegida com uma senha adicional. ‖ Увімкнено двоетапну автентифікацію, ваш акаунт захищено додатковим паролем.
+Пароль ‖ Password ‖ Contraseña ‖ Senha ‖ Пароль
+Показать пароль ‖ Show password ‖ Mostrar contraseña ‖ Mostrar senha ‖ Показати пароль
+Введите пароль ‖ Enter the password ‖ Introduce la contraseña ‖ Digite a senha ‖ Введіть пароль
+Неверный пароль ‖ Invalid password ‖ Contraseña incorrecta ‖ Senha incorreta ‖ Невірний пароль
+Вход по QR-коду ‖ Log in by QR code ‖ Iniciar sesión con código QR ‖ Entrar com código QR ‖ Вхід за QR-кодом
+Откройте Telegram на телефоне: <b>Настройки → Устройства → Подключить устройство</b> и наведите камеру на код. ‖ Open Telegram on your phone: <b>Settings → Devices → Link Desktop Device</b> and point your camera at the code. ‖ Abre Telegram en tu teléfono: <b>Ajustes → Dispositivos → Vincular dispositivo</b> y apunta la cámara al código. ‖ Abra o Telegram no celular: <b>Configurações → Dispositivos → Conectar dispositivo</b> e aponte a câmera para o código. ‖ Відкрийте Telegram на телефоні: <b>Налаштування → Пристрої → Під’єднати пристрій</b> і наведіть камеру на код.
+Войти по номеру телефона ‖ Log in by phone number ‖ Iniciar sesión con el número de teléfono ‖ Entrar com número de telefone ‖ Увійти за номером телефону
+Ошибка подключения ‖ Connection error ‖ Error de conexión ‖ Erro de conexão ‖ Помилка з’єднання
+вчера в {a} ‖ yesterday at {a} ‖ ayer a las {a} ‖ ontem às {a} ‖ вчора о {a}
+{a} в {b} ‖ {a} at {b} ‖ {a} a las {b} ‖ {a} às {b} ‖ {a} о {b}
+Поделиться ‖ Share ‖ Compartir ‖ Compartilhar ‖ Поділитися
+Канал ‖ Channel ‖ Canal ‖ Canal ‖ Канал
+Ответить ‖ Reply ‖ Responder ‖ Responder ‖ Відповісти
+Копировать ‖ Copy ‖ Copiar ‖ Copiar ‖ Копіювати
+Сохранить в галерею ‖ Save to gallery ‖ Guardar en la galería ‖ Salvar na galeria ‖ Зберегти в галерею
+Моя история ‖ My story ‖ Mi historia ‖ Meu story ‖ Моя історія
+только что ‖ just now ‖ justo ahora ‖ agora mesmo ‖ щойно
+Звук ‖ Sound ‖ Sonido ‖ Som ‖ Звук
+Закрыть ‖ Close ‖ Cerrar ‖ Fechar ‖ Закрити
+Обои установлены: {a} ✨ ‖ Wallpaper set: {a} ✨ ‖ Fondo aplicado: {a} ✨ ‖ Plano de fundo aplicado: {a} ✨ ‖ Шпалери встановлено: {a} ✨
+Неверный код подтверждения ‖ Invalid verification code ‖ Código de verificación no válido ‖ Código de verificação inválido ‖ Невірний код підтвердження
+Срок действия кода истёк. Запросите новый. ‖ The code has expired. Please request a new one. ‖ El código ha caducado. Solicita uno nuevo. ‖ O código expirou. Solicite um novo. ‖ Термін дії коду минув. Запросіть новий.
+Неверный номер телефона ‖ Invalid phone number ‖ Número de teléfono no válido ‖ Número de telefone inválido ‖ Невірний номер телефону
+Неверный облачный пароль ‖ Invalid cloud password ‖ Contraseña en la nube incorrecta ‖ Senha na nuvem incorreta ‖ Невірний хмарний пароль
+Требуется облачный пароль (2FA) ‖ Cloud password (2FA) required ‖ Se requiere la contraseña en la nube (2FA) ‖ Senha na nuvem (2FA) necessária ‖ Потрібен хмарний пароль (2FA)
+Слишком много попыток. Попробуйте позже. ‖ Too many attempts. Please try again later. ‖ Demasiados intentos. Inténtalo más tarde. ‖ Muitas tentativas. Tente novamente mais tarde. ‖ Забагато спроб. Спробуйте пізніше.
+Нажмите, чтобы показать ‖ Tap to reveal ‖ Toca para mostrar ‖ Toque para mostrar ‖ Натисніть, щоб показати
+Это не похоже на сессию TeleX ‖ This doesn't look like a TeleX session ‖ Esto no parece una sesión de TeleX ‖ Isto não parece uma sessão do TeleX ‖ Це не схоже на сесію TeleX
+Строка сессии повреждена ‖ The session string is corrupted ‖ La cadena de sesión está dañada ‖ A string de sessão está corrompida ‖ Рядок сесії пошкоджено
+Пользователь ‖ User ‖ Usuario ‖ Usuário ‖ Користувач
+Канал не найден среди ваших подписок ‖ Channel not found among your subscriptions ‖ Canal no encontrado entre tus suscripciones ‖ Canal não encontrado entre suas inscrições ‖ Канал не знайдено серед ваших підписок
+Сначала запросите код по номеру телефона ‖ Request a code for the phone number first ‖ Primero solicita el código para el número de teléfono ‖ Primeiro solicite o código para o número de telefone ‖ Спершу запросіть код за номером телефону
+Этот номер не зарегистрирован в Telegram ‖ This number is not registered in Telegram ‖ Este número no está registrado en Telegram ‖ Este número não está registrado no Telegram ‖ Цей номер не зареєстровано в Telegram
+Неожиданный ответ Telegram: {a} ‖ Unexpected Telegram response: {a} ‖ Respuesta inesperada de Telegram: {a} ‖ Resposta inesperada do Telegram: {a} ‖ Неочікувана відповідь Telegram: {a}
+Без названия ‖ Untitled ‖ Sin título ‖ Sem título ‖ Без назви
+Фото ‖ Photo ‖ Foto ‖ Foto ‖ Фото
+Стикер ‖ Sticker ‖ Sticker ‖ Figurinha ‖ Стікер
+Видео ‖ Video ‖ Video ‖ Vídeo ‖ Відео
+Аудио ‖ Audio ‖ Audio ‖ Áudio ‖ Аудіо
+Файл ‖ File ‖ Archivo ‖ Arquivo ‖ Файл
+Опрос ‖ Poll ‖ Encuesta ‖ Enquete ‖ Опитування
+Комментарии к этому посту отключены ‖ Comments are disabled for this post ‖ Los comentarios están desactivados en esta publicación ‖ Os comentários estão desativados nesta publicação ‖ Коментарі до цього допису вимкнено
+Текст комментария пуст ‖ The comment is empty ‖ El comentario está vacío ‖ O comentário está vazio ‖ Текст коментаря порожній
+Вы ‖ You ‖ Tú ‖ Você ‖ Ви
+Фотография ‖ Photo ‖ Fotografía ‖ Foto ‖ Фотографія
+Медиа ‖ Media ‖ Multimedia ‖ Mídia ‖ Медіа
+{a} мин назад ‖ {a} min ago ‖ hace {a} min ‖ há {a} min ‖ {a} хв тому
+␣МБ ‖ ␣MB ‖ ␣MB ‖ ␣MB ‖ ␣МБ
+␣КБ ‖ ␣KB ‖ ␣KB ‖ ␣KB ‖ ␣КБ
+␣Б ‖ ␣B ‖ ␣B ‖ ␣B ‖ ␣Б
+вс ‖ Sun ‖ dom ‖ dom ‖ нд
+пн ‖ Mon ‖ lun ‖ seg ‖ пн
+вт ‖ Tue ‖ mar ‖ ter ‖ вт
+ср ‖ Wed ‖ mié ‖ qua ‖ ср
+чт ‖ Thu ‖ jue ‖ qui ‖ чт
+пт ‖ Fri ‖ vie ‖ sex ‖ пт
+сб ‖ Sat ‖ sáb ‖ sáb ‖ сб
+#{n} подписчик ‖ {n} subscriber / {n} subscribers ‖ {n} suscriptor / {n} suscriptores ‖ {n} inscrito / {n} inscritos ‖ {n} підписник / {n} підписники / {n} підписників
+канал ‖ channel ‖ canal ‖ canal ‖ канал
+Без звука ‖ Muted ‖ Silenciado ‖ Silenciado ‖ Без звуку
+Ссылка ‖ Link ‖ Enlace ‖ Link ‖ Посилання
+Покинуть ‖ Leave ‖ Salir ‖ Sair ‖ Покинути
+Описание ‖ Description ‖ Descripción ‖ Descrição ‖ Опис
+Уведомления выключены ‖ Notifications are off ‖ Notificaciones desactivadas ‖ Notificações desativadas ‖ Сповіщення вимкнено
+Уведомления включены ‖ Notifications are on ‖ Notificaciones activadas ‖ Notificações ativadas ‖ Сповіщення увімкнено
+Покинуть канал ‖ Leave channel ‖ Salir del canal ‖ Sair do canal ‖ Покинути канал
+Профиль ‖ Profile ‖ Perfil ‖ Perfil ‖ Профіль
+О себе ‖ Bio ‖ Biografía ‖ Bio ‖ Про себе
+Имя пользователя ‖ Username ‖ Nombre de usuario ‖ Nome de usuário ‖ Ім’я користувача
+в сети ‖ online ‖ en línea ‖ online ‖ в мережі
+Изменить ‖ Edit ‖ Editar ‖ Editar ‖ Змінити
+Настройки ‖ Settings ‖ Ajustes ‖ Configurações ‖ Налаштування
+Скопировано ‖ Copied ‖ Copiado ‖ Copiado ‖ Скопійовано
+Язык ‖ Language ‖ Idioma ‖ Idioma ‖ Мова
+группа ‖ group ‖ grupo ‖ grupo ‖ група
+Изменить обои ‖ Change Wallpaper ‖ Cambiar fondo ‖ Mudar plano de fundo ‖ Змінити шпалери
+Тема ‖ Theme ‖ Tema ‖ Tema ‖ Тема
+Авто ‖ Auto ‖ Auto ‖ Auto ‖ Авто
+Поиск ‖ Search ‖ Buscar ‖ Buscar ‖ Пошук
+Закреплённое сообщение ‖ Pinned message ‖ Mensaje fijado ‖ Mensagem fixada ‖ Закріплене повідомлення
+Включить звук ‖ Unmute ‖ Activar sonido ‖ Ativar som ‖ Увімкнути звук
+Все ‖ All ‖ Todo ‖ Tudo ‖ Усі
+Избранное ‖ Favorites ‖ Favoritos ‖ Favoritos ‖ Вибране
+Готово ‖ Done ‖ Listo ‖ Pronto ‖ Готово
+Меню ‖ Menu ‖ Menú ‖ Menu ‖ Меню
+Очистить ‖ Clear ‖ Borrar ‖ Limpar ‖ Очистити
+Эмодзи ‖ Emoji ‖ Emojis ‖ Emojis ‖ Емодзі
+Отправить ‖ Send ‖ Enviar ‖ Enviar ‖ Надіслати
+Вниз ‖ Down ‖ Abajo ‖ Para baixo ‖ Вниз
+{a} создал(а) группу «{b}» ‖ {a} created the group “{b}” ‖ {a} creó el grupo «{b}» ‖ {a} criou o grupo «{b}» ‖ {a} створив(ла) групу «{b}»
+Канал «{a}» создан ‖ Channel “{a}” created ‖ Canal «{a}» creado ‖ Canal «{a}» criado ‖ Канал «{a}» створено
+{a} изменил(а) название на «{b}» ‖ {a} changed the name to “{b}” ‖ {a} cambió el nombre a «{b}» ‖ {a} mudou o nome para «{b}» ‖ {a} змінив(ла) назву на «{b}»
+{a} обновил(а) фото группы ‖ {a} updated the group photo ‖ {a} actualizó la foto del grupo ‖ {a} atualizou a foto do grupo ‖ {a} оновив(ла) фото групи
+{a} удалил(а) фото группы ‖ {a} removed the group photo ‖ {a} eliminó la foto del grupo ‖ {a} removeu a foto do grupo ‖ {a} видалив(ла) фото групи
+{a} добавил(а) участников ‖ {a} added members ‖ {a} añadió miembros ‖ {a} adicionou membros ‖ {a} додав(ла) учасників
+{a} покинул(а) группу ‖ {a} left the group ‖ {a} salió del grupo ‖ {a} saiu do grupo ‖ {a} залишив(ла) групу
+{a} вступил(а) в группу ‖ {a} joined the group ‖ {a} se unió al grupo ‖ {a} entrou no grupo ‖ {a} приєднався(лась) до групи
+{a} закрепил(а) сообщение ‖ {a} pinned a message ‖ {a} fijó un mensaje ‖ {a} fixou uma mensagem ‖ {a} закріпив(ла) повідомлення
+История очищена ‖ History cleared ‖ Historial borrado ‖ Histórico apagado ‖ Історію очищено
+Видеозвонок ‖ Video call ‖ Videollamada ‖ Chamada de vídeo ‖ Відеодзвінок
+Звонок ‖ Call ‖ Llamada ‖ Chamada ‖ Дзвінок
+{a} теперь в Telegram ‖ {a} joined Telegram ‖ {a} se unió a Telegram ‖ {a} entrou no Telegram ‖ {a} тепер у Telegram
+Служебное сообщение ‖ Service message ‖ Mensaje de servicio ‖ Mensagem de serviço ‖ Службове повідомлення
+Чат не найден ‖ Chat not found ‖ Chat no encontrado ‖ Chat não encontrado ‖ Чат не знайдено
+Удалённый аккаунт ‖ Deleted account ‖ Cuenta eliminada ‖ Conta excluída ‖ Видалений акаунт
+Скрытый отправитель ‖ Hidden sender ‖ Remitente oculto ‖ Remetente oculto ‖ Прихований відправник
+Сообщение недоступно ‖ Message unavailable ‖ Mensaje no disponible ‖ Mensagem indisponível ‖ Повідомлення недоступне
+Чаты ‖ Chats ‖ Chats ‖ Chats ‖ Чати
+Контакты ‖ Contacts ‖ Contactos ‖ Contatos ‖ Контакти
+{a} печатает ‖ {a} is typing ‖ {a} está escribiendo ‖ {a} está digitando ‖ {a} друкує
+печатает ‖ typing ‖ escribiendo ‖ digitando ‖ друкує
+Выключить звук ‖ Mute ‖ Silenciar ‖ Silenciar ‖ Вимкнути звук
+Сообщение ‖ Message ‖ Mensaje ‖ Mensagem ‖ Повідомлення
+Прикрепить ‖ Attach ‖ Adjuntar ‖ Anexar ‖ Прикріпити
+Не удалось загрузить сообщения ‖ Couldn’t load messages ‖ No se pudieron cargar los mensajes ‖ Não foi possível carregar as mensagens ‖ Не вдалося завантажити повідомлення
+Переслано от {a} ‖ Forwarded from {a} ‖ Reenviado de {a} ‖ Encaminhada de {a} ‖ Переслано від {a}
+Редактирование ‖ Editing ‖ Edición ‖ Edição ‖ Редагування
+себе ‖ yourself ‖ ti mismo ‖ você mesmo ‖ собі
+Не удалось изменить ‖ Couldn’t edit ‖ No se pudo editar ‖ Não foi possível editar ‖ Не вдалося змінити
+Не отправлено ‖ Not sent ‖ No enviado ‖ Não enviada ‖ Не надіслано
+Не удалось воспроизвести ‖ Couldn’t play ‖ No se pudo reproducir ‖ Não foi possível reproduzir ‖ Не вдалося відтворити
+Звонки скоро ‖ Calls are coming soon ‖ Las llamadas llegarán pronto ‖ Chamadas em breve ‖ Дзвінки скоро
+Скоро ‖ Coming soon ‖ Próximamente ‖ Em breve ‖ Скоро
+Удалить чат ‖ Delete chat ‖ Eliminar chat ‖ Excluir chat ‖ Видалити чат
+Удалить ‖ Delete ‖ Eliminar ‖ Excluir ‖ Видалити
+Не удалось удалить ‖ Couldn’t delete ‖ No se pudo eliminar ‖ Não foi possível excluir ‖ Не вдалося видалити
+Не удалось загрузить чаты ‖ Couldn’t load chats ‖ No se pudieron cargar los chats ‖ Não foi possível carregar os chats ‖ Не вдалося завантажити чати
+{a} печатает… ‖ {a} is typing… ‖ {a} está escribiendo… ‖ {a} está digitando… ‖ {a} друкує…
+печатает… ‖ typing… ‖ escribiendo… ‖ digitando… ‖ друкує…
+Архив чатов ‖ Archived chats ‖ Chats archivados ‖ Chats arquivados ‖ Архів чатів
+Личные ‖ Personal ‖ Personales ‖ Pessoais ‖ Особисті
+Новые ‖ New ‖ Nuevos ‖ Novos ‖ Нові
+Архив пуст ‖ The archive is empty ‖ El archivo está vacío ‖ O arquivo está vazio ‖ Архів порожній
+Глобальный поиск ‖ Global search ‖ Búsqueda global ‖ Pesquisa global ‖ Глобальний пошук
+Ничего не найдено ‖ Nothing found ‖ No se encontró nada ‖ Nada encontrado ‖ Нічого не знайдено
+Здесь пока пусто ‖ Nothing here yet ‖ Aquí no hay nada todavía ‖ Ainda não há nada aqui ‖ Тут поки порожньо
+Новое сообщение ‖ New message ‖ Nuevo mensaje ‖ Nova mensagem ‖ Нове повідомлення
+Прочитать все ‖ Mark all as read ‖ Marcar todo como leído ‖ Marcar tudo como lido ‖ Прочитати все
+Открепить ‖ Unpin ‖ Desfijar ‖ Desafixar ‖ Відкріпити
+Закрепить ‖ Pin ‖ Fijar ‖ Fixar ‖ Закріпити
+Прочитано ‖ Mark as read ‖ Marcar como leído ‖ Marcar como lido ‖ Прочитано
+Видеосообщение ‖ Video message ‖ Mensaje de vídeo ‖ Mensagem de vídeo ‖ Відеоповідомлення
+Не удалось загрузить контакты ‖ Couldn’t load contacts ‖ No se pudieron cargar los contactos ‖ Não foi possível carregar os contatos ‖ Не вдалося завантажити контакти
+Контактов нет ‖ No contacts ‖ Sin contactos ‖ Sem contatos ‖ Контактів немає
+Телефон ‖ Phone ‖ Teléfono ‖ Telefone ‖ Телефон
+бот ‖ bot ‖ bot ‖ bot ‖ бот
+был(а) недавно ‖ last seen recently ‖ visto recientemente ‖ visto recentemente ‖ був(ла) нещодавно
+был(а) на этой неделе ‖ last seen within a week ‖ visto esta semana ‖ visto esta semana ‖ був(ла) цього тижня
+был(а) в этом месяце ‖ last seen within a month ‖ visto este mes ‖ visto este mês ‖ був(ла) цього місяця
+был(а) давно ‖ last seen a long time ago ‖ visto hace mucho ‖ visto há muito tempo ‖ був(ла) давно
+был(а) в {a} ‖ last seen at {a} ‖ visto a las {a} ‖ visto às {a} ‖ був(ла) о {a}
+был(а) вчера в {a} ‖ last seen yesterday at {a} ‖ visto ayer a las {a} ‖ visto ontem às {a} ‖ був(ла) вчора о {a}
+был(а) {a} ‖ last seen {a} ‖ visto {a} ‖ visto {a} ‖ був(ла) {a}
+#{n} участник ‖ {n} member / {n} members ‖ {n} miembro / {n} miembros ‖ {n} membro / {n} membros ‖ {n} учасник / {n} учасники / {n} учасників
+Выберите чат ‖ Select a chat ‖ Selecciona un chat ‖ Selecione um chat ‖ Виберіть чат
+Файлы ‖ Files ‖ Archivos ‖ Arquivos ‖ Файли
+Ссылки ‖ Links ‖ Enlaces ‖ Links ‖ Посилання
+Музыка ‖ Music ‖ Música ‖ Música ‖ Музика
+Голосовые ‖ Voice ‖ Voz ‖ Voz ‖ Голосові
+Отмена ‖ Cancel ‖ Cancelar ‖ Cancelar ‖ Скасувати
+Выбрано {a} ‖ {a} selected ‖ {a} seleccionados ‖ {a} selecionadas ‖ Вибрано {a}
+Переслать ‖ Forward ‖ Reenviar ‖ Encaminhar ‖ Переслати
+Все закреплённые ‖ All pinned messages ‖ Todos los fijados ‖ Todas as fixadas ‖ Усі закріплені
+Удалить {a} сообщ.? ‖ Delete {a} messages? ‖ ¿Eliminar {a} mensajes? ‖ Excluir {a} mensagens? ‖ Видалити {a} повідомл.?
+Удалить сообщение? ‖ Delete this message? ‖ ¿Eliminar el mensaje? ‖ Excluir a mensagem? ‖ Видалити повідомлення?
+Переслано ‖ Forwarded ‖ Reenviado ‖ Encaminhada ‖ Переслано
+Не удалось переслать ‖ Couldn’t forward ‖ No se pudo reenviar ‖ Não foi possível encaminhar ‖ Не вдалося переслати
+Уведомления ‖ Notifications ‖ Notificaciones ‖ Notificações ‖ Сповіщення
+Очистить историю ‖ Clear history ‖ Borrar historial ‖ Limpar histórico ‖ Очистити історію
+Очистить историю переписки? ‖ Clear the chat history? ‖ ¿Borrar el historial del chat? ‖ Limpar o histórico da conversa? ‖ Очистити історію листування?
+Удалить чат «{a}»? ‖ Delete chat “{a}”? ‖ ¿Eliminar el chat «{a}»? ‖ Excluir o chat «{a}»? ‖ Видалити чат «{a}»?
+В ответ {a} ‖ Reply to {a} ‖ En respuesta a {a} ‖ Em resposta a {a} ‖ У відповідь {a}
+Удерживайте для записи видео. Нажмите для переключения в голосовой режим. ‖ Hold to record video. Tap to switch to voice mode. ‖ Mantén para grabar vídeo. Toca para cambiar al modo de voz. ‖ Segure para gravar vídeo. Toque para alternar para o modo de voz. ‖ Утримуйте для запису відео. Натисніть для перемикання на голосовий режим.
+Удерживайте для записи голоса. Нажмите для переключения в режим видео. ‖ Hold to record voice. Tap to switch to video mode. ‖ Mantén para grabar voz. Toca para cambiar al modo de vídeo. ‖ Segure para gravar voz. Toque para alternar para o modo de vídeo. ‖ Утримуйте для запису голосу. Натисніть для перемикання на режим відео.
+Выбрать ‖ Select ‖ Seleccionar ‖ Selecionar ‖ Вибрати
+Не удалось сохранить ‖ Couldn’t save ‖ No se pudo guardar ‖ Não foi possível salvar ‖ Не вдалося зберегти
+Неверный манифест ‖ Invalid manifest ‖ Manifiesto no válido ‖ Manifesto inválido ‖ Невірний маніфест
+Неверный id мода ‖ Invalid mod id ‖ ID de mod no válido ‖ ID de mod inválido ‖ Невірний id моду
+У мода нет названия ‖ The mod has no name ‖ El mod no tiene nombre ‖ O mod não tem nome ‖ У моду немає назви
+Неверные права ‖ Invalid permissions ‖ Permisos no válidos ‖ Permissões inválidas ‖ Невірні дозволи
+Код мода слишком большой ‖ The mod code is too large ‖ El código del mod es demasiado grande ‖ O código do mod é grande demais ‖ Код моду завеликий
+Моды ‖ Mods ‖ Mods ‖ Mods ‖ Моди
+Вкл ‖ On ‖ Act. ‖ Lig. ‖ Увімк.
+Выкл ‖ Off ‖ Desact. ‖ Desl. ‖ Вимк.
+Установить мод из файла ‖ Install a mod from a file ‖ Instalar un mod desde un archivo ‖ Instalar um mod de um arquivo ‖ Встановити мод із файлу
+Мод установлен ‖ Mod installed ‖ Mod instalado ‖ Mod instalado ‖ Мод встановлено
+Стикеры ‖ Stickers ‖ Stickers ‖ Figurinhas ‖ Стікери
+GIF скоро ‖ GIFs are coming soon ‖ Los GIF llegarán pronto ‖ GIFs em breve ‖ GIF скоро
+Стикеры скоро ‖ Stickers are coming soon ‖ Los stickers llegarán pronto ‖ Figurinhas em breve ‖ Стікери скоро
+Чат ‖ Chat ‖ Chat ‖ Chat ‖ Чат
+Автоудаление ‖ Auto-delete ‖ Autoeliminación ‖ Autoexclusão ‖ Автовидалення
+Поделиться контактом ‖ Share contact ‖ Compartir contacto ‖ Compartilhar contato ‖ Поділитися контактом
+Разблокировать ‖ Unblock ‖ Desbloquear ‖ Desbloquear ‖ Розблокувати
+Заблокировать ‖ Block ‖ Bloquear ‖ Bloquear ‖ Заблокувати
+Пользователь заблокирован ‖ User blocked ‖ Usuario bloqueado ‖ Usuário bloqueado ‖ Користувача заблоковано
+Пользователь разблокирован ‖ User unblocked ‖ Usuario desbloqueado ‖ Usuário desbloqueado ‖ Користувача розблоковано
+Изменить контакт ‖ Edit contact ‖ Editar contacto ‖ Editar contato ‖ Змінити контакт
+Удалить контакт ‖ Delete contact ‖ Eliminar contacto ‖ Excluir contato ‖ Видалити контакт
+Удалить контакт «{a}»? ‖ Delete contact “{a}”? ‖ ¿Eliminar el contacto «{a}»? ‖ Excluir o contato «{a}»? ‖ Видалити контакт «{a}»?
+Контакт удалён ‖ Contact deleted ‖ Contacto eliminado ‖ Contato excluído ‖ Контакт видалено
+Отправить подарок ‖ Send a gift ‖ Enviar un regalo ‖ Enviar um presente ‖ Надіслати подарунок
+Начать секретный чат ‖ Start secret chat ‖ Iniciar chat secreto ‖ Iniciar chat secreto ‖ Почати секретний чат
+Запретить копирование ‖ Restrict saving content ‖ Restringir el guardado de contenido ‖ Restringir o salvamento de conteúdo ‖ Заборонити копіювання
+Создать ярлык ‖ Add shortcut ‖ Crear acceso directo ‖ Criar atalho ‖ Створити ярлик
+Пожаловаться ‖ Report ‖ Denunciar ‖ Denunciar ‖ Поскаржитися
+Покинуть группу ‖ Leave group ‖ Salir del grupo ‖ Sair do grupo ‖ Залишити групу
+Покинуть «{a}»? ‖ Leave “{a}”? ‖ ¿Salir de «{a}»? ‖ Sair de «{a}»? ‖ Залишити «{a}»?
+Мод «{a}» не запустился ‖ Mod “{a}” failed to start ‖ El mod «{a}» no se pudo iniciar ‖ O mod «{a}» não iniciou ‖ Мод «{a}» не запустився
+Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b} ‖ Mod “{a}” will get full access to the app and your account. Install only mods you trust.{b} ‖ El mod «{a}» tendrá acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes.{b} ‖ O mod «{a}» terá acesso total ao app e à sua conta. Instale apenas mods em que confia.{b} ‖ Мод «{a}» отримає повний доступ до застосунку та вашого акаунта. Встановлюйте лише моди, яким довіряєте.{b}
+Этот мод не проверен. ‖ This mod has not been reviewed. ‖ Este mod no ha sido revisado. ‖ Este mod não foi verificado. ‖ Цей мод не перевірено.
+Установить ‖ Install ‖ Instalar ‖ Instalar ‖ Встановити
+изменено ‖ edited ‖ editado ‖ editada ‖ змінено
+Войти в Telegram ‖ Log in to Telegram ‖ Iniciar sesión en Telegram ‖ Entrar no Telegram ‖ Увійти в Telegram
+Кэш очищен ‖ Cache cleared ‖ Caché borrada ‖ Cache limpo ‖ Кеш очищено
+Выйти из Telegram на этом устройстве? ‖ Log out of Telegram on this device? ‖ ¿Cerrar sesión de Telegram en este dispositivo? ‖ Sair do Telegram neste dispositivo? ‖ Вийти з Telegram на цьому пристрої?
+Ссылка скопирована ‖ Link copied ‖ Enlace copiado ‖ Link copiado ‖ Посилання скопійовано
+Копировать ссылку ‖ Copy link ‖ Copiar enlace ‖ Copiar link ‖ Копіювати посилання
+Не удалось сохранить:␣ ‖ Could not save:␣ ‖ No se pudo guardar:␣ ‖ Não foi possível salvar:␣ ‖ Не вдалося зберегти:␣
+ошибка ‖ error ‖ error ‖ erro ‖ помилка
+Ещё ‖ More ‖ Más ‖ Mais ‖ Ще
+Гость ‖ Guest ‖ Invitado ‖ Visitante ‖ Гість
+Войдите, чтобы читать свои каналы ‖ Log in to read your channels ‖ Inicia sesión para leer tus canales ‖ Entre para ler seus canais ‖ Увійдіть, щоб читати свої канали
+QR-код или номер телефона ‖ QR code or phone number ‖ Código QR o número de teléfono ‖ Código QR ou número de telefone ‖ QR-код або номер телефону
+Мобильный ‖ Mobile ‖ Móvil ‖ Celular ‖ Мобільний
+Номер скопирован ‖ Number copied ‖ Número copiado ‖ Número copiado ‖ Номер скопійовано
+День рождения ‖ Date of birth ‖ Fecha de nacimiento ‖ Data de nascimento ‖ День народження
+Выбрать фото ‖ Choose photo ‖ Elegir foto ‖ Escolher foto ‖ Вибрати фото
+Изменить профиль ‖ Edit profile ‖ Editar perfil ‖ Editar perfil ‖ Змінити профіль
+Сохранить ‖ Save ‖ Guardar ‖ Salvar ‖ Зберегти
+Выбрать фотографию ‖ Choose a photo ‖ Elegir una foto ‖ Escolher uma foto ‖ Вибрати фотографію
+Имя (обязательно) ‖ First name (required) ‖ Nombre (obligatorio) ‖ Nome (obrigatório) ‖ Ім’я (обов’язково)
+Фамилия (необязательно) ‖ Last name (optional) ‖ Apellidos (opcional) ‖ Sobrenome (opcional) ‖ Прізвище (необов’язково)
+Укажите имя и, если хотите, фамилию. ‖ Enter your name and, if you like, add a last name. ‖ Introduce tu nombre y, si quieres, tus apellidos. ‖ Digite seu nome e, se quiser, um sobrenome. ‖ Вкажіть ім’я та, якщо хочете, прізвище.
+Любые подробности, например: возраст, род занятий или город. Пример: 23 года, дизайнер из Санкт-Петербурга. ‖ Any details such as age, occupation or city. Example: 23 y.o. designer from San Francisco. ‖ Cualquier detalle, como edad, ocupación o ciudad. Ejemplo: diseñadora de 23 años de Madrid. ‖ Qualquer detalhe, como idade, profissão ou cidade. Exemplo: designer de 23 anos de São Paulo. ‖ Будь-які подробиці, наприклад: вік, рід занять або місто. Приклад: 23 роки, дизайнер із Львова.
+Изменить информацию ‖ Edit info ‖ Editar información ‖ Editar informações ‖ Змінити інформацію
+Файл слишком большой (до 10 МБ) ‖ The file is too large (up to 10 MB) ‖ El archivo es demasiado grande (hasta 10 MB) ‖ O arquivo é grande demais (até 10 MB) ‖ Файл завеликий (до 10 МБ)
+Загрузка фото… ‖ Uploading photo… ‖ Subiendo foto… ‖ Enviando foto… ‖ Завантаження фото…
+Не удалось обновить фото:␣ ‖ Could not update the photo:␣ ‖ No se pudo actualizar la foto:␣ ‖ Não foi possível atualizar a foto:␣ ‖ Не вдалося оновити фото:␣
+Фото профиля обновлено ‖ Profile photo updated ‖ Foto de perfil actualizada ‖ Foto do perfil atualizada ‖ Фото профілю оновлено
+Введите имя ‖ Enter a name ‖ Introduce un nombre ‖ Digite um nome ‖ Введіть ім’я
+Профиль сохранён ‖ Profile saved ‖ Perfil guardado ‖ Perfil salvo ‖ Профіль збережено
+Войдите в Telegram ‖ Log in to Telegram ‖ Inicia sesión en Telegram ‖ Entre no Telegram ‖ Увійдіть у Telegram
+Г ‖ G ‖ I ‖ V ‖ Г
+Аккаунт ‖ Account ‖ Cuenta ‖ Conta ‖ Акаунт
+Имя, «О себе», фото профиля ‖ Name, bio, profile photo ‖ Nombre, biografía, foto de perfil ‖ Nome, bio, foto do perfil ‖ Ім’я, «Про себе», фото профілю
+Настройки чатов ‖ Chat Settings ‖ Ajustes del chat ‖ Configurações do chat ‖ Налаштування чатів
+Обои, ночной режим, анимации ‖ Wallpapers, night mode, animations ‖ Fondos, modo nocturno, animaciones ‖ Planos de fundo, modo noturno, animações ‖ Шпалери, нічний режим, анімації
+Данные и память ‖ Data and Storage ‖ Datos y almacenamiento ‖ Dados e armazenamento ‖ Дані та пам’ять
+Автозагрузка медиа, кэш ‖ Media auto-download, cache ‖ Descarga automática, caché ‖ Download automático, cache ‖ Автозавантаження медіа, кеш
+Устройства ‖ Devices ‖ Dispositivos ‖ Dispositivos ‖ Пристрої
+Управление активными сеансами ‖ Manage active sessions ‖ Gestiona las sesiones activas ‖ Gerencie as sessões ativas ‖ Керування активними сеансами
+Энергосбережение ‖ Power Saving ‖ Ahorro de energía ‖ Economia de energia ‖ Енергозбереження
+Анимации выключены ‖ Animations are off ‖ Animaciones desactivadas ‖ Animações desativadas ‖ Анімації вимкнено
+Анимации и автовоспроизведение ‖ Animations and autoplay ‖ Animaciones y reproducción automática ‖ Animações e reprodução automática ‖ Анімації й автовідтворення
+Написать автору ‖ Contact the author ‖ Escribir al autor ‖ Falar com o autor ‖ Написати авторові
+Версия {a} ‖ Version {a} ‖ Versión {a} ‖ Versão {a} ‖ Версія {a}
+Для разработчиков ‖ For developers ‖ Para desarrolladores ‖ Para desenvolvedores ‖ Для розробників
+Сессия, диагностика, логи ‖ Session, diagnostics, logs ‖ Sesión, diagnóstico, registros ‖ Sessão, diagnóstico, logs ‖ Сесія, діагностика, логи
+Режим энергосбережения ‖ Power saving mode ‖ Modo de ahorro de energía ‖ Modo de economia de energia ‖ Режим енергозбереження
+Без анимаций, стикеры и эмодзи на паузе ‖ No animations, stickers and emoji paused ‖ Sin animaciones, stickers y emojis en pausa ‖ Sem animações, figurinhas e emojis pausados ‖ Без анімацій, стікери й емодзі на паузі
+Экономит заряд и ускоряет работу на слабых телефонах. ‖ Saves battery and speeds up weak phones. ‖ Ahorra batería y acelera los teléfonos más lentos. ‖ Economiza bateria e acelera celulares mais fracos. ‖ Заощаджує заряд і прискорює роботу на слабких телефонах.
+Автовоспроизведение видео ‖ Autoplay videos ‖ Reproducir videos automáticamente ‖ Reproduzir vídeos automaticamente ‖ Автовідтворення відео
+Короткие видео в ленте без звука ‖ Short videos play muted in the feed ‖ Los videos cortos se reproducen sin sonido en el muro ‖ Vídeos curtos tocam sem som no mural ‖ Короткі відео у стрічці без звуку
+Автовоспроизведение GIF ‖ Autoplay GIFs ‖ Reproducir GIF automáticamente ‖ Reproduzir GIFs automaticamente ‖ Автовідтворення GIF
+Эффекты стекла ‖ Glass effects ‖ Efectos de cristal ‖ Efeitos de vidro ‖ Ефекти скла
+Размытие под панелями ‖ Blur behind the bars ‖ Desenfoque tras las barras ‖ Desfoque atrás das barras ‖ Розмиття під панелями
+Ресурсоёмкие процессы ‖ Resource-intensive processes ‖ Procesos que consumen muchos recursos ‖ Processos que consomem muitos recursos ‖ Ресурсоємні процеси
+Версия ‖ Version ‖ Versión ‖ Versão ‖ Версія
+Приложение ‖ App ‖ Aplicación ‖ Aplicativo ‖ Застосунок
+Проверить обновления ‖ Check for updates ‖ Buscar actualizaciones ‖ Verificar atualizações ‖ Перевірити оновлення
+Автор · Telegram ‖ Author · Telegram ‖ Autor · Telegram ‖ Autor · Telegram ‖ Автор · Telegram
+Исходный код ‖ Source code ‖ Código fuente ‖ Código-fonte ‖ Вихідний код
+Соединение с Telegram ‖ Connection to Telegram ‖ Conexión con Telegram ‖ Conexão com o Telegram ‖ З’єднання з Telegram
+Проверить соединение ‖ Check connection ‖ Comprobar conexión ‖ Verificar conexão ‖ Перевірити з’єднання
+Пинг MTProto ‖ MTProto ping ‖ Ping de MTProto ‖ Ping do MTProto ‖ Пінг MTProto
+Переподключиться ‖ Reconnect ‖ Reconectar ‖ Reconectar ‖ Перепідключитися
+Диагностика ‖ Diagnostics ‖ Diagnóstico ‖ Diagnóstico ‖ Діагностика
+Индикатор соединения ‖ Connection indicator ‖ Indicador de conexión ‖ Indicador de conexão ‖ Індикатор з’єднання
+Дата-центр и пинг поверх экрана ‖ Data center and ping over the screen ‖ Centro de datos y ping sobre la pantalla ‖ Data center e ping sobre a tela ‖ Дата-центр і пінг поверх екрана
+Подробные логи MTProto ‖ Verbose MTProto logs ‖ Registros detallados de MTProto ‖ Logs detalhados do MTProto ‖ Докладні логи MTProto
+Пишет в консоль всё, что делает GramJS ‖ Writes everything GramJS does to the console ‖ Escribe en la consola todo lo que hace GramJS ‖ Escreve no console tudo o que o GramJS faz ‖ Пише в консоль усе, що робить GramJS
+Отладка ‖ Debugging ‖ Depuración ‖ Depuração ‖ Налагодження
+Telegram в отдельном потоке ‖ Telegram in a separate thread ‖ Telegram en un hilo aparte ‖ Telegram em uma thread separada ‖ Telegram в окремому потоці
+Включено — загрузка не тормозит интерфейс ‖ On — loading doesn't slow the interface down ‖ Activado: la carga no ralentiza la interfaz ‖ Ativado — o carregamento não deixa a interface lenta ‖ Увімкнено — завантаження не гальмує інтерфейс
+Как в Telegram Web A: быстрее при прокрутке ‖ Like Telegram Web A: smoother scrolling ‖ Como Telegram Web A: desplazamiento más fluido ‖ Como o Telegram Web A: rolagem mais fluida ‖ Як у Telegram Web A: швидше під час прокрутки
+Производительность ‖ Performance ‖ Rendimiento ‖ Desempenho ‖ Продуктивність
+Клиент Telegram (сеть, расшифровка, загрузка медиа) работает в отдельном потоке и не мешает интерфейсу. Применяется после перезапуска. Если что-то сломается — выключите. ‖ The Telegram client (network, decryption, media downloads) runs in a separate thread and never blocks the interface. Applies after a restart. If something breaks, turn it off. ‖ El cliente de Telegram (red, descifrado, descarga de archivos) funciona en un hilo aparte y no bloquea la interfaz. Se aplica al reiniciar. Si algo falla, desactívalo. ‖ O cliente do Telegram (rede, descriptografia, download de mídia) roda em uma thread separada e não trava a interface. Vale após reiniciar. Se algo quebrar, desative. ‖ Клієнт Telegram (мережа, розшифрування, завантаження медіа) працює в окремому потоці й не заважає інтерфейсу. Застосовується після перезапуску. Якщо щось зламається — вимкніть.
+Экспорт логов ‖ Export logs ‖ Exportar registros ‖ Exportar logs ‖ Експорт логів
+{a} записей + сведения об устройстве ‖ {a} entries + device info ‖ {a} entradas + datos del dispositivo ‖ {a} registros + informações do dispositivo ‖ {a} записів + відомості про пристрій
+Скопировать диагностику ‖ Copy diagnostics ‖ Copiar diagnóstico ‖ Copiar diagnóstico ‖ Скопіювати діагностику
+Очистить логи ‖ Clear logs ‖ Borrar registros ‖ Limpar logs ‖ Очистити логи
+Логи ‖ Logs ‖ Registros ‖ Logs ‖ Логи
+Экспорт сессии ‖ Export session ‖ Exportar sesión ‖ Exportar sessão ‖ Експорт сесії
+Скопировать строку входа ‖ Copy the login string ‖ Copiar la cadena de inicio de sesión ‖ Copiar a string de login ‖ Скопіювати рядок входу
+Импорт сессии ‖ Import session ‖ Importar sesión ‖ Importar sessão ‖ Імпорт сесії
+Войти по строке из другого TeleX ‖ Log in with a string from another TeleX ‖ Iniciar sesión con una cadena de otro TeleX ‖ Entrar com uma string de outro TeleX ‖ Увійти за рядком з іншого TeleX
+Вставьте строку сессии ‖ Paste the session string ‖ Pega la cadena de sesión ‖ Cole a string de sessão ‖ Вставте рядок сесії
+Войти ‖ Log in ‖ Iniciar sesión ‖ Entrar ‖ Увійти
+Сессия ‖ Session ‖ Sesión ‖ Sessão ‖ Сесія
+Строка сессии — это полный доступ к аккаунту. Никому её не отправляйте: с ней можно читать и писать от вашего имени. Отозвать её можно в «Устройствах». ‖ The session string gives full access to your account. Never send it to anyone: it lets them read and write as you. You can revoke it in “Devices”. ‖ La cadena de sesión da acceso total a tu cuenta. No se la envíes a nadie: permite leer y escribir en tu nombre. Puedes revocarla en «Dispositivos». ‖ A string de sessão dá acesso total à sua conta. Não envie a ninguém: com ela é possível ler e escrever em seu nome. Você pode revogá-la em “Dispositivos”. ‖ Рядок сесії — це повний доступ до акаунта. Нікому його не надсилайте: з ним можна читати й писати від вашого імені. Скасувати його можна в «Пристроях».
+Перезагрузить приложение начисто ‖ Reload the app from scratch ‖ Recargar la aplicación desde cero ‖ Recarregar o app do zero ‖ Перезавантажити застосунок начисто
+Сбросить Service Worker и кэш кода (вход сохранится) ‖ Resets the Service Worker and code cache (you stay logged in) ‖ Restablece el Service Worker y la caché de código (la sesión se mantiene) ‖ Redefine o Service Worker e o cache de código (você continua conectado) ‖ Скидає Service Worker і кеш коду (вхід збережеться)
+Доброе утро! 👋 ‖ Good morning! 👋 ‖ ¡Buenos días! 👋 ‖ Bom dia! 👋 ‖ Добрий ранок! 👋
+Знаешь, который час? ‖ Do you know what time it is? ‖ ¿Sabes qué hora es? ‖ Sabe que horas são? ‖ Знаєш, котра година?
+В Токио утро 😎 ‖ It's morning in Tokyo 😎 ‖ En Tokio es de mañana 😎 ‖ Em Tóquio é de manhã 😎 ‖ У Токіо ранок 😎
+Размер текста сообщений ‖ Message Text Size ‖ Tamaño del texto de mensajes ‖ Tamanho do texto das mensagens ‖ Розмір тексту повідомлень
+Изменить цвет имени ‖ Change Name Color ‖ Cambiar color del nombre ‖ Mudar cor do nome ‖ Змінити колір імені
+Цветовая тема ‖ Color Theme ‖ Tema de color ‖ Tema de cor ‖ Кольорова тема
+Переключить на ночную тему ‖ Switch to Night Theme ‖ Cambiar al tema nocturno ‖ Mudar para o tema noturno ‖ Перемкнути на нічну тему
+Переключить на дневную тему ‖ Switch to Day Theme ‖ Cambiar al tema diurno ‖ Mudar para o tema diurno ‖ Перемкнути на денну тему
+Настройки темы ‖ Theme Settings ‖ Ajustes del tema ‖ Configurações do tema ‖ Налаштування теми
+Углы блоков с сообщениями ‖ Message Corners ‖ Esquinas de los mensajes ‖ Cantos das mensagens ‖ Кути блоків повідомлень
+Как на устройстве ‖ Same as device ‖ Igual que el dispositivo ‖ Igual ao dispositivo ‖ Як на пристрої
+Тема меняется вместе с системной ‖ The theme changes together with the system one ‖ El tema cambia junto con el del sistema ‖ O tema muda junto com o do sistema ‖ Тема змінюється разом із системною
+Дневная ‖ Day ‖ Diurno ‖ Diurno ‖ Денна
+Ночная ‖ Night ‖ Nocturno ‖ Noturno ‖ Нічна
+Цвет акцента ‖ Accent color ‖ Color de énfasis ‖ Cor de destaque ‖ Акцентний колір
+Цвет имени ‖ Name color ‖ Color del nombre ‖ Cor do nome ‖ Колір імені
+Цвет вашего имени в комментариях и превью. Виден только вам. ‖ The color of your name in comments and previews. Only you can see it. ‖ El color de tu nombre en los comentarios y vistas previas. Solo lo ves tú. ‖ A cor do seu nome nos comentários e prévias. Só você vê. ‖ Колір вашого імені в коментарях і попередньому перегляді. Бачите лише ви.
+Применяем язык… ‖ Applying the language… ‖ Aplicando el idioma… ‖ Aplicando o idioma… ‖ Застосовуємо мову…
+Сбросить настройки ‖ Reset settings ‖ Restablecer ajustes ‖ Redefinir configurações ‖ Скинути налаштування
+Настройки чатов сброшены ‖ Chat settings reset ‖ Ajustes del chat restablecidos ‖ Configurações de conversa redefinidas ‖ Налаштування чатів скинуто
+Загружать фото автоматически ‖ Auto-download photos ‖ Descargar fotos automáticamente ‖ Baixar fotos automaticamente ‖ Автоматично завантажувати фото
+Автовоспроизведение ‖ Autoplay ‖ Reproducción automática ‖ Reprodução automática ‖ Автовідтворення
+В разделе «Энергосбережение» ‖ In “Power Saving” ‖ En «Ahorro de energía» ‖ Em “Economia de energia” ‖ У розділі «Енергозбереження»
+Автозагрузка медиа ‖ Media auto-download ‖ Descarga automática de archivos ‖ Download automático de mídia ‖ Автозавантаження медіа
+Использование памяти ‖ Storage usage ‖ Uso de almacenamiento ‖ Uso de armazenamento ‖ Використання пам’яті
+Подсчёт… ‖ Calculating… ‖ Calculando… ‖ Calculando… ‖ Підрахунок…
+Очистить кэш ‖ Clear cache ‖ Borrar caché ‖ Limpar cache ‖ Очистити кеш
+Медиа и сохранённая лента ‖ Media and the saved feed ‖ Archivos y el muro guardado ‖ Mídia e o mural salvo ‖ Медіа та збережена стрічка
+Хранилище ‖ Storage ‖ Almacenamiento ‖ Armazenamento ‖ Сховище
+Сессия и настройки при очистке кэша сохраняются. ‖ Your session and settings are kept when the cache is cleared. ‖ Tu sesión y tus ajustes se conservan al borrar la caché. ‖ Sua sessão e suas configurações são mantidas ao limpar o cache. ‖ Сесія та налаштування під час очищення кешу зберігаються.
+Выйти из TeleX ‖ Log out of TeleX ‖ Cerrar sesión en TeleX ‖ Sair do TeleX ‖ Вийти з TeleX
+Завершить сеанс в этом браузере ‖ End the session in this browser ‖ Cerrar la sesión en este navegador ‖ Encerrar a sessão neste navegador ‖ Завершити сеанс у цьому браузері
+Войдите, чтобы увидеть устройства ‖ Log in to see your devices ‖ Inicia sesión para ver tus dispositivos ‖ Entre para ver seus dispositivos ‖ Увійдіть, щоб побачити пристрої
+Это устройство ‖ This device ‖ Este dispositivo ‖ Este dispositivo ‖ Цей пристрій
+Активные сеансы ‖ Active sessions ‖ Sesiones activas ‖ Sessões ativas ‖ Активні сеанси
+Нажмите на сеанс, чтобы завершить его. ‖ Tap a session to terminate it. ‖ Toca una sesión para cerrarla. ‖ Toque em uma sessão para encerrá-la. ‖ Натисніть на сеанс, щоб завершити його.
+Не удалось загрузить: {a} ‖ Could not load: {a} ‖ No se pudo cargar: {a} ‖ Não foi possível carregar: {a} ‖ Не вдалося завантажити: {a}
+{a} МБ ‖ {a} MB ‖ {a} MB ‖ {a} MB ‖ {a} МБ
+{a} КБ ‖ {a} KB ‖ {a} KB ‖ {a} KB ‖ {a} КБ
+нет данных ‖ no data ‖ sin datos ‖ sem dados ‖ немає даних
+Завершить этот сеанс? ‖ Terminate this session? ‖ ¿Cerrar esta sesión? ‖ Encerrar esta sessão? ‖ Завершити цей сеанс?
+Сеанс завершён ‖ Session terminated ‖ Sesión cerrada ‖ Sessão encerrada ‖ Сеанс завершено
+Ошибка:␣ ‖ Error:␣ ‖ Error:␣ ‖ Erro:␣ ‖ Помилка:␣
+Подключено ‖ Connected ‖ Conectado ‖ Conectado ‖ Підключено
+Нет соединения ‖ No connection ‖ Sin conexión ‖ Sem conexão ‖ Немає з’єднання
+␣· без сессии ‖ ␣· no session ‖ ␣· sin sesión ‖ ␣· sem sessão ‖ ␣· без сесії
+Пинг… ‖ Ping… ‖ Ping… ‖ Ping… ‖ Пінг…
+{a} мс ‖ {a} ms ‖ {a} ms ‖ {a} ms ‖ {a} мс
+Нет ответа:␣ ‖ No response:␣ ‖ Sin respuesta:␣ ‖ Sem resposta:␣ ‖ Немає відповіді:␣
+Переподключение… ‖ Reconnecting… ‖ Reconectando… ‖ Reconectando… ‖ Перепідключення…
+Соединение восстановлено ‖ Connection restored ‖ Conexión restablecida ‖ Conexão restabelecida ‖ З’єднання відновлено
+Соединение в порядке ‖ The connection is fine ‖ La conexión está bien ‖ A conexão está boa ‖ З’єднання в нормі
+Диагностика скопирована ‖ Diagnostics copied ‖ Diagnóstico copiado ‖ Diagnóstico copiado ‖ Діагностику скопійовано
+Не удалось скопировать ‖ Could not copy ‖ No se pudo copiar ‖ Não foi possível copiar ‖ Не вдалося скопіювати
+Логи очищены ‖ Logs cleared ‖ Registros borrados ‖ Logs limpos ‖ Логи очищено
+Вы не вошли в Telegram ‖ You are not logged in to Telegram ‖ No has iniciado sesión en Telegram ‖ Você não está conectado ao Telegram ‖ Ви не увійшли в Telegram
+Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её? ‖ The session string gives full access to your Telegram account. Copy it? ‖ La cadena de sesión da acceso total a tu cuenta de Telegram. ¿Copiarla? ‖ A string de sessão dá acesso total à sua conta do Telegram. Copiar? ‖ Рядок сесії дає повний доступ до вашого акаунта Telegram. Скопіювати його?
+Сессия скопирована. Храните её в секрете ‖ Session copied. Keep it secret ‖ Sesión copiada. Guárdala en secreto ‖ Sessão copiada. Mantenha em segredo ‖ Сесію скопійовано. Зберігайте її в таємниці
+Сессия загружена, перезапуск… ‖ Session loaded, restarting… ‖ Sesión cargada, reiniciando… ‖ Sessão carregada, reiniciando… ‖ Сесію завантажено, перезапуск…
+Не удалось импортировать ‖ Could not import ‖ No se pudo importar ‖ Não foi possível importar ‖ Не вдалося імпортувати
+Доступно только в приложении для Android ‖ Available only in the Android app ‖ Disponible solo en la app para Android ‖ Disponível apenas no app para Android ‖ Доступно лише в застосунку для Android
+Проверяем обновления… ‖ Checking for updates… ‖ Buscando actualizaciones… ‖ Verificando atualizações… ‖ Перевіряємо оновлення…
+Перезапуск в новом режиме… ‖ Restarting in the new mode… ‖ Reiniciando en el nuevo modo… ‖ Reiniciando no novo modo… ‖ Перезапуск у новому режимі…
+Возврат к обычному режиму… ‖ Going back to the normal mode… ‖ Volviendo al modo normal… ‖ Voltando ao modo normal… ‖ Повернення до звичайного режиму…
+О Telegram You ‖ About Telegram You ‖ Acerca de Telegram You ‖ Sobre o Telegram You ‖ Про Telegram You
+Расширения Telegram You ‖ Telegram You extensions ‖ Extensiones de Telegram You ‖ Extensões do Telegram You ‖ Розширення Telegram You
+Telegram You {a} · автор ‖ Telegram You {a} · author ‖ Telegram You {a} · autor ‖ Telegram You {a} · autor ‖ Telegram You {a} · автор
+Копия Telegram для Android в вебе ‖ Telegram for Android, copied for the web ‖ Telegram para Android, copiado para la web ‖ Telegram para Android, copiado para a web ‖ Копія Telegram для Android у вебі
+Telegram You — неофициальный клиент. Работает напрямую с серверами Telegram, сессия хранится только на вашем устройстве. ‖ Telegram You is an unofficial client. It talks to Telegram’s servers directly and the session stays on your device only. ‖ Telegram You es un cliente no oficial. Funciona directamente con los servidores de Telegram y la sesión se guarda solo en tu dispositivo. ‖ O Telegram You é um cliente não oficial. Funciona direto com os servidores do Telegram e a sessão fica apenas no seu dispositivo. ‖ Telegram You — неофіційний клієнт. Працює напряму із серверами Telegram, сесія зберігається лише на вашому пристрої.
+Мод получает полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете. ‖ A mod gets full access to the app and your account. Install only mods you trust. ‖ Un mod tiene acceso total a la aplicación y a tu cuenta. Instala solo mods en los que confíes. ‖ Um mod tem acesso total ao app e à sua conta. Instale apenas mods em que confia. ‖ Мод отримує повний доступ до застосунку та вашого акаунта. Встановлюйте лише моди, яким довіряєте.

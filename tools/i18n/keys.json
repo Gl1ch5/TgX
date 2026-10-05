@@ -1855,601 +1855,6 @@
   "plural": false
  },
  {
-  "key": "Чаты",
-  "where": "chat/js/app.js",
-  "plural": false
- },
- {
-  "key": "Контакты",
-  "where": "chat/js/app.js",
-  "plural": false
- },
- {
-  "key": "{a} печатает",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "печатает",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Отмена",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Выбрано {a}",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Переслать",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удалить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Избранное",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Меню",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Все закреплённые",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Вниз",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Выключить звук",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Эмодзи",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Сообщение",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Прикрепить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Отправить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось загрузить сообщения",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "изменено",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Переслано от {a}",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удалить {a} сообщ.?",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удалить сообщение?",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось удалить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Переслано",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось переслать",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Ничего не найдено",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Уведомления",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось изменить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Звонки скоро",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Очистить историю",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Очистить историю переписки?",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Очистить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удалить чат",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удалить чат «{a}»?",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Редактирование",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "В ответ {a}",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "себе",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не отправлено",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось воспроизвести",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удерживайте для записи видео. Нажмите для переключения в голосовой режим.",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Удерживайте для записи голоса. Нажмите для переключения в режим видео.",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Открепить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Закрепить",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Выбрать",
-  "where": "chat/js/conv.js",
-  "plural": false
- },
- {
-  "key": "Не удалось загрузить чаты",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "{a} печатает…",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "печатает…",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Архив чатов",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Все",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Личные",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Новые",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Архив пуст",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Глобальный поиск",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Здесь пока пусто",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Новое сообщение",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Прочитать все",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Скоро",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Прочитано",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Видеосообщение",
-  "where": "chat/js/list.js",
-  "plural": false
- },
- {
-  "key": "Не удалось сохранить",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Неверный манифест",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Неверный id мода",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "У мода нет названия",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Неверные права",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Мод «{a}» не запустился",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Код мода слишком большой",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Этот мод не проверен.",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Установить",
-  "where": "chat/js/mods.js",
-  "plural": false
- },
- {
-  "key": "Не удалось загрузить контакты",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Контактов нет",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Светлая",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Тёмная",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Стена каналов TeleX",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Моды",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Вкл",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Выкл",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Установить мод из файла",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "неофициальный клиент Telegram",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Мод установлен",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Автоматически",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Выйти из аккаунта?",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Телефон",
-  "where": "chat/js/pages.js",
-  "plural": false
- },
- {
-  "key": "Стикеры",
-  "where": "chat/js/panel.js",
-  "plural": false
- },
- {
-  "key": "GIF скоро",
-  "where": "chat/js/panel.js",
-  "plural": false
- },
- {
-  "key": "Стикеры скоро",
-  "where": "chat/js/panel.js",
-  "plural": false
- },
- {
-  "key": "Файлы",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Ссылки",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Музыка",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Голосовые",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Чат",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Автоудаление",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Поделиться контактом",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Разблокировать",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Заблокировать",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Пользователь заблокирован",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Пользователь разблокирован",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Изменить контакт",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Удалить контакт",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Удалить контакт «{a}»?",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Контакт удалён",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Отправить подарок",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Начать секретный чат",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Запретить копирование",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Создать ярлык",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Пожаловаться",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Покинуть группу",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Покинуть «{a}»?",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "Готово",
-  "where": "chat/js/profile.js",
-  "plural": false
- },
- {
-  "key": "бот",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) недавно",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) на этой неделе",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) в этом месяце",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) давно",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) в {a}",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) вчера в {a}",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "был(а) {a}",
-  "where": "chat/js/store.js",
-  "plural": false
- },
- {
-  "key": "{n} участник",
-  "where": "chat/js/store.js",
-  "plural": true,
-  "forms": [
-   "{n} участник",
-   "{n} участника",
-   "{n} участников"
-  ]
- },
- {
   "key": "TeleX — стена каналов Telegram",
   "where": "index.html",
   "plural": false
@@ -2460,7 +1865,17 @@
   "plural": false
  },
  {
+  "key": "Все",
+  "where": "index.html",
+  "plural": false
+ },
+ {
   "key": "Популярное",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Избранное",
   "where": "index.html",
   "plural": false
  },
@@ -2490,7 +1905,7 @@
   "plural": false
  },
  {
-  "key": "Выберите чат",
+  "key": "Готово",
   "where": "index.html",
   "plural": false
  },
@@ -2500,12 +1915,37 @@
   "plural": false
  },
  {
+  "key": "Меню",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Очистить",
+  "where": "index.html",
+  "plural": false
+ },
+ {
   "key": "Поиск в комментариях",
   "where": "index.html",
   "plural": false
  },
  {
+  "key": "Эмодзи",
+  "where": "index.html",
+  "plural": false
+ },
+ {
   "key": "Комментарий",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Отправить",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Вниз",
   "where": "index.html",
   "plural": false
  }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copies the extra Telegram for Android icons used by Telegram You (app/static/chat) into
+"""Copies the extra Telegram for Android icons used by Telegram You (telegram-you) into
 app/static/icons/android/ (vectors become SVG, rasters are copied from xxhdpi).
 
 Usage: python3 tools/icons/extract-chat.py <path-to-DrKLO/Telegram checkout>

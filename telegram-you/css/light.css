@@ -1,0 +1,113 @@
+/* Light ("day") theme. Dark stays the base; this file only re-colours what is
+   hard-coded for dark. Media viewers and stories stay black, like in Telegram. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --tx-bg: #f0f0f5;
+  --tx-surface: #ffffff;
+  --tx-surface-2: #f2f2f6;
+  --tx-bubble: #ffffff;
+  --tx-glass: rgba(255, 255, 255, 0.8);
+  --tx-glass-border: rgba(0, 0, 0, 0.08);
+  --tx-separator: rgba(0, 0, 0, 0.09);
+  --tx-text: #000000;
+  --tx-text-2: #707579;
+  --tx-hint: #9a9ea4;
+  --tx-reaction: rgba(58, 111, 230, 0.1);
+  --tx-red: #e5484d;
+  --tx-green: #2f9e44;
+  --tx-badge-muted: #a8acb2;
+  --tx-story-read: rgba(0, 0, 0, 0.25);
+  --tx-dock-cut: rgb(255, 255, 255);
+  --color-background: #f0f0f5;
+  --color-background-secondary: #ffffff;
+  --color-background-card: #ffffff;
+  --color-background-card-hover: #f4f4f7;
+  --color-borders: rgba(0, 0, 0, 0.08);
+  --color-borders-strong: rgba(0, 0, 0, 0.14);
+  --color-text: #000000;
+  --color-text-secondary: #707579;
+  --color-text-meta: #8a8e93;
+  --color-reaction-bg: rgba(0, 0, 0, 0.06);
+  --color-reaction-hover: rgba(0, 0, 0, 0.1);
+}
+html[data-theme='light'], html[data-theme='light'] body { background: var(--tx-bg); color: var(--tx-text); }
+
+/* chat wallpaper: the same drawing, in dark lines on a pale gradient */
+html[data-theme='light'] #tgx-bg-pattern { filter: invert(1); }
+
+/* text that was hard-coded white */
+html[data-theme='light'] .tx-circle,
+html[data-theme='light'] .tx-search input,
+html[data-theme='light'] .tx-empty-icon .icon,
+html[data-theme='light'] .tx-composer-field textarea,
+html[data-theme='light'] .tx-pf-action,
+html[data-theme='light'] .tx-reaction,
+html[data-theme='light'] .tx-menu button .icon,
+html[data-theme='light'] .tx-menu-head,
+html[data-theme='light'] .tx-menu-head .icon,
+html[data-theme='light'] .tx-side-btn,
+html[data-theme='light'] .tx-pinned,
+html[data-theme='light'] .tx-dock-tab,
+html[data-theme='light'] .tx-thread-jump { color: var(--tx-text); }
+html[data-theme='light'] .tx-text { color: var(--tx-text) !important; }
+html[data-theme='light'] .tx-empty p,
+html[data-theme='light'] .tx-reply span,
+html[data-theme='light'] .tx-webpage-desc { color: var(--tx-text-2); }
+html[data-theme='light'] .tx-tab .tx-badge { color: #fff; }
+html[data-theme='light'] .tx-tab.is-active .tx-badge { color: #fff; }
+
+/* outgoing bubbles are coloured in both themes: white text */
+html[data-theme='light'] .tx-bubble.is-out,
+html[data-theme='light'] .tx-bubble.is-out .tx-text,
+html[data-theme='light'] .tx-msg.is-out .tx-msg-body { color: #fff !important; }
+html[data-theme='light'] .tx-msg.is-out a { color: #fff; text-decoration: underline; }
+
+/* hover / pressed states */
+html[data-theme='light'] .tx-icon-btn:hover,
+html[data-theme='light'] .tx-emoji-pop button:hover,
+html[data-theme='light'] .tx-menu button:active,
+html[data-theme='light'] .tx-menu button:hover { background: rgba(0, 0, 0, 0.06); }
+html[data-theme='light'] button.tx-row:active,
+html[data-theme='light'] label.tx-row:active,
+html[data-theme='light'] .tx-comments-row:active { background: rgba(0, 0, 0, 0.05); }
+
+/* surfaces */
+html[data-theme='light'] .tx-search-main,
+html[data-theme='light'] .tx-search { background: rgba(255, 255, 255, 0.9); }
+html[data-theme='light'] .tx-pill-tabs { background: rgba(0, 0, 0, 0.05); }
+html[data-theme='light'] .tx-ctx-reactions,
+html[data-theme='light'] .tx-menu { background: rgba(255, 255, 255, 0.98); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18); }
+html[data-theme='light'] .tx-menu-gap { background: rgba(0, 0, 0, 0.06); }
+html[data-theme='light'] .liquid-glass { background: rgba(255, 255, 255, 0.98) !important; border-color: rgba(0, 0, 0, 0.08) !important; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2); }
+html[data-theme='light'] .tx-switch span { background: #c9ccd1; }
+html[data-theme='light'] .tx-slider input[type=range] { background: linear-gradient(to right, var(--tx-accent-fill) var(--p, 50%), rgba(0, 0, 0, 0.14) var(--p, 50%)); }
+html[data-theme='light'] .tx-wave i { background: rgba(0, 0, 0, 0.3); }
+html[data-theme='light'] .tx-progress { background: rgba(0, 0, 0, 0.15); }
+html[data-theme='light'] .tx-skel-ava { background-color: rgba(0, 0, 0, 0.08); }
+html[data-theme='light'] .tx-skeleton i,
+html[data-theme='light'] .tx-skel { background-color: rgba(0, 0, 0, 0.06); }
+html[data-theme='light'] .tx-pf-hero-bg, html[data-theme='light'] .tx-pf-top { background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.6)); }
+
+/* glass bars */
+html[data-theme='light'] .tx-dock {
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: inset 0 0 0 0.4px rgba(0, 0, 0, 0.08), 0 6px 24px rgba(0, 0, 0, 0.16);
+}
+html[data-theme='light'] .tx-dock-tab:not(.is-active) .tx-tab-icon { filter: invert(1) brightness(0.45); }
+html[data-theme='light'] .tx-dock-tab:not(.is-active) .tx-tab-label { color: var(--tx-text); }
+html[data-theme='light'] .tx-dock-tab.is-active { color: var(--tx-accent); }
+html[data-theme='light'] .tx-dock-fade { background: linear-gradient(to bottom, rgba(240, 240, 245, 0), rgba(240, 240, 245, 0.7)); }
+html[data-theme='light'] .tx-stories-bar,
+html[data-theme='light'] .tx-wall-top { background: linear-gradient(to bottom, rgba(244, 244, 248, 0.86), rgba(244, 244, 248, 0.5)); }
+html[data-theme='light'] .tx-stack .tx-avatar { box-shadow: 0 0 0 2px #f2f2f6, 0 0 0 3.5px #3cbf7a; }
+
+/* scrollbars, links, code from the old theme file */
+html[data-theme='light'] { scrollbar-color: rgba(0, 0, 0, 0.25) transparent; }
+html[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.22); }
+
+/* old-theme text colours */
+html[data-theme='light'] .post-text { color: var(--tx-text); }
+html[data-theme='light'] .tx-bubble.is-out .post-text { color: #fff; }
+html[data-theme='light'] .post-text .hashtag, html[data-theme='light'] .post-text .mention { color: var(--tx-link) !important; }
+html[data-theme='light'] .tg-quote { background: var(--tx-accent-soft) !important; color: var(--tx-text); }
+html[data-theme='light'] .tx-msg-body, html[data-theme='light'] .tx-reply b { color: inherit; }

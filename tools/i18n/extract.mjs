@@ -40,9 +40,8 @@ function scan(dir) {
   }
 }
 scan(path.join(ROOT, 'js'));
-scan(path.join(ROOT, 'chat/js'));
 // static text and attributes of index.html
-const html = ['index.html', 'chat/index.html'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+const html = ['index.html'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
 for (const m of html.matchAll(/>([^<>{}]*[А-Яа-яЁё][^<>{}]*)</g)) add(m[1].trim().replace(/\s+/g, ' '), 'index.html');
 for (const m of html.matchAll(/\b(?:placeholder|title|alt|aria-label)="([^"]*[А-Яа-яЁё][^"]*)"/g)) add(m[1].trim(), 'index.html');
 for (const m of html.matchAll(/<title>([^<]*)<\/title>/g)) if (/[А-Яа-яЁё]/.test(m[1])) add(m[1].trim(), 'index.html');

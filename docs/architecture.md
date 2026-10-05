@@ -106,25 +106,5 @@ URL `media/<kind>/…` → `sw.js` перехватывает → просит �
 * `loadDialogs()` грузит до 100 диалогов и кэширует сущности — для чатов нужна полноценная пагинация и IndexedDB.
 * Тестировать на живом Telegram из песочницы обычно нельзя → `07-TESTING.md`.
 
-## 10. Telegram You (`app/static/chat/`)
-Второй клиент: обычные чаты. Работает на том же движке и той же сессии, лежит внутри области Service Worker (`app/static/`), поэтому медиа идёт тем же путём.
-```
-chat/index.html         разметка: список (aside), переписка (main), меню, просмотрщик
-chat/chat.css           стили; цвета берутся из токенов css/tx/tokens.css и light.css
-chat/js/app.js          запуск: тема, язык, вход (authModal), вкладки, живые события
-chat/js/store.js        общее состояние S, шина событий, форматирование времени и статусов
-chat/js/list.js         вкладка «Чаты»: папки, архив, поиск, строки диалогов
-chat/js/conv.js         переписка: шапка, пузыри, композер, отправка, меню, просмотр медиа
-chat/js/pages.js        «Контакты», «Настройки», «Профиль»
-chat/js/fake.js         демо-сервис для ?fake=1 (тесты, скриншоты)
-js/telegram-chat.js     API чатов поверх TelegramService (работает и в Worker)
-```
-Ключи собеседников: `u123` (пользователь), `g123` (обычная группа), `c123` (канал/супергруппа). Диалоги и сообщения — простые объекты (`formatDialog`, `formatChatMessage`). Адреса медиа — `media/<тип>/<ключ>/<id сообщения>`; на странице они получают префикс `../`.
-
-Методы: `chatDialogs`, `chatFolders`, `chatHistory`, `chatSend`, `chatSendFile`, `chatEdit`, `chatDelete`, `chatMarkRead`, `chatTyping`, `chatSearch`, `chatContacts`, `startChatLive`.
-
-### Расширения (моды) и точки расширения
-`chat/js/ext.js` — реестр: меню (`message`, `chat`), хуки (`beforeSend`) и события (`message`). Встроенные пункты и моды пользуются одними и теми же точками. `chat/js/mods.js` загружает моды как ES-модули (`export default function (tx) {…}`) прямо в страницу: песочницы нет, мод получает полный доступ к API (`tx.S`, `tx.tg`, `tx.ext`, `tx.menu`, `tx.send`, `tx.storage`, `tx.toast`). Перед установкой показывается предупреждение; поле `manifest.verified` зарезервировано под будущую проверку модов. Примеры: `mods-examples/`.
-
-### Иконки
-Оригинальные иконки Telegram для Android (`app/static/icons/android/`) извлекаются скриптами `tools/icons/extract.py` и `extract-chat.py` из клона DrKLO/Telegram. В Telegram You они подключаются через `chat/js/icons.js` как маски (`.ic`), анимации нижней панели — lottie из `icons/tabs/`.
+## 10. Telegram You
+Вынесен в отдельный проект `telegram-you/` (свой README, AGENT.md, тесты, переводы, ресурсы Telegram). Его архитектура: `telegram-you/docs/architecture.md`. `app/static/chat/index.html` — только перенаправление.

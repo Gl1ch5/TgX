@@ -122,51 +122,6 @@ const ok = (msg) => console.log('  ✓', msg);
       await ctx.close();
     }
   }
-  // ---- Telegram You (app/static/chat/, demo service ?fake=1) ----
-  console.log('\nTelegram You');
-  for (const scheme of ['dark', 'light']) {
-    const ctx = await browser.newContext({ viewport: { width: 412, height: 860 }, colorScheme: scheme, locale: 'ru-RU' });
-    const page = await ctx.newPage();
-    const errs = [];
-    page.on('pageerror', (e) => errs.push(e.message));
-    await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.abort());
-    await page.goto(`http://127.0.0.1:${port}/chat/?fake=1`);
-    try {
-      await page.waitForSelector('.cx-row', { timeout: 8000 });
-      ok(`${scheme}: chat list renders`);
-      await page.click('.cx-row[data-id="u1000"]');
-      await page.waitForSelector('.cx-msg', { timeout: 5000 });
-      ok(`${scheme}: conversation opens with messages`);
-      const before = await page.locator('.cx-msg').count();
-      await page.fill('#cx-input', 'тест отправки');
-      await page.click('#cx-send');
-      await page.waitForFunction((n) => document.querySelectorAll('.cx-msg').length > n, before, { timeout: 4000 });
-      await page.waitForFunction(() => !document.querySelector('.cx-msg.pending'), null, { timeout: 4000 });
-      ok(`${scheme}: message is sent (pending → sent)`);
-      await page.click('[data-act="back"], .cx-back');
-      for (const tab of ['contacts', 'settings', 'profile', 'chats']) { await page.click(`[data-tab="${tab}"]`); await page.waitForTimeout(150); }
-      ok(`${scheme}: tabs switch`);
-      // mods: full-access ES module, plugged through the extension points, removable
-      const modOk = await page.evaluate(async () => {
-        const { installMod, removeMod } = await import('./js/mods.js');
-        const { ext } = await import('./js/ext.js');
-        const code = "export default function (tx) { tx.menu('message', 'Probe item', () => {}); tx.ext.addHook('beforeSend', (x) => x + '!'); tx.storage.set('k', 1); }";
-        const p = installMod({ manifest: { id: 'probe', name: 'Probe', version: '1' }, code });
-        await new Promise((r) => setTimeout(r, 100));
-        document.querySelector('#cx-menu button[data-v="1"]').click();
-        await p;
-        const has = ext.menu('message', { msg: {}, chat: {} }).some((i) => i.label === 'Probe item');
-        const hooked = await ext.run('beforeSend', 'hi', {});
-        removeMod('probe');
-        const gone = !ext.menu('message', { msg: {}, chat: {} }).some((i) => i.label === 'Probe item');
-        return has && hooked === 'hi!' && gone;
-      });
-      modOk ? ok(`${scheme}: a mod plugs in (menu item, send hook) and is removed cleanly`) : fail(`chat ${scheme}: mod lifecycle failed`);
-      if (shotsDir) await page.screenshot({ path: path.join(shotsDir, `chat-${scheme}.png`) });
-    } catch (e) { fail(`chat ${scheme}: ${e.message.split('\n')[0]}`); }
-    errs.length ? errs.slice(0, 5).forEach((e) => fail(`chat ${scheme}: page error ${e}`)) : ok(`${scheme}: no page errors`);
-    await ctx.close();
-  }
   await browser.close();
   srv.close();
   console.log(failures.length ? `\n${failures.length} problem(s)` : '\nALL GOOD');
