@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Моды TeleX — документация</title>
+<meta name="description" content="Как создать мод для TeleX: формат .module, темы, виджеты, API, инструкция для нейросетей.">
+<link rel="icon" href="app/static/icons/telex.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site/landing.css">
+<style>
+  .doc { max-width: 860px; margin: 0 auto; padding: 96px 20px 80px; line-height: 1.6; }
+  .doc h1 { font-size: 40px; margin: 0 0 8px; }
+  .doc h2 { font-size: 28px; margin: 44px 0 10px; }
+  .doc h3 { font-size: 21px; margin: 30px 0 8px; }
+  .doc h4 { font-size: 17px; margin: 22px 0 6px; }
+  .doc p, .doc li { color: var(--text-2); font-size: 16.5px; }
+  .doc a { color: #6aa3ff; }
+  .doc code { background: rgba(127,127,127,.18); padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+  .doc pre { background: rgba(0,0,0,.4); border-radius: 14px; padding: 16px 18px; overflow-x: auto; }
+  .doc pre code { background: none; padding: 0; font-size: 13.5px; color: #dfe6f3; }
+  .doc .tbl { overflow-x: auto; }
+  .doc table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  .doc th, .doc td { text-align: left; padding: 8px 12px; border-bottom: 1px solid rgba(127,127,127,.25); vertical-align: top; }
+  .tabs { display: flex; gap: 8px; margin: 26px 0 6px; flex-wrap: wrap; }
+  .tabs a { padding: 9px 18px; border-radius: 999px; background: rgba(127,127,127,.18); color: inherit; text-decoration: none; font-weight: 600; }
+  .lead { font-size: 19px; color: var(--text-2); }
+</style>
+</head>
+<body>
+  <header class="nav"><div class="wrap nav-in">
+    <a class="brand" href="./"><img src="app/static/icons/telex.svg" alt="" width="32" height="32">TeleX</a>
+    <nav class="links"><a href="./#mods">Каталог модов</a><a href="#people">Для людей</a><a href="#agents">Для нейросетей</a></nav>
+    <a class="btn btn-sm" href="app/static/">Открыть</a>
+  </div></header>
+  <main class="doc">
+    <h1>Моды TeleX</h1>
+    <p class="lead">Мод — один файл <code>.module</code>. Внутри может быть что угодно: тема, HTML-виджет, JS, CSS. Любой экран приложения можно изменить или дополнить.</p>
+    <div class="tabs"><a href="#people">Документация</a><a href="#agents">Инструкция для нейросетей</a><a href="./#mods">Скачать официальные моды</a></div>
+    <section id="people"><p>Мод — расширение, которое работает внутри приложения с <b>полным доступом</b> к его API (песочницы нет сознательно). Поэтому установщик показывает предупреждение, а поле <code>manifest.verified</code> зарезервировано под будущую проверку модов. Моды ставятся в <b>Настройки → Моды</b> (или из «Настроек чатов» → «Моды тем»): из файла <code>.module</code>, по ссылке <code>https://…</code> или вставкой текста.</p>
+<h3 id="h-файл-module">Файл <code>.module</code></h3>
+<p>Мод — файл с расширением <b><code>.module</code></b>. Это обычный текст, внутри может быть что угодно: HTML, JS, CSS, тема, JSON-данные. Поддерживаются две формы.</p>
+<p><b>1. JSON-пакет</b> — несколько частей в одном файле:</p>
+<pre><code>{
+  "manifest": { "id": "my-mod", "name": "Мой мод", "version": "1.0.0", "author": "me",
+                "description": "коротко", "about": "подробно\nв несколько строк",
+                "icon": "🕒", "preview": ["https://…/1.png", "data:image/png;base64,…"], "tags": ["theme"],
+                "settings": [ { "key": "seconds", "type": "switch", "title": "Секунды", "default": false } ] },
+  "parts": [
+    { "type": "theme", "data": { … } },
+    { "type": "css",   "code": "…" },
+    { "type": "html",  "code": "&lt;div&gt;…&lt;/div&gt;&lt;script&gt;…&lt;/script&gt;" },
+    { "type": "js",    "code": "export default function (tx) { … }" },
+    { "type": "json",  "name": "table", "data": { … } }
+  ]
+}</code></pre>
+<p><b>2. Один исходник с аннотацией</b> — первая строка-комментарий с <code>@manifest {json}</code>, остальное — тело. Тело, начинающееся с <code>&lt;</code>, — HTML (скрипты внутри выполняются), JSON с ключами темы — тема, иначе — JS-модуль. Примеры: <code>// @manifest {…}</code>, <code>&lt;!-- @manifest {…} --&gt;</code>.</p>
+<p><code>id</code> — латиница/цифры/<code>._-</code>, 2–41 символ. Размер — до 1,5 МБ. Мод только из <code>theme</code>/<code>css</code> не исполняет код, поэтому ставится без предупреждения о полном доступе.</p>
+<h4 id="h-языки">Языки</h4>
+<p>Любой текст манифеста — <code>name</code>, <code>description</code>, <code>about</code>, <code>title</code>/<code>sub</code>/подписи <code>options</code> в настройках — можно задать либо строкой, либо по языкам: <code>{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }</code>. Берётся язык приложения, иначе английский. В коде: <code>tx.L({ ru: '…', en: '…' })</code>. Официальные моды переведены на все 5 языков.</p>
+<h4 id="h-иконка">Иконка</h4>
+<p><code>icon</code> — эмодзи <b>или</b> картинка: <code>data:image/svg+xml;base64,…</code>, <code>https://…</code> либо путь внутри приложения (<code>mods/icons/&lt;id&gt;.svg</code> у официальных). Лучше SVG 96×96 со скруглённым квадратом и градиентом — как у официальных модов (<code>app/static/mods/icons/</code>).</p>
+<h4 id="h-карточка-и-страница-мода">Карточка и страница мода</h4>
+<p><code>description</code> — короткое описание на карточке, <code>about</code> — подробное (на странице мода), <code>preview</code> — картинка или список картинок (<code>https://</code> или <code>data:image/…</code>; без них рисуется превью темы или <code>icon</code> на градиенте), <code>tags</code>, <code>author</code>, <code>version</code>.</p>
+<h4 id="h-настройки-мода">Настройки мода</h4>
+<p><code>manifest.settings</code> — схема: <code>{ key, type: "switch" | "text" | "number" | "select" | "color", title, sub?, default, min?, max?, options? }</code>. Страница мода рисует для них элементы сама. В коде: <code>tx.config.get(key)</code>, <code>tx.config.set(key, v)</code>, <code>tx.config.on(key | '*', fn)</code>; для собственного блока на странице — <code>tx.config.render((box) =&gt; { … })</code>. В HTML-частях объект доступен как <code>TeleXMods['&lt;id&gt;']</code>.</p>
+<h3 id="h-тема-theme-часть">Тема (<code>theme</code>-часть)</h3>
+<div class="tbl"><table><thead><tr><th>поле</th><th>что делает</th></tr></thead><tbody><tr><td><code>vars</code></td><td>CSS-переменные: <code>{ "all": {}, "dark": {}, "light": {} }</code>, например <code>--tx-bg</code>, <code>--tx-accent</code>, <code>--tx-bubble-out</code>, <code>--tx-surface</code>, <code>--tx-text</code> (список — <code>app/static/css/tx/tokens.css</code>)</td></tr><tr><td><code>css</code></td><td>произвольный CSS</td></tr><tr><td><code>wallpapers[]</code></td><td>обои в выбор: <code>{ id, name, kind: "fill" | "pattern", colors: ["#rrggbb"…], rotation, intensity, url? }</code> (как у обоев Telegram: 1–4 цвета; <code>intensity &lt; 0</code> — тёмный фон; <code>url</code> паттерна — svg)</td></tr><tr><td><code>colorThemes[]</code></td><td>цветовая тема в карусели «Настроек чатов»: <code>{ id, emoji, accent?, out: { dark: [цвета], light: [цвета] }, wallpapers: { dark, light } }</code> — у темы свои обои для дня и ночи</td></tr><tr><td><code>apply</code></td><td>id цветовой темы, которую выбрать сразу после установки</td></tr></tbody></table></div>
+<h3 id="h-api-кода-tx">API кода (<code>tx</code>)</h3>
+<p><code>export default function (tx) { … }</code> (в HTML-частях — <code>TeleXMods['&lt;id&gt;']</code>).</p>
+<div class="tbl"><table><thead><tr><th>что</th><th>зачем</th></tr></thead><tbody><tr><td><code>tx.theme</code></td><td><code>setVars(vars, mode)</code>, <code>addCss(css)</code>, <code>addColorTheme(theme)</code>, <code>addWallpaper(wp)</code>, <code>setWallpaper(id)</code>, <code>select(themeId)</code>, <code>mode()</code></td></tr><tr><td><code>tx.ui</code></td><td><code>watch(selector, fn)</code> — fn(el) для существующих и будущих элементов; <code>inject(selector, html, where)</code> — вставить разметку в любой экран; <code>root()</code></td></tr><tr><td><code>tx.ext</code></td><td><code>addMenu(point, provider)</code>, <code>addHook(name, fn)</code>, <code>on(event, fn)</code> — см. «Точки расширения»</td></tr><tr><td><code>tx.settings</code></td><td><code>addRow({ title, sub, icon, color, run })</code>, <code>addPage({ id, title, sub, icon, render(box) })</code> — свой экран в настройках</td></tr><tr><td><code>tx.config</code></td><td>настройки мода: <code>get</code>, <code>set</code>, <code>on(key | '*', fn)</code>, <code>render(fn(box))</code></td></tr><tr><td><code>tx.storage</code></td><td><code>get(k)</code>, <code>set(k, v)</code> — произвольные данные мода</td></tr><tr><td><code>tx.onStop(fn)</code></td><td>своя очистка (таймеры, узлы) при выключении мода</td></tr><tr><td><code>tx.data</code></td><td>части <code>json</code>/<code>text</code> из пакета, по <code>name</code></td></tr><tr><td><code>tx.S</code>, <code>tx.api</code></td><td>состояние приложения (<code>S.posts</code>, <code>S.channels</code>, <code>S.user</code>) и весь доступ к Telegram</td></tr><tr><td><code>tx.t</code>, <code>tx.toast</code>, <code>tx.confirm</code>, <code>tx.escapeHtml</code></td><td>перевод, всплывашка, диалог, экранирование</td></tr></tbody></table></div>
+<h4 id="h-точки-расширения-tx-ext">Точки расширения (<code>tx.ext</code>)</h4>
+<ul><li>меню <code>post</code> — пункты меню поста: провайдер получает <code>{ post }</code> и возвращает <code>[{ label, icon, run }]</code>;</li><li>меню <code>settings</code> — строки на экране настроек;</li><li>хук <code>postText</code> (синхронный) — готовый HTML текста поста → HTML;</li><li>события <code>view</code> (сменился экран).</li></ul>
+<p>Так как это веб-приложение, мод может и <b>напрямую менять DOM</b> любого экрана (<code>tx.ui.watch</code>) — это и есть «внедрить что угодно». Всё, что мод добавил (стили, переменные, темы, обои, меню, наблюдатели, HTML, вставки), снимается при выключении или удалении.</p>
+<p>Примеры — <a href="../mods-examples"><code>mods-examples/</code></a>. Для нейросетей — <a href="#agents"><code>docs/mods-for-agents.md</code></a>.</p></section>
+    <section id="agents"><h2>Для нейросетей (инструкция агенту)</h2><p>Goal: you are asked to "make a mod/theme/widget for TeleX". Produce <b>one file with the extension <code>.module</code></b> that the user installs in *Settings → Mods* (file, link or pasted text). No build step, no dependencies, no sandbox: the file runs inside the web app with full access.</p>
+<h3 id="a-output-contract">Output contract</h3>
+<p>1. Write exactly one file, <code>&lt;id&gt;.module</code>, UTF-8 text. Do not wrap it in markdown fences when saving it to a file. 2. It must contain a <b>manifest</b> and one or more <b>parts</b>. Two accepted shapes:</p>
+<p><b>A. JSON bundle</b> (use this for anything with more than one part):</p>
+<pre><code>{
+  "manifest": {
+    "id": "my-mod",                 // required: [a-z0-9][a-z0-9._-]{1,40}
+    "name": "My mod",               // required
+    "version": "1.0.0", "author": "me",
+    "description": "one line shown on the card",
+    "about": "longer text\nshown on the mod page",
+    "icon": "🧩",                    // emoji (card icon when there is no preview)
+    "preview": ["https://…/shot.png"],   // optional; https:// or data:image/…; a theme gets an auto preview
+    "tags": ["theme"],
+    "settings": [ { "key": "size", "type": "number", "title": "Size", "default": 16, "min": 10, "max": 30 } ]
+  },
+  "parts": [
+    { "type": "theme", "data": { } },
+    { "type": "css",   "code": "…" },
+    { "type": "html",  "code": "&lt;div&gt;…&lt;/div&gt;&lt;script&gt;const tx = TeleXMods['my-mod']; …&lt;/script&gt;" },
+    { "type": "js",    "code": "export default function (tx) { … }" },
+    { "type": "json",  "name": "table", "data": { } }
+  ]
+}</code></pre>
+<p><b>B. Single annotated source</b> — first line is a comment holding <code>@manifest {one-line json}</code>, the rest is the body: <code>// @manifest {…}</code> + JS module · <code>&lt;!-- @manifest {…} --&gt;</code> + HTML · <code>/* @manifest {…} */</code> + JSON theme. Body starting with <code>&lt;</code> = HTML, JSON with <code>vars|colorThemes|wallpapers|css</code> = theme, anything else = JS module (must <code>export default function (tx)</code>).</p>
+<p>Limits: total ≤ 1.5 MB. A mod made only of <code>theme</code>/<code>css</code> parts executes no code (the user gets a lighter confirmation).</p>
+<h3 id="a-languages-and-icon-do-this-for-every-mod-you-publish">Languages and icon (do this for every mod you publish)</h3>
+<p>Any manifest text (<code>name</code>, <code>description</code>, <code>about</code>, settings <code>title</code>/<code>sub</code>, <code>options</code> labels) may be a string <b>or</b> <code>{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }</code>. Provide all five when the mod is meant for others; the app picks its language, then English. In code use <code>tx.L({ ru: '…', en: '…', … })</code>. <code>icon</code>: an emoji, or an image — <code>data:image/svg+xml;base64,…</code> / <code>https://…</code> / <code>mods/icons/&lt;id&gt;.svg</code> (official mods). Prefer a 96×96 SVG: rounded square <code>rx=22</code> with a two-colour gradient and a white stroke glyph (see <code>app/static/mods/icons/*.svg</code>).</p>
+<h3 id="a-settings-schema-manifest-settings">Settings schema (<code>manifest.settings[]</code>)</h3>
+<p><code>{ key, type, title, sub?, default, … }</code> with <code>type</code>: <code>switch</code> (bool) · <code>number</code> (<code>min</code>,<code>max</code>,<code>step</code>) · <code>select</code> (<code>options</code>: <code>["a","b"]</code> or <code>[["value","Label"]]</code>) · <code>color</code> (<code>#rrggbb</code>) · <code>text</code>. The mod page renders the controls. Read with <code>tx.config.get(key)</code>; react with <code>tx.config.on(key | '*', fn)</code>; for a custom block use <code>tx.config.render((box) =&gt; { box.innerHTML = '…' })</code>.</p>
+<h3 id="a-theme-part">Theme part</h3>
+<pre><code>{ "vars":  { "all": {}, "dark": { "--tx-bg": "#000" }, "light": { "--tx-bg": "#f0f0f5" } },
+  "css": "…",
+  "wallpapers":  [ { "id": "dusk", "name": "Dusk", "kind": "fill", "colors": ["#3a1c4a", "#e0643a"], "rotation": 45, "intensity": 0 } ],
+  "colorThemes": [ { "id": "sunset", "emoji": "🌇", "accent": "orange",
+                     "out": { "dark": ["#cf4339", "#e08a35"], "light": ["#e0483f", "#f09a3a"] },
+                     "wallpapers": { "dark": { "kind": "fill", "colors": ["#2a1030", "#8a3a2a"] }, "light": { "kind": "fill", "colors": ["#ffd9b8", "#ffb48a"] } } } ],
+  "apply": "sunset" }</code></pre>
+<p>Wallpaper: <code>kind</code> <code>fill</code> | <code>pattern</code> (<code>url</code> to an svg); 1–4 <code>colors</code>; <code>rotation</code> degrees (2 colours); <code>intensity</code> negative = dark background (pattern lit by the colours). <code>accent</code>: <code>blue|violet|orange|cyan|green|pink|…</code> (names in <code>app/static/js/core/prefs.js</code> <code>ACCENTS</code>). CSS variables: see <code>app/static/css/tx/tokens.css</code>.</p>
+<h3 id="a-code-api-tx-argument-of-export-default-function-tx-in-html-parts-telexmods-id">Code API — <code>tx</code> (argument of <code>export default function (tx)</code>; in html parts: <code>TeleXMods['&lt;id&gt;']</code>)</h3>
+<ul><li><code>tx.theme.setVars(vars, 'all'|'dark'|'light')</code>, <code>.addCss(css)</code>, <code>.addColorTheme(t)</code>, <code>.addWallpaper(w)</code>, <code>.setWallpaper(id)</code>, <code>.select(themeId)</code>, <code>.mode()</code></li><li><code>tx.ui.watch(selector, el =&gt; …)</code> — run for existing and future elements (MutationObserver); <code>tx.ui.inject(selector, html, where='beforeend')</code>; <code>tx.ui.root()</code></li><li><code>tx.ext.addMenu('post', ({post}) =&gt; [{label, icon, run}])</code> — item in the post menu · <code>tx.ext.addMenu('settings', …)</code> — rows in settings</li><li><code>tx.ext.addHook('postText', (html, ctx) =&gt; html)</code> — sync rewrite of every post's HTML · <code>tx.ext.on('view', name =&gt; …)</code></li><li><code>tx.settings.addRow({title, sub, icon, color, run})</code> · <code>tx.settings.addPage({id, title, sub, icon, render(box)})</code></li><li><code>tx.config</code> (own settings) · <code>tx.storage.get/set</code> · <code>tx.data[name]</code> (json/text parts)</li><li><code>tx.S</code> — app state: <code>S.posts</code>, <code>S.channels</code>, <code>S.user</code>, … · <code>tx.api</code> — all Telegram calls (see <code>app/static/js/api.js</code>) · <code>tx.t</code>, <code>tx.toast(msg)</code>, <code>tx.confirm(text, okLabel)</code>, <code>tx.escapeHtml</code></li></ul>
+<p><code>tx.onStop(fn)</code> registers your own cleanup (timers, nodes). Everything registered through <code>tx</code> is removed when the mod is disabled/deleted. Things you create *outside* <code>tx</code> (timers, global listeners, <code>document.body</code> nodes) are your responsibility — for HTML parts the root <code>&lt;div class="tx-mod-root"&gt;</code> is removed automatically, timers are not.</p>
+<h3 id="a-how-to-build-any-ui-change">How to build any UI change</h3>
+<p>1. Find the markup you want to change in <code>app/static/js/**</code> (templates are template-literals) and the styles in <code>app/static/css/tx/*.css</code>.    Class prefix <code>tx-</code>; screens: <code>#screen-wall</code>, <code>#screen-settings</code>, <code>#screen-profile</code>, <code>#screen-thread</code>, <code>#screen-channel</code>; dock <code>.tx-dock</code>. 2. Restyle with <code>css</code>/<code>vars</code> parts (no code). Add behaviour with <code>tx.ui.watch(selector, fn)</code>. Add markup with <code>tx.ui.inject</code>. 3. The UI re-renders often — never rely on a node surviving; use <code>watch</code>, not a one-off <code>querySelector</code>. 4. Use theme variables (<code>var(--tx-accent)</code>, <code>var(--tx-surface)</code>, <code>var(--tx-text)</code>) so the mod works in day and night mode.</p>
+<h3 id="a-checklist-before-you-hand-the-file-over">Checklist before you hand the file over</h3>
+<ul><li><code>id</code> valid and unique; <code>name</code>, <code>version</code>, <code>description</code> filled; <code>about</code> explains how to use it.</li><li>Works in light and dark theme; no hard-coded fonts; touch targets ≥ 40 px (it also runs on phones).</li><li>Settings declared in <code>manifest.settings</code> with sane defaults; code reads them via <code>tx.config</code>, never assumes a value.</li><li>No network calls to unknown hosts; no secrets; no use of <code>tx.api</code> beyond what the mod needs (the user's account is at stake).</li><li>Valid JSON (bundle shape) — validate with <code>node -e "JSON.parse(require('fs').readFileSync('x.module','utf8'))"</code>.</li><li>Test: serve <code>app/static</code> (<code>python3 -m http.server 8801 --directory app/static</code>), open <code>index.html?fake=1</code>, Settings → Mods → paste the file.</li></ul>
+<p>Working examples: <code>mods-examples/sunset-theme.module</code> (JSON bundle, theme) · <code>clock-widget.module</code> (HTML + settings) · <code>copy-post-link.module</code> (JS + menus). Full human documentation: <code>docs/mods.md</code>.</p></section>
+  </main>
+</body>
+</html>

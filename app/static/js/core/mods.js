@@ -15,7 +15,7 @@
 import { ext } from './ext.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { t } from '../i18n.js';
+import { t, lang } from '../i18n.js';
 import { showToast, escapeHtml } from '../utils.js';
 import { onPrefsChange, applyAppearance, resolvedTheme } from './prefs.js';
 import { registerColorThemes, unregisterColorThemes, COLOR_THEMES } from './colorThemes.js';
@@ -39,10 +39,19 @@ const running = new Map(); // id -> { vars: {all,dark,light}, styles: [], themes
 
 export const listMods = () => load();
 
+/** A text that may be given per language: "text" or { ru, en, es, pt, uk }. Falls back to English, then to any. */
+export const L = (v) => (v == null || typeof v === 'string' ? v : v[lang()] || v.en || v.ru || Object.values(v)[0] || '');
+
+/** Icon of a mod: emoji, or an image (https:, data:image/ or a path inside the app). Returns { img } or { emoji }. */
+export function modIcon(icon) {
+  if (typeof icon === 'string' && /^(https:|data:image\/|mods\/)/.test(icon)) return { img: icon };
+  return { emoji: typeof icon === 'string' ? icon : '' };
+}
+
 export function validateManifest(m) {
   if (!m || typeof m !== 'object') return t('Неверный манифест');
   if (!/^[a-z0-9][a-z0-9._-]{1,40}$/.test(m.id || '')) return t('Неверный id мода');
-  if (!m.name || typeof m.name !== 'string') return t('У мода нет названия');
+  if (!L(m.name) || (typeof m.name !== 'string' && typeof m.name !== 'object')) return t('У мода нет названия');
   if (m.permissions != null && !Array.isArray(m.permissions)) return t('Неверные права');
   return null;
 }
@@ -185,7 +194,7 @@ function makeApi(mod) {
   for (const p of mod.parts) if (p.type === 'json' || p.type === 'text') dataParts[p.name || p.type] = p.data !== undefined ? p.data : p.code;
   return {
     mod: manifest,
-    S: state, api, t, toast: showToast, confirm: (text, ok) => confirmDialog(text, ok || t('ОК')), escapeHtml,
+    S: state, api, t, L, toast: showToast, confirm: (text, ok) => confirmDialog(text, ok || t('ОК')), escapeHtml,
     ext: {
       addMenu: (point, provider) => ext.addMenu(point, provider, id),
       addHook: (name, fn) => ext.addHook(name, fn, id),
@@ -275,7 +284,7 @@ async function start(mod) {
   } catch (e) {
     console.warn(`[mods] ${id} failed`, e);
     stop(id);
-    showToast(t('Мод «{a}» не запустился', { a: mod.manifest.name }));
+    showToast(t('Мод «{a}» не запустился', { a: L(mod.manifest.name) }));
   }
 }
 
@@ -319,8 +328,8 @@ export async function installMod(mod) {
   const risky = parts.some((p) => p.type === 'js' || p.type === 'html');
   const ok = await confirmDialog(
     risky
-      ? t('Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}', { a: m.name, b: m.verified ? '' : ' ' + t('Этот мод не проверен.') })
-      : t('Установить тему «{a}»?', { a: m.name }),
+      ? t('Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}', { a: L(m.name), b: m.verified ? '' : ' ' + t('Этот мод не проверен.') })
+      : t('Установить тему «{a}»?', { a: L(m.name) }),
     t('Установить'));
   if (!ok) return false;
   const entry = { manifest: m, parts, enabled: true };

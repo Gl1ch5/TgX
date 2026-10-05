@@ -423,3 +423,4 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Официальные моды ‖ Official mods ‖ Mods oficiales ‖ Mods oficiais ‖ Офіційні моди
 Обновить ‖ Update ‖ Actualizar ‖ Atualizar ‖ Оновити
 Установлено ‖ Installed ‖ Instalado ‖ Instalado ‖ Встановлено
+Документация по созданию модов ‖ How to create mods ‖ Cómo crear mods ‖ Como criar mods ‖ Документація зі створення модів

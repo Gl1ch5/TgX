@@ -21,7 +21,7 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { ext } from '../core/ext.js';
-import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial } from '../core/mods.js';
+import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, L as modL, modIcon, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -436,6 +436,7 @@ function extraRows() {
   return group(items.map((it, i) => row({ icon: it.icon || 'st-features', color: it.color || 'PURPLE', title: escapeHtml(it.title || it.label || ''), sub: it.sub ? escapeHtml(it.sub) : '', onclick: `window.__txSettingsExt[${i}].run()` })).join(''));
 }
 
+const MODS_DOCS_URL = 'https://telex-web.ru/mods.html';
 const modKind = (m) => (m.parts.some((p) => p.type === 'js' || p.type === 'html') ? (m.parts.some((p) => p.type === 'theme') ? t('Тема + код') : t('Мод')) : t('Тема'));
 
 /** Card picture: the mod's own preview, else a drawing of its theme, else its icon on a gradient. */
@@ -451,7 +452,9 @@ function modThumb(m, { big = false } = {}) {
     const out = ct.out && (ct.out[dayMode() ? 'light' : 'dark'] || ct.out.dark) || ['#5a86c4'];
     return `<span class="${cls}" style="position:relative;overflow:hidden">${wallPreviewHtml({ ...wp, remote: true, gradient: wallFillCss(wp), svg: wp.kind === 'pattern' ? wp.url : null }, dayMode(), 90)}<i class="tx-mod-bub" style="background:${out.length > 1 ? `linear-gradient(135deg,${out.join(',')})` : out[0]}"></i></span>`;
   }
-  const icon = mf.icon && !/^(https:|data:)/.test(mf.icon) ? mf.icon : (mf.name || '?').trim().slice(0, 1).toUpperCase();
+  const ic = modIcon(mf.icon);
+  if (ic.img) return `<span class="${cls} is-img"><img src="${escapeHtml(ic.img)}" alt=""></span>`;
+  const icon = ic.emoji || (modL(mf.name) || '?').trim().slice(0, 1).toUpperCase();
   return `<span class="${cls} is-icon">${parseEmojis(escapeHtml(icon))}</span>`;
 }
 
@@ -469,9 +472,9 @@ function modsPage() {
       <div class="tx-mod-card" onclick="window.TelegramX.openSettingsPage('mod:${mf.id}')">
         ${modThumb(m)}
         <span class="tx-mod-body">
-          <span class="tx-mod-name">${escapeHtml(mf.name)}</span>
+          <span class="tx-mod-name">${escapeHtml(modL(mf.name))}</span>
           <span class="tx-mod-sub">${sub}</span>
-          ${mf.description ? `<span class="tx-mod-desc">${escapeHtml(mf.description)}</span>` : ''}
+          ${mf.description ? `<span class="tx-mod-desc">${escapeHtml(modL(mf.description))}</span>` : ''}
         </span>
         <label class="tx-switch" onclick="event.stopPropagation()"><input type="checkbox" ${m.enabled ? 'checked' : ''} onchange="window.TelegramX.toggleMod('${mf.id}', this.checked)"><span></span></label>
       </div>`;
@@ -479,6 +482,7 @@ function modsPage() {
   return `
     ${titleBar(t('Моды'), { back: true })}
     <div class="tx-page">
+      ${group(row({ icon: 'faq', color: 'PURPLE', title: t('Документация по созданию модов'), sub: 'telex-web.ru/mods.html', onclick: `window.open('${MODS_DOCS_URL}', '_blank', 'noopener')` }))}
       ${group(
         row({ icon: 'download', color: 'BLUE', title: t('Установить из файла'), sub: t('Файл .module'), onclick: "document.getElementById('mod-file').click()" }) +
         row({ icon: 'copy', color: 'GREEN', title: t('Вставить ссылку или JSON'), onclick: "document.getElementById('mod-paste').classList.toggle('tx-hidden')" }) +
@@ -505,14 +509,16 @@ async function fillOfficial() {
   const cards = list.map((c) => {
     const cur = have.get(c.id);
     const state = cur == null ? t('Установить') : cur !== c.version ? t('Обновить') : t('Установлено');
-    const pic = c.swatch ? `<span class="tx-mod-pic" style="background:linear-gradient(135deg,${c.swatch.join(',')})">${parseEmojis(escapeHtml(c.icon || ''))}</span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(c.icon || c.name.slice(0, 1)))}</span>`;
+    const ic = modIcon(c.icon);
+    const nm = modL(c.name);
+    const pic = ic.img ? `<span class="tx-mod-pic is-img"><img src="${escapeHtml(ic.img)}" alt=""></span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(ic.emoji || nm.slice(0, 1)))}</span>`;
     return `
       <div class="tx-mod-card">
         ${pic}
         <span class="tx-mod-body">
-          <span class="tx-mod-name">${escapeHtml(c.name)} <i class="tx-verified"></i></span>
+          <span class="tx-mod-name">${escapeHtml(nm)} <i class="tx-verified"></i></span>
           <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
-          <span class="tx-mod-desc">${escapeHtml(c.description || '')}</span>
+          <span class="tx-mod-desc">${escapeHtml(modL(c.description) || '')}</span>
         </span>
         <button class="tx-mod-get ${cur != null && cur === c.version ? 'is-done' : ''}" ${cur != null && cur === c.version ? 'disabled' : ''} onclick="window.TelegramX.installOfficial('${c.id}')">${state}</button>
       </div>`;
@@ -527,12 +533,12 @@ function modControl(m, def) {
   const v = modConfigGet(m, def.key);
   const k = JSON.stringify(def.key).replace(/"/g, '&quot;');
   const set = (expr) => `window.TelegramX.modSet('${id}', ${k}, ${expr})`;
-  const title = escapeHtml(def.title || def.key);
-  const sub = def.sub ? escapeHtml(def.sub) : '';
+  const title = escapeHtml(modL(def.title) || def.key);
+  const sub = def.sub ? escapeHtml(modL(def.sub)) : '';
   switch (def.type) {
     case 'switch': return switchRow({ title, sub, checked: !!v, onchange: set('this.checked') });
     case 'number': return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + slider({ min: def.min ?? 0, max: def.max ?? 100, step: def.step || 1, value: Number(v) || 0, oninput: set('+this.value'), left: '', right: '' });
-    case 'select': return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + segments((def.options || []).map((o) => (Array.isArray(o) ? o : [o, String(o)])), v, `${set('$v')}; window.TelegramX.rerenderSettings()`);
+    case 'select': return `<div class="tx-group-title" style="padding-top:12px">${title}</div>` + segments((def.options || []).map((o) => (Array.isArray(o) ? [o[0], modL(o[1])] : [o, String(o)])), v, `${set('$v')}; window.TelegramX.rerenderSettings()`);
     case 'color': return row({ title, sub, html: `<input type="color" class="tx-mod-color" value="${escapeHtml(String(v || '#3390ec'))}" onchange="${set('this.value')}">` });
     default: return `<div class="tx-group-title" style="padding-top:12px">${title}</div><label class="tx-field"><input type="text" class="tx-mod-text" value="${escapeHtml(String(v ?? ''))}" onchange="${set('this.value')}"></label>`;
   }
@@ -549,15 +555,15 @@ function modPage(id) {
   const tags = (mf.tags || []).map((x) => `<span class="tx-mod-tag">${escapeHtml(String(x))}</span>`).join('');
   const schema = (mf.settings || []).filter((d) => d && d.key);
   return `
-    ${titleBar(mf.name, { back: true })}
+    ${titleBar(modL(mf.name), { back: true })}
     <div class="tx-page">
       ${hero}
       <div class="tx-mod-meta">
-        <div class="tx-mod-title">${escapeHtml(mf.name)}${mf.verified ? ' <i class="tx-verified"></i>' : ''}</div>
+        <div class="tx-mod-title">${escapeHtml(modL(mf.name))}${mf.verified ? ' <i class="tx-verified"></i>' : ''}</div>
         <div class="tx-mod-by">${[modKind(m), mf.version ? 'v' + mf.version : '', mf.author || ''].filter(Boolean).map(escapeHtml).join(' · ')}</div>
         ${tags ? `<div class="tx-mod-tags">${tags}</div>` : ''}
-        ${mf.description ? `<p class="tx-mod-lead">${escapeHtml(mf.description)}</p>` : ''}
-        ${mf.about ? `<p class="tx-mod-about">${escapeHtml(mf.about).replace(/\n/g, '<br>')}</p>` : ''}
+        ${mf.description ? `<p class="tx-mod-lead">${escapeHtml(modL(mf.description))}</p>` : ''}
+        ${mf.about ? `<p class="tx-mod-about">${escapeHtml(modL(mf.about)).replace(/\n/g, '<br>')}</p>` : ''}
       </div>
       ${group(switchRow({ icon: 'st-features', color: 'PURPLE', title: t('Включён'), checked: !!m.enabled, onchange: `window.TelegramX.toggleMod('${id}', this.checked)` }))}
       ${schema.length ? `<div class="tx-group"><div class="tx-group-title">${t('Настройки мода')}</div>${schema.map((d) => modControl(m, d)).join('')}</div>` : ''}

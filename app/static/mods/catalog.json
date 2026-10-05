@@ -4,27 +4,47 @@
   {
    "id": "aurora-theme",
    "file": "aurora-theme.module",
-   "name": "Aurora",
+   "name": {
+    "ru": "Аврора",
+    "en": "Aurora",
+    "es": "Aurora",
+    "pt": "Aurora",
+    "uk": "Аврора"
+   },
    "version": "1.0.0",
    "author": "TeleX",
-   "icon": "🌌",
-   "description": "Northern-lights colour themes with their own day and night wallpapers",
+   "icon": "mods/icons/aurora-theme.svg",
+   "description": {
+    "ru": "Цветовые темы «северное сияние» со своими обоями для дня и ночи",
+    "en": "Northern-lights colour themes with their own day and night wallpapers",
+    "es": "Temas de color «aurora boreal» con fondos propios para día y noche",
+    "pt": "Temas de cor «aurora boreal» com papéis de parede próprios para dia e noite",
+    "uk": "Кольорові теми «північне сяйво» зі своїми шпалерами для дня та ночі"
+   },
    "tags": [
     "theme"
-   ],
-   "swatch": [
-    "#0d3b3a",
-    "#1a2a5c"
    ]
   },
   {
    "id": "compact-feed",
    "file": "compact-feed.module",
-   "name": "Compact feed",
+   "name": {
+    "ru": "Компактная лента",
+    "en": "Compact feed",
+    "es": "Muro compacto",
+    "pt": "Mural compacto",
+    "uk": "Компактна стрічка"
+   },
    "version": "1.0.0",
    "author": "TeleX",
-   "icon": "📰",
-   "description": "More posts on the screen: smaller media, tighter spacing, optional reactions",
+   "icon": "mods/icons/compact-feed.svg",
+   "description": {
+    "ru": "Больше постов на экране: меньше картинки, плотнее отступы, реакции по желанию",
+    "en": "More posts on the screen: smaller media, tighter spacing, optional reactions",
+    "es": "Más publicaciones en pantalla: medios más pequeños, menos espacio, reacciones opcionales",
+    "pt": "Mais publicações na tela: mídia menor, espaçamento menor, reações opcionais",
+    "uk": "Більше дописів на екрані: менші зображення, щільніші відступи, реакції за бажанням"
+   },
    "tags": [
     "feed"
    ]
@@ -32,11 +52,23 @@
   {
    "id": "reading-time",
    "file": "reading-time.module",
-   "name": "Reading time",
+   "name": {
+    "ru": "Время чтения",
+    "en": "Reading time",
+    "es": "Tiempo de lectura",
+    "pt": "Tempo de leitura",
+    "uk": "Час читання"
+   },
    "version": "1.0.0",
    "author": "TeleX",
-   "icon": "⏱️",
-   "description": "Shows how long a post takes to read",
+   "icon": "mods/icons/reading-time.svg",
+   "description": {
+    "ru": "Показывает, сколько читать пост",
+    "en": "Shows how long a post takes to read",
+    "es": "Muestra cuánto se tarda en leer una publicación",
+    "pt": "Mostra quanto tempo leva para ler uma publicação",
+    "uk": "Показує, скільки часу читати допис"
+   },
    "tags": [
     "feed"
    ]
@@ -44,11 +76,23 @@
   {
    "id": "clock-widget",
    "file": "clock-widget.module",
-   "name": "Clock widget",
+   "name": {
+    "ru": "Часы",
+    "en": "Clock widget",
+    "es": "Reloj",
+    "pt": "Relógio",
+    "uk": "Годинник"
+   },
    "version": "1.0.0",
    "author": "TeleX",
-   "icon": "🕒",
-   "description": "A floating clock on top of the feed",
+   "icon": "mods/icons/clock-widget.svg",
+   "description": {
+    "ru": "Плавающие часы поверх ленты",
+    "en": "A floating clock on top of the feed",
+    "es": "Un reloj flotante sobre el muro",
+    "pt": "Um relógio flutuante sobre o mural",
+    "uk": "Плаваючий годинник поверх стрічки"
+   },
    "tags": [
     "widget"
    ]

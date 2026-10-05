@@ -1,21 +1,44 @@
 {
   "manifest": {
     "id": "aurora-theme",
-    "name": "Aurora",
+    "name": {
+      "ru": "Аврора",
+      "en": "Aurora",
+      "es": "Aurora",
+      "pt": "Aurora",
+      "uk": "Аврора"
+    },
     "version": "1.0.0",
     "author": "TeleX",
-    "icon": "🌌",
-    "description": "Northern-lights colour themes with their own day and night wallpapers",
-    "about": "Adds three colour themes to Settings → Chat settings → Color theme: Aurora, Glacier and Ember.\nEach has its own wallpaper for day and night mode and gradient message bubbles.\nPick a tile in the carousel after installing.",
+    "icon": "mods/icons/aurora-theme.svg",
+    "description": {
+      "ru": "Цветовые темы «северное сияние» со своими обоями для дня и ночи",
+      "en": "Northern-lights colour themes with their own day and night wallpapers",
+      "es": "Temas de color «aurora boreal» con fondos propios para día y noche",
+      "pt": "Temas de cor «aurora boreal» com papéis de parede próprios para dia e noite",
+      "uk": "Кольорові теми «північне сяйво» зі своїми шпалерами для дня та ночі"
+    },
+    "about": {
+      "ru": "Добавляет три цветовые темы: Аврора, Ледник и Уголь.\nУ каждой свои обои для дня и ночи и градиентные пузыри сообщений.\nПосле установки откройте Настройки → Настройки чатов → Цветовая тема и выберите плитку.",
+      "en": "Adds three colour themes: Aurora, Glacier and Ember.\nEach has its own wallpaper for day and night and gradient message bubbles.\nAfter installing, open Settings → Chat settings → Color theme and pick a tile.",
+      "es": "Añade tres temas de color: Aurora, Glaciar y Brasa.\nCada uno tiene su fondo para día y noche y burbujas con degradado.\nTras instalarlo, abre Ajustes → Ajustes de chats → Tema de color y elige una.",
+      "pt": "Adiciona três temas de cor: Aurora, Geleira e Brasa.\nCada um tem seu papel de parede para dia e noite e balões em degradê.\nDepois de instalar, abra Configurações → Configurações de chats → Tema de cor e escolha um.",
+      "uk": "Додає три кольорові теми: Аврора, Льодовик і Жар.\nУ кожної свої шпалери для дня та ночі й градієнтні бульбашки.\nПісля встановлення відкрийте Налаштування → Налаштування чатів → Кольорова тема й оберіть плитку."
+    },
     "tags": [
-      "theme",
-      "wallpaper"
+      "theme"
     ],
     "settings": [
       {
         "key": "glow",
         "type": "switch",
-        "title": "Soft glow on the dock",
+        "title": {
+          "ru": "Мягкое свечение панели",
+          "en": "Soft glow on the dock",
+          "es": "Brillo suave en la barra",
+          "pt": "Brilho suave na barra",
+          "uk": "М’яке сяйво панелі"
+        },
         "default": true
       }
     ]

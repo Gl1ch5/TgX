@@ -1,5 +1,6 @@
-// @manifest {"id":"reading-time","name":"Reading time","version":"1.0.0","author":"TeleX","icon":"⏱️","description":"Shows how long a post takes to read","about":"Adds a small “≈ 2 min” chip to long posts in the feed. Set your reading speed and the shortest post that gets a chip.","tags":["feed","posts"],"settings":[{"key":"wpm","type":"number","title":"Reading speed, words per minute","default":200,"min":100,"max":400,"step":10},{"key":"min","type":"number","title":"Only for posts longer than (words)","default":60,"min":0,"max":300,"step":10}]}
+// @manifest {"id": "reading-time", "name": {"ru": "Время чтения", "en": "Reading time", "es": "Tiempo de lectura", "pt": "Tempo de leitura", "uk": "Час читання"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/reading-time.svg", "description": {"ru": "Показывает, сколько читать пост", "en": "Shows how long a post takes to read", "es": "Muestra cuánto se tarda en leer una publicación", "pt": "Mostra quanto tempo leva para ler uma publicação", "uk": "Показує, скільки часу читати допис"}, "about": {"ru": "Добавляет метку «≈ 2 мин» к длинным постам в ленте. Настройте свою скорость чтения и минимальную длину поста.", "en": "Adds a small “≈ 2 min” chip to long posts in the feed. Set your reading speed and the shortest post that gets a chip.", "es": "Añade una etiqueta «≈ 2 min» a las publicaciones largas. Ajusta tu velocidad de lectura y la longitud mínima.", "pt": "Adiciona uma etiqueta «≈ 2 min» às publicações longas. Ajuste sua velocidade de leitura e o tamanho mínimo.", "uk": "Додає позначку «≈ 2 хв» до довгих дописів у стрічці. Налаштуйте швидкість читання й мінімальну довжину допису."}, "tags": ["feed", "posts"], "settings": [{"key": "wpm", "type": "number", "title": {"ru": "Скорость чтения, слов в минуту", "en": "Reading speed, words per minute", "es": "Velocidad de lectura, palabras por minuto", "pt": "Velocidade de leitura, palavras por minuto", "uk": "Швидкість читання, слів на хвилину"}, "default": 200, "min": 100, "max": 400, "step": 10}, {"key": "min", "type": "number", "title": {"ru": "Только для постов длиннее (слов)", "en": "Only for posts longer than (words)", "es": "Solo para publicaciones de más de (palabras)", "pt": "Apenas para publicações com mais de (palavras)", "uk": "Лише для дописів довших за (слів)"}, "default": 60, "min": 0, "max": 300, "step": 10}]}
 export default function (tx) {
+  const unit = tx.L({ ru: 'мин', en: 'min', es: 'min', pt: 'min', uk: 'хв' });
   const mark = (card) => {
     card.querySelectorAll('.rt-chip').forEach((n) => n.remove());
     const text = card.querySelector('.post-text');
@@ -9,7 +10,7 @@ export default function (tx) {
     const mins = Math.max(1, Math.round(words / tx.config.get('wpm')));
     const chip = document.createElement('div');
     chip.className = 'rt-chip';
-    chip.textContent = '⏱ ≈ ' + mins + ' ' + (tx.t('мин') === 'мин' ? 'мин' : 'min');
+    chip.textContent = '\u23F1 \u2248 ' + mins + ' ' + unit;
     chip.style.cssText = 'display:inline-block;margin:4px 0 2px;padding:2px 9px;border-radius:999px;font-size:12.5px;background:var(--tx-accent-soft);color:var(--tx-accent)';
     text.prepend(chip);
   };

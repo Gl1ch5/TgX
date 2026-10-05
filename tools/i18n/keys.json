@@ -1645,6 +1645,11 @@
   "plural": false
  },
  {
+  "key": "Документация по созданию модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Установить из файла",
   "where": "js/views/settings.js",
   "plural": false

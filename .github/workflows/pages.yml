@@ -26,7 +26,7 @@ jobs:
       - name: Assemble site (landing + app)
         run: |
           mkdir -p _site
-          cp -r index.html .nojekyll site _site/
+          cp -r index.html mods.html .nojekyll site _site/
           mkdir -p _site/app
           cp -r app/static _site/app/static
           echo telex-web.ru > _site/CNAME

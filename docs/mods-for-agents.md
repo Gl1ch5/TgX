@@ -37,6 +37,13 @@ JSON with `vars|colorThemes|wallpapers|css` = theme, anything else = JS module (
 
 Limits: total ≤ 1.5 MB. A mod made only of `theme`/`css` parts executes no code (the user gets a lighter confirmation).
 
+## Languages and icon (do this for every mod you publish)
+
+Any manifest text (`name`, `description`, `about`, settings `title`/`sub`, `options` labels) may be a string **or** `{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }`.
+Provide all five when the mod is meant for others; the app picks its language, then English. In code use `tx.L({ ru: '…', en: '…', … })`.
+`icon`: an emoji, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
+rounded square `rx=22` with a two-colour gradient and a white stroke glyph (see `app/static/mods/icons/*.svg`).
+
 ## Settings schema (`manifest.settings[]`)
 
 `{ key, type, title, sub?, default, … }` with `type`: `switch` (bool) · `number` (`min`,`max`,`step`) · `select` (`options`: `["a","b"]` or `[["value","Label"]]`) ·

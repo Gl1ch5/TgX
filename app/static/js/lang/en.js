@@ -424,4 +424,5 @@ export const EN = {
   "Официальные моды": "Official mods",
   "Обновить": "Update",
   "Установлено": "Installed",
+  "Документация по созданию модов": "How to create mods",
 };

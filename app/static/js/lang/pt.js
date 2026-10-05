@@ -424,4 +424,5 @@ export const PT = {
   "Официальные моды": "Mods oficiais",
   "Обновить": "Atualizar",
   "Установлено": "Instalado",
+  "Документация по созданию модов": "Como criar mods",
 };

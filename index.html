@@ -125,15 +125,16 @@
       <div class="grid" id="mods-grid">
         <article class="card reveal"><h3>Загружаем каталог…</h3></article>
       </div>
-      <p class="fine center">Официальные моды можно ставить прямо из приложения. Свой мод — по <a href="https://github.com/Gl1ch5/TgX/blob/main/docs/mods.md">документации</a>; нейросеть соберёт его по <a href="https://github.com/Gl1ch5/TgX/blob/main/docs/mods-for-agents.md">инструкции для агентов</a>.</p>
+      <p class="fine center">Официальные моды можно ставить прямо из приложения. Свой мод — по <a href="mods.html">документации</a>; нейросеть соберёт его по <a href="mods.html#agents">инструкции для агентов</a>.</p>
     </section>
     <script>
       fetch('app/static/mods/catalog.json').then(function (r) { return r.json(); }).then(function (c) {
+        var L = function (v) { return (v && typeof v === 'object') ? (v.ru || v.en) : v; };
         var esc = function (s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
         document.getElementById('mods-grid').innerHTML = c.mods.map(function (m) {
-          var bg = m.swatch ? 'linear-gradient(135deg,' + m.swatch.join(',') + ')' : 'linear-gradient(135deg,#4F85F6,#8a5cf0)';
-          return '<article class="card reveal in"><span class="sq" style="background:' + bg + ';font-size:26px;display:flex;align-items:center;justify-content:center">' + esc(m.icon || '') + '</span>' +
-            '<h3>' + esc(m.name) + ' <small style="opacity:.6;font-weight:500">v' + esc(m.version) + '</small></h3><p>' + esc(m.description) + '</p>' +
+          var bg = 'transparent';
+          return '<article class="card reveal in"><span class="sq" style="background:' + bg + ';font-size:26px;display:flex;align-items:center;justify-content:center">' + (m.icon && /^mods\//.test(m.icon) ? '<img src="app/static/' + esc(m.icon) + '" alt="" style="width:100%;height:100%;border-radius:inherit">' : esc(m.icon || '')) + '</span>' +
+            '<h3>' + esc(L(m.name)) + ' <small style="opacity:.6;font-weight:500">v' + esc(m.version) + '</small></h3><p>' + esc(m.description) + '</p>' +
             '<p style="margin-top:16px"><a class="btn btn-sm" href="app/static/mods/' + esc(m.file) + '" download>Скачать .module</a></p></article>';
         }).join('');
       }).catch(function () { document.getElementById('mods-grid').innerHTML = ''; });
