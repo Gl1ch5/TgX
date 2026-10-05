@@ -1,0 +1,31 @@
+// @manifest {"id":"post-tools","name":"Post tools","version":"1.0.0","author":"TeleX","icon":"🛠️","description":"Highlights words in posts, tags every post card and adds its own settings screen","about":"A JS mod showing the three ways to change the interface:\n• a text hook (postText),\n• tx.ui.watch on any element,\n• a whole page in the settings (tx.settings.addPage).","tags":["example","js"],"settings":[{"key":"word","type":"text","title":"Word to highlight","default":"TeleX"},{"key":"badge","type":"switch","title":"Mark post cards","default":true}]}
+export default function (tx) {
+  // 1. rewrite the finished HTML of every post
+  tx.ext.addHook('postText', (html) => {
+    const w = tx.config.get('word');
+    if (!w) return html;
+    const re = new RegExp(`(${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![^<]*>)`, 'gi');
+    return html.replace(re, '<mark style="background:var(--tx-accent-soft);color:inherit;border-radius:4px">$1</mark>');
+  });
+
+  // 2. reach into any element, now and whenever it appears
+  tx.ui.watch('[id^="post-card-"]', (card) => {
+    if (!tx.config.get('badge') || card.querySelector('.pt-badge')) return;
+    const b = document.createElement('span');
+    b.className = 'pt-badge';
+    b.textContent = '#' + card.id.replace('post-card-', '');
+    b.style.cssText = 'position:absolute;right:8px;top:4px;font-size:11px;opacity:.5;pointer-events:none';
+    card.style.position = 'relative';
+    card.append(b);
+  });
+
+  // 3. a screen of its own in the settings
+  tx.settings.addPage({
+    id: 'stats', title: 'Post tools', sub: 'Statistics of the loaded feed', icon: 'st-features',
+    render: (box) => {
+      const n = tx.S.posts.length;
+      const channels = new Set(tx.S.posts.map((p) => p.channel_id)).size;
+      box.innerHTML = `<div class="tx-group"><div class="tx-group-title">Feed</div><div class="tx-group-hint" style="padding:10px 22px 16px">${n} posts from ${channels} channels are loaded.</div></div>`;
+    },
+  });
+}

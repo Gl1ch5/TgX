@@ -1,0 +1,2212 @@
+[
+ {
+  "key": "Просмотренные посты будут отмечаться прочитанными",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Обновить стену",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Поиск публикаций",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Каналы на стене",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Обои",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Выйти",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Войти в Telegram",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Кэш очищен",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Выйти из Telegram на этом устройстве?",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Вы вышли из аккаунта",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Голосовое сообщение",
+  "where": "js/components/audioPlayer.js",
+  "plural": false
+ },
+ {
+  "key": "Аудиозапись",
+  "where": "js/components/audioPlayer.js",
+  "plural": false
+ },
+ {
+  "key": "Слушать",
+  "where": "js/components/audioPlayer.js",
+  "plural": false
+ },
+ {
+  "key": "Назад",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Далее",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Номер телефона",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Проверьте код страны и введите свой номер телефона.",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Страна",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Код страны",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Войти по QR-коду",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Введите номер телефона полностью",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось отправить код",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Мы отправили код через <b>Telegram</b> на другое устройство, где авторизован {a}.",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Мы отправили SMS с кодом на номер {a}.",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Проверьте сообщения в Telegram",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Введите код",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Код",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Не получили код?",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Добро пожаловать!",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный код",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Повторно запросить код можно через {a} с",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Отправляем…",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Код отправлен ещё раз",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Код отправлен по SMS",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Ваш пароль",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Включена двухэтапная аутентификация, ваш аккаунт защищён дополнительным паролем.",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Пароль",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Показать пароль",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Введите пароль",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный пароль",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Вход по QR-коду",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Откройте Telegram на телефоне: <b>Настройки → Устройства → Подключить устройство</b> и наведите камеру на код.",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Войти по номеру телефона",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "Ошибка подключения",
+  "where": "js/components/authModal.js",
+  "plural": false
+ },
+ {
+  "key": "сегодня в {a}",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "вчера в {a}",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "{a} в {b}",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Поделиться",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Скачать",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Пауза",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Канал",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "{a} из {b}",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка скопирована",
+  "where": "js/components/mediaViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Подтверждённый",
+  "where": "js/components/postCard.js",
+  "plural": false
+ },
+ {
+  "key": "Документ",
+  "where": "js/components/postCard.js",
+  "plural": false
+ },
+ {
+  "key": "{n} комментарий",
+  "where": "js/components/postCard.js",
+  "plural": true,
+  "forms": [
+   "{n} комментарий",
+   "{n} комментария",
+   "{n} комментариев"
+  ]
+ },
+ {
+  "key": "Прокомментировать",
+  "where": "js/components/postCard.js",
+  "plural": false
+ },
+ {
+  "key": "изменено ",
+  "where": "js/components/postCard.js",
+  "plural": false
+ },
+ {
+  "key": "Ответить",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Копировать",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Копировать ссылку",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранить в галерею",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Переслать в «Избранное»",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Убрать из закладок",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "В закладки",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Не показывать канал в ленте",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Открыть в Telegram",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Канал скрыт из ленты. Вернуть: Настройки → Стена",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "изменено в {time}",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "изменено {day} в {time}",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "сегодня в {time}",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "{day} в {time}",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранение {a} файлов…",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранение…",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось сохранить: ",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Текст скопирован",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранено в «Избранное» Telegram",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось переслать: ",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "ошибка",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Добавлено в закладки",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Удалено из закладок",
+  "where": "js/components/postMenu.js",
+  "plural": false
+ },
+ {
+  "key": "Эта реакция доступна только с Telegram Premium",
+  "where": "js/components/reactions.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось поставить реакцию: ",
+  "where": "js/components/reactions.js",
+  "plural": false
+ },
+ {
+  "key": "Платные реакции ⭐ отправляются из приложения Telegram",
+  "where": "js/components/reactions.js",
+  "plural": false
+ },
+ {
+  "key": "Моя история",
+  "where": "js/components/stories.js",
+  "plural": false
+ },
+ {
+  "key": "Публикуйте истории в приложении Telegram — здесь они появятся сразу",
+  "where": "js/components/stories.js",
+  "plural": false
+ },
+ {
+  "key": "только что",
+  "where": "js/components/storyViewer.js",
+  "plural": false
+ },
+ {
+  "key": "{n} минуту назад",
+  "where": "js/components/storyViewer.js",
+  "plural": true,
+  "forms": [
+   "{n} минуту назад",
+   "{n} минуты назад",
+   "{n} минут назад"
+  ]
+ },
+ {
+  "key": "{n} час назад",
+  "where": "js/components/storyViewer.js",
+  "plural": true,
+  "forms": [
+   "{n} час назад",
+   "{n} часа назад",
+   "{n} часов назад"
+  ]
+ },
+ {
+  "key": "Звук",
+  "where": "js/components/storyViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Закрыть",
+  "where": "js/components/storyViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Нравится",
+  "where": "js/components/storyViewer.js",
+  "plural": false
+ },
+ {
+  "key": "Обои установлены: {a} ✨",
+  "where": "js/components/wallpaperTheme.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось сохранить",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный манифест",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный id мода",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "У мода нет названия",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Неверные права",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Отмена",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "ОК",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Мод «{a}» не запустился",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "В моде нет ни кода, ни темы",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Код мода слишком большой",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Мод «{a}» получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.{b}",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Этот мод не проверен.",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить тему «{a}»?",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Установить",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Пользователь",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} создал(а) группу «{b}»",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Канал «{a}» создан",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} изменил(а) название на «{b}»",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} обновил(а) фото группы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} удалил(а) фото группы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} добавил(а) участников",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} покинул(а) группу",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} вступил(а) в группу",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} закрепил(а) сообщение",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "История очищена",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Видеозвонок",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Звонок",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "{a} теперь в Telegram",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Служебное сообщение",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Чат не найден",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Удалённый аккаунт",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Без названия",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Вы",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Скрытый отправитель",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщение недоступно",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Фото",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Видео",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Стикер",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Аудио",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Файл",
+  "where": "js/telegram-chat.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный код подтверждения",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Срок действия кода истёк. Запросите новый.",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный номер телефона",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Неверный облачный пароль",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Требуется облачный пароль (2FA)",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Слишком много попыток. Попробуйте позже.",
+  "where": "js/telegram-remote.js",
+  "plural": false
+ },
+ {
+  "key": "Нажмите, чтобы показать",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Это не похоже на сессию TeleX",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Строка сессии повреждена",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Канал не найден среди ваших подписок",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Сначала запросите код по номеру телефона",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Этот номер не зарегистрирован в Telegram",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Неожиданный ответ Telegram: {a}",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Опрос",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Комментарии к этому посту отключены",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Текст комментария пуст",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Фотография",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "Медиа",
+  "where": "js/telegram.js",
+  "plural": false
+ },
+ {
+  "key": "{a} мин назад",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": " МБ",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": " КБ",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": " Б",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "вс",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "пн",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "вт",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "ср",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "чт",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "пт",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "сб",
+  "where": "js/utils.js",
+  "plural": false
+ },
+ {
+  "key": "{n} подписчик",
+  "where": "js/views/channel.js",
+  "plural": true,
+  "forms": [
+   "{n} подписчик",
+   "{n} подписчика",
+   "{n} подписчиков"
+  ]
+ },
+ {
+  "key": "канал",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Публикаций нет",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Канал пока не сохранил истории на своей странице.",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Медиа нет",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "В этом канале пока нет фото и видео.",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Публикации",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Ещё",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Без звука",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Обсуждение",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Покинуть",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Описание",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Показать публикации на стене",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось: ",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Уведомления выключены",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Уведомления включены",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Покинуть канал «{a}»? Он пропадёт со стены и из Telegram.",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Вы покинули канал",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Показать на стене",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Покинуть канал",
+  "where": "js/views/channel.js",
+  "plural": false
+ },
+ {
+  "key": "Профиль",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Гость",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Войдите, чтобы читать свои каналы",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "QR-код или номер телефона",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Публикаций пока нет",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Истории, которые вы сохраните в профиле в Telegram, появятся здесь.",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Мобильный",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Номер скопирован",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "О себе",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Имя пользователя",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "День рождения",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Выбрать фото",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "в сети",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Изменить",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Изменить профиль",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Сохранить",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Выбрать фотографию",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Имя (обязательно)",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Фамилия (необязательно)",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Укажите имя и, если хотите, фамилию.",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Любые подробности, например: возраст, род занятий или город. Пример: 23 года, дизайнер из Санкт-Петербурга.",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Изменить информацию",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Скопировано",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Файл слишком большой (до 10 МБ)",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Загрузка фото…",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось обновить фото: ",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Фото профиля обновлено",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Введите имя",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Профиль сохранён",
+  "where": "js/views/profile.js",
+  "plural": false
+ },
+ {
+  "key": "Войдите в Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Г",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Аккаунт",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Имя, «О себе», фото профиля",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Стена",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скрыто каналов: {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Каналы на стене, прочитанное",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки чатов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Обои, ночной режим, анимации",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Данные и память",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автозагрузка медиа, кэш",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Устройства",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Управление активными сеансами",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Энергосбережение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Анимации выключены",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Анимации и автовоспроизведение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Полноценный клиент Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Язык",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Закладки",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Посты, сохранённые на стене",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Написать автору",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "О TeleX",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Версия {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Для разработчиков",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сессия, диагностика, логи",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "TeleX {a} · автор",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Режим энергосбережения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Без анимаций, стикеры и эмодзи на паузе",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Экономит заряд и ускоряет работу на слабых телефонах.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автовоспроизведение видео",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Короткие видео в ленте без звука",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автовоспроизведение GIF",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Эффекты стекла",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Размытие под панелями",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ресурсоёмкие процессы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Все ваши каналы — одной стеной",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Версия",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Приложение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Проверить обновления",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автор · Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Исходный код",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "TeleX — неофициальный клиент. Работает напрямую с серверами Telegram, сессия хранится только на вашем устройстве.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Соединение с Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Проверить соединение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Пинг MTProto",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Переподключиться",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Диагностика",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Индикатор соединения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Дата-центр и пинг поверх экрана",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Подробные логи MTProto",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Пишет в консоль всё, что делает GramJS",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Отладка",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Telegram в отдельном потоке",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Включено — загрузка не тормозит интерфейс",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Как в Telegram Web A: быстрее при прокрутке",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Производительность",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Клиент Telegram (сеть, расшифровка, загрузка медиа) работает в отдельном потоке и не мешает интерфейсу. Применяется после перезапуска. Если что-то сломается — выключите.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Экспорт логов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "{a} записей + сведения об устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скопировать диагностику",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Очистить логи",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Логи",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Экспорт сессии",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скопировать строку входа",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Импорт сессии",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Войти по строке из другого TeleX",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставьте строку сессии",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Войти",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сессия",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Строка сессии — это полный доступ к аккаунту. Никому её не отправляйте: с ней можно читать и писать от вашего имени. Отозвать её можно в «Устройствах».",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Перезагрузить приложение начисто",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сбросить Service Worker и кэш кода (вход сохранится)",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "группа",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Отмечать прочитанным",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Просмотренные посты — прочитаны и в Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Показывать группы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщения супергрупп на стене",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сколько каналов загружать",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Чем больше каналов, тем дольше обновляется стена.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Поиск каналов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Каналы появятся после входа в Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Выключенные каналы не попадают на стену и в счётчик новых.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Доброе утро! 👋",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Знаешь, который час?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "В Токио утро 😎",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Размер текста сообщений",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Изменить обои",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Изменить цвет имени",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Цветовая тема",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Переключить на ночную тему",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Переключить на дневную тему",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки темы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Моды тем",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Углы блоков с сообщениями",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Как на устройстве",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Тема меняется вместе с системной",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Дневная",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ночная",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Тема",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Цвет акцента",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Авто",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Цвет имени",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Цвет вашего имени в комментариях и превью. Виден только вам.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Поиск",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Применяем язык…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сбросить настройки",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки чатов сброшены",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Включено: {a} из {b}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Темы и расширения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Тема + код",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Настройки мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Документация по созданию модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установить из файла",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Файл .module",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить ссылку или JSON",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка https://… или JSON мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установка",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установленные",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Модов пока нет",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скопировать промпт для нейросети",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставьте его в нейросеть и опишите нужный мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить мод из буфера",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Готовый файл от нейросети — одним нажатием",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод с помощью нейросети",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "1. Нажмите «Скопировать промпт». 2. Вставьте его в нейросеть и допишите, какой мод нужен. 3. Скопируйте ответ нейросети и нажмите «Вставить мод из буфера».",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Опубликовать свой мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Репозиторий сообщества на GitHub",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Обновить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Открыть",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Официальные моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщество",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Моды сообщества не проверяются проектом: ставьте только то, чему доверяете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Промпт скопирован — вставьте его в нейросеть",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось скопировать",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Буфер обмена пуст",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставьте мод в поле ниже",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Включён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод установлен",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Удалить мод?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Загружать фото автоматически",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автовоспроизведение",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "В разделе «Энергосбережение»",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Автозагрузка медиа",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Использование памяти",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Подсчёт…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Очистить кэш",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Медиа и сохранённая лента",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Хранилище",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сессия и настройки при очистке кэша сохраняются.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Выйти из TeleX",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Завершить сеанс в этом браузере",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Войдите, чтобы увидеть устройства",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Это устройство",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Активные сеансы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Нажмите на сеанс, чтобы завершить его.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось загрузить: {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "{a} МБ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "{a} КБ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "нет данных",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Завершить этот сеанс?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сеанс завершён",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ошибка: ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Подключено",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Нет соединения",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": " · без сессии",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Пинг…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "{a} мс",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Нет ответа: ",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Переподключение…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Соединение восстановлено",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Соединение в порядке",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Диагностика скопирована",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Логи очищены",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вы не вошли в Telegram",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Строка сессии даёт полный доступ к вашему аккаунту Telegram. Скопировать её?",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сессия скопирована. Храните её в секрете",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сессия загружена, перезапуск…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось импортировать",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Доступно только в приложении для Android",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Проверяем обновления…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Перезапуск в новом режиме…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Возврат к обычному режиму…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "нет комментариев",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Сегодня",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Вчера",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось загрузить комментарии: {a}",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Начало обсуждения",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Комментариев пока нет — напишите первым",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Показать предыдущие комментарии",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Копировать текст",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Не удалось отправить: ",
+  "where": "js/views/thread.js",
+  "plural": false
+ },
+ {
+  "key": "Закреплённое сообщение",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Включить звук",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Убрать звук",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Включить уведомления",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Выключить уведомления",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Информация о канале",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Наверх",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Нажмите на пост и выберите «В закладки» — он появится здесь",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "По запросу ничего не найдено",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Вы всё прочитали",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Стена обновлена",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "TeleX — стена каналов Telegram",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "все ваши каналы",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Все",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Популярное",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Избранное",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Все каналы — одной лентой",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Войдите в Telegram, и публикации всех ваших каналов соберутся на одной стене. Сессия хранится только в этом браузере.",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Комментарии",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Обои для фона",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Выберите оригинальный фон Telegram с векторным паттерном или глубокий OLED Black.",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Готово",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Истории",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Меню",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Очистить",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Поиск в комментариях",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Эмодзи",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Комментарий",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Отправить",
+  "where": "index.html",
+  "plural": false
+ },
+ {
+  "key": "Вниз",
+  "where": "index.html",
+  "plural": false
+ }
+]

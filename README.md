@@ -1,84 +1,73 @@
-# TeleX — все каналы одной стеной
+# TeleX
 
 <div align="center">
 
-<img src="app/static/icons/telex.svg" width="96" alt="TeleX" />
+<img src="app/static/icons/telex.svg" width="88" alt="TeleX" />
 
-**Неофициальный клиент Telegram для чтения каналов.**
-Публикации всех ваших подписок — одной лентой, в интерфейсе Telegram для Android:
-истории, комментарии, реакции, премиум-эмодзи.
+**Неофициальный клиент Telegram в браузере, на Android и Windows.**
+Два режима на одной учётной записи: лента всех каналов и обычные чаты.
 
-[**Сайт**](https://gl1ch5.github.io/TgX/) · [**Открыть в браузере**](https://gl1ch5.github.io/TgX/app/static/) · [**Android APK**](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [**Windows**](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
+[Сайт](https://telex-web.ru/) · [TeleX](https://telex-web.ru/app/static/) · [Telegram You](https://telex-web.ru/telegram-you/) · [Android](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [Windows](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
 
-<img src="site/shots/wall.jpg" width="230" alt="Стена" />
-<img src="site/shots/stories.jpg" width="230" alt="Истории" />
-<img src="site/shots/comments.jpg" width="230" alt="Комментарии" />
+<img src="site/shots/wall.jpg" width="190" alt="Стена каналов" />
+<img src="site/shots/stories.jpg" width="190" alt="Истории" />
+<img src="site/shots/chat-list.jpg" width="190" alt="Список чатов" />
+<img src="site/shots/chat.jpg" width="190" alt="Переписка" />
 
 </div>
 
----
+## Что внутри
 
-## Возможности
+**TeleX** — публикации всех ваших каналов одной лентой. Истории, комментарии, реакции, премиум-эмодзи, закреплённые сообщения, поиск по каналу.
 
-- **Стена каналов** — новые посты из всех подписок в одной ленте; живые обновления, кнопка «новые посты», счётчик непрочитанного, синхронизация прочитанного с Telegram. Каналы можно скрыть со стены.
-- **Шапка как в Telegram** — «TeleX» со стопкой историй; потяните вниз, чтобы раскрыть ряд историй.
-- **Истории** — настоящие истории из Telegram: сегментные кольца, полноэкранный просмотр с жестами (тап, удержание, свайпы), видео со звуком, отметка просмотра.
-- **Каналы** — экран канала с закреплённым сообщением, звуком и поиском; страница канала с описанием, ссылкой, «Публикациями» и «Медиа».
-- **Комментарии** — обсуждения под постами, ответы, поиск, кнопки-ссылки, отправка своих комментариев.
-- **Реакции** — обычные, премиум (custom emoji) и платные ⭐, контекстное меню как в Telegram, сохранение в галерею.
-- **Профиль** — фото, имя и «О себе» можно менять прямо в TeleX; сохранённые истории профиля.
-- **Скорость** — мгновенные размытые превью из самого сообщения, приоритетная очередь загрузок, потоковое видео, кэш медиа.
-- **Оформление** — оригинальные иконки Telegram для Android, обои, размер текста, скругления, цвет акцента, режим энергосбережения.
-- **Для разработчиков** — диагностика соединения, логи, экспорт/импорт сессии (Настройки → Для разработчиков).
+**Telegram You** (бета) — обычный клиент: список чатов с папками и архивом, переписка, ответы и пересылки, фото, видео, голосовые и файлы, отправка и редактирование, «печатает…», галочки прочитанного, контакты. Внешний вид повторяет Telegram для Android.
 
-## Как это работает
+Общее для обоих:
 
-TeleX работает **целиком на вашем устройстве**: клиент Telegram (MTProto через защищённый WebSocket, [GramJS](https://github.com/gram-js/gramjs)) запускается прямо на странице, своего сервера у проекта нет. Сессия хранится только в `localStorage`. «Выйти» завершает сессию в Telegram и стирает локальные данные.
+- вход как в Telegram: номер телефона с выбором страны, код (в том числе по SMS), облачный пароль, QR-код;
+- русский, английский, испанский, португальский и украинский;
+- светлая и тёмная тема, по умолчанию как на устройстве;
+- настройки чатов: цветовые темы, обои, цвет имён, размер текста, скругления;
+- всё работает на вашем устройстве, своего сервера у проекта нет.
 
-> Если Telegram в вашей сети заблокирован, нужен VPN — приложение подключается к серверам Telegram напрямую.
+## Как это устроено
 
-## Вход
+Клиент Telegram ([GramJS](https://github.com/gram-js/gramjs), MTProto по WebSocket) запускается прямо на странице, в Web Worker. Сессия лежит в `localStorage`; «Выйти» завершает сеанс в Telegram и стирает локальные данные. Фото и видео отдаёт Service Worker, поэтому они кэшируются и видео проигрывается потоком.
 
-- **QR-код** — в Telegram на телефоне: Настройки → Устройства → Подключить устройство, наведите камеру. При облачном пароле (2FA) введите его.
-- **Номер телефона** — номер в международном формате, затем код из Telegram/SMS и, если есть, облачный пароль.
+Если Telegram в вашей сети заблокирован, нужен VPN: приложение соединяется с серверами Telegram напрямую.
 
-## Android
+## Установка
 
-Нативная оболочка (WebView), которая открывает живой сайт, поэтому всегда актуальна. Плюс: прозрачная строка состояния, кнопка «Назад» закрывает вложенные экраны, ссылки `t.me` открываются в Telegram, сохранение фото и видео в галерею, переподключение после сна, экран «Нет соединения» и **автообновление**: приложение само находит новую сборку в релизе `nightly`, скачивает её и предлагает установить.
+- **Браузер** — откройте [telex-web.ru](https://telex-web.ru/), вход не нужен до первого запуска.
+- **Android 7.0+** — [TeleX-android.apk](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk). Разрешите установку из неизвестных источников; дальше приложение обновляется само.
+- **Windows** — `TeleX-Setup.exe` или `TeleX-Portable.exe` из [релиза](https://github.com/Gl1ch5/TgX/releases/tag/nightly). Файлы не подписаны, SmartScreen может предупредить: «Подробнее» → «Выполнить в любом случае».
 
-1. Скачайте [`TeleX-android.apk`](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk).
-2. Разрешите установку из неизвестных источников, когда Android попросит.
-3. Дальше обновления приходят сами; вход в Telegram сохраняется.
-
-Требуется Android 7.0+. Сборка: `cd native/android && ./gradlew assembleDebug` (JDK 17 + Android SDK). Адрес сайта — в `AppConfig.kt`.
-
-## Windows
-
-Окно Electron с сайтом TeleX: своя иконка, запоминание размера, сессия и кэш между запусками, внешние ссылки в браузере.
-[Релиз nightly](https://github.com/Gl1ch5/TgX/releases/tag/nightly): `TeleX-Setup.exe` (установщик) или `TeleX-Portable.exe`.
-
-> Файлы без цифровой подписи — SmartScreen может предупредить: «Подробнее» → «Выполнить в любом случае».
-
-Сборка: `cd native/desktop && npm ci && npm run dist:win` (Node.js 22+).
-
-## Для разработчика
+## Разработка
 
 ```bash
-python run.py              # статический сервер на http://localhost:8000 (лендинг + приложение)
+npm install
+npm run serve        # http://localhost:8765
+npm test             # браузерные проверки (Playwright), включая оба клиента
+npm run i18n         # проверка и сборка переводов
 ```
 
-- `index.html`, `site/` — лендинг (корень GitHub Pages).
-- `app/static/` — само приложение: `js/telegram.js` (GramJS-клиент), `js/views/*` (экраны), `js/components/*`, `css/tx/*`, `sw.js` (Service Worker: медиа и стриминг).
-- `native/android`, `native/desktop` — оболочки; сборки в `.github/workflows/android.yml` и `windows.yml` публикуют релиз `nightly` (Android вместе с `version.json` для автообновления).
-- `tools/gramjs` — браузерная сборка GramJS: `cd tools/gramjs && npm install && npm run build`.
-- `tools/icons/extract.py` — достаёт оригинальные иконки Telegram для Android (векторы → SVG, растр из xxhdpi) и генерирует `css/tx/icons-android.css`:
-  `python3 tools/icons/extract.py <путь к клону DrKLO/Telegram>`.
+Без аккаунта Telegram можно открыть демо: `http://localhost:8765/chat/?fake=1`.
 
-Подробнее об архитектуре — в [AGENT.md](AGENT.md).
+| Папка | Назначение |
+|---|---|
+| `app/static/` | клиент TeleX: `js/telegram.js` (движок), `js/views`, `js/components`, `css/tx`, `sw.js` |
+| `telegram-you/` | отдельный проект Telegram You (свой README, AGENT.md, тесты) |
+| `native/android`, `native/desktop` | оболочки WebView и Electron |
+| `tools/` | сборка GramJS, переводы, извлечение оригинальных иконок Telegram (`icons/extract*.py`), тесты |
+| `site/`, `index.html` | лендинг |
+| `promo/`, `promo-materials/` | ролики, логотип, тексты для соцсетей |
+| `docs/` | [архитектура](docs/architecture.md), [планы](docs/roadmap.md), [заметки по API Telegram](docs/telegram-api.md), [тестирование](docs/testing.md) |
+
+Сборка Android: `cd native/android && ./gradlew assembleDebug` (JDK 17, Android SDK). Windows: `cd native/desktop && npm ci && npm run dist:win`. Релизы собирает GitHub Actions (`.github/workflows`).
 
 ## Автор
 
-**[@grzxk](https://t.me/grzxk)** · [github.com/Gl1ch5](https://github.com/Gl1ch5)
+[@grzxk](https://t.me/grzxk) · [github.com/Gl1ch5](https://github.com/Gl1ch5)
 
 ## Лицензия
 

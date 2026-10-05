@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private lateinit var downloads: Downloads
     private lateinit var updater: Updater
+    private lateinit var appAssets: AppAssets
 
     private val startedAt = SystemClock.uptimeMillis()
     private var firstPaint = false
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
 
         downloads = Downloads(this)
         updater = Updater(this)
+        appAssets = AppAssets(this)
         root = FrameLayout(this).apply { setBackgroundColor(Color.BLACK) }
         webView = WebView(this).apply {
             setBackgroundColor(Color.BLACK) // no white flash before the page paints
@@ -95,6 +97,8 @@ class MainActivity : ComponentActivity() {
         setContentView(root)
         applyInsets()
 
+        // Same bar colours as last time, so a light phone does not flash black.
+        applyBarTheme(getSharedPreferences("telex", Context.MODE_PRIVATE).getBoolean("lightTheme", false), save = false)
         configureWebView()
         configureServiceWorkers()
         installBridge()
@@ -102,8 +106,13 @@ class MainActivity : ComponentActivity() {
         watchNetwork()
 
         val restored = savedInstanceState?.let { webView.restoreState(it) } != null
-        if (!restored) webView.loadUrl(AppConfig.START_URL)
-        updater.check()
+        if (!restored) {
+            // The app moved to its own domain: bring the Telegram session along once.
+            val migration = StorageMigration(this)
+            if (migration.needed()) migration.run { webView.loadUrl(AppConfig.START_URL) }
+            else webView.loadUrl(AppConfig.START_URL)
+        }
+        updater.check(onStart = true)
     }
 
     // ---------------------------------------------------------------- insets
@@ -212,7 +221,7 @@ class MainActivity : ComponentActivity() {
             }
             if (WebViewFeature.isFeatureSupported(WebViewFeature.SERVICE_WORKER_SHOULD_INTERCEPT_REQUEST)) {
                 controller.setServiceWorkerClient(object : ServiceWorkerClientCompat() {
-                    override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+                    override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = appAssets.intercept(request.url)
                 })
             }
         } catch (e: Exception) {
@@ -220,7 +229,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** window.TeleXNative.postMessage(...) — only for https://gl1ch5.github.io. */
+    /** window.TeleXNative.postMessage(...) — only for the app's own origin. */
     private fun installBridge() {
         val origins = setOf(AppConfig.ORIGIN)
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
@@ -249,13 +258,43 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** The web app switched between its light and dark theme: dark icons in the bars on light. */
+    private fun applyBarTheme(light: Boolean, save: Boolean = true) {
+        val bg = if (light) 0xFFF0F0F5.toInt() else Color.BLACK
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.isAppearanceLightStatusBars = light
+        controller.isAppearanceLightNavigationBars = light
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bg))
+        if (::root.isInitialized) root.setBackgroundColor(bg)
+        if (::webView.isInitialized) webView.setBackgroundColor(bg)
+        if (save) getSharedPreferences("telex", Context.MODE_PRIVATE).edit().putBoolean("lightTheme", light).apply()
+    }
+
     private fun onBridgeMessage(message: String) {
+        if (message.startsWith("theme:")) {
+            applyBarTheme(message.removePrefix("theme:") == "light")
+            return
+        }
         if (message == "retry") {
             retry()
             return
         }
         if (message == "checkUpdate") {
             updater.check(manual = true)
+            return
+        }
+        if (message == "clipboard") { // "Paste mod from clipboard": the WebView has no clipboard read permission, the app does
+            val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val text = cm.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString() ?: ""
+            webView.evaluateJavascript("window.__txClip && window.__txClip(${JSONObject.quote(text)})", null)
+            return
+        }
+        if (message == "updateStatus") { // About screen asks what the updater did last
+            webView.evaluateJavascript("window.__txUpdate && window.__txUpdate(${JSONObject.quote(updater.statusJson())})", null)
+            return
+        }
+        if (message == "updateCheck") { // the page asks quietly (after the feed loaded): throttled, silent when nothing is new
+            updater.check()
             return
         }
         try {
@@ -277,6 +316,9 @@ class MainActivity : ComponentActivity() {
                 else -> openExternal(uri).let { true } // tg:, intent:, mailto:, tel:, …
             }
         }
+
+        override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? =
+            if (request.method == "GET") appAssets.intercept(request.url) else null
 
         override fun onPageCommitVisible(view: WebView, url: String) {
             firstPaint = true
@@ -433,8 +475,17 @@ class MainActivity : ComponentActivity() {
         if (!showingError) webView.saveState(outState)
     }
 
+    private val updateTick = object : Runnable {
+        override fun run() {
+            updater.check()
+            webView.postDelayed(this, 20 * 60 * 1000L)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+        webView.removeCallbacks(updateTick)
+        webView.postDelayed(updateTick, 20 * 60 * 1000L)
         webView.onResume()
         webView.resumeTimers()
         // Let the page re-check its Telegram connection after being in background.
@@ -444,6 +495,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onPause() {
+        webView.removeCallbacks(updateTick)
         webView.onPause()
         CookieManager.getInstance().flush()
         super.onPause()

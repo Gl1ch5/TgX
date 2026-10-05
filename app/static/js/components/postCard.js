@@ -5,15 +5,16 @@
  * ====================================================================
  */
 
-import { formatNumber, formatFileSize, formatDuration, formatPostText, escapeQuotes, escapeHtml, pluralRu } from '../utils.js';
+import { formatNumber, formatFileSize, formatDuration, formatPostText, escapeQuotes, escapeHtml } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { getPrefs } from '../core/prefs.js';
 import { avatarHtml, peerColor } from './avatar.js';
 import { reactionsHtml } from './reactions.js';
 import { stickerHtml } from './sticker.js';
 import { audioHtml } from './audioPlayer.js';
+import { t, tn, locale } from '../i18n.js';
 
-export const VERIFIED_BADGE_SVG = '<span class="VerifiedIcon tx-verified" role="img" aria-label="Подтверждённый"></span>';
+export const VERIFIED_BADGE_SVG = `<span class="VerifiedIcon tx-verified" role="img" aria-label="${t('Подтверждённый')}"></span>`;
 
 const VISUAL = new Set(['photo', 'video', 'gif']);
 
@@ -22,7 +23,7 @@ export function galleryOf(post) {
 }
 
 function timeOf(post) {
-  return new Date(post.date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return new Date(post.date).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 function aspect(item) {
@@ -35,7 +36,7 @@ function openAttr(post, idx) {
 
 /** Tiny blurred preview embedded in the message (Telegram's "stripped" thumbnail): shows instantly, no network. */
 function previewSpan(item) {
-  return item.preview ? `<span class="tx-preview" style="background-image:url('${item.preview}')"></span>` : '';
+  return item.preview ? `<span class="tx-media-preview" style="background-image:url('${item.preview}')"></span>` : '';
 }
 
 function photoTile(post, item, idx, fill = false) {
@@ -132,7 +133,7 @@ function mediaBlock(post) {
       <a href="${escapeHtml(item.url)}" download="${escapeHtml(item.filename || 'file')}" class="tx-file" onclick="event.stopPropagation()">
         <span class="tx-file-icon"><i class="icon icon-download"></i></span>
         <span class="tx-file-body">
-          <span class="tx-file-name" style="display:block">${escapeHtml(item.filename || 'Документ')}</span>
+          <span class="tx-file-name" style="display:block">${escapeHtml(item.filename || t('Документ'))}</span>
           <span class="tx-file-sub" style="display:block">${formatFileSize(item.size)}</span>
         </span>
       </a>`;
@@ -153,14 +154,14 @@ function webpageHtml(post) {
 }
 
 export function commentsLabel(count) {
-  return count ? `${formatNumber(count)} ${pluralRu(count, 'комментарий', 'комментария', 'комментариев')}` : 'Прокомментировать';
+  return count ? tn(['{n} комментарий', '{n} комментария', '{n} комментариев'], count, { n: formatNumber(count) }) : t('Прокомментировать');
 }
 
 function commentsRow(post) {
   if (!post.comments_enabled) return '';
   const avatars = (post.recent_repliers || []).map((p) => avatarHtml(p, 'xs')).join('');
   return `
-    <button class="tx-comments-row" onclick="event.stopPropagation(); window.TelegramX.openThread('${post.id}')">
+    <button class="tx-comments-row" onpointerdown="window.TelegramX.prefetchComments('${post.id}')" onclick="event.stopPropagation(); window.TelegramX.openThread('${post.id}')">
       ${avatars ? `<span class="tx-avatars">${avatars}</span>` : '<i class="icon icon-comments"></i>'}
       <span id="comments-label-${post.id}">${commentsLabel(post.replies_count)}</span>
       <i class="icon icon-next tx-chevron"></i>
@@ -172,7 +173,7 @@ function metaHtml(post) {
     <i class="icon icon-star ${post.is_favorite ? '' : 'tx-hidden'}" id="fav-mark-${post.id}" style="color:#f5b72f"></i>
     ${post.views != null ? `<i class="icon icon-channelviews"></i><span class="tx-views">${formatNumber(post.views)}</span>` : ''}
     ${post.post_author ? `<span class="tx-meta-author">&nbsp;${escapeHtml(post.post_author)},</span>` : ''}
-    <span>&nbsp;${post.edited ? 'изменено ' : ''}${timeOf(post)}</span>`;
+    <span>&nbsp;${post.edited ? t('изменено ') : ''}${timeOf(post)}</span>`;
 }
 
 /** Inline URL buttons under a message, like Telegram's bot keyboards. */
@@ -204,7 +205,7 @@ export function createPostCardElement(post) {
       <div class="tx-bubble ${isSticker ? 'is-sticker' : ''} ${mediaOnly ? 'tx-media-only' : ''}"
            onclick="window.TelegramX.openPostMenu('${post.id}', event)"
            ondblclick="window.TelegramX.quickReact('${post.id}', event)">
-        ${isSticker ? '' : `<div class="tx-bubble-name tx-peer-${peerColor(post.channel_id)} tx-peer-name" onclick="event.stopPropagation(); window.TelegramX.filterByChannel(${post.channel_id}, '${escapeQuotes(ch.title)}')">${avatarHtml(ch, 'xs')}<span>${parseEmojis(ch.title || 'Канал')}</span>${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>`}
+        ${isSticker ? '' : `<div class="tx-bubble-name tx-peer-${peerColor(post.channel_id)} tx-peer-name" onclick="event.stopPropagation(); window.TelegramX.filterByChannel(${post.channel_id}, '${escapeQuotes(ch.title)}')">${avatarHtml(ch, 'xs')}<span>${parseEmojis(ch.title || t('Канал'))}</span>${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>`}
         ${media}
         ${body ? `<div class="post-text tx-text">${body}</div>` : ''}
         ${webpageHtml(post)}
@@ -214,7 +215,7 @@ export function createPostCardElement(post) {
       </div>
       ${buttonsHtml(post.buttons)}
       </div>
-      <button class="tx-side-btn tx-glass" onclick="window.TelegramX.sharePost('${post.id}')" title="Поделиться">
+      <button class="tx-side-btn tx-glass" onclick="window.TelegramX.sharePost('${post.id}')" title="${t('Поделиться')}">
         <i class="icon icon-share-filled"></i>
       </button>
     </div>`;

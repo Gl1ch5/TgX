@@ -1,0 +1,11 @@
+{
+  "name": "Telegram You",
+  "short_name": "Telegram You",
+  "description": "Неофициальный веб-клиент Telegram",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#181819",
+  "theme_color": "#181819",
+  "icons": [{ "src": "icons/app.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

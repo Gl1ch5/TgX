@@ -6,6 +6,7 @@
  */
 
 import { escapeHtml, formatDuration } from '../utils.js';
+import { t } from '../i18n.js';
 
 const audio = new Audio();
 audio.preload = 'none';
@@ -46,13 +47,13 @@ audio.addEventListener('play', () => current && setPlaying(rowOf(current.id), tr
 
 export function audioHtml(post, item) {
   const id = `${post.id}:${item.msg_id}`;
-  const title = item.title || item.performer || (item.is_voice ? 'Голосовое сообщение' : 'Аудиозапись');
+  const title = item.title || item.performer || (item.is_voice ? t('Голосовое сообщение') : t('Аудиозапись'));
   const wave = item.is_voice && item.waveform
     ? `<span class="tx-wave" onclick="event.stopPropagation(); window.TelegramX.seekAudio('${id}', event)">${item.waveform.map((v) => `<i style="height:${Math.max(3, Math.round((v / 31) * 22))}px"></i>`).join('')}</span>`
     : `<span class="tx-progress" onclick="event.stopPropagation(); window.TelegramX.seekAudio('${id}', event)"><i></i></span>`;
   return `
     <div class="tx-file tx-audio" data-audio="${escapeHtml(id)}" data-src="${escapeHtml(item.url)}" data-duration="${item.duration || 0}">
-      <button class="tx-file-icon" onclick="event.stopPropagation(); window.TelegramX.toggleAudio('${id}')" title="Слушать">
+      <button class="tx-file-icon" onclick="event.stopPropagation(); window.TelegramX.toggleAudio('${id}')" title="${t('Слушать')}">
         <i class="icon icon-play"></i>
       </button>
       <span class="tx-file-body">

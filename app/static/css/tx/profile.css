@@ -4,7 +4,7 @@
 .tx-pf-bar {
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: flex-end; gap: 4px;
-  height: 56px; padding: var(--tx-safe-top) 4px 0 18px; margin: 0 -10px;
+  height: calc(56px + var(--tx-safe-top)); box-sizing: border-box; padding: var(--tx-safe-top) 4px 0 18px; margin: 0 -10px;
   box-sizing: content-box;
 }
 .tx-pf-bar::before {

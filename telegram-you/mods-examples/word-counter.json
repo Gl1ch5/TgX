@@ -1,0 +1,13 @@
+{
+  "manifest": {
+    "id": "word-counter",
+    "name": "Счётчик слов",
+    "version": "1.0.0",
+    "description": "Пункт «Сколько слов?» в меню сообщения",
+    "permissions": [
+      "ui.menu",
+      "storage"
+    ]
+  },
+  "code": "export default function (tx) {\n  tx.menu('message', 'Сколько слов?', ({ msg }) => {\n    const n = (msg.text || '').trim().split(/\\s+/).filter(Boolean).length;\n    tx.storage.set('total', (tx.storage.get('total') || 0) + n);\n    tx.toast('Слов: ' + n);\n  });\n}\n"
+}

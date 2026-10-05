@@ -8,7 +8,9 @@
   <meta name="theme-color" content="#0b0b0f" />
   <meta property="og:title" content="TeleX — все каналы одной стеной" />
   <meta property="og:description" content="Неофициальный клиент Telegram: каналы одной лентой, истории, комментарии, реакции. Браузер, Android, Windows." />
-  <meta property="og:image" content="site/shots/wall.jpg" />
+  <meta property="og:image" content="https://telex-web.ru/site/shots/wall.jpg" />
+  <meta property="og:url" content="https://telex-web.ru/" />
+  <link rel="canonical" href="https://telex-web.ru/" />
   <link rel="icon" href="app/static/icons/telex.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,8 +30,10 @@
     <div class="wrap nav-in">
       <a class="brand" href="#top"><img src="app/static/icons/telex.svg" alt="" width="32" height="32" />TeleX</a>
       <nav class="links">
+        <a href="#clients">Клиенты</a>
         <a href="#features">Возможности</a>
         <a href="#shots">Скриншоты</a>
+        <a href="#mods">Моды</a>
         <a href="#download">Скачать</a>
         <a href="#faq">Вопросы</a>
       </nav>
@@ -46,6 +50,7 @@
         <p class="lead">TeleX собирает публикации всех ваших каналов в одну ленту, как в Telegram: истории, комментарии, реакции и премиум-эмодзи. Без лишних чатов — только то, что вы читаете.</p>
         <div class="cta">
           <a class="btn" href="app/static/"><span class="ico" style="--i:url(../app/static/icons/android/settings_language.svg)"></span>Открыть в браузере</a>
+          <a class="btn btn-ghost" href="telegram-you/"><span class="ico" style="--i:url(../app/static/icons/android/settings_chat.svg)"></span>Telegram You</a>
           <a class="btn btn-ghost" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk"><span class="ico" style="--i:url(phone.svg)"></span>Android</a>
           <a class="btn btn-ghost" href="https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-Setup.exe"><span class="ico" style="--i:url(../app/static/icons/android/settings_devices.svg)"></span>Windows</a>
         </div>
@@ -58,6 +63,18 @@
     </section>
 
     <!-- Features -->
+    <!-- Two clients -->
+    <section id="clients" class="wrap section">
+      <div class="head reveal">
+        <h2>Два клиента — выбирайте</h2>
+        <p>Одна учётная запись Telegram, вход общий: войдёте в одном — второй откроется сразу.</p>
+      </div>
+      <div class="grid two">
+        <article class="card reveal"><span class="sq" style="--a:#4F85F6;--b:#3568E8;--i:url(../app/static/icons/android/settings_channel.svg)"></span><h3>TeleX — стена каналов</h3><p>Все ваши каналы одной лентой, истории, комментарии и реакции. Для тех, кто читает, а не переписывается.</p><p style="margin-top:16px"><a class="btn btn-sm" href="app/static/">Открыть TeleX</a></p></article>
+        <article class="card reveal"><span class="sq" style="--a:#55CA47;--b:#27B434;--i:url(../app/static/icons/android/settings_chat.svg)"></span><h3>Telegram You <small style="opacity:.6;font-weight:500">· бета</small></h3><p>Полноценный клиент Telegram: список чатов с папками и архивом, переписка, ответы, файлы, поиск — как в Telegram для Android.</p><p style="margin-top:16px"><a class="btn btn-sm" href="telegram-you/">Открыть Telegram You</a></p></article>
+      </div>
+    </section>
+
     <section id="features" class="wrap section">
       <div class="head reveal">
         <h2>Как Telegram. Только про каналы.</h2>
@@ -100,6 +117,29 @@
     </section>
 
     <!-- Download -->
+    <section id="mods" class="wrap section">
+      <div class="head reveal">
+        <h2>Моды</h2>
+        <p>Темы, виджеты и расширения — один файл <b>.module</b>. Скачайте и установите в приложении: Настройки → Моды.</p>
+      </div>
+      <div class="grid" id="mods-grid">
+        <article class="card reveal"><h3>Загружаем каталог…</h3></article>
+      </div>
+      <p class="fine center">Официальные моды можно ставить прямо из приложения. Свой мод — по <a href="mods.html">документации</a>; нейросеть соберёт его по <a href="mods.html#agents">инструкции для агентов</a>.</p>
+    </section>
+    <script>
+      fetch('app/static/mods/catalog.json').then(function (r) { return r.json(); }).then(function (c) {
+        var L = function (v) { return (v && typeof v === 'object') ? (v.ru || v.en) : v; };
+        var esc = function (s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
+        document.getElementById('mods-grid').innerHTML = c.mods.map(function (m) {
+          var bg = 'transparent';
+          return '<article class="card reveal in"><span class="sq" style="background:' + bg + ';font-size:26px;display:flex;align-items:center;justify-content:center">' + (m.icon && /^mods\//.test(m.icon) ? '<img src="app/static/' + esc(m.icon) + '" alt="" style="width:100%;height:100%;border-radius:inherit">' : esc(m.icon || '')) + '</span>' +
+            '<h3>' + esc(L(m.name)) + ' <small style="opacity:.6;font-weight:500">v' + esc(m.version) + '</small></h3><p>' + esc(m.description) + '</p>' +
+            '<p style="margin-top:16px"><a class="btn btn-sm" href="app/static/mods/' + esc(m.file) + '" download>Скачать .module</a></p></article>';
+        }).join('');
+      }).catch(function () { document.getElementById('mods-grid').innerHTML = ''; });
+    </script>
+
     <section id="download" class="wrap section">
       <div class="head reveal"><h2>Скачать</h2><p>Все версии бесплатные и обновляются автоматически.</p></div>
       <div class="dl">

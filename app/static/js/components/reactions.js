@@ -9,6 +9,7 @@ import { api } from '../api.js';
 import { showToast, formatNumber, escapeQuotes, haptic } from '../utils.js';
 import { renderEmoji } from '../emoji.js';
 import { hydrateStickers } from './sticker.js';
+import { t } from '../i18n.js';
 
 const STAR_SVG = '<img class="tx-star" src="icons/android/star_reaction.svg" width="22" height="22" alt="⭐" draggable="false" />';
 
@@ -69,7 +70,7 @@ export async function sendReaction(channelId, msgId, emoji, postId, customId = n
   const res = await api.sendReaction(channelId, msgId, send.emoji, send.customId);
   if (res.status !== 'success') {
     const premium = /PREMIUM|REACTION_INVALID/.test(res.message || '');
-    showToast(premium ? 'Эта реакция доступна только с Telegram Premium' : 'Не удалось поставить реакцию: ' + (res.message || 'ошибка'));
+    showToast(premium ? t('Эта реакция доступна только с Telegram Premium') : t('Не удалось поставить реакцию: ') + (res.message || t('ошибка')));
   }
 }
 
@@ -78,7 +79,7 @@ export function tapReaction(postId, index) {
   const r = post && post.reactions[index];
   if (!r) return;
   if (r.paid) {
-    showToast('Платные реакции ⭐ отправляются из приложения Telegram');
+    showToast(t('Платные реакции ⭐ отправляются из приложения Telegram'));
     return;
   }
   sendReaction(post.channel_id, post.msg_id, r.emoji, post.id, r.custom_id || null);

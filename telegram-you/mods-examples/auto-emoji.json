@@ -1,0 +1,12 @@
+{
+  "manifest": {
+    "id": "auto-emoji",
+    "name": "Авто-эмодзи",
+    "version": "1.0.0",
+    "description": "Хук отправки: дописывает 🙂 к сообщению, оканчивающемуся на «!»",
+    "permissions": [
+      "messages.send"
+    ]
+  },
+  "code": "export default function (tx) {\n  tx.ext.addHook('beforeSend', (text) => (text.endsWith('!') ? text + ' 🙂' : text));\n}\n"
+}

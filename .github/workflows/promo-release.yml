@@ -1,0 +1,49 @@
+name: Promo videos (release)
+
+# Renders the four trailers (vertical/YouTube × en/ru) and publishes them as the
+# "promo" release, so big files never live in the git history.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ccr-297b0b47-05qrmt]
+    paths: ['promo/**', '.github/workflows/promo-release.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promo-release
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Tools and fonts
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-roboto fonts-inter fonts-noto-color-emoji python3
+          fc-cache -f
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Screens of the app (en, ru)
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory app/static &
+          sleep 2
+          for l in en ru; do LANG_CODE=$l node promo/capture.cjs; done
+      - name: Render the trailers
+        run: sh promo/render-all.sh
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete promo -y --cleanup-tag || true
+          gh release create promo --title "TeleX promo videos" --prerelease \
+            --notes "Trailers with an original background beat and sound effects. vertical = 1080×1920 (TikTok/Shorts/Reels), youtube = 1920×1080; en / ru." \
+            promo/build/TeleX-trailer-vertical-en.mp4 promo/build/TeleX-trailer-vertical-ru.mp4 \
+            promo/build/TeleX-trailer-youtube-en.mp4 promo/build/TeleX-trailer-youtube-ru.mp4

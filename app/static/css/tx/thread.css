@@ -92,3 +92,16 @@
 @keyframes tx-jump-in { from { opacity: 0; transform: scale(0.6); } }
 #thread-send { transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.18s ease; }
 .tx-composer.is-empty #thread-send { transform: scale(0.7); opacity: 0.55; }
+
+/* Discussion skeleton */
+.tx-thread-skeleton { padding-top: 6px; }
+.tx-skel-msg { animation: tx-enter 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
+.tx-skel-bubble { padding: 11px 13px 12px; min-width: 120px; }
+.tx-skel {
+  display: block; border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06) linear-gradient(100deg, transparent 25%, rgba(140, 160, 255, 0.1) 45%, rgba(255, 255, 255, 0.12) 50%, rgba(140, 160, 255, 0.1) 55%, transparent 75%) no-repeat;
+  background-size: 220% 100%;
+  animation: tx-shimmer 1.5s linear infinite;
+}
+.tx-skel-ava { width: 36px; height: 36px; border-radius: 50%; }
+.tx-skel-ava { background-color: rgba(255, 255, 255, 0.12); }

@@ -16,8 +16,8 @@
 button.tx-row:active, label.tx-row:active { background: rgba(255, 255, 255, 0.05); }
 label.tx-row { cursor: pointer; }
 .tx-row-body { flex: 1; min-width: 0; }
-.tx-row-title { display: block; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tx-row-sub { display: block; font-size: 14.5px; color: var(--tx-text-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-row-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: 17px; line-height: 1.3; overflow: hidden; overflow-wrap: anywhere; }
+.tx-row-sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-size: 14.5px; color: var(--tx-text-2); margin-top: 2px; overflow: hidden; overflow-wrap: anywhere; }
 .tx-row-sub.wrap { white-space: normal; }
 .tx-row-value { font-size: 16px; color: var(--tx-accent); flex-shrink: 0; }
 .tx-row.is-danger .tx-row-title { color: var(--tx-red); }
@@ -86,3 +86,53 @@ label.tx-row { cursor: pointer; }
 }
 .tx-cam-badge .icon { font-size: 20px; }
 body.tx-no-glass { --tx-glass: rgba(34, 34, 36, 0.97); }
+
+/* ---- Chat settings (Telegram for Android: "Настройки чатов") ---- */
+.tx-group-flush { padding-bottom: 0; }
+.tx-slider.is-big { padding: 8px 22px 18px; }
+.tx-slider .tx-slider-val { font-size: 21px; font-weight: 500; color: var(--tx-accent); min-width: 34px; text-align: right; }
+.tx-glyph { width: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--tx-accent); }
+.tx-glyph .icon { font-size: 26px; }
+.tx-row.is-accent .tx-row-title { color: var(--tx-accent); }
+.tx-chat-settings .tx-row + .tx-row::before,
+.tx-radio-row + .tx-radio-row::before { content: ''; position: absolute; left: 76px; right: 0; top: 0; height: 1px; background: var(--tx-separator); }
+
+.tx-cp { position: relative; padding: 14px 14px 12px; overflow: hidden; display: flex; flex-direction: column; gap: 6px; margin: 2px 0 6px; }
+.tx-cp-pattern { position: absolute; inset: 0; background-size: 300px auto; opacity: 0.28; pointer-events: none; }
+:root[data-theme='light'] .tx-cp-pattern, :root[data-theme='light'] .tx-theme-tile .tx-cp-pattern { filter: invert(1); opacity: 0.1; }
+.tx-cp-msg { position: relative; display: flex; }
+.tx-cp-msg.is-out { justify-content: flex-end; }
+.tx-cp-bubble { max-width: 82%; padding: 6px 10px 6px 8px; border-radius: var(--tx-bubble-radius); border-bottom-left-radius: var(--tx-bubble-radius-small); background: var(--tx-bubble); font-size: var(--tx-text-size); color: var(--tx-text); }
+.tx-cp-bubble.is-out { color: #fff; padding: 7px 12px 6px 14px; border-radius: var(--tx-bubble-radius); border-bottom-right-radius: var(--tx-bubble-radius-small); }
+.tx-cp-quote { border-left: 3px solid var(--tx-green); background: color-mix(in srgb, var(--tx-green) 14%, transparent); border-radius: 6px; padding: 3px 8px 4px 9px; margin-bottom: 4px; display: flex; flex-direction: column; font-size: 0.94em; line-height: 1.25; }
+.tx-cp-quote b { font-weight: 500; }
+.tx-cp-text { line-height: 1.3; }
+.tx-cp-time { font-style: normal; font-size: 12px; opacity: 0.62; margin-left: 12px; float: right; margin-top: 9px; display: inline-flex; align-items: center; gap: 3px; }
+
+.tx-theme-strip { display: flex; gap: 12px; overflow-x: auto; padding: 8px 18px 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.tx-theme-strip::-webkit-scrollbar { display: none; }
+.tx-theme-tile { position: relative; flex: 0 0 88px; height: 124px; border-radius: 14px; overflow: hidden; box-shadow: 0 0 0 1px var(--tx-separator) inset; }
+.tx-theme-tile.is-active { box-shadow: 0 0 0 3px var(--tx-accent-fill); }
+.tx-theme-tile .tx-cp-pattern { background-size: 190px auto; }
+.tx-theme-out { position: absolute; left: 18px; top: 22px; width: 62px; height: 26px; border-radius: 13px; }
+.tx-theme-in { position: absolute; left: 7px; top: 56px; width: 50px; height: 24px; border-radius: 12px; background: var(--tx-bubble); opacity: 0.9; }
+.tx-theme-emoji { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font-size: 34px; line-height: 1; }
+.tx-theme-emoji .emoji { width: 36px; height: 36px; }
+
+.tx-name-pill { display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 17px; font-weight: 500; color: var(--n); background: color-mix(in srgb, var(--n) 16%, transparent); }
+.tx-name-pill.is-big { font-size: 24px; padding: 10px 24px; }
+.tx-name-preview { display: flex; justify-content: center; padding: 18px 0 8px; }
+.tx-swatches { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 22px 22px; justify-content: center; }
+.tx-swatch { width: 46px; height: 46px; border-radius: 50%; background: var(--c); position: relative; color: #fff; font-weight: 700; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; }
+.tx-swatch.is-active::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; box-shadow: 0 0 0 2.5px var(--c); }
+
+.tx-radio { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--tx-hint); flex: none; position: relative; margin: 0 6px 0 2px; }
+.tx-radio.is-checked { border-color: var(--tx-accent); }
+.tx-radio.is-checked::after { content: ''; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--tx-accent); }
+.tx-radio-row .tx-row-title { font-size: 20px; }
+.tx-lang-search { padding: 0 2px 10px; }
+.tx-lang-search input { width: 100%; height: 46px; border-radius: 14px; border: 1px solid var(--tx-separator); background: var(--tx-surface); color: var(--tx-text); padding: 0 16px; font: inherit; font-size: 17px; outline: none; }
+.tx-slider span:empty { display: none; }
+.tx-chat-settings .tx-slider { padding: 8px 22px 16px; }
+.tx-chat-settings .tx-row { gap: 16px; }
+.tx-name-pill { font-size: 15.5px; padding: 5px 15px; }

@@ -5,13 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>TeleX — стена каналов Telegram</title>
   <meta name="theme-color" content="#000000" />
+  <script>
+    // Theme before the first paint (no dark flash on a light phone): saved choice or the device's.
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('telex.prefs') || '{}');
+        var t = p.theme === 'light' || p.theme === 'dark' ? p.theme : (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        var r = document.documentElement;
+        r.setAttribute('data-theme', t);
+        if (t === 'light') { r.classList.remove('dark'); document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f0f0f5'); }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="description" content="Все ваши Telegram-каналы одной лентой. Работает прямо в браузере." />
   <link rel="icon" href="icons/telex.svg" type="image/svg+xml" />
   
   <!-- Fonts: Roboto & JetBrains Mono (Telegram Native) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/fonts.css">
 
   <!-- Tailwind CSS -->
   <script src="js/vendor/tailwindcss.js"></script>
@@ -20,7 +30,7 @@
   <link rel="stylesheet" href="css/telegram-icons.css">
   <link rel="stylesheet" href="css/telegram-theme.css">
   <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/telex.css?v=3.7.0">
+  <link rel="stylesheet" href="css/telex.css?v=3.14.0">
 
   <!-- External Libraries -->
   <script src="js/vendor/qrcode.min.js"></script>
@@ -260,125 +270,8 @@
     </div>
   </div>
 
-  <!-- AUTH MODAL -->
-  <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="liquid-glass rounded-3xl w-full max-w-sm p-5 relative shadow-2xl overflow-hidden border border-white/15">
-      <button onclick="window.TelegramX.closeAuthModal()" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-white w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center">
-        <i class="icon icon-close text-base"></i>
-      </button>
-
-      <div class="text-center mb-5 mt-1">
-        <div class="w-12 h-12 rounded-2xl bg-[#3390ec]/15 border border-[#3390ec]/30 flex items-center justify-center mx-auto mb-2.5 text-[#3390ec]">
-          <svg class="w-7 h-7 text-[#3390ec]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.05-.49-.83-.27-1.49-.42-1.43-.88.03-.24.38-.49 1.03-.75 4.04-1.76 6.74-2.92 8.09-3.48 3.85-1.6 4.65-1.88 5.17-1.89.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.21-.04.38z"/>
-          </svg>
-        </div>
-        <h2 class="text-xl font-bold text-white">Вход в Telegram</h2>
-        <p class="text-[#8a8a90] text-xs mt-0.5 font-mono">Прямой вход без сторонних сервисов</p>
-      </div>
-
-      <div class="flex border-b border-white/10 mb-4">
-        <button onclick="window.TelegramX.switchAuthTab('qr')" id="auth-tab-qr" class="flex-1 pb-2.5 text-xs font-semibold text-[#3390ec] border-b-2 border-[#3390ec] flex items-center justify-center gap-1.5">
-          <i class="icon icon-camera text-sm"></i> QR-код
-        </button>
-        <button onclick="window.TelegramX.switchAuthTab('phone')" id="auth-tab-phone" class="flex-1 pb-2.5 text-xs font-semibold text-[#8a8a90] hover:text-white flex items-center justify-center gap-1.5">
-          <i class="icon icon-phone text-sm"></i> По номеру
-        </button>
-      </div>
-
-      <!-- QR Code Pane -->
-      <div id="auth-qr-pane" class="flex flex-col items-center">
-        <div id="qr-display-box" class="flex flex-col items-center w-full">
-          <div class="bg-white p-3 rounded-2xl shadow-inner mb-3 flex items-center justify-center w-[210px] h-[210px]" id="qr-container">
-            <div class="text-slate-500 text-xs flex flex-col items-center gap-2" id="qr-placeholder">
-              <span class="inline-block animate-spin text-[#3390ec] text-xl"><i class="icon icon-reload-arrows"></i></span>
-              Генерация QR-кода...
-            </div>
-          </div>
-
-          <p class="text-[11.5px] text-center text-slate-300 mb-2 leading-relaxed">
-            1. Откройте Telegram на телефоне<br/>
-            2. <b>Настройки → Устройства → Подключить</b><br/>
-            3. Наведите камеру на QR-код
-          </p>
-
-          <button onclick="window.TelegramX.generateQRLogin()" class="text-xs text-[#3390ec] hover:underline flex items-center gap-1 mt-1">
-            <i class="icon icon-reload-arrows text-xs"></i> Обновить QR
-          </button>
-        </div>
-
-        <div id="qr-2fa-container" class="hidden w-full flex-col gap-3">
-          <div class="bg-[#4fae4e]/10 border border-[#4fae4e]/30 text-[#4fae4e] p-2.5 rounded-xl text-xs flex items-center gap-2">
-            <i class="icon icon-check-bold text-sm text-[#4fae4e]"></i>
-            <span><b>QR подтвержден!</b> Введите ваш 2FA пароль:</span>
-          </div>
-
-          <label class="text-xs font-medium text-yellow-400 mt-1">Облачный пароль (2FA):</label>
-          <input 
-            type="password" 
-            id="qr-password-input" 
-            placeholder="Ваш 2FA пароль" 
-            class="w-full bg-[#121216] border border-yellow-500/50 focus:border-yellow-400 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none"
-            onkeydown="if(event.key==='Enter') window.TelegramX.submitQRPassword()"
-          />
-
-          <button onclick="window.TelegramX.submitQRPassword()" id="btn-qr-password" class="w-full bg-[#3390ec] hover:bg-[#267fd9] text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-md shadow-[#3390ec]/25">
-            <span>Подтвердить вход</span>
-          </button>
-
-          <div id="qr-2fa-error" class="hidden text-xs text-red-400 bg-red-500/10 p-2 rounded-xl border border-red-500/20 text-center"></div>
-        </div>
-      </div>
-
-      <!-- Phone Number Pane -->
-      <div id="auth-phone-pane" class="hidden flex flex-col gap-3">
-        <div id="step-phone" class="space-y-2.5">
-          <label class="text-xs font-medium text-slate-300">Номер телефона (+7...):</label>
-          <input 
-            type="tel" 
-            id="phone-input" 
-            placeholder="+7 999 123 45 67" 
-            class="w-full bg-[#121216] border border-white/10 focus:border-[#3390ec] rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none"
-          />
-          <button onclick="window.TelegramX.sendPhoneCode()" id="btn-send-code" class="w-full bg-[#3390ec] hover:bg-[#267fd9] text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-md shadow-[#3390ec]/25">
-            <span>Получить код</span>
-          </button>
-          <div id="phone-error" class="hidden text-xs text-red-400 bg-red-500/10 p-2 rounded-xl text-center"></div>
-        </div>
-
-        <div id="step-code" class="space-y-2.5 hidden">
-          <label class="text-xs font-medium text-slate-300">Код из Telegram или SMS:</label>
-          <input 
-            type="text" 
-            id="code-input" 
-            placeholder="12345" 
-            class="w-full bg-[#121216] border border-white/10 focus:border-[#3390ec] rounded-xl px-3.5 py-2.5 text-white text-center tracking-widest text-base font-mono focus:outline-none"
-            onkeydown="if(event.key==='Enter') window.TelegramX.submitPhoneCode()"
-          />
-          <button onclick="window.TelegramX.submitPhoneCode()" id="btn-submit-code" class="w-full bg-[#3390ec] hover:bg-[#267fd9] text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-md shadow-[#3390ec]/25">
-            <span>Войти</span>
-          </button>
-          <div id="code-error" class="hidden text-xs text-red-400 bg-red-500/10 p-2 rounded-xl text-center"></div>
-        </div>
-
-        <div id="step-password" class="space-y-2.5 hidden">
-          <label class="text-xs font-medium text-yellow-400">Облачный пароль 2FA:</label>
-          <input 
-            type="password" 
-            id="password-input" 
-            placeholder="Пароль" 
-            class="w-full bg-[#121216] border border-yellow-500/50 focus:border-yellow-400 rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none"
-            onkeydown="if(event.key==='Enter') window.TelegramX.submitPhonePassword()"
-          />
-          <button onclick="window.TelegramX.submitPhonePassword()" id="btn-submit-password" class="w-full bg-[#3390ec] hover:bg-[#267fd9] text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-md shadow-[#3390ec]/25">
-            <span>Подтвердить вход</span>
-          </button>
-          <div id="password-error" class="hidden text-xs text-red-400 bg-red-500/10 p-2 rounded-xl text-center"></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
+  <!-- LOGIN (rendered by components/authModal.js) -->
+  <div id="auth-modal" class="tx-auth tx-hidden"></div>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="tx-toast fixed bottom-20 left-1/2 -translate-x-1/2 liquid-glass border border-white/15 px-4 py-2 rounded-full text-xs font-medium text-white shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
@@ -387,6 +280,6 @@
   </div>
 
   <!-- JavaScript ES Modules Entrypoint -->
-  <script type="module" src="js/app.js?v=3.7.0"></script>
+  <script type="module" src="js/app.js?v=3.14.0"></script>
 </body>
 </html>

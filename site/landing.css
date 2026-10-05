@@ -90,6 +90,8 @@ h2 { font-size: clamp(30px, 4vw, 44px); line-height: 1.12; letter-spacing: -0.01
 .head p { color: var(--text-2); font-size: 18px; margin: 0; }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid.two { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 760px) { .grid.two { grid-template-columns: 1fr; } }
 .card {
   padding: 26px; border-radius: var(--radius); background: linear-gradient(180deg, var(--surface-2), var(--surface));
   box-shadow: inset 0 0 0 1px var(--line); transition: transform 0.25s ease, box-shadow 0.25s ease;

@@ -8,13 +8,14 @@
 
 import { state } from '../state.js';
 import { api } from '../api.js';
-import { escapeHtml, formatNumber, pluralRu, showToast } from '../utils.js';
+import { escapeHtml, formatNumber, showToast } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { go } from '../core/nav.js';
 import { avatarHtml } from '../components/avatar.js';
 import { VERIFIED_BADGE_SVG } from '../components/postCard.js';
 import { openStoryViewer } from '../components/storyViewer.js';
 import { openPopup } from '../components/postMenu.js';
+import { t, tn } from '../i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const fullCache = new Map(); // channelId -> full info
@@ -107,7 +108,7 @@ function info() {
 }
 
 function subsLabel(n) {
-  return n ? `${formatNumber(n)} ${pluralRu(n, 'подписчик', 'подписчика', 'подписчиков')}` : 'канал';
+  return n ? tn(['{n} подписчик', '{n} подписчика', '{n} подписчиков'], n, { n: formatNumber(n) }) : t('канал');
 }
 
 function action(icon, label, onclick, extra = '') {
@@ -117,7 +118,7 @@ function action(icon, label, onclick, extra = '') {
 function storiesGrid() {
   const list = cur.stories ? cur.stories.stories : null;
   if (!list) return '<div class="tx-pf-empty"><span class="animate-spin"><i class="icon icon-reload"></i></span></div>';
-  if (!list.length) return '<div class="tx-pf-empty"><b>Публикаций нет</b><span>Канал пока не сохранил истории на своей странице.</span></div>';
+  if (!list.length) return `<div class="tx-pf-empty"><b>${t('Публикаций нет')}</b><span>${t('Канал пока не сохранил истории на своей странице.')}</span></div>`;
   return `<div class="tx-pf-grid">${list.map((s, i) => `
     <button class="tx-pf-cell" onclick="window.TelegramX.openChannelStory(${i}, this)">
       ${s.skipped ? '' : `<img src="${escapeHtml(s.type === 'video' ? s.thumb_url || '' : s.url)}" alt="" loading="lazy" decoding="async" />`}
@@ -128,7 +129,7 @@ function storiesGrid() {
 
 function mediaGrid() {
   if (cur.media === null) return '<div class="tx-pf-empty"><span class="animate-spin"><i class="icon icon-reload"></i></span></div>';
-  if (!cur.media.length) return '<div class="tx-pf-empty"><b>Медиа нет</b><span>В этом канале пока нет фото и видео.</span></div>';
+  if (!cur.media.length) return `<div class="tx-pf-empty"><b>${t('Медиа нет')}</b><span>${t('В этом канале пока нет фото и видео.')}</span></div>`;
   const cells = cur.media.map((p) => {
     const it = p.media_items[0];
     const thumb = it.type === 'photo' ? it.url : it.thumb_url || '';
@@ -147,36 +148,36 @@ function render() {
   const ch = info();
   const muted = !!ch.muted;
   const link = ch.username ? `t.me/${ch.username}` : '';
-  const tabs = [['posts', 'Публикации'], ['media', 'Медиа']];
+  const tabs = [['posts', t('Публикации')], ['media', t('Медиа')]];
 
   el.innerHTML = `
     <div class="tx-pf-bar">
-      <button class="tx-icon-btn" onclick="window.TelegramX.back()" title="Назад"><i class="icon icon-arrow-left"></i></button>
-      <span class="tx-pf-bar-title">${parseEmojis(ch.title || 'Канал')}</span>
-      <button class="tx-icon-btn" onclick="window.TelegramX.openChannelPageMenu(event)" title="Ещё"><i class="icon icon-more"></i></button>
+      <button class="tx-icon-btn" onclick="window.TelegramX.back()" title="${t('Назад')}"><i class="icon icon-arrow-left"></i></button>
+      <span class="tx-pf-bar-title">${parseEmojis(ch.title || t('Канал'))}</span>
+      <button class="tx-icon-btn" onclick="window.TelegramX.openChannelPageMenu(event)" title="${t('Ещё')}"><i class="icon icon-more"></i></button>
     </div>
     <div class="tx-page tx-pf">
       <div class="tx-pf-hero">
         <span class="tx-pf-avatar">${avatarHtml({ ...ch, avatar: ch.avatar_big || ch.avatar }, 'xl')}</span>
-        <div class="tx-hero-name">${parseEmojis(ch.title || 'Канал')}${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>
+        <div class="tx-hero-name">${parseEmojis(ch.title || t('Канал'))}${ch.verified ? VERIFIED_BADGE_SVG : ''}</div>
         <div class="tx-hero-sub">${escapeHtml(subsLabel(ch.participants_count))}</div>
       </div>
       <div class="tx-pf-actions">
-        ${action(muted ? 'mute' : 'unmute', muted ? 'Без звука' : 'Звук', 'window.TelegramX.toggleChannelMute()')}
-        ${ch.linked ? action('comments', 'Обсуждение', 'window.TelegramX.openChannelDiscussion()') : ''}
-        ${action('share-filled', 'Ссылка', 'window.TelegramX.copyChannelLink()')}
-        ${action('logout', 'Покинуть', 'window.TelegramX.leaveChannelConfirm()')}
+        ${action(muted ? 'mute' : 'unmute', muted ? t('Без звука') : t('Звук'), 'window.TelegramX.toggleChannelMute()')}
+        ${ch.linked ? action('comments', t('Обсуждение'), 'window.TelegramX.openChannelDiscussion()') : ''}
+        ${action('share-filled', t('Ссылка'), 'window.TelegramX.copyChannelLink()')}
+        ${action('logout', t('Покинуть'), 'window.TelegramX.leaveChannelConfirm()')}
       </div>
       ${(ch.about || link) ? `
         <div class="tx-group">
-          ${ch.about ? `<div class="tx-row"><span class="tx-row-body"><span class="tx-row-title tx-about-text">${linkify(ch.about)}</span><span class="tx-row-sub">Описание</span></span></div>` : ''}
-          ${link ? `<button class="tx-row" onclick="window.TelegramX.copyChannelLink()"><span class="tx-row-body"><span class="tx-row-title">${escapeHtml(link)}</span><span class="tx-row-sub">Ссылка</span></span><i class="icon icon-qr tx-row-end"></i></button>` : ''}
+          ${ch.about ? `<div class="tx-row"><span class="tx-row-body"><span class="tx-row-title tx-about-text">${linkify(ch.about)}</span><span class="tx-row-sub">${t('Описание')}</span></span></div>` : ''}
+          ${link ? `<button class="tx-row" onclick="window.TelegramX.copyChannelLink()"><span class="tx-row-body"><span class="tx-row-title">${escapeHtml(link)}</span><span class="tx-row-sub">${t('Ссылка')}</span></span><i class="icon icon-qr tx-row-end"></i></button>` : ''}
         </div>` : ''}
       <div class="tx-group tx-pf-posts">
         <div class="tx-pill-tabs">${tabs.map(([k, label]) => `<button class="${cur.tab === k ? 'is-active' : ''}" onclick="window.TelegramX.switchChannelTab('${k}')">${label}</button>`).join('')}</div>
         ${cur.tab === 'posts' ? storiesGrid() : mediaGrid()}
       </div>
-      <button class="tx-open-wall" onclick="window.TelegramX.filterByChannel(${cur.id})"><i class="icon icon-channel"></i>Показать публикации на стене</button>
+      <button class="tx-open-wall" onclick="window.TelegramX.filterByChannel(${cur.id})"><i class="icon icon-channel"></i>${t('Показать публикации на стене')}</button>
     </div>`;
   observeMore();
 }
@@ -206,13 +207,13 @@ export async function toggleChannelMute(channelId = cur && cur.id) {
   const next = !(ch && ch.muted);
   const res = await api.setChannelMuted(Number(channelId), next);
   if (res.status !== 'success') {
-    showToast('Не удалось: ' + (res.message || 'ошибка'));
+    showToast(t('Не удалось: ') + (res.message || t('ошибка')));
     return null;
   }
   state.channels.forEach((x) => { if (x.id === Number(channelId)) x.muted = next; });
   const full = fullCache.get(Number(channelId));
   if (full) full.muted = next;
-  showToast(next ? 'Уведомления выключены' : 'Уведомления включены');
+  showToast(next ? t('Уведомления выключены') : t('Уведомления включены'));
   if (cur && cur.id === Number(channelId)) render();
   window.dispatchEvent(new CustomEvent('tx:channel-muted', { detail: { id: Number(channelId), muted: next } }));
   return next;
@@ -221,7 +222,7 @@ export async function toggleChannelMute(channelId = cur && cur.id) {
 export function copyChannelLink(channelId = cur && cur.id) {
   const ch = { ...(state.channels.find((x) => x.id === Number(channelId)) || {}), ...(fullCache.get(Number(channelId)) || {}) };
   const url = ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${channelId}`;
-  navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована')).catch(() => showToast(url));
+  navigator.clipboard.writeText(url).then(() => showToast(t('Ссылка скопирована'))).catch(() => showToast(url));
 }
 
 export function openChannelDiscussion() {
@@ -233,15 +234,15 @@ export function openChannelDiscussion() {
 
 export async function leaveChannelConfirm(channelId = cur && cur.id) {
   const ch = state.channels.find((x) => x.id === Number(channelId)) || {};
-  if (!confirm(`Покинуть канал «${ch.title || 'канал'}»? Он пропадёт со стены и из Telegram.`)) return;
+  if (!confirm(t('Покинуть канал «{a}»? Он пропадёт со стены и из Telegram.', {a: ch.title || t('канал')}))) return;
   const res = await api.leaveChannel(Number(channelId));
   if (res.status !== 'success') {
-    showToast('Не удалось: ' + (res.message || 'ошибка'));
+    showToast(t('Не удалось: ') + (res.message || t('ошибка')));
     return;
   }
   state.channels = state.channels.filter((x) => x.id !== Number(channelId));
   state.posts = state.posts.filter((p) => p.channel_id !== Number(channelId));
-  showToast('Вы покинули канал');
+  showToast(t('Вы покинули канал'));
   if (state.activeChannelId === Number(channelId)) state.activeChannelId = null;
   go('wall');
   window.TelegramX.resetFeed();
@@ -251,10 +252,10 @@ export function openChannelPageMenu(event) {
   const ch = info();
   openPopup(event.currentTarget, {
     items: [
-      { icon: 'channel', label: 'Показать на стене', run: () => window.TelegramX.filterByChannel(cur.id) },
-      { icon: 'link', label: 'Копировать ссылку', run: () => copyChannelLink() },
-      { icon: 'open-in-new-tab', label: 'Открыть в Telegram', run: () => window.open(ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${cur.id}`, '_blank', 'noopener') },
-      { icon: 'logout', label: 'Покинуть канал', danger: true, run: () => leaveChannelConfirm() },
+      { icon: 'channel', label: t('Показать на стене'), run: () => window.TelegramX.filterByChannel(cur.id) },
+      { icon: 'link', label: t('Копировать ссылку'), run: () => copyChannelLink() },
+      { icon: 'open-in-new-tab', label: t('Открыть в Telegram'), run: () => window.open(ch.username ? `https://t.me/${ch.username}` : `https://t.me/c/${cur.id}`, '_blank', 'noopener') },
+      { icon: 'logout', label: t('Покинуть канал'), danger: true, run: () => leaveChannelConfirm() },
     ],
   });
 }

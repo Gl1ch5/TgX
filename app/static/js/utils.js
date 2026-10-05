@@ -5,6 +5,8 @@
  */
 
 import { parseEmojis, emojifyHtml, escapeHtml } from './emoji.js';
+import { t, locale } from './i18n.js';
+import { ext } from './core/ext.js';
 
 export { escapeHtml };
 
@@ -26,21 +28,21 @@ export function formatTgTime(dateString) {
   const now = new Date();
   const diffSec = Math.floor((now - date) / 1000);
 
-  if (diffSec < 60) return 'только что';
-  if (diffSec < 3600) return `${Math.floor(diffSec / 60)} мин назад`;
+  if (diffSec < 60) return t('только что');
+  if (diffSec < 3600) return t('{a} мин назад', {a: Math.floor(diffSec / 60)});
   
   const isToday = date.toDateString() === now.toDateString();
-  const timeStr = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const timeStr = date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 
   if (isToday) return `${timeStr}`;
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
   if (date.toDateString() === yesterday.toDateString()) {
-    return `вчера в ${timeStr}`;
+    return t('вчера в {a}', {a: timeStr});
   }
 
-  return `${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })} в ${timeStr}`;
+  return t('{a} в {b}', {a: date.toLocaleDateString(locale(), { day: 'numeric', month: 'short' }), b: timeStr});
 }
 
 export function formatNumber(num) {
@@ -52,9 +54,9 @@ export function formatNumber(num) {
 
 export function formatFileSize(bytes) {
   if (!bytes) return '';
-  if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' МБ';
-  if (bytes >= 1024) return (bytes / 1024).toFixed(1) + ' КБ';
-  return bytes + ' Б';
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + t(' МБ');
+  if (bytes >= 1024) return (bytes / 1024).toFixed(1) + t(' КБ');
+  return bytes + t(' Б');
 }
 
 export function formatDuration(sec) {
@@ -99,14 +101,14 @@ function linkifyText(html, { urls }) {
 }
 
 export function formatPostText(rawText, htmlText) {
-  if (htmlText) {
-    return emojifyHtml(linkifyText(htmlText, { urls: false }).replace(/\n/g, '<br/>'));
-  }
-  if (!rawText) return '';
-  return emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
+  let out;
+  if (htmlText) out = emojifyHtml(linkifyText(htmlText, { urls: false }).replace(/\n/g, '<br/>'));
+  else if (!rawText) return '';
+  else out = emojifyHtml(linkifyText(escapeHtml(rawText), { urls: true }).replace(/\n/g, '<br/>'));
+  return ext.pipe('postText', out, { rawText }); // mods may rewrite the finished HTML of a post
 }
 
-const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const WEEKDAYS = [t('вс'), t('пн'), t('вт'), t('ср'), t('чт'), t('пт'), t('сб')];
 
 /** Chat-list style time: 21:15 today, «ср» this week, «10 сент.» earlier. */
 export function formatChatTime(unixSeconds) {
@@ -114,30 +116,23 @@ export function formatChatTime(unixSeconds) {
   const date = new Date(unixSeconds * 1000);
   const now = new Date();
   if (date.toDateString() === now.toDateString()) {
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   }
   if (now - date < 6 * 86400000) return WEEKDAYS[date.getDay()];
   const opts = { day: 'numeric', month: 'short' };
   if (date.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
-  return date.toLocaleDateString('ru-RU', opts);
+  return date.toLocaleDateString(locale(), opts);
 }
 
 /** Message footer time: «13:10» today, «10 сент., 13:10» otherwise. */
 export function formatPostTime(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const time = date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
   if (date.toDateString() === new Date().toDateString()) return time;
-  return `${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}, ${time}`;
+  return `${date.toLocaleDateString(locale(), { day: 'numeric', month: 'short' })}, ${time}`;
 }
 
-export function pluralRu(n, one, few, many) {
-  const m10 = n % 10;
-  const m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-  return many;
-}
 
 /** +79991234567 -> +7 999 123 45 67 (other countries: digits grouped by 3). */
 export function formatPhone(raw) {

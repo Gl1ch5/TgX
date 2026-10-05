@@ -13,6 +13,7 @@ import { escapeHtml, showToast, haptic } from '../utils.js';
 import { parseEmojis } from '../emoji.js';
 import { avatarHtml } from './avatar.js';
 import { openStoryViewer } from './storyViewer.js';
+import { t } from '../i18n.js';
 
 const $ = (id) => document.getElementById(id);
 const ROW_H = 100;
@@ -56,7 +57,7 @@ function selfTileHtml() {
   return `
     <button class="tx-story-tile is-self" data-key="self">
       <span class="tx-story-ava">${avatarHtml({ id: me.id, name: me.name, avatar: me.avatar })}<span class="tx-story-add"><i class="icon icon-add"></i></span></span>
-      <span class="tx-story-name">Моя история</span>
+      <span class="tx-story-name">${t('Моя история')}</span>
     </button>`;
 }
 
@@ -163,7 +164,7 @@ export function setupStoriesBar() {
     const tile = e.target.closest('.tx-story-tile');
     if (!tile) return;
     if (tile.dataset.key === 'self') {
-      showToast('Публикуйте истории в приложении Telegram — здесь они появятся сразу');
+      showToast(t('Публикуйте истории в приложении Telegram — здесь они появятся сразу'));
       return;
     }
     openPeer(tile.dataset.key, tile.querySelector('.tx-avatar'));

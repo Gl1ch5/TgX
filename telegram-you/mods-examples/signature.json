@@ -1,0 +1,13 @@
+{
+  "manifest": {
+    "id": "signature",
+    "name": "Подпись",
+    "version": "1.0.0",
+    "description": "Пункт чата «Отправить подпись»",
+    "permissions": [
+      "ui.menu",
+      "messages.send"
+    ]
+  },
+  "code": "export default function (tx) {\n  tx.menu('chat', 'Отправить подпись', () => tx.send('— отправлено из Telegram You'));\n}\n"
+}

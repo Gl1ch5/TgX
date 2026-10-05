@@ -1,0 +1,95 @@
+/* Own profile — Telegram for Android 12 */
+#profile-root { --pp: 0; }
+
+.tx-pf-bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+  height: 56px; padding: var(--tx-safe-top) 4px 0 18px; margin: 0 -10px;
+  box-sizing: content-box;
+}
+.tx-pf-bar::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to bottom, rgba(18, 18, 20, 0.8), rgba(18, 18, 20, 0.55));
+  backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 75%, transparent); mask-image: linear-gradient(to bottom, #000 75%, transparent);
+  bottom: -12px;
+  opacity: 0; transition: opacity 0.2s ease;
+}
+.tx-pf-bar-title {
+  flex: 1; min-width: 0; font-size: 20px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transform: translateY(8px); transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#profile-root.is-collapsed .tx-pf-bar::before,
+#profile-root.is-collapsed .tx-pf-bar-title { opacity: 1; transform: none; }
+
+.tx-pf-hero {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 0 0 18px; margin-top: -24px;
+  transform: translateY(calc(var(--pp) * 36px)) scale(calc(1 - var(--pp) * 0.18));
+  opacity: calc(1 - var(--pp) * 0.9);
+  transform-origin: center top;
+}
+.tx-pf-hero.is-small { margin-top: 4px; transform: none; opacity: 1; }
+.tx-pf-avatar { position: relative; border-radius: 50%; margin-bottom: 14px; }
+.tx-pf-avatar .tx-avatar { width: 104px; height: 104px; font-size: 40px; }
+.tx-pf-avatar:active { transform: scale(0.97); }
+.tx-pf-avatar-cam {
+  position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.5); color: #fff; font-size: 34px; font-size: 0;
+}
+.tx-pf-avatar-cam .icon { font-size: 34px;
+}
+.tx-pf-link { color: var(--tx-accent); font-size: 16px; font-weight: 500; margin-top: -2px; }
+.tx-pf-premium { color: #a77bff; font-size: 22px; }
+
+.tx-pf-actions { display: flex; gap: 7px; margin: 0 2px 14px; }
+.tx-pf-action {
+  flex: 1; min-width: 0; height: 62px; border-radius: 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  background: var(--tx-surface); color: #fff; font-size: 12.5px; font-weight: 500;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.tx-pf-action .icon { font-size: 24px; }
+.tx-pf-action span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 4px; }
+.tx-pf-action:active { transform: scale(0.96); background: var(--tx-surface-2); }
+
+.tx-pf-posts { padding: 0 0 4px; }
+.tx-pf-tabs { display: flex; gap: 22px; padding: 14px 20px 10px; font-size: 15px; font-weight: 600; color: var(--tx-text-2); }
+.tx-pf-tabs .is-active { color: var(--tx-accent); position: relative; }
+.tx-pf-tabs .is-active::after {
+  content: ''; position: absolute; left: -2px; right: -2px; bottom: -10px; height: 3px;
+  border-radius: 3px 3px 0 0; background: var(--tx-accent);
+}
+.tx-pf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; padding-top: 1px; }
+.tx-pf-cell {
+  position: relative; aspect-ratio: 9 / 16; overflow: hidden; background: var(--tx-surface-2);
+  animation: tx-pf-cell-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1) backwards;
+}
+.tx-pf-cell:nth-child(3n + 2) { animation-delay: 40ms; }
+.tx-pf-cell:nth-child(3n) { animation-delay: 80ms; }
+.tx-pf-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tx-pf-cell > .icon-play { position: absolute; top: 6px; right: 6px; font-size: 16px; color: #fff; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); }
+.tx-pf-views {
+  position: absolute; left: 6px; bottom: 5px; display: inline-flex; align-items: center; gap: 3px;
+  font-size: 12.5px; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+.tx-pf-views .icon { font-size: 14px; }
+@keyframes tx-pf-cell-in { from { opacity: 0; transform: scale(0.92); } }
+
+.tx-pf-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+  padding: 28px 28px 30px; color: var(--tx-text-2); font-size: 14.5px; line-height: 1.4;
+}
+.tx-pf-empty .icon { font-size: 44px; color: var(--tx-hint); margin-bottom: 4px; }
+.tx-pf-empty b { color: var(--tx-text); font-size: 16px; font-weight: 600; }
+
+/* Text fields (edit profile) */
+.tx-field { position: relative; display: block; padding: 4px 20px; }
+.tx-field + .tx-field { border-top: 0.5px solid var(--tx-separator); }
+.tx-field input, .tx-field textarea {
+  width: 100%; box-sizing: border-box; padding: 12px 0; border: 0; outline: none; resize: none;
+  background: transparent; color: var(--tx-text); font: inherit; font-size: 16.5px;
+}
+.tx-field input::placeholder, .tx-field textarea::placeholder { color: var(--tx-hint); }
+.tx-field-count { position: absolute; right: 20px; bottom: 14px; font-size: 14px; color: var(--tx-hint); }

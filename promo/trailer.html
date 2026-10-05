@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>TeleX trailer</title>
+<!--
+  Frame-exact trailer: nothing moves by itself, window.render(t) draws the
+  frame at t seconds. promo/render.cjs steps t at 30 fps and encodes the video.
+  ?f=v → 1080×1920 (TikTok, Shorts, Reels)   ?f=h → 1920×1080 (YouTube)
+-->
+<style>
+  :root { --blue: #5a83f3; --violet: #8774e1; --bg: #07080d; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); overflow: hidden; }
+  body { font-family: 'Inter', 'Roboto', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; overflow: hidden; background: var(--bg); }
+  .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: .55; will-change: transform; }
+  .star { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; }
+  #grain { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.55)); }
+
+  .phone { position: absolute; border-radius: 13% / 6%; background: linear-gradient(145deg, #2c2d33, #0e0f12 40%, #1b1c21);
+    box-shadow: 0 60px 160px rgba(0,0,0,.65), 0 0 0 2px #3a3b42 inset, 0 0 120px rgba(90,131,243,.25); }
+  .screen { position: absolute; overflow: hidden; border-radius: 11% / 5.2%; background: #000; }
+  .island { position: absolute; left: 50%; transform: translateX(-50%); background: #000; border-radius: 99px; z-index: 50; }
+  .layer { position: absolute; left: 0; top: 0; width: 100%; will-change: transform, opacity; }
+  .full { height: 100%; object-fit: cover; object-position: top; }
+  .content { position: absolute; left: 0; width: 100%; overflow: hidden; }
+  .dock { position: absolute; left: 0; top: 0; width: 100%; clip-path: inset(87% 0 0 0); z-index: 2; }
+  .status { position: absolute; left: 0; top: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; background: #000; color: #fff; font: 600 1px Roboto, sans-serif; z-index: 40; }
+  .status svg { display: block; }
+  .tap { position: absolute; border-radius: 50%; background: rgba(255,255,255,.35); border: 3px solid rgba(255,255,255,.8); z-index: 60; pointer-events: none; }
+  .bar { position: absolute; height: .32%; top: .62%; background: #fff; border-radius: 9px; z-index: 30; }
+
+  .cap { position: absolute; z-index: 10; font-weight: 900; letter-spacing: -.02em; line-height: 1.04; text-shadow: 0 6px 40px rgba(0,0,0,.6); }
+  .cap .w { display: inline-block; white-space: pre; will-change: transform, opacity, filter; }
+  .accent { background: linear-gradient(90deg, #9cc6ff, #c3b2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { position: absolute; font-weight: 600; color: rgba(255,255,255,.72); }
+
+  .logo { position: absolute; display: flex; align-items: center; gap: .32em; font-weight: 900; letter-spacing: -.03em; }
+  .logo img { height: 1.1em; width: 1.1em; }
+  .pill { position: absolute; display: inline-flex; align-items: center; gap: .5em; padding: .45em 1.1em; border-radius: 99px; font-weight: 800;
+    background: linear-gradient(90deg, var(--blue), var(--violet)); box-shadow: 0 20px 60px rgba(90,131,243,.45); white-space: nowrap; }
+  .chips { position: absolute; display: flex; gap: .5em; flex-wrap: wrap; justify-content: center; }
+  .chip { padding: .4em .9em; border-radius: 99px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16); font-weight: 700; white-space: nowrap; }
+  .float { position: absolute; z-index: 5; border-radius: 50%; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .float img { width: 100%; height: 100%; }
+  .browser { position: absolute; border-radius: 18px; overflow: hidden; background: #1c1d22; box-shadow: 0 60px 160px rgba(0,0,0,.7), 0 0 0 1px #33343a; }
+  .browser .top { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 18px; background: #26272d; }
+  .browser .dot { width: 13px; height: 13px; border-radius: 50%; }
+  .browser .url { margin-left: 18px; flex: 1; max-width: 520px; height: 28px; border-radius: 8px; background: #17181c; color: #c9cbd3; font: 500 15px Roboto, sans-serif; display: flex; align-items: center; padding: 0 12px; }
+  .browser img { display: block; width: 100%; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const F = new URLSearchParams(location.search).get('f') === 'h' ? 'h' : 'v';
+const W = F === 'v' ? 1080 : 1920, H = F === 'v' ? 1920 : 1080;
+const LNG = new URLSearchParams(location.search).get('l') === 'en' ? 'en' : 'ru';
+const SHOTS = `build/shots-${LNG}/`;
+const TXT = LNG === 'en' ? {
+  feed: ['One', ' feed', ' —', '\n', '<a>all your channels</a>'], comments: ['Comments', '\n', '<a>instantly</a>'], react: ['Reactions', '\n', 'in <a>one tap</a>'],
+  story: ['Stories', '\n', '<a>of channels and friends</a>'], channel: ['Channels', '\n', '<a>like in Telegram</a>'], viewer: ['Photos and video', '\n', '<a>full screen</a>'], desktop: ['And on <a>desktop</a>'],
+  hook1a: '100 channels', hook1b: 'in Telegram?', hook2a: 'Read them in', hook2b: 'one feed', tag: 'All your Telegram channels in one feed', chips: ['Browser', 'Android', 'Windows', 'Free'],
+} : {
+  feed: ['Одна', ' стена', ' —', '\n', '<a>все каналы</a>'], comments: ['Комментарии', '\n', '<a>сразу</a>'], react: ['Реакции', '\n', 'в <a>одно касание</a>'],
+  story: ['Истории', '\n', '<a>каналов и друзей</a>'], channel: ['Каналы —', '\n', '<a>как в Telegram</a>'], viewer: ['Фото и видео', '\n', '<a>на весь экран</a>'], desktop: ['И на <a>компьютере</a>'],
+  hook1a: '100 каналов', hook1b: 'в Telegram?', hook2a: 'Читай их', hook2b: 'одной лентой', tag: 'Все каналы Telegram — одной лентой', chips: ['Браузер', 'Android', 'Windows', 'Бесплатно'],
+};
+const stage = document.getElementById('stage');
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+
+// ---------------------------------------------------------------- easing
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const outCubic = (k) => 1 - Math.pow(1 - k, 3);
+const inOutCubic = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const outBack = (k) => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const inOutQuint = (k) => (k < .5 ? 16 * k ** 5 : 1 - Math.pow(-2 * k + 2, 5) / 2);
+const el = (tag, cls, parent = stage, html = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; parent.appendChild(e); return e; };
+const img = (src, cls, parent) => { const i = el('img', cls, parent); i.src = SHOTS + src; return i; };
+
+// ---------------------------------------------------------------- timeline
+// Cuts land on beats of the 120 bpm soundtrack (every 0.5 s).
+const V = F === 'v';
+const T = V ? {
+  hook: [0, 2], hook2: [2, 4], feed: [4, 10], comments: [10, 14], react: [14, 17], story: [17, 20], channel: [20, 23], viewer: [23, 26], cta: [26, 31],
+} : {
+  hook: [0, 2], hook2: [2, 4], feed: [4, 10], comments: [10, 14], react: [14, 17], story: [17, 20], channel: [20, 23], viewer: [23, 26], desktop: [26, 30], cta: [30, 35],
+};
+const DURATION = V ? 31 : 35;
+
+const CAPS = [
+  { at: T.feed, text: TXT.feed }, { at: T.comments, text: TXT.comments }, { at: T.react, text: TXT.react },
+  { at: T.story, text: TXT.story }, { at: T.channel, text: TXT.channel }, { at: T.viewer, text: TXT.viewer },
+  ...(T.desktop ? [{ at: T.desktop, text: TXT.desktop }] : []),
+];
+
+// ---------------------------------------------------------------- background
+const blobs = [
+  { c: '#3b5bff', s: .9, x: .15, y: .2, ax: .18, ay: .12, f: .11 },
+  { c: '#8a4dff', s: .8, x: .85, y: .7, ax: .15, ay: .18, f: .09 },
+  { c: '#00b3ff', s: .6, x: .7, y: .1, ax: .2, ay: .1, f: .13 },
+].map((b) => { const e = el('div', 'blob'); const d = Math.max(W, H) * b.s * .6; Object.assign(e.style, { width: d + 'px', height: d + 'px', background: b.c }); return { ...b, e, d }; });
+const stars = Array.from({ length: 70 }, (_, i) => {
+  const e = el('div', 'star'); const r = (n) => (Math.sin(i * 91.7 + n * 12.9) * 43758.5453) % 1;
+  return { e, x: Math.abs(r(1)) * W, y: Math.abs(r(2)) * H, s: .5 + Math.abs(r(3)) * 1.6, tw: Math.abs(r(4)) * 6, sp: 10 + Math.abs(r(5)) * 40 };
+});
+el('div', '', stage).id = 'grain';
+
+// ---------------------------------------------------------------- phone
+// Screen = status bar (36 app px) + the 390×844 app shot, so nothing hides under the island.
+const PH = V ? { w: 660, x: (W - 660) / 2, y: 470 } : { w: 470, x: 1260, y: 32 };
+const bez = PH.w * .035;
+const SW = PH.w - 2 * bez;
+const SC = SW / 390; // screen px per CSS px of the app shots
+const SB = 36 * SC;
+const SH = 844 * SC; // app area
+PH.h = SH + SB + 2 * bez;
+const phone = el('div', 'phone');
+Object.assign(phone.style, { width: PH.w + 'px', height: PH.h + 'px' });
+const screenBox = el('div', 'screen', phone);
+Object.assign(screenBox.style, { left: bez + 'px', top: bez + 'px', width: SW + 'px', height: SH + SB + 'px' });
+const status = el('div', 'status', screenBox, `<span style="padding-left:${26 * SC}px;font-size:${15 * SC}px">9:41</span><span style="display:flex;gap:${5 * SC}px;align-items:center;padding-right:${24 * SC}px">
+  <svg width="${18 * SC}" height="${12 * SC}" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#fff"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#fff"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#fff"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#fff"/></svg>
+  <svg width="${16 * SC}" height="${12 * SC}" viewBox="0 0 16 12"><path d="M8 11.5 L5.6 8.9 A3.4 3.4 0 0 1 10.4 8.9Z M2.9 6.2 A7.3 7.3 0 0 1 13.1 6.2 L11.7 7.6 A5.3 5.3 0 0 0 4.3 7.6Z M0.2 3.5 A11.2 11.2 0 0 1 15.8 3.5 L14.4 4.9 A9.2 9.2 0 0 0 1.6 4.9Z" fill="#fff"/></svg>
+  <svg width="${26 * SC}" height="${12 * SC}" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="19" height="8" rx="1.8" fill="#fff"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="#fff" fill-opacity=".5"/></svg></span>`);
+Object.assign(status.style, { height: SB + 'px' });
+const screen = el('div', 'content', screenBox);
+Object.assign(screen.style, { top: SB + 'px', height: SH + 'px' });
+const island = el('div', 'island', phone);
+Object.assign(island.style, { top: bez + SB * .18 + 'px', width: SW * .27 + 'px', height: SB * .7 + 'px' });
+
+const L = {
+  feed: img('feed.png', 'layer', screen),
+  dock: img('dock.png', 'dock', screen),
+  menu: img('menu.png', 'layer full', screen),
+  comments: img('comments.png', 'layer full', screen),
+  channel: img('channel.png', 'layer full', screen),
+  story: img('story.png', 'layer full', screen),
+  viewer: img('viewer.png', 'layer full', screen),
+};
+Object.values(L).forEach((i) => { if (i !== L.feed && i !== L.dock) i.style.height = SH + 'px'; });
+const shade = el('div', 'layer', screen); Object.assign(shade.style, { height: '100%', background: '#000', zIndex: 3 });
+// stacking: feed 1, dock 2, shade 3, pushed screens above
+L.feed.style.zIndex = 1;
+['menu', 'comments', 'channel', 'story', 'viewer'].forEach((k, i) => { L[k].style.zIndex = 5 + i; });
+const bar = el('div', 'bar', screen); bar.style.zIndex = 20;
+const tap = el('div', 'tap', screen); tap.style.zIndex = 30;
+const FEED_H = 2892 * SC; // feed.png is 1170×8676 at 3×
+
+// ---------------------------------------------------------------- captions
+const capBox = (c) => {
+  const e = el('div', 'cap');
+  e.innerHTML = c.text.map((w) => (w === '\n' ? '<br>' : `<span class="w">${w.replace(/<a>(.*?)<\/a>/g, '<span class="accent">$1</span>')}</span>`)).join('');
+  if (V) Object.assign(e.style, { left: '70px', right: '70px', top: '150px', fontSize: '92px', textAlign: 'center' });
+  else Object.assign(e.style, { left: '150px', width: '960px', top: '380px', fontSize: '104px' });
+  return { ...c, e, words: [...e.querySelectorAll('.w')] };
+};
+const caps = CAPS.map(capBox);
+
+// hook
+const hook = el('div', 'cap', stage, `<span class="w">${TXT.hook1a}</span><br><span class="w">${TXT.hook1b}</span>`);
+const hook2 = el('div', 'cap', stage, `<span class="w">${TXT.hook2a}</span><br><span class="w accent">${TXT.hook2b}</span>`);
+[hook, hook2].forEach((e) => Object.assign(e.style, V
+  ? { left: '60px', right: '60px', top: '700px', fontSize: '128px', textAlign: 'center' }
+  : { left: '0', right: '0', top: '330px', fontSize: '150px', textAlign: 'center' }));
+const hookWords = [...hook.querySelectorAll('.w')], hook2Words = [...hook2.querySelectorAll('.w')];
+
+// channel avatars flying around the hook
+const AV = ['🪐', '🎨', '🏔️', '🍋', '⚡', '🎧', '🌃', '📰', '🎮', '⚽', '🎬', '💸'];
+const AVC = [['#3b2a7a', '#0b1033'], ['#ff6fb1', '#7a4dff'], ['#ff9a5a', '#e2587b'], ['#ffd84d', '#ff9f1c'], ['#2fa9ff', '#1d4bd6'], ['#3be0a0', '#138a6a'], ['#8c3bff', '#ff3d9a'], ['#9aa4b8', '#4b5568'], ['#66e0ff', '#7a4dff'], ['#5fd36a', '#1f8a3a'], ['#ff6161', '#a3122a'], ['#f2c94c', '#7a5c00']];
+const floats = AV.map((emoji, i) => {
+  const e = el('div', 'float'); const d = (V ? 120 : 110) * (.8 + (i % 3) * .2);
+  e.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${d * .5}px;background:linear-gradient(135deg,${AVC[i][0]},${AVC[i][1]})">${emoji}</div>`;
+  Object.assign(e.style, { width: d + 'px', height: d + 'px' });
+  const ang = (i / AV.length) * Math.PI * 2;
+  return { e, d, ang, r: (V ? 430 : 520) + (i % 2) * (V ? 120 : 140), sp: .25 + (i % 4) * .05 };
+});
+
+// CTA
+const icon = '../app/static/icons/telex.svg';
+const logo = el('div', 'logo', stage, `<img src="${icon}"><span>TeleX</span>`);
+const tagline = el('div', 'sub', stage, TXT.tag);
+const pill = el('div', 'pill', stage, '🌐 telex-web.ru');
+const chips = el('div', 'chips', stage, TXT.chips.map((c) => `<span class="chip">${c}</span>`).join(''));
+if (V) {
+  Object.assign(logo.style, { left: 0, right: 0, justifyContent: 'center', top: '560px', fontSize: '190px' });
+  Object.assign(tagline.style, { left: '80px', right: '80px', top: '820px', fontSize: '54px', textAlign: 'center' });
+  Object.assign(pill.style, { left: '50%', top: '1010px', fontSize: '76px' });
+  Object.assign(chips.style, { left: '80px', right: '80px', top: '1220px', fontSize: '40px' });
+} else {
+  Object.assign(logo.style, { left: 0, right: 0, justifyContent: 'center', top: '220px', fontSize: '200px' });
+  Object.assign(tagline.style, { left: 0, right: 0, top: '500px', fontSize: '56px', textAlign: 'center' });
+  Object.assign(pill.style, { left: '50%', top: '640px', fontSize: '80px' });
+  Object.assign(chips.style, { left: '200px', right: '200px', top: '850px', fontSize: '40px' });
+}
+
+// desktop window (YouTube only)
+let browser = null;
+if (T.desktop) {
+  browser = el('div', 'browser');
+  browser.innerHTML = '<div class="top"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="url">🔒 telex-web.ru/app/static/</span></div>';
+  const bi = el('img', '', browser); bi.src = SHOTS + 'desktop.png';
+  Object.assign(browser.style, { width: '1500px', left: '210px', top: '120px' });
+}
+
+// ---------------------------------------------------------------- helpers
+function words(list, t0, t, out = Infinity, step = .07) {
+  list.forEach((w, i) => {
+    const k = outBack(prog(t, t0 + i * step, t0 + i * step + .45));
+    const o = prog(t, t0 + i * step, t0 + i * step + .25) * (1 - prog(t, out - .3, out));
+    const up = prog(t, out - .3, out);
+    w.style.opacity = o;
+    w.style.transform = `translateY(${(1 - k) * 60 - up * 40}px) scale(${.85 + .15 * k})`;
+    w.style.filter = `blur(${(1 - prog(t, t0 + i * step, t0 + i * step + .3)) * 14 + up * 10}px)`;
+  });
+}
+function setTap(t, at, x, y) { // x, y in app CSS px
+  const k = prog(t, at - .15, at + .45);
+  const show = t > at - .2 && t < at + .5;
+  const d = 70 * SC;
+  Object.assign(tap.style, {
+    display: show ? 'block' : 'none', width: d + 'px', height: d + 'px', left: x * SC - d / 2 + 'px', top: y * SC - d / 2 + 'px',
+    opacity: show ? (1 - prog(t, at + .1, at + .45)) : 0, transform: `scale(${t < at ? 1.25 - .35 * prog(t, at - .15, at) : .9 + 1.2 * outCubic(k)})`,
+  });
+}
+const vis = (e, on) => { e.style.display = on ? 'block' : 'none'; };
+const slide = (e, x, o = 1, s = 1) => { e.style.transform = `translateX(${x}px) scale(${s})`; e.style.opacity = o; };
+
+// ---------------------------------------------------------------- frame
+window.DURATION = DURATION;
+window.render = (t) => {
+  // background drift
+  blobs.forEach((b) => {
+    const x = (b.x + Math.sin(t * b.f * 6.28) * b.ax) * W - b.d / 2, y = (b.y + Math.cos(t * b.f * 5.1) * b.ay) * H - b.d / 2;
+    b.e.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  stars.forEach((s) => {
+    const y = (s.y - t * s.sp + H * 10) % H;
+    s.e.style.transform = `translate(${s.x}px, ${y}px) scale(${s.s})`;
+    s.e.style.opacity = .25 + .35 * (0.5 + 0.5 * Math.sin(t * 2 + s.tw));
+  });
+
+  // hook
+  words(hookWords, T.hook[0] + .1, t, T.hook[1], .18);
+  words(hook2Words, T.hook2[0] + .05, t, T.hook2[1] + .05, .16);
+  const fly = prog(t, 0, T.hook2[1]);
+  floats.forEach((f, i) => {
+    const appear = outBack(prog(t, .05 + i * .06, .55 + i * .06));
+    const gather = inOutCubic(prog(t, T.hook2[0] + .6, T.hook2[1] + .2));
+    const a = f.ang + t * f.sp;
+    const cx = W / 2, cy = V ? 860 : H / 2;
+    const ox = cx + Math.cos(a) * f.r * (V ? .95 : 1.55), oy = cy + Math.sin(a) * f.r * (V ? 1.35 : .8);
+    // fall into the phone that comes up from below
+    const tx = V ? W / 2 : PH.x + PH.w / 2, ty = H + 150;
+    f.e.style.transform = `translate(${lerp(ox, tx, gather) - f.d / 2}px, ${lerp(oy, ty, gather * gather) - f.d / 2}px) scale(${appear * (1 - gather * .5)})`;
+    f.e.style.opacity = (1 - prog(t, T.hook2[1] - .2, T.hook2[1] + .2)) * clamp(appear * 1.2);
+    f.e.style.display = fly >= 1 && t > T.hook2[1] + .3 ? 'none' : 'block';
+  });
+
+  // phone entrance / exit
+  const enter = outCubic(prog(t, T.feed[0] - .3, T.feed[0] + .7));
+  const ctaStart = T.cta[0];
+  const exit = inOutCubic(prog(t, ctaStart - .1, ctaStart + .6));
+  const desk = T.desktop ? inOutCubic(prog(t, T.desktop[0] - .2, T.desktop[0] + .5)) - inOutCubic(prog(t, T.desktop[1] - .3, T.desktop[1] + .3)) : 0;
+  const py = PH.y + (1 - enter) * (V ? 1500 : 1100) + exit * (V ? 1700 : 1200);
+  const tilt = (1 - enter) * 14;
+  phone.style.transform = `translate(${PH.x + (V ? 0 : desk * 700)}px, ${py}px) rotate(${tilt - exit * 8}deg) scale(${1 - desk * .15})`;
+  phone.style.display = t > T.feed[0] - .35 && t < ctaStart + .7 ? 'block' : 'none';
+  phone.style.opacity = 1 - desk;
+
+  // ---- screen content
+  // feed: scroll down, then back to the top
+  const s1 = inOutQuint(prog(t, T.feed[0] + .8, T.feed[0] + 3.4));
+  const s2 = inOutCubic(prog(t, T.feed[0] + 3.9, T.feed[1] - .2));
+  const maxScroll = Math.min(FEED_H - SH, 1500 * SC);
+  const scroll = maxScroll * s1 * (1 - s2);
+  L.feed.style.transform = `translateY(${-scroll}px)`;
+
+  // comments: slide in from the right (Telegram-like parallax)
+  const cIn = inOutCubic(prog(t, T.comments[0] + .55, T.comments[0] + 1.0));
+  const cOut = inOutCubic(prog(t, T.comments[1] - .35, T.comments[1] + .05));
+  const cK = cIn * (1 - cOut);
+  vis(L.comments, cK > 0);
+  slide(L.comments, (1 - cK) * SW);
+  const under = -cK * SW * .25;
+  L.feed.style.transform += ` translateX(${under}px)`;
+  L.dock.style.transform = `translateX(${under}px)`;
+
+  // reactions menu
+  const mIn = outCubic(prog(t, T.react[0] + .5, T.react[0] + .8));
+  const mOut = prog(t, T.react[1] - .25, T.react[1]);
+  vis(L.menu, mIn > 0 && mOut < 1);
+  L.menu.style.opacity = mIn * (1 - mOut);
+  L.menu.style.transform = `scale(${.96 + .04 * mIn})`;
+
+  // story
+  const stK = outCubic(prog(t, T.story[0] - .05, T.story[0] + .45)) * (1 - prog(t, T.story[1] - .2, T.story[1] + .05));
+  vis(L.story, stK > 0);
+  L.story.style.opacity = stK;
+  L.story.style.transform = `scale(${.6 + .4 * stK})`;
+  L.story.style.transformOrigin = '30% 15%';
+  const barK = prog(t, T.story[0] + .3, T.story[1] - .1);
+  vis(bar, stK > .9);
+  Object.assign(bar.style, { left: 8 * SC + 'px', width: (183 * SC) * barK + 'px' });
+
+  // channel page: slides from the right
+  const chK = inOutCubic(prog(t, T.channel[0] - .05, T.channel[0] + .4)) * (1 - prog(t, T.channel[1] - .2, T.channel[1]));
+  vis(L.channel, chK > 0);
+  slide(L.channel, (1 - inOutCubic(prog(t, T.channel[0] - .05, T.channel[0] + .4))) * SW, prog(t, T.channel[1] - .2, T.channel[1]) > 0 ? chK : 1);
+
+  // viewer: zooms out of the post, then a slow push-in
+  const vK = outCubic(prog(t, T.viewer[0] - .05, T.viewer[0] + .45));
+  const vOut = prog(t, T.viewer[1] - .1, T.viewer[1] + .2);
+  vis(L.viewer, vK > 0 && vOut < 1);
+  L.viewer.style.opacity = vK * (1 - vOut);
+  L.viewer.style.transform = `scale(${.7 + .3 * vK + .08 * prog(t, T.viewer[0] + .5, T.viewer[1])})`;
+
+  // shade under modal screens
+  shade.style.opacity = Math.max(cK * .4, mIn * (1 - mOut) * .0);
+  vis(shade, cK > 0);
+
+  // taps
+  if (t < T.comments[1]) setTap(t, T.comments[0] + .35, 150, 624);
+  else if (t < T.react[1]) setTap(t, t < T.react[0] + 1.2 ? T.react[0] + .3 : T.react[0] + 1.6, t < T.react[0] + 1.2 ? 170 : 92, t < T.react[0] + 1.2 ? 330 : 205);
+  else setTap(t, -9, 0, 0);
+
+  // captions per scene
+  caps.forEach((c) => {
+    const on = t > c.at[0] - .2 && t < c.at[1] + .1;
+    c.e.style.display = on ? 'block' : 'none';
+    if (on) words(c.words, c.at[0] + .05, t, c.at[1], .09);
+  });
+  if (!V) caps.forEach((c) => { c.e.style.transform = `translateX(${T.desktop && c.at === T.desktop ? 0 : 0}px)`; });
+
+  // desktop window
+  if (browser) {
+    const bK = outCubic(prog(t, T.desktop[0] + .1, T.desktop[0] + .8));
+    const bOut = prog(t, T.desktop[1] - .3, T.desktop[1] + .2);
+    browser.style.display = bK > 0 && bOut < 1 ? 'block' : 'none';
+    browser.style.opacity = bK * (1 - bOut);
+    browser.style.transform = `translateY(${(1 - bK) * 500 + 75}px) scale(${.74 + .06 * bK + .03 * prog(t, T.desktop[0], T.desktop[1])})`;
+    browser.style.transformOrigin = '50% 0';
+    const dc = caps[caps.length - 1].e;
+    Object.assign(dc.style, { left: 0, width: W + 'px', textAlign: 'center', top: '36px', fontSize: '96px' });
+  }
+
+  // CTA
+  const c0 = T.cta[0] + .4;
+  const lk = outBack(prog(t, c0, c0 + .6));
+  logo.style.opacity = prog(t, c0, c0 + .3);
+  logo.style.transform = `scale(${.6 + .4 * lk})`;
+  tagline.style.opacity = prog(t, c0 + .4, c0 + .8);
+  tagline.style.transform = `translateY(${(1 - outCubic(prog(t, c0 + .4, c0 + .9))) * 30}px)`;
+  const pk = outBack(prog(t, c0 + .8, c0 + 1.4));
+  pill.style.opacity = prog(t, c0 + .8, c0 + 1.1);
+  const pulse = 1 + .03 * Math.sin(Math.max(0, t - c0 - 1.4) * 5.2) * prog(t, c0 + 1.4, c0 + 1.8);
+  pill.style.transform = `translateX(-50%) scale(${(.5 + .5 * pk) * pulse})`;
+  [...chips.children].forEach((ch, i) => {
+    const k = outBack(prog(t, c0 + 1.3 + i * .12, c0 + 1.8 + i * .12));
+    ch.style.display = 'inline-block';
+    ch.style.opacity = prog(t, c0 + 1.3 + i * .12, c0 + 1.5 + i * .12);
+    ch.style.transform = `translateY(${(1 - k) * 40}px)`;
+  });
+  const ctaOn = t > c0 - .1;
+  [logo, tagline, pill, chips].forEach((e) => { e.style.visibility = ctaOn ? 'visible' : 'hidden'; });
+  // fade to black at the very end
+  stage.style.filter = `brightness(${1 - prog(t, DURATION - .6, DURATION)})`;
+};
+window.ready = Promise.all([...document.images].map((i) => (i.complete ? 0 : new Promise((r) => { i.onload = i.onerror = r; })))).then(() => document.fonts.ready);
+window.render(0);
+</script>
+</body>
+</html>

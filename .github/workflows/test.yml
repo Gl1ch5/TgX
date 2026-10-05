@@ -1,0 +1,21 @@
+name: Tests
+
+on:
+  push:
+    paths-ignore: ['native/**', 'docs/**', '*.md', 'promo/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Translations cover every string used in the code
+        run: npm run i18n
+      - name: UI smoke test (5 languages × light/dark)
+        run: npm test

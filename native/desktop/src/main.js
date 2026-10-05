@@ -1,12 +1,15 @@
 'use strict';
-// TeleX desktop shell: opens the live web app (always up to date) in a native window.
+// TeleX desktop shell: the web app is packed into the installer (web/) and answered locally for
+// https://telex-web.ru/app/static/…, so it opens at once and works offline; the origin is unchanged,
+// so the Telegram session is kept.
 const path = require('path');
 const fs = require('fs');
-const { app, BrowserWindow, session, shell, nativeTheme, Menu } = require('electron');
+const { app, BrowserWindow, session, shell, nativeTheme, Menu, net } = require('electron');
 
 // ---- The one place that says what the app is ------------------------------
-const APP_URL = 'https://gl1ch5.github.io/TgX/app/static/';
-const APP_SCOPE = 'https://gl1ch5.github.io/TgX/'; // anything under here stays in-app
+const APP_URL = 'https://telex-web.ru/app/static/';
+const APP_SCOPE = 'https://telex-web.ru/app/static/'; // only the app stays in-app; the site and docs open in the browser
+const LEGACY_SCOPE = 'https://gl1ch5.github.io/TgX/app/static/'; // the old address, redirects to the domain
 const PARTITION = 'persist:telex'; // localStorage, session, Service Worker, cache survive restarts
 const BG = '#000000';
 
@@ -61,7 +64,7 @@ if (!app.requestSingleInstanceLock()) {
   const saveSoon = () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveState, 400); };
 
   // ---- Navigation policy ---------------------------------------------------------
-  const inScope = (url) => typeof url === 'string' && url.startsWith(APP_SCOPE);
+  const inScope = (url) => typeof url === 'string' && (url.startsWith(APP_SCOPE) || url.startsWith(LEGACY_SCOPE));
   function openExternal(url) {
     try {
       const u = new URL(url);
@@ -185,11 +188,70 @@ if (!app.requestSingleInstanceLock()) {
     contents.on('will-attach-webview', (ev) => ev.preventDefault());
   });
 
-  app.whenReady().then(() => {
+  // ---- One-time move of the web app's data to the domain ---------------------
+  // localStorage (Telegram session, settings) belongs to an origin: copy the
+  // telex.* keys from gl1ch5.github.io to telex-web.ru, or everyone is logged out.
+  // Both origins are opened as blank local stubs (outside the Service Worker scope).
+  async function migrateLegacyStorage(ses) {
+    const flag = path.join(app.getPath('userData'), 'storage-migrated');
+    if (fs.existsSync(flag)) return;
+    const OLD = 'https://gl1ch5.github.io/__telex_migrate';
+    const NEW = 'https://telex-web.ru/__telex_migrate';
+    ses.protocol.handle('https', (req) => (req.url === OLD || req.url === NEW
+      ? new Response('<!doctype html><html><body></body></html>', { headers: { 'content-type': 'text/html' } })
+      : net.fetch(req, { bypassCustomProtocolHandlers: true })));
+    const w = new BrowserWindow({ show: false, webPreferences: { partition: PARTITION, contextIsolation: true, sandbox: true } });
+    const work = (async () => {
+      await w.loadURL(OLD);
+      const data = await w.webContents.executeJavaScript(
+        '(() => { const o = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith("telex.")) o[k] = localStorage.getItem(k); } return o; })()');
+      if (data && data['telex.session']) {
+        await w.loadURL(NEW);
+        await w.webContents.executeJavaScript(
+          `(() => { if (localStorage.getItem("telex.session")) return; const o = ${JSON.stringify(data)}; for (const k in o) localStorage.setItem(k, o[k]); })()`);
+      }
+    })();
+    try {
+      await Promise.race([work, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000))]);
+      fs.mkdirSync(app.getPath('userData'), { recursive: true });
+      fs.writeFileSync(flag, '1');
+    } catch (_) { /* try again next start */ } finally {
+      if (!w.isDestroyed()) w.destroy();
+      ses.protocol.unhandle('https');
+    }
+  }
+
+  // ---- The packed web app ----------------------------------------------------------
+  const WEB_ROOT = path.join(__dirname, '..', 'web');
+  const MIME = { html: 'text/html', js: 'text/javascript', mjs: 'text/javascript', css: 'text/css', json: 'application/json', webmanifest: 'application/json',
+    svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp', woff2: 'font/woff2', wasm: 'application/wasm' };
+  function servePackedApp(ses) {
+    if (!fs.existsSync(path.join(WEB_ROOT, 'index.html'))) return; // dev checkout without a copy: use the network
+    ses.protocol.handle('https', async (req) => {
+      const u = new URL(req.url);
+      const prefix = new URL(APP_URL);
+      if (req.method === 'GET' && u.origin === prefix.origin && u.pathname.startsWith(prefix.pathname)) {
+        let rel = decodeURIComponent(u.pathname.slice(prefix.pathname.length));
+        if (!rel || rel.endsWith('/')) rel += 'index.html';
+        const file = path.join(WEB_ROOT, rel);
+        if (!rel.startsWith('media/') && file.startsWith(WEB_ROOT) && fs.existsSync(file) && fs.statSync(file).isFile()) {
+          const ext = path.extname(file).slice(1).toLowerCase();
+          return new Response(fs.readFileSync(file), { headers: { 'content-type': MIME[ext] || 'application/octet-stream', 'cache-control': 'no-cache' } });
+        }
+      }
+      return net.fetch(req, { bypassCustomProtocolHandlers: true });
+    });
+  }
+
+  app.whenReady().then(async () => {
     nativeTheme.themeSource = 'dark';
     Menu.setApplicationMenu(null);
-    configureSession(session.fromPartition(PARTITION));
+    const ses = session.fromPartition(PARTITION);
+    configureSession(ses);
+    await migrateLegacyStorage(ses).catch(() => {});
+    servePackedApp(ses);
     createWindow();
+    setTimeout(() => require('./updates').checkForUpdate(win), 6000);
     app.on('activate', () => { if (!win) createWindow(); });
   });
 

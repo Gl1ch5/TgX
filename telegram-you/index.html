@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <title>Telegram You</title>
+  <meta name="description" content="Telegram You — неофициальный веб-клиент Telegram, точная копия Telegram для Android." />
+  <meta name="theme-color" content="#181819" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <script>
+    // Theme before the first paint: the saved choice, or the device's.
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('telex.prefs') || '{}');
+        var t = p.theme === 'light' || p.theme === 'dark' ? p.theme : (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        var r = document.documentElement;
+        r.setAttribute('data-theme', t);
+        if (t === 'light') r.classList.remove('dark');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="icons/app.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/light.css" />
+  <link rel="stylesheet" href="css/avatar.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/settings.css" />
+  <link rel="stylesheet" href="css/profile.css" />
+  <link rel="stylesheet" href="css/icons-android.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/chat.css?v=1" />
+  <script src="js/vendor/qrcode.min.js"></script>
+</head>
+<body class="tx cx">
+  <div id="tgx-bg-canvas"></div><div id="tgx-bg-pattern"></div>
+  <div id="cx-app" class="cx-app" data-tab="chats">
+    <aside class="cx-side" id="cx-side">
+      <section class="cx-page" id="page-chats"></section>
+      <section class="cx-page tx-hidden" id="page-contacts"></section>
+      <section class="cx-page tx-hidden" id="page-settings"></section>
+      <section class="cx-page tx-hidden" id="page-profile"></section>
+      <nav class="cx-dock" id="cx-dock"></nav>
+    </aside>
+    <main class="cx-main" id="cx-main">
+      <div class="cx-empty" id="cx-empty"><span>Выберите чат</span></div>
+      <section class="cx-conv tx-hidden" id="cx-conv"></section>
+    </main>
+  </div>
+  <div id="cx-menu" class="cx-menu tx-hidden"></div>
+  <div id="cx-viewer" class="cx-viewer tx-hidden"></div>
+  <div id="toast" class="cx-toast opacity-0"><span id="toast-msg"></span></div>
+  <div id="auth-modal" class="tx-auth tx-hidden"></div>
+  <script type="module" src="js/ui/app.js?v=1"></script>
+</body>
+</html>

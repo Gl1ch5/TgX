@@ -1,0 +1,16 @@
+<!-- @manifest {"id": "clock-widget", "name": {"ru": "Часы", "en": "Clock widget", "es": "Reloj", "pt": "Relógio", "uk": "Годинник"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/clock-widget.svg", "description": {"ru": "Плавающие часы поверх ленты", "en": "A floating clock on top of the feed", "es": "Un reloj flotante sobre el muro", "pt": "Um relógio flutuante sobre o mural", "uk": "Плаваючий годинник поверх стрічки"}, "about": {"ru": "Простой HTML-мод: часы в углу экрана. Показ секунд, цвет и размер настраиваются на странице мода.", "en": "A simple HTML mod: a clock in the corner of the screen. Seconds, colour and size are set on the mod page.", "es": "Un mod HTML sencillo: un reloj en la esquina. Segundos, color y tamaño se ajustan en la página del mod.", "pt": "Um mod HTML simples: um relógio no canto da tela. Segundos, cor e tamanho são ajustados na página do mod.", "uk": "Простий HTML-мод: годинник у куті екрана. Секунди, колір і розмір налаштовуються на сторінці моду."}, "tags": ["widget", "html"], "settings": [{"key": "seconds", "type": "switch", "title": {"ru": "Показывать секунды", "en": "Show seconds", "es": "Mostrar segundos", "pt": "Mostrar segundos", "uk": "Показувати секунди"}, "default": false}, {"key": "color", "type": "color", "title": {"ru": "Цвет", "en": "Colour", "es": "Color", "pt": "Cor", "uk": "Колір"}, "default": "#ffffff"}, {"key": "size", "type": "number", "title": {"ru": "Размер", "en": "Size", "es": "Tamaño", "pt": "Tamanho", "uk": "Розмір"}, "default": 16, "min": 12, "max": 32}]} -->
+<div id="clock-w" style="position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 6px);right:12px;padding:3px 10px;border-radius:12px;background:rgba(0,0,0,.45);font:500 16px Roboto,sans-serif;pointer-events:none"></div>
+<script>
+  const tx = TeleXMods['clock-widget'];
+  const el = document.getElementById('clock-w');
+  const draw = () => {
+    const d = new Date();
+    el.style.color = tx.config.get('color');
+    el.style.fontSize = tx.config.get('size') + 'px';
+    el.textContent = d.toLocaleTimeString([], tx.config.get('seconds') ? {} : { hour: '2-digit', minute: '2-digit' });
+  };
+  draw();
+  const timer = setInterval(draw, 1000);
+  tx.onStop(() => clearInterval(timer));
+  tx.config.on('*', draw);
+</script>

@@ -1,0 +1,91 @@
+{
+  "manifest": {
+    "id": "compact-feed",
+    "name": {
+      "ru": "Компактная лента",
+      "en": "Compact feed",
+      "es": "Muro compacto",
+      "pt": "Mural compacto",
+      "uk": "Компактна стрічка"
+    },
+    "version": "1.0.0",
+    "author": "TeleX",
+    "icon": "mods/icons/compact-feed.svg",
+    "description": {
+      "ru": "Больше постов на экране: меньше картинки, плотнее отступы, реакции по желанию",
+      "en": "More posts on the screen: smaller media, tighter spacing, optional reactions",
+      "es": "Más publicaciones en pantalla: medios más pequeños, menos espacio, reacciones opcionales",
+      "pt": "Mais publicações na tela: mídia menor, espaçamento menor, reações opcionais",
+      "uk": "Більше дописів на екрані: менші зображення, щільніші відступи, реакції за бажанням"
+    },
+    "about": {
+      "ru": "Делает ленту плотнее. Каждый параметр включается отдельно на странице мода.",
+      "en": "Makes the feed denser. Every option can be switched on its own page.",
+      "es": "Hace el muro más denso. Cada opción se activa por separado en la página del mod.",
+      "pt": "Deixa o mural mais denso. Cada opção é ativada separadamente na página do mod.",
+      "uk": "Робить стрічку щільнішою. Кожен параметр вмикається окремо на сторінці моду."
+    },
+    "tags": [
+      "feed"
+    ],
+    "settings": [
+      {
+        "key": "media",
+        "type": "number",
+        "title": {
+          "ru": "Максимальная высота картинок, px",
+          "en": "Maximum media height, px",
+          "es": "Altura máxima de medios, px",
+          "pt": "Altura máxima da mídia, px",
+          "uk": "Максимальна висота зображень, px"
+        },
+        "default": 260,
+        "min": 120,
+        "max": 520,
+        "step": 20
+      },
+      {
+        "key": "gap",
+        "type": "switch",
+        "title": {
+          "ru": "Плотные отступы между постами",
+          "en": "Tighter spacing between posts",
+          "es": "Menos espacio entre publicaciones",
+          "pt": "Menos espaço entre publicações",
+          "uk": "Щільні відступи між дописами"
+        },
+        "default": true
+      },
+      {
+        "key": "reactions",
+        "type": "switch",
+        "title": {
+          "ru": "Скрыть реакции",
+          "en": "Hide reactions",
+          "es": "Ocultar reacciones",
+          "pt": "Ocultar reações",
+          "uk": "Сховати реакції"
+        },
+        "default": false
+      },
+      {
+        "key": "views",
+        "type": "switch",
+        "title": {
+          "ru": "Скрыть счётчик просмотров",
+          "en": "Hide view counter",
+          "es": "Ocultar contador de vistas",
+          "pt": "Ocultar contador de visualizações",
+          "uk": "Сховати лічильник переглядів"
+        },
+        "default": false
+      }
+    ]
+  },
+  "parts": [
+    {
+      "type": "js",
+      "code": "export default function (tx) {\n  const el = document.createElement('style');\n  document.head.append(el);\n  tx.onStop(() => el.remove());\n  const apply = () => {\n    const c = tx.config;\n    el.textContent =\n      `#screen-wall .tx-media img, #screen-wall .tx-media video { max-height: ${c.get('media')}px !important; }` +\n      (c.get('gap') ? '#screen-wall [id^=post-card-] { margin-bottom: 2px !important; }' : '') +\n      (c.get('reactions') ? '#screen-wall .tx-reactions { display: none !important; }' : '') +\n      (c.get('views') ? '#screen-wall .tx-meta { display: none !important; }' : '');\n  };\n  apply();\n  tx.config.on('*', apply);\n}"
+    }
+  ]
+}

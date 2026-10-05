@@ -1,0 +1,66 @@
+/* TeleX design tokens — Telegram for Android, dark theme */
+:root {
+  --tx-safe-top: env(safe-area-inset-top, 0px);
+  --tx-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tx-bg: #000000;
+  --tx-surface: #1c1c1d;
+  --tx-surface-2: #262628;
+  --tx-bubble: #212123;
+  --tx-bubble-out: #2b3e63;
+  --tx-glass: rgba(34, 34, 36, 0.72);
+  --tx-glass-border: rgba(255, 255, 255, 0.075);
+  --tx-separator: rgba(255, 255, 255, 0.08);
+  --tx-text: #ffffff;
+  --tx-text-2: #9d9da3;
+  --tx-hint: #6e6e74;
+  --tx-accent: #7595ff;
+  --tx-accent-fill: #5a83f3;
+  --tx-accent-soft: rgba(117, 149, 255, 0.16);
+  --tx-link: #7595ff;
+  --tx-reaction: rgba(120, 146, 255, 0.13);
+  --tx-red: #ff5b5b;
+  --tx-green: #4fbf6a;
+  --tx-badge-muted: #6d6d72;
+  --tx-bubble-radius: 17px;
+  --tx-bubble-radius-small: 6px;
+  --tx-text-size: 16px;
+  --tx-column-w: 680px;
+  --tx-dock-h: 64px;
+  --tx-font: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --tx-glass-blur: blur(22px) saturate(170%);
+}
+
+html, body {
+  background: var(--tx-bg);
+  color: var(--tx-text);
+  font-family: var(--tx-font);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+
+body.tx { margin: 0; min-height: 100vh; min-height: 100dvh; overflow-x: hidden; overscroll-behavior-y: none; }
+:where(.tx) button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+:where(.tx) a { color: inherit; }
+.tx-hidden { display: none !important; }
+
+.tx-reduce-motion *, .tx-reduce-motion *::before, .tx-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Wallpaper: one composited layer sized to the large viewport, so it never
+   jumps when the mobile address bar shows/hides. */
+#tgx-bg-canvas, #tgx-bg-pattern {
+  position: fixed !important;
+  top: 0; left: 0; right: 0;
+  height: 100vh; height: 100lvh;
+  pointer-events: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: none !important;
+  z-index: 0 !important;
+}
+#tgx-bg-pattern { z-index: 1 !important; }
+
+.tx .icon { font-family: icons !important; line-height: 1; display: inline-block; font-style: normal; }

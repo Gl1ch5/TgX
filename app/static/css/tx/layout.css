@@ -71,7 +71,7 @@
 .tx-pill-sub { font-size: 14px; color: var(--tx-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Plain (black) header used by settings/profile */
-.tx-titlebar { display: flex; align-items: center; gap: 4px; height: 56px; padding-top: var(--tx-safe-top); }
+.tx-titlebar { display: flex; align-items: center; gap: 4px; height: calc(56px + var(--tx-safe-top)); padding-top: var(--tx-safe-top); box-sizing: border-box; }
 .tx-titlebar h1 { flex: 1; margin: 0 0 0 8px; font-size: 22px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tx-icon-btn {
   width: 44px; height: 44px; border-radius: 50%;
@@ -89,7 +89,10 @@
 .tx-search input::placeholder { color: var(--tx-hint); }
 .tx-search input::-webkit-search-cancel-button { display: none; }
 
-.tx-tabs { display: flex; gap: 2px; padding: 4px; border-radius: 999px; overflow-x: auto; scrollbar-width: none; }
+.tx-tabs { position: relative; display: flex; gap: 2px; padding: 4px; border-radius: 999px; overflow-x: auto; scrollbar-width: none; }
+.tx-tab-ind { position: absolute; left: 4px; top: 4px; bottom: 4px; width: 0; border-radius: 999px; background: var(--tx-accent-soft); transition: transform .34s cubic-bezier(.3,1.25,.5,1), width .3s cubic-bezier(.2,.9,.3,1); pointer-events: none; will-change: transform; }
+.tx-tabs.has-ind .tx-tab.is-active { background: transparent; }
+.tx-tabs .tx-tab { position: relative; z-index: 1; }
 .tx-tabs::-webkit-scrollbar { display: none; }
 .tx-tab {
   display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 15px;
@@ -183,3 +186,22 @@ html[data-nav="tab"]::view-transition-new(root) { animation: tx-tab-in 0.24s cub
 @keyframes tx-pop-in { from { transform: translateX(-22%); filter: brightness(0.6); } to { transform: none; } }
 @keyframes tx-fade-out { to { opacity: 0; } }
 @keyframes tx-tab-in { from { opacity: 0; transform: scale(0.985) translateY(6px); } }
+
+/* ---------- Motion polish ---------- */
+@keyframes tx-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.tx-rise { animation: tx-rise 0.38s cubic-bezier(0.2, 0.9, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 38ms); }
+/* press feedback everywhere: a small, springy squeeze */
+button, .tx-row, .tx-dock-tab, .tx-icon-btn, .tx-chip, .tx-pf-action, .tx-mod-card { -webkit-tap-highlight-color: transparent; }
+.tx-icon-btn { transition: transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.16s; }
+.tx-icon-btn:active { transform: scale(0.88); background: var(--tx-accent-soft); }
+.tx-dock-tab { transition: transform 0.18s cubic-bezier(0.3, 1.4, 0.5, 1), background 0.2s, color 0.2s; }
+.tx-dock-tab:active { transform: scale(0.9); }
+.tx-pf-action { transition: transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1); }
+.tx-pf-action:active { transform: scale(0.94); }
+button.tx-row, label.tx-row { transition: background 0.18s ease, transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1); }
+button.tx-row:active, label.tx-row:active { transform: scale(0.985); }
+/* switch: springy thumb */
+.tx-switch span::after { transition: transform 0.28s cubic-bezier(0.3, 1.5, 0.5, 1) !important; }
+.tx-switch input:active + span::after { width: 26px; }
+/* images fade in once loaded */
+.tx-media img, .tx-avatar img { transition: opacity 0.3s ease; }
