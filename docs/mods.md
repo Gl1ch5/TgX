@@ -65,6 +65,7 @@ HTML (скрипты внутри выполняются), JSON с ключам�
 | `tx.settings` | `addRow({ title, sub, icon, color, run })`, `addPage({ id, title, sub, icon, render(box) })` — свой экран в настройках |
 | `tx.config` | настройки мода: `get`, `set`, `on(key \| '*', fn)`, `render(fn(box))` |
 | `tx.storage` | `get(k)`, `set(k, v)` — произвольные данные мода |
+| `tx.onStop(fn)` | своя очистка (таймеры, узлы) при выключении мода |
 | `tx.data` | части `json`/`text` из пакета, по `name` |
 | `tx.S`, `tx.api` | состояние приложения (`S.posts`, `S.channels`, `S.user`) и весь доступ к Telegram |
 | `tx.t`, `tx.toast`, `tx.confirm`, `tx.escapeHtml` | перевод, всплывашка, диалог, экранирование |

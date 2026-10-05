@@ -255,7 +255,7 @@ class Updater(private val activity: Activity) {
     private companion object {
         const val TAG = "TeleXUpdater"
         const val KEY_LAST_CHECK = "last_check"
-        const val CHECK_EVERY_MS = 3 * 60 * 60 * 1000L
+        const val CHECK_EVERY_MS = 20 * 60 * 1000L
         const val VERSION_URL = "https://github.com/Gl1ch5/TgX/releases/download/nightly/version.json"
         const val APK_URL = "https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk"
     }

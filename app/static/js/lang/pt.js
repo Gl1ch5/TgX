@@ -421,4 +421,7 @@ export const PT = {
   "Файл .module": "Arquivo .module",
   "Включён": "Ativado",
   "Настройки мода": "Configurações do mod",
+  "Официальные моды": "Mods oficiais",
+  "Обновить": "Atualizar",
+  "Установлено": "Instalado",
 };

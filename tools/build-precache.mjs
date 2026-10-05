@@ -7,7 +7,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'app', 'static');
-const DIRS = ['css', 'js', 'icons', 'fonts'];
+const DIRS = ['css', 'js', 'icons', 'fonts', 'mods'];
 const FILES = ['index.html', 'chat/index.html'];
 
 // emoji (27 MB) and wallpapers are cached on first use (sw.js), everything else is installed up front.

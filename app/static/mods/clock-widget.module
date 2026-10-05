@@ -1,0 +1,16 @@
+<!-- @manifest {"id":"clock-widget","name":"Clock widget","version":"1.0.0","author":"TeleX","icon":"🕒","description":"A floating clock on top of the feed","about":"An HTML mod: the file is just a page. The script reads its own settings through TeleXMods['clock-widget'].config.","tags":["widget","html"],"settings":[{"key":"seconds","type":"switch","title":"Show seconds","default":false},{"key":"color","type":"color","title":"Colour","default":"#ffffff"},{"key":"size","type":"number","title":"Size","default":16,"min":12,"max":32}]} -->
+<div id="clock-w" style="position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 6px);right:12px;padding:3px 10px;border-radius:12px;background:rgba(0,0,0,.45);font:500 16px Roboto,sans-serif;pointer-events:none"></div>
+<script>
+  const tx = TeleXMods['clock-widget'];
+  const el = document.getElementById('clock-w');
+  const draw = () => {
+    const d = new Date();
+    el.style.color = tx.config.get('color');
+    el.style.fontSize = tx.config.get('size') + 'px';
+    el.textContent = d.toLocaleTimeString([], tx.config.get('seconds') ? {} : { hour: '2-digit', minute: '2-digit' });
+  };
+  draw();
+  const timer = setInterval(draw, 1000);
+  tx.onStop(() => clearInterval(timer));
+  tx.config.on('*', draw);
+</script>

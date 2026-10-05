@@ -33,6 +33,7 @@
         <a href="#clients">Клиенты</a>
         <a href="#features">Возможности</a>
         <a href="#shots">Скриншоты</a>
+        <a href="#mods">Моды</a>
         <a href="#download">Скачать</a>
         <a href="#faq">Вопросы</a>
       </nav>
@@ -116,6 +117,28 @@
     </section>
 
     <!-- Download -->
+    <section id="mods" class="wrap section">
+      <div class="head reveal">
+        <h2>Моды</h2>
+        <p>Темы, виджеты и расширения — один файл <b>.module</b>. Скачайте и установите в приложении: Настройки → Моды.</p>
+      </div>
+      <div class="grid" id="mods-grid">
+        <article class="card reveal"><h3>Загружаем каталог…</h3></article>
+      </div>
+      <p class="fine center">Официальные моды можно ставить прямо из приложения. Свой мод — по <a href="https://github.com/Gl1ch5/TgX/blob/main/docs/mods.md">документации</a>; нейросеть соберёт его по <a href="https://github.com/Gl1ch5/TgX/blob/main/docs/mods-for-agents.md">инструкции для агентов</a>.</p>
+    </section>
+    <script>
+      fetch('app/static/mods/catalog.json').then(function (r) { return r.json(); }).then(function (c) {
+        var esc = function (s) { return String(s).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); };
+        document.getElementById('mods-grid').innerHTML = c.mods.map(function (m) {
+          var bg = m.swatch ? 'linear-gradient(135deg,' + m.swatch.join(',') + ')' : 'linear-gradient(135deg,#4F85F6,#8a5cf0)';
+          return '<article class="card reveal in"><span class="sq" style="background:' + bg + ';font-size:26px;display:flex;align-items:center;justify-content:center">' + esc(m.icon || '') + '</span>' +
+            '<h3>' + esc(m.name) + ' <small style="opacity:.6;font-weight:500">v' + esc(m.version) + '</small></h3><p>' + esc(m.description) + '</p>' +
+            '<p style="margin-top:16px"><a class="btn btn-sm" href="app/static/mods/' + esc(m.file) + '" download>Скачать .module</a></p></article>';
+        }).join('');
+      }).catch(function () { document.getElementById('mods-grid').innerHTML = ''; });
+    </script>
+
     <section id="download" class="wrap section">
       <div class="head reveal"><h2>Скачать</h2><p>Все версии бесплатные и обновляются автоматически.</p></div>
       <div class="dl">

@@ -67,7 +67,7 @@ Wallpaper: `kind` `fill` | `pattern` (`url` to an svg); 1–4 `colors`; `rotatio
 - `tx.config` (own settings) · `tx.storage.get/set` · `tx.data[name]` (json/text parts)
 - `tx.S` — app state: `S.posts`, `S.channels`, `S.user`, … · `tx.api` — all Telegram calls (see `app/static/js/api.js`) · `tx.t`, `tx.toast(msg)`, `tx.confirm(text, okLabel)`, `tx.escapeHtml`
 
-Everything registered through `tx` is removed when the mod is disabled/deleted. Things you create *outside* `tx` (timers, global listeners,
+`tx.onStop(fn)` registers your own cleanup (timers, nodes). Everything registered through `tx` is removed when the mod is disabled/deleted. Things you create *outside* `tx` (timers, global listeners,
 `document.body` nodes) are your responsibility — for HTML parts the root `<div class="tx-mod-root">` is removed automatically, timers are not.
 
 ## How to build any UI change

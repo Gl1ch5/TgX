@@ -123,6 +123,7 @@ function stop(id) {
   if (!r) { ext.removeOwner(id); return; }
   r.styles.forEach((s) => s.remove());
   (r.roots || []).forEach((n) => n.remove());
+  (r.cleanups || []).forEach((fn) => { try { fn(); } catch (e) { console.warn(`[mods] ${id} cleanup`, e); } });
   configListeners.delete(id);
   renderers.delete(id);
   (observers.get(id) || []).forEach((o) => o.disconnect());
@@ -191,6 +192,8 @@ function makeApi(mod) {
       on: (name, fn) => ext.on(name, fn, id),
     },
     theme: themeApi(id),
+    /** Register cleanup (timers, listeners, nodes you made yourself): runs when the mod is disabled or removed. */
+    onStop: (fn) => { const r = running.get(id); if (r) r.cleanups.push(fn); },
     /** The mod's own settings (schema in manifest.settings): get(key), set(key, value), on(key | '*', fn), render(fn(container)) for a custom block */
     config: {
       get: (k) => modConfigGet(mod, k),
@@ -243,7 +246,7 @@ function mountHtml(id, html, tx, r) {
 async function start(mod) {
   const id = mod.manifest.id;
   stop(id);
-  running.set(id, { vars: {}, styles: [], roots: [], themes: null });
+  running.set(id, { vars: {}, styles: [], roots: [], cleanups: [], themes: null });
   const r = running.get(id);
   const tx = makeApi(mod);
   try {
@@ -355,4 +358,26 @@ export function startMods() {
   load().filter((m) => m.enabled).forEach((m) => { start(m); });
   // the app redraws its own variables on theme changes: put the mods' ones back on top
   onPrefsChange(() => setTimeout(applyVars, 0));
+}
+
+// ---------------------------------------------------------------- official catalog (app/static/mods/catalog.json)
+
+let catalog = null;
+export async function loadCatalog() {
+  if (catalog) return catalog;
+  const res = await fetch('mods/catalog.json', { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  catalog = (await res.json()).mods || [];
+  return catalog;
+}
+
+/** Install a mod from the catalog; mods from there are the project's own, so they carry the verified mark. */
+export async function installOfficial(id) {
+  const entry = (await loadCatalog()).find((m) => m.id === id);
+  if (!entry) throw new Error('not found');
+  const res = await fetch('mods/' + entry.file, { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const bundle = parseBundle(await res.text());
+  bundle.manifest = { ...bundle.manifest, verified: true, official: true };
+  return installMod(bundle);
 }

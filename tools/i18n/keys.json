@@ -1685,6 +1685,21 @@
   "plural": false
  },
  {
+  "key": "Обновить",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установлено",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Официальные моды",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Включён",
   "where": "js/views/settings.js",
   "plural": false

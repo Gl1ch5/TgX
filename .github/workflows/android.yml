@@ -22,11 +22,17 @@ jobs:
     defaults:
       run:
         working-directory: native/android
-    env:
-      TELEX_VERSION_CODE: ${{ github.run_number }}
-      TELEX_VERSION_NAME: 1.0.${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
+
+      # versionCode must only ever grow (the in-app updater compares it): minutes since 1970 never go back,
+      # unlike the workflow run number, which restarts when a workflow is recreated.
+      - name: Version
+        working-directory: .
+        run: |
+          app=$(grep -oP "APP_VERSION = '\K[^']+" app/static/js/version.js)
+          echo "TELEX_VERSION_CODE=$(( $(date +%s) / 60 ))" >> "$GITHUB_ENV"
+          echo "TELEX_VERSION_NAME=${app}.${{ github.run_number }}" >> "$GITHUB_ENV"
 
       - uses: actions/setup-java@v4
         with:

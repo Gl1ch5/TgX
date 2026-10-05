@@ -59,10 +59,16 @@ export function openPopup(anchor, { reactionsHtml = '', items = [], header = nul
 
   const r = anchor.getBoundingClientRect();
   const w = ctx.offsetWidth;
+  const cs = getComputedStyle(document.documentElement);
+  const edgeTop = (parseFloat(cs.getPropertyValue('--tx-safe-top')) || 0) + 8;
+  const edgeBottom = (parseFloat(cs.getPropertyValue('--tx-safe-bottom')) || 0) + 12;
+  // A tall post can reach past the screen: keep the whole menu inside it and scroll the list when it does not fit.
+  const room = window.innerHeight - edgeTop - edgeBottom;
+  if (ctx.offsetHeight > room) ctx.style.maxHeight = `${room}px`;
   const h = ctx.offsetHeight;
   const left = Math.max(8, Math.min(r.left + 12, window.innerWidth - w - 8));
-  let top = r.top + 12;
-  if (top + h > window.innerHeight - 12) top = Math.max(8, window.innerHeight - h - 12);
+  let top = Math.max(edgeTop, r.top + 12);
+  if (top + h > window.innerHeight - edgeBottom) top = Math.max(edgeTop, window.innerHeight - h - edgeBottom);
   ctx.style.left = `${left}px`;
   ctx.style.top = `${top}px`;
   ctx.style.transformOrigin = `${Math.max(0, r.left + 24 - left)}px ${top < r.top ? 'top' : 'bottom'}`;

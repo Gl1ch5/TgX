@@ -1,0 +1,50 @@
+{
+  "manifest": {
+    "id": "compact-feed",
+    "name": "Compact feed",
+    "version": "1.0.0",
+    "author": "TeleX",
+    "icon": "📰",
+    "description": "More posts on the screen: smaller media, tighter spacing, optional reactions",
+    "about": "Make the feed denser. Every option can be switched on its own page.",
+    "tags": [
+      "feed",
+      "layout"
+    ],
+    "settings": [
+      {
+        "key": "media",
+        "type": "number",
+        "title": "Maximum media height, px",
+        "default": 260,
+        "min": 120,
+        "max": 520,
+        "step": 20
+      },
+      {
+        "key": "gap",
+        "type": "switch",
+        "title": "Tighter spacing between posts",
+        "default": true
+      },
+      {
+        "key": "reactions",
+        "type": "switch",
+        "title": "Hide reactions",
+        "default": false
+      },
+      {
+        "key": "views",
+        "type": "switch",
+        "title": "Hide view counter",
+        "default": false
+      }
+    ]
+  },
+  "parts": [
+    {
+      "type": "js",
+      "code": "export default function (tx) {\n  const el = document.createElement('style');\n  document.head.append(el);\n  tx.onStop(() => el.remove());\n  const apply = () => {\n    const c = tx.config;\n    el.textContent =\n      `#screen-wall .tx-media img, #screen-wall .tx-media video { max-height: ${c.get('media')}px !important; }` +\n      (c.get('gap') ? '#screen-wall [id^=post-card-] { margin-bottom: 2px !important; }' : '') +\n      (c.get('reactions') ? '#screen-wall .tx-reactions { display: none !important; }' : '') +\n      (c.get('views') ? '#screen-wall .tx-meta { display: none !important; }' : '');\n  };\n  apply();\n  tx.config.on('*', apply);\n}"
+    }
+  ]
+}

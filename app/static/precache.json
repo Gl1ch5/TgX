@@ -1,5 +1,5 @@
 {
- "build": "26647f6586",
+ "build": "90824125ce",
  "files": [
   "./",
   "index.html",
@@ -687,6 +687,11 @@
   "fonts/roboto-latin-400-italic.woff2",
   "fonts/roboto-latin-400-normal.woff2",
   "fonts/roboto-latin-500-normal.woff2",
-  "fonts/roboto-latin-700-normal.woff2"
+  "fonts/roboto-latin-700-normal.woff2",
+  "mods/aurora-theme.module",
+  "mods/catalog.json",
+  "mods/clock-widget.module",
+  "mods/compact-feed.module",
+  "mods/reading-time.module"
  ]
 }

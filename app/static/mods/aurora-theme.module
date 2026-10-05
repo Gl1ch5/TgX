@@ -1,0 +1,147 @@
+{
+  "manifest": {
+    "id": "aurora-theme",
+    "name": "Aurora",
+    "version": "1.0.0",
+    "author": "TeleX",
+    "icon": "🌌",
+    "description": "Northern-lights colour themes with their own day and night wallpapers",
+    "about": "Adds three colour themes to Settings → Chat settings → Color theme: Aurora, Glacier and Ember.\nEach has its own wallpaper for day and night mode and gradient message bubbles.\nPick a tile in the carousel after installing.",
+    "tags": [
+      "theme",
+      "wallpaper"
+    ],
+    "settings": [
+      {
+        "key": "glow",
+        "type": "switch",
+        "title": "Soft glow on the dock",
+        "default": true
+      }
+    ]
+  },
+  "parts": [
+    {
+      "type": "theme",
+      "data": {
+        "css": "html.mod-aurora-glow .tx-dock { box-shadow: 0 6px 30px color-mix(in srgb, var(--tx-accent-fill) 35%, transparent); }",
+        "colorThemes": [
+          {
+            "id": "aurora",
+            "emoji": "🌌",
+            "accent": "cyan",
+            "out": {
+              "dark": [
+                "#1f8f7a",
+                "#3a6fd8"
+              ],
+              "light": [
+                "#23a58b",
+                "#3f7be0"
+              ]
+            },
+            "wallpapers": {
+              "dark": {
+                "kind": "fill",
+                "colors": [
+                  "#07161f",
+                  "#0d3b3a",
+                  "#1a2a5c",
+                  "#0a1020"
+                ],
+                "intensity": 0
+              },
+              "light": {
+                "kind": "fill",
+                "colors": [
+                  "#d9f7ee",
+                  "#bfe3f7",
+                  "#e2dcff",
+                  "#cfeee3"
+                ],
+                "intensity": 0
+              }
+            }
+          },
+          {
+            "id": "glacier",
+            "emoji": "🧊",
+            "accent": "blue",
+            "out": {
+              "dark": [
+                "#2f6fb4",
+                "#4aa3d6"
+              ],
+              "light": [
+                "#3a86d0",
+                "#5bb4e0"
+              ]
+            },
+            "wallpapers": {
+              "dark": {
+                "kind": "fill",
+                "colors": [
+                  "#0c1b2b",
+                  "#16344f"
+                ],
+                "rotation": 45,
+                "intensity": 0
+              },
+              "light": {
+                "kind": "fill",
+                "colors": [
+                  "#e8f4ff",
+                  "#c9e4fb"
+                ],
+                "rotation": 45,
+                "intensity": 0
+              }
+            }
+          },
+          {
+            "id": "ember",
+            "emoji": "🔥",
+            "accent": "orange",
+            "out": {
+              "dark": [
+                "#c2412d",
+                "#e08a35"
+              ],
+              "light": [
+                "#d9503a",
+                "#f0a040"
+              ]
+            },
+            "wallpapers": {
+              "dark": {
+                "kind": "fill",
+                "colors": [
+                  "#1a0b08",
+                  "#4a1a10",
+                  "#2a1208"
+                ],
+                "rotation": 135,
+                "intensity": 0
+              },
+              "light": {
+                "kind": "fill",
+                "colors": [
+                  "#fff0e0",
+                  "#ffd2b0",
+                  "#ffe6c8"
+                ],
+                "rotation": 135,
+                "intensity": 0
+              }
+            }
+          }
+        ],
+        "apply": "aurora"
+      }
+    },
+    {
+      "type": "js",
+      "code": "export default function (tx) { const set = () => document.documentElement.classList.toggle('mod-aurora-glow', !!tx.config.get('glow')); set(); tx.config.on('glow', set); tx.onStop(() => document.documentElement.classList.remove('mod-aurora-glow')); }"
+    }
+  ]
+}

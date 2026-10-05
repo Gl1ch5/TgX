@@ -1,0 +1,57 @@
+{
+ "updated": "2026-10-05",
+ "mods": [
+  {
+   "id": "aurora-theme",
+   "file": "aurora-theme.module",
+   "name": "Aurora",
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "🌌",
+   "description": "Northern-lights colour themes with their own day and night wallpapers",
+   "tags": [
+    "theme"
+   ],
+   "swatch": [
+    "#0d3b3a",
+    "#1a2a5c"
+   ]
+  },
+  {
+   "id": "compact-feed",
+   "file": "compact-feed.module",
+   "name": "Compact feed",
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "📰",
+   "description": "More posts on the screen: smaller media, tighter spacing, optional reactions",
+   "tags": [
+    "feed"
+   ]
+  },
+  {
+   "id": "reading-time",
+   "file": "reading-time.module",
+   "name": "Reading time",
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "⏱️",
+   "description": "Shows how long a post takes to read",
+   "tags": [
+    "feed"
+   ]
+  },
+  {
+   "id": "clock-widget",
+   "file": "clock-widget.module",
+   "name": "Clock widget",
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "🕒",
+   "description": "A floating clock on top of the feed",
+   "tags": [
+    "widget"
+   ]
+  }
+ ]
+}

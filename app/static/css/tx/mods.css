@@ -33,3 +33,7 @@
 .tx-mod-about { font-size: 14.5px; line-height: 1.45; color: var(--tx-text-2); margin: 8px 0 10px; text-align: left; }
 .tx-mod-color { width: 44px; height: 30px; border: 0; padding: 0; background: none; }
 .tx-mod-text { width: 100%; box-sizing: border-box; }
+.tx-mod-get { flex: 0 0 auto; border: 0; border-radius: 999px; padding: 8px 16px; font: inherit; font-size: 14px; font-weight: 600; background: var(--tx-accent-fill); color: #fff; cursor: pointer; }
+.tx-mod-get:active { transform: scale(0.96); }
+.tx-mod-get.is-done { background: var(--tx-accent-soft); color: var(--tx-accent); cursor: default; }
+.tx-mod-name .tx-verified { vertical-align: -3px; margin-left: 2px; }

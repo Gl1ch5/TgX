@@ -421,4 +421,7 @@ export const EN = {
   "Файл .module": "A .module file",
   "Включён": "Enabled",
   "Настройки мода": "Mod settings",
+  "Официальные моды": "Official mods",
+  "Обновить": "Update",
+  "Установлено": "Installed",
 };

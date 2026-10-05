@@ -21,7 +21,7 @@ import { workerMode } from '../tg.js';
 import { nativeVersion, isAndroidApp, postNative, logCount, diagnostics, exportLogs, clearLogs, hardReload } from '../core/devtools.js';
 import { t, LANGUAGES, lang } from '../i18n.js';
 import { ext } from '../core/ext.js';
-import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef } from '../core/mods.js';
+import { listMods, installMod, removeMod, setModEnabled, parseBundle, installFromUrl, confirmDialog, modConfigGet, modConfigSet, modRenderers, modPage as modPageDef, loadCatalog, installOfficial } from '../core/mods.js';
 
 const root = () => document.getElementById('settings-root');
 let page = 'root';
@@ -42,6 +42,7 @@ function render() {
   const pages = { root: rootPage, power: powerPage, wall: wallPage, chat: chatPage, appearance: chatPage, theme: themePage, language: languagePage, namecolor: nameColorPage, data: dataPage, devices: devicesPage, about: aboutPage, developer: developerPage, mods: modsPage };
   el.innerHTML = (pages[page] || (page.startsWith('mod:') ? () => modPage(page.slice(4)) : page.startsWith('xp:') ? () => extPage(page.slice(3)) : rootPage))();
   if (page.startsWith('xp:')) { const pg = modPageDef(page.slice(3)); const box = document.getElementById('xp-box'); if (pg && box) { try { pg.render(box); } catch (e) { console.warn('[mods] page', e); } } }
+  if (page === 'mods') fillOfficial();
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
   if (page === 'devices') loadSessions();
   if (page === 'data') loadStorage();
@@ -487,10 +488,39 @@ function modsPage() {
         </div>`,
         { title: t('Установка'), hint: t('Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.') },
       )}
+      <div id="mod-official"></div>
       <div class="tx-group"><div class="tx-group-title">${t('Установленные')}</div>${list.length ? cards : `<div class="tx-group-hint" style="padding:6px 22px 18px;margin:0">${t('Модов пока нет')}</div>`}</div>
       <input type="file" id="mod-file" accept=".module,.json,.js,.html,application/json,text/*" hidden onchange="window.TelegramX.installModFile(this)" />
     </div>`;
 }
+
+/** "Official mods": the project's own catalog, one tap to install. */
+async function fillOfficial() {
+  const box = document.getElementById('mod-official');
+  if (!box) return;
+  let list;
+  try { list = await loadCatalog(); } catch { return; }
+  if (!document.getElementById('mod-official')) return;
+  const have = new Map(listMods().map((m) => [m.manifest.id, m.manifest.version]));
+  const cards = list.map((c) => {
+    const cur = have.get(c.id);
+    const state = cur == null ? t('Установить') : cur !== c.version ? t('Обновить') : t('Установлено');
+    const pic = c.swatch ? `<span class="tx-mod-pic" style="background:linear-gradient(135deg,${c.swatch.join(',')})">${parseEmojis(escapeHtml(c.icon || ''))}</span>` : `<span class="tx-mod-pic is-icon">${parseEmojis(escapeHtml(c.icon || c.name.slice(0, 1)))}</span>`;
+    return `
+      <div class="tx-mod-card">
+        ${pic}
+        <span class="tx-mod-body">
+          <span class="tx-mod-name">${escapeHtml(c.name)} <i class="tx-verified"></i></span>
+          <span class="tx-mod-sub">${escapeHtml([c.version ? 'v' + c.version : '', c.author || ''].filter(Boolean).join(' · '))}</span>
+          <span class="tx-mod-desc">${escapeHtml(c.description || '')}</span>
+        </span>
+        <button class="tx-mod-get ${cur != null && cur === c.version ? 'is-done' : ''}" ${cur != null && cur === c.version ? 'disabled' : ''} onclick="window.TelegramX.installOfficial('${c.id}')">${state}</button>
+      </div>`;
+  }).join('');
+  box.innerHTML = `<div class="tx-group"><div class="tx-group-title">${t('Официальные моды')}</div>${cards}</div>`;
+}
+
+export function installOfficialMod(id) { runInstall(installOfficial(id)); }
 
 function modControl(m, def) {
   const id = m.manifest.id;
