@@ -20,3 +20,4 @@ app/media_cache/
 .env
 *.log
 node_modules/
+promo/build/
