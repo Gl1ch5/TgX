@@ -2,7 +2,7 @@
 // keeps working with its built-in catalog.
 import { listMods } from './mods.js';
 
-export const STORE_API = 'https://api.telex-web.ru/api';
+export const STORE_API = 'https://grzxk.ru:8443/api';
 const base = () => { try { return (localStorage.getItem('telex.storeApi') || STORE_API).replace(/\/$/, ''); } catch { return STORE_API; } };
 
 const rnd = (n) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return [...a].map((b) => (b % 36).toString(36)).join(''); };
@@ -17,7 +17,9 @@ const authorToken = () => persistent('telex.store.author', () => 'tok_' + rnd(40
 let online = null; // null = unknown
 export const storeOnline = () => online;
 
-async function call(method, path, body, { timeout = 8000, raw = false } = {}) {
+let downUntil = 0; // after a network failure the store is skipped for a while, so tabs never wait on a dead server
+async function call(method, path, body, { timeout = 5000, raw = false } = {}) {
+  if (Date.now() < downUntil) throw new Error('offline');
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeout);
   try {
@@ -32,7 +34,7 @@ async function call(method, path, body, { timeout = 8000, raw = false } = {}) {
     if (!r.ok) throw Object.assign(new Error(j.error || 'HTTP ' + r.status), { status: r.status });
     return j;
   } catch (e) {
-    if (e.status == null) online = false; // network error / timeout, not an API answer
+    if (e.status == null) { online = false; downUntil = Date.now() + 90000; } // network error / timeout, not an API answer
     throw e;
   } finally { clearTimeout(timer); }
 }

@@ -5,10 +5,18 @@ name: Deploy mod store API
 on:
   workflow_dispatch:
     inputs:
-      domain:
-        description: 'Public domain of the API (its DNS A record must point to the server), e.g. api.telex-web.ru'
+      tls_host:
+        description: 'Reuse the HTTPS certificate of this existing site of the server (no DNS changes); the API will be at https://HOST:PORT/api'
         required: false
-        default: 'api.telex-web.ru'
+        default: 'grzxk.ru'
+      port:
+        description: 'Public HTTPS port for the API'
+        required: false
+        default: '8443'
+      domain:
+        description: 'Optional: own sub-domain for the API (DNS A record must point to the server)'
+        required: false
+        default: ''
       email:
         description: 'E-mail for the HTTPS certificate (Let''s Encrypt); empty = skip HTTPS'
         required: false
@@ -37,6 +45,8 @@ jobs:
           PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           DOMAIN: ${{ inputs.domain }}
+          TLS_HOST: ${{ inputs.tls_host }}
+          PUBLIC_PORT: ${{ inputs.port }}
           EMAIL: ${{ inputs.email }}
         run: |
           set -e
@@ -54,3 +64,12 @@ jobs:
           $SCP server/index.js server/package.json server/install.sh "$USER_@$HOST:/tmp/telex-api/"
           SUDO=""; [ "$USER_" = root ] || SUDO="sudo"
           $SSH "$USER_@$HOST" "cd /tmp/telex-api && $SUDO env DOMAIN='$DOMAIN' EMAIL='$EMAIL' bash install.sh"
+      - name: Check the public address
+        if: ${{ inputs.tls_host != '' }}
+        run: |
+          for i in 1 2 3 4 5; do
+            curl -fsS -m 10 "https://${{ inputs.tls_host }}:${{ inputs.port }}/api/health" && exit 0
+            sleep 4
+          done
+          echo "::error::The API does not answer from outside. Open TCP port ${{ inputs.port }} in the server firewall / hosting panel."
+          exit 1

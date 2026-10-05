@@ -4,8 +4,10 @@
 # Re-running updates the code and keeps the data and the admin token.
 set -euo pipefail
 
-DOMAIN="${DOMAIN:-}"
+DOMAIN="${DOMAIN:-}"       # own sub-domain for the API (nginx on :80 + certbot), optional
 EMAIL="${EMAIL:-}"
+TLS_HOST="${TLS_HOST:-}"   # alternative without new DNS records: reuse the certificate of an existing site, e.g. grzxk.ru
+PUBLIC_PORT="${PUBLIC_PORT:-8443}"
 PORT="${PORT:-8787}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 APP=/opt/telex-api
@@ -86,6 +88,42 @@ NGX
   else
     echo "!! HTTPS: install certbot and run: certbot --nginx -d $DOMAIN -m you@example.com --agree-tos --redirect"
   fi
+fi
+
+# --- HTTPS on an extra port with the certificate of an existing site (no DNS changes, existing nginx config untouched)
+if [ -n "$TLS_HOST" ]; then
+  command -v nginx >/dev/null 2>&1 || { echo "nginx is not installed: cannot expose the API over HTTPS"; exit 1; }
+  CERT=""; KEY=""
+  if [ -f "/etc/letsencrypt/live/$TLS_HOST/fullchain.pem" ]; then
+    CERT="/etc/letsencrypt/live/$TLS_HOST/fullchain.pem"; KEY="/etc/letsencrypt/live/$TLS_HOST/privkey.pem"
+  else
+    CF="$(grep -rl "server_name[^;]*$TLS_HOST" /etc/nginx 2>/dev/null | head -n1 || true)"
+    if [ -n "$CF" ]; then
+      CERT="$(grep -m1 -oP 'ssl_certificate\s+\K[^;]+' "$CF" || true)"
+      KEY="$(grep -m1 -oP 'ssl_certificate_key\s+\K[^;]+' "$CF" || true)"
+    fi
+  fi
+  [ -n "$CERT" ] && [ -n "$KEY" ] || { echo "!! no TLS certificate found for $TLS_HOST"; exit 1; }
+  cat > /etc/nginx/conf.d/telex-api-tls.conf <<NGX
+server {
+  listen $PUBLIC_PORT ssl;
+  server_name $TLS_HOST;
+  ssl_certificate $CERT;
+  ssl_certificate_key $KEY;
+  client_max_body_size 2m;
+  location /api/ {
+    proxy_pass http://127.0.0.1:$PORT;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Forwarded-For \$remote_addr;
+    proxy_read_timeout 30s;
+  }
+  location / { return 404; }
+}
+NGX
+  if ! nginx -t; then rm -f /etc/nginx/conf.d/telex-api-tls.conf; echo "!! nginx config test failed, the change was reverted"; exit 1; fi
+  systemctl reload nginx
+  if command -v ufw >/dev/null 2>&1 && ufw status | grep -q "Status: active"; then ufw allow "$PUBLIC_PORT/tcp" >/dev/null && echo ">> ufw: opened $PUBLIC_PORT/tcp"; fi
+  curl -fsSk --resolve "$TLS_HOST:$PUBLIC_PORT:127.0.0.1" "https://$TLS_HOST:$PUBLIC_PORT/api/health" && echo && echo ">> HTTPS ok: https://$TLS_HOST:$PUBLIC_PORT/api"
 fi
 
 echo
