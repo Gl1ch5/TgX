@@ -17,8 +17,8 @@ import { state } from '../state.js';
 import { api } from '../api.js';
 import { tgDialog } from './dialog.js';
 import { palette, onThemeChange, keysApi, ambientApi, mediaApi } from './modsApi.js';
-import { parseEmojis, renderEmoji } from '../emoji.js';
-import { hasKey, reviewMod, groqChat } from './groq.js';
+import { parseEmojis, renderEmoji, emojifyHtml } from '../emoji.js';
+import { hasKey, reviewMod, groqChat, groqStream } from './groq.js';
 import { t, lang } from '../i18n.js';
 import { showToast, escapeHtml } from '../utils.js';
 import { getPrefs, onPrefsChange, applyAppearance, resolvedTheme } from './prefs.js';
@@ -46,9 +46,10 @@ export const listMods = () => load();
 /** A text that may be given per language: "text" or { ru, en, es, pt, uk }. Falls back to English, then to any. */
 export const L = (v) => (v == null || typeof v === 'string' ? v : v[lang()] || v.en || v.ru || Object.values(v)[0] || '');
 
-/** Icon of a mod: emoji, or an image (https:, data:image/ or a path inside the app). Returns { img } or { emoji }. */
+/** Icon of a mod: an image (https:, data:image/ or a path inside the app), a name from the app's icon font (e.g. "ai"), or legacy emoji. Returns { img } | { glyph } | { emoji }. */
 export function modIcon(icon) {
   if (typeof icon === 'string' && /^(https:|data:image\/|mods\/)/.test(icon)) return { img: icon };
+  if (typeof icon === 'string' && /^[a-z][a-z0-9-]{1,30}$/.test(icon)) return { glyph: icon };
   return { emoji: typeof icon === 'string' ? icon : '' };
 }
 
@@ -239,13 +240,16 @@ function addToSlot(id, slot, spec) {
   return { remove };
 }
 
-function openModScreen(id, { title = '', render } = {}) {
+function openModScreen(id, { title = '', subtitle = '', avatar = '', actions = [], chat = false, render } = {}) {
   const el = document.createElement('div');
-  el.className = 'tx-mod-screen';
+  el.className = 'tx-mod-screen' + (chat ? ' is-chat' : '');
   el.dataset.mod = id;
-  el.innerHTML = `<div class="tx-titlebar"><button class="tx-icon-btn" data-close title="${t('Назад')}"><i class="icon icon-arrow-left"></i></button><h1>${escapeHtml(L(title) || '')}</h1></div><div class="tx-mod-screen-box tx-page"></div>`;
+  const acts = (actions || []).map((a, i) => `<button class="tx-icon-btn" data-act="${i}" title="${escapeHtml(L(a.title) || '')}">${iconHtml(a.icon || 'more')}</button>`).join('');
+  el.innerHTML = `<div class="tx-titlebar"><button class="tx-icon-btn" data-close title="${t('Назад')}"><i class="icon icon-arrow-left"></i></button>${avatar ? `<span class="tx-mod-screen-ava">${avatar}</span>` : ''}<span class="tx-mod-screen-t"><h1>${escapeHtml(L(title) || '')}</h1>${subtitle ? `<small>${escapeHtml(L(subtitle))}</small>` : '<small hidden></small>'}</span>${acts}</div><div class="tx-mod-screen-box tx-page"></div>${chat ? '<div class="tx-mod-screen-foot"></div>' : ''}`;
+  el.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', (e) => { try { actions[Number(b.dataset.act)].run(e); } catch (err) { console.warn(`[mods] ${id} screen action`, err); } }));
   const box = el.querySelector('.tx-mod-screen-box');
   document.body.append(el);
+  if (chat) document.documentElement.classList.add('tx-chat-open'); // the app underneath is hidden: a chat shows only the wallpaper
   el.animate([{ transform: 'translateX(32px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 280, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
   let closed = false;
   let viaBack = false;
@@ -253,6 +257,7 @@ function openModScreen(id, { title = '', render } = {}) {
   const close = () => {
     if (closed) return;
     closed = true;
+    if (chat) document.documentElement.classList.remove('tx-chat-open');
     window.removeEventListener('popstate', onPop);
     el.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateX(32px)' }], { duration: 200, easing: 'ease-in' }).finished.then(() => el.remove(), () => el.remove());
     if (!viaBack) history.back();
@@ -262,8 +267,10 @@ function openModScreen(id, { title = '', render } = {}) {
   el.querySelector('[data-close]').onclick = close;
   const me = running.get(id);
   if (me) me.cleanups.push(() => { viaBack = true; close(); });
-  try { render && render(box, { close }); } catch (e) { console.warn(`[mods] ${id} screen`, e); }
-  return { close, box };
+  const foot = el.querySelector('.tx-mod-screen-foot');
+  const setSubtitle = (text) => { const sm = el.querySelector('.tx-mod-screen-t small'); if (sm) { sm.textContent = text || ''; sm.hidden = !text; } };
+  try { render && render(box, { close, footer: foot, setSubtitle, el }); } catch (e) { console.warn(`[mods] ${id} screen`, e); }
+  return { close, box, footer: foot, setSubtitle };
 }
 
 const configListeners = new Map(); // id -> Map(key -> [fn])
@@ -310,6 +317,8 @@ function makeApi(mod) {
     ambient: ambientApi(id, (fn) => { const r = running.get(id); if (r) r.cleanups.push(fn); }),
     /** tx.media.of(post) → [{ type, url, thumb, duration, size }]; tx.media.urls(post) → [url]. */
     media: mediaApi,
+    /** tx.emoji('😀 text') → HTML where emoji are Apple images, like in Telegram (escapes the text). */
+    emoji: Object.assign((text) => parseEmojis(String(text ?? '')), { html: (html) => emojifyHtml(String(html ?? '')) }),
     /** Current app language code: 'ru' | 'en' | 'es' | 'pt' | 'uk'. */
     lang: () => lang(),
     /** Register cleanup (timers, listeners, nodes you made yourself): runs when the mod is disabled or removed. */
@@ -520,7 +529,7 @@ const aiCalls = new Map(); // mod id → timestamps of the last minute
 function aiApi(mod) {
   const id = mod.manifest.id;
   const allowed = Array.isArray(mod.manifest.permissions) && mod.manifest.permissions.includes('ai');
-  const chat = async (messages, opts = {}) => {
+  const prep = (messages, opts) => {
     if (!allowed) throw new Error('tx.ai needs "ai" in manifest.permissions');
     if (!hasKey()) throw Object.assign(new Error(t('Нужен ключ Groq: Настройки → Ключ Groq')), { code: 'no-key' });
     const now = Date.now();
@@ -529,20 +538,28 @@ function aiApi(mod) {
     aiCalls.set(id, [...recent, now]);
     let list = (Array.isArray(messages) ? messages : [{ role: 'user', content: String(messages) }]).map((m) => ({ role: m.role === 'assistant' || m.role === 'system' ? m.role : 'user', content: String(m.content ?? '').slice(0, 12000) }));
     if (opts.system) list = [{ role: 'system', content: String(opts.system).slice(0, 6000) }, ...list];
-    list = list.slice(-24);
+    return list.slice(-24);
+  };
+  const chat = async (messages, opts = {}) => {
+    const list = prep(messages, opts);
     const out = await groqChat(list, { json: !!opts.json, maxTokens: Math.min(Number(opts.maxTokens) || 800, 2000), temperature: opts.temperature });
     if (!opts.json) return out;
     const m = out.match(/\{[\s\S]*\}/);
     return JSON.parse(m ? m[0] : out);
   };
-  return { available: () => allowed && hasKey(), chat, ask: (prompt, opts) => chat([{ role: 'user', content: prompt }], opts) };
+  /** tx.ai.stream(messages, { system?, maxTokens?, temperature?, signal? }, onText(textSoFar)) → full text; the answer appears as it is written. */
+  const stream = (messages, opts = {}, onText) => groqStream(prep(messages, opts), { maxTokens: Math.min(Number(opts.maxTokens) || 800, 2000), temperature: opts.temperature, signal: opts.signal, onToken: onText });
+  return { available: () => allowed && hasKey(), chat, stream, ask: (prompt, opts) => chat([{ role: 'user', content: prompt }], opts) };
 }
 
-function modIconHtml(m) {
-  const i = modIcon(m.icon);
+/** The square picture of a mod (image, icon-font glyph, or the first letter): used by cards, sets and dialogs. */
+export function modPicHtml(icon, name = '') {
+  const i = modIcon(icon);
   if (i.img) return `<span class="tx-mod-pic is-img"><img src="${escapeHtml(i.img)}" alt=""></span>`;
-  return `<span class="tx-mod-pic is-icon">${parseEmojis(i.emoji || (L(m.name) || '?').trim().slice(0, 1).toUpperCase())}</span>`; // Apple emoji, like in Telegram
+  if (i.glyph) return `<span class="tx-mod-pic is-icon"><i class="icon icon-${escapeHtml(i.glyph)}"></i></span>`;
+  return `<span class="tx-mod-pic is-icon">${i.emoji ? parseEmojis(i.emoji) : escapeHtml((L(name) || '?').trim().slice(0, 1).toUpperCase())}</span>`;
 }
+const modIconHtml = (m) => modPicHtml(m.icon, m.name);
 
 /** Reviews the mod with the user's Groq key (if any) behind a small progress dialog; null when there is no key or the check failed. */
 async function reviewWithProgress(mod) {

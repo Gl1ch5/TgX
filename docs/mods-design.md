@@ -1,5 +1,7 @@
 # TeleX mods — layout, colours, safety and recipes (read this before writing any code)
 
+**Rule 0: no emoji anywhere** (UI text, buttons, toasts, names, descriptions, `icon`). Use the Telegram icon font (`<i class="icon icon-NAME"></i>`) or inline SVG. Emoji look cheap and break the Telegram feel.
+
 This part explains *how to do it well and why*. A mod that ignores it can overlap the phone's status bar, cover the bottom bar, become unreadable in day mode or
 (worst case) make the app unusable. The app has an emergency switch (⋮ menu → "Disable all mods", and automatic safe mode after 2 failed starts), but a good mod never needs it.
 
@@ -28,7 +30,7 @@ This part explains *how to do it well and why*. A mod that ignores it can overla
 ┌──────────────── phone ────────────────┐
 │ status bar (OS)      ← var(--tx-safe-top) tall, drawn over the page; NOTHING of yours here
 ├───────────────────────────────────────┤
-│ .tx-mainbar        56 px: stories stack · "TeleX" · search 🔍 · ⋮     ← slot 'topbar' (end side)
+│ .tx-mainbar        56 px: stories stack · "TeleX" · search · ⋮     ← slot 'topbar' (end side)
 │ #header-search-bar search field                                         ← slot 'search'
 │ #feed-tabs         All · Media · Popular · Favorites                    ← slot 'tabs'
 │ ┌ post card (.tx-bubble) ───────────┐
@@ -140,7 +142,7 @@ All recipes are sectioned `.module` files. Keep your own file in the same shape.
 
 ### 6.1 Clock in the top bar (the correct way — no overlap with the status bar)
 ```
-// @manifest {"id":"topbar-clock","name":{"ru":"Часы","en":"Clock","es":"Reloj","pt":"Relógio","uk":"Годинник"},"version":"1.0.0","author":"you","description":{"ru":"Часы в шапке ленты","en":"A clock in the feed header","es":"Un reloj en la cabecera","pt":"Um relógio no cabeçalho","uk":"Годинник у шапці стрічки"},"icon":"🕒","tags":["widget"],"settings":[{"key":"h24","type":"switch","title":{"ru":"24-часовой формат","en":"24-hour format","es":"Formato 24 h","pt":"Formato 24 h","uk":"24-годинний формат"},"default":true}]}
+// @manifest {"id":"topbar-clock","name":{"ru":"Часы","en":"Clock","es":"Reloj","pt":"Relógio","uk":"Годинник"},"version":"1.0.0","author":"you","description":{"ru":"Часы в шапке ленты","en":"A clock in the feed header","es":"Un reloj en la cabecera","pt":"Um relógio no cabeçalho","uk":"Годинник у шапці стрічки"},"icon":"clock","tags":["widget"],"settings":[{"key":"h24","type":"switch","title":{"ru":"24-часовой формат","en":"24-hour format","es":"Formato 24 h","pt":"Formato 24 h","uk":"24-годинний формат"},"default":true}]}
 // @part js
 export default function (tx) {
   function fmt() {
@@ -163,11 +165,11 @@ Why this is right: the slot puts the clock *inside* the 56 px bar that already s
 
 ### 6.2 A tool button + a result dialog
 ```
-// @manifest {"id":"post-counter","name":{"ru":"Счётчик постов","en":"Post counter","es":"Contador","pt":"Contador","uk":"Лічильник"},"version":"1.0.0","author":"you","description":{"ru":"Показывает, сколько постов загружено","en":"Shows how many posts are loaded","es":"Muestra cuántas publicaciones hay","pt":"Mostra quantas publicações há","uk":"Показує, скільки дописів завантажено"},"icon":"🔢"}
+// @manifest {"id":"post-counter","name":{"ru":"Счётчик постов","en":"Post counter","es":"Contador","pt":"Contador","uk":"Лічильник"},"version":"1.0.0","author":"you","description":{"ru":"Показывает, сколько постов загружено","en":"Shows how many posts are loaded","es":"Muestra cuántas publicaciones hay","pt":"Mostra quantas publicações há","uk":"Показує, скільки дописів завантажено"},"icon":"stats"}
 // @part js
 export default function (tx) {
   tx.ui.add('fab', {
-    id: 'count', icon: '🔢', title: 'Posts',
+    id: 'count', icon: 'stats', title: 'Posts',
     run: function () { tx.toast(String((tx.S.posts || []).length)); },
   });
 }
@@ -175,7 +177,7 @@ export default function (tx) {
 
 ### 6.3 Filter: hide posts containing words
 ```
-// @manifest {"id":"word-filter","name":{"ru":"Фильтр слов","en":"Word filter","es":"Filtro","pt":"Filtro","uk":"Фільтр слів"},"version":"1.0.0","author":"you","description":{"ru":"Скрывает посты с заданными словами","en":"Hides posts with chosen words","es":"Oculta publicaciones","pt":"Oculta publicações","uk":"Ховає дописи"},"icon":"🚫","settings":[{"key":"words","type":"text","title":{"ru":"Слова через запятую","en":"Words, comma separated","es":"Palabras","pt":"Palavras","uk":"Слова через кому"},"default":""}]}
+// @manifest {"id":"word-filter","name":{"ru":"Фильтр слов","en":"Word filter","es":"Filtro","pt":"Filtro","uk":"Фільтр слів"},"version":"1.0.0","author":"you","description":{"ru":"Скрывает посты с заданными словами","en":"Hides posts with chosen words","es":"Oculta publicaciones","pt":"Oculta publicações","uk":"Ховає дописи"},"icon":"hand-stop","settings":[{"key":"words","type":"text","title":{"ru":"Слова через запятую","en":"Words, comma separated","es":"Palabras","pt":"Palavras","uk":"Слова через кому"},"default":""}]}
 // @part js
 export default function (tx) {
   function words() {
@@ -192,7 +194,7 @@ export default function (tx) {
 
 ### 6.4 Post footer: reading time
 ```
-// @manifest {"id":"read-time","name":{"ru":"Время чтения","en":"Reading time","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання"},"version":"1.0.0","author":"you","description":{"ru":"Время чтения под постом","en":"Reading time under a post","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання під дописом"},"icon":"⏱️"}
+// @manifest {"id":"read-time","name":{"ru":"Время чтения","en":"Reading time","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання"},"version":"1.0.0","author":"you","description":{"ru":"Время чтения под постом","en":"Reading time under a post","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання під дописом"},"icon":"timer"}
 // @part js
 export default function (tx) {
   tx.ui.add('post.footer', {
@@ -209,11 +211,11 @@ export default function (tx) {
 
 ### 6.5 Own page with saved data (notebook)
 ```
-// @manifest {"id":"notebook","name":{"ru":"Блокнот","en":"Notebook","es":"Cuaderno","pt":"Caderno","uk":"Блокнот"},"version":"1.0.0","author":"you","description":{"ru":"Заметки в приложении","en":"Notes inside the app","es":"Notas","pt":"Notas","uk":"Нотатки"},"icon":"📝"}
+// @manifest {"id":"notebook","name":{"ru":"Блокнот","en":"Notebook","es":"Cuaderno","pt":"Caderno","uk":"Блокнот"},"version":"1.0.0","author":"you","description":{"ru":"Заметки в приложении","en":"Notes inside the app","es":"Notas","pt":"Notas","uk":"Нотатки"},"icon":"note"}
 // @part js
 export default function (tx) {
   tx.ui.addDockItem({
-    id: 'notes', title: 'Notes', icon: '📝',
+    id: 'notes', title: 'Notes', icon: 'note',
     run: function () {
       tx.ui.openScreen({
         title: 'Notes',
@@ -231,7 +233,7 @@ export default function (tx) {
 
 ### 6.6 Theme with skin (glass look, day + night)
 ```
-// @manifest {"id":"my-glass","name":{"ru":"Стекло","en":"Glass","es":"Cristal","pt":"Vidro","uk":"Скло"},"version":"1.0.0","author":"you","description":{"ru":"Полупрозрачные карточки","en":"Translucent cards","es":"Tarjetas translúcidas","pt":"Cartões translúcidos","uk":"Напівпрозорі картки"},"icon":"🪟","tags":["theme"]}
+// @manifest {"id":"my-glass","name":{"ru":"Стекло","en":"Glass","es":"Cristal","pt":"Vidro","uk":"Скло"},"version":"1.0.0","author":"you","description":{"ru":"Полупрозрачные карточки","en":"Translucent cards","es":"Tarjetas translúcidas","pt":"Cartões translúcidos","uk":"Напівпрозорі картки"},"icon":"brush","tags":["theme"]}
 // @part theme
 { "skin": {
     "dark":  { "--sk-card-bg": "rgba(28,28,32,.55)", "--sk-card-filter": "blur(18px) saturate(160%)", "--sk-card-border": "rgba(255,255,255,.08)", "--sk-bar-bg": "rgba(30,30,34,.6)" },
@@ -241,11 +243,14 @@ export default function (tx) {
 
 ### 6.7 A floating widget, only if a slot does not fit (safe-area aware)
 ```
-// @manifest {"id":"float-note","name":"Floating note","version":"1.0.0","author":"you","description":"A small note card above the dock","icon":"📌"}
+// @manifest {"id":"float-note","name":"Floating note","version":"1.0.0","author":"you","description":"A small note card above the dock","icon":"pin"}
 // @part html
 <div class="tx-mod-float" style="position:fixed;z-index:35;left:12px;bottom:calc(var(--tx-dock-h) + 24px + var(--tx-safe-bottom));max-width:60vw;padding:8px 12px;border-radius:14px;background:var(--tx-glass);border:1px solid var(--tx-glass-border);backdrop-filter:var(--tx-glass-blur);color:var(--tx-text);font:14px var(--tx-font);pointer-events:none">Hello</div>
 ```
 Note `bottom` includes the dock and the gesture inset, `pointer-events:none` lets taps through, theme colours, small size.
+
+### 6.8 Make it look like Telegram (official-mod quality)
+Official mods should feel native. Reuse the app's look instead of inventing one: bubbles use `--tx-bubble` / `--tx-bubble-out` with `border-radius: 17px` and a 6px corner on the last bubble of a group; glass bars use `--tx-glass` + `--tx-glass-blur`; primary buttons are round/pill with `--tx-accent-fill`; icons come from the icon font (`<i class="icon icon-send">`, `icon-copy`, `icon-close`, `icon-more`, `icon-language`, `icon-favorite`); no emoji at all (use icon-font glyphs; `tx.emoji.html` exists only to render emoji that arrive inside user content); lists use the `.tx-group` card look; add an empty state (big emoji + one sentence + a suggestion), a typing indicator (three bouncing dots) while waiting, a Telegram-style toast with Undo for destructive actions, and stream AI answers with `tx.ai.stream`. See `mods-src/ai-chat.js` for a complete example.
 
 ## 7. Pitfalls we have seen (do NOT repeat)
 

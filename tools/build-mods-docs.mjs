@@ -111,6 +111,7 @@ const prompt = `You write mods for TeleX, a web client for Telegram. A mod is ON
 Below is the complete specification. Read it, then build exactly the mod the user asks for at the end of this message.
 
 HARD RULES FOR YOUR ANSWER
+- NO EMOJI anywhere: not in the interface, names, descriptions, toasts, empty states or the manifest icon. TeleX looks like Telegram: use the app's icon font (<i class="icon icon-NAME"></i>) or inline SVG. The manifest icon is an icon-font name such as "ai", "tools", "language", or an SVG data URL.
 - Put the ENTIRE .module file inside ONE markdown code block (\`\`\` … \`\`\`) and write nothing outside it except at most one short sentence. The user copies it with the "Copy" button of the code block; text outside code blocks loses backticks and turns code into links.
 - Inside the file use plain quotes and string concatenation ('a' + b) instead of backtick template literals wherever possible, so the code survives copying. Never put markdown formatting inside the code.
 - The file starts with "{" (JSON bundle) or with a comment line carrying @manifest (annotated / sectioned file).

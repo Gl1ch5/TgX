@@ -1,0 +1,2 @@
+.cp-clamp:not(.cp-open) { max-height: var(--cp-max); overflow: hidden; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.cp-more { display: block; margin: 4px 0 2px; padding: 6px 0; font-size: 14px; font-weight: 600; color: var(--tx-accent); }

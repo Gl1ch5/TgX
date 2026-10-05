@@ -1,5 +1,7 @@
 # TeleX mods — brief for AI agents
 
+> **NO EMOJI. Ever.** Not in names, descriptions, buttons, toasts, dialogs, empty states, `icon` fields or code comments shown to the user. TeleX looks like Telegram: use the app's **icon font** (`<i class="icon icon-send"></i>`, names such as `ai`, `language`, `copy`, `favorite`, `favorite-filled`, `warning`, `tools`, `key-filled`, `more`, `close`, `settings`, `article`, `stars-filled`, `darkmode`, `brush`, `info-filled`, `check-bold`) or inline SVG with `currentColor`. The manifest `icon` is an icon-font name (e.g. `"icon": "ai"`), a 96×96 SVG (`data:image/svg+xml;base64,…`) or an https image — never an emoji.
+
 Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file with the extension `.module`** that the user installs in
 *Settings → Mods* (file, link or pasted text). No build step, no dependencies, no sandbox: the file runs inside the web app with full access.
 
@@ -24,7 +26,7 @@ Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file w
 | to change the **whole look** | `tx.theme.setSkin(...)`, `tx.theme.setAccent(...)`, `tx.theme.addCss(...)` |
 | a **floating widget** on top of the app | an `html` part (position: fixed) |
 
-`ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an emoji, an SVG string or an icon name.
+`ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an icon-font name (preferred) or an SVG string — never an emoji.
 Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole element. Every slot is removed automatically when the mod is turned off.
 
 ### AI inside a mod (`tx.ai`, free, uses the user's own Groq key)
@@ -33,6 +35,7 @@ TeleX has a built-in AI. A mod can use it **without its own API key**: declare `
 The user adds a free Groq key once (Settings → Groq key); the install dialog tells them that the mod uses AI.
 
 - `tx.ai.available()` → `true` when the manifest has the permission **and** a key is saved. Check it before calling and show a hint (`Settings → Groq key`) otherwise.
+- `await tx.ai.stream(messages, { system?, maxTokens?, temperature?, signal? }, (textSoFar) => …)` → full text — the answer appears as it is written (use it in chats/translators, with an `AbortController` for Stop).
 - `await tx.ai.ask('prompt', { system?, json?, maxTokens?, temperature? })` → string
 - `await tx.ai.chat([{ role: 'user'|'assistant', content }], { system?, json?, maxTokens?, temperature? })` → string (an object when `json: true`)
 - `tx.lang()` → `'ru'|'en'|'es'|'pt'|'uk'` — tell the model which language to answer in.
@@ -43,10 +46,10 @@ The user adds a free Groq key once (Settings → Groq key); the install dialog t
 Kinds that fit: a chat screen (`ui.addDockItem` + `ui.openScreen`), a "translate / summarise / explain" button on a post (`post.actions` → `ask(post.text)`), a post classifier or tone filter (`ui.onPost` + `json: true`, remember results in `tx.storage`, never one request per scrolled post), a writing helper. Full examples: `app/static/mods/ai-chat.module`, `ai-translate.module`.
 
 ```
-// @manifest {"id":"ai-explain","name":"Explain","version":"1.0.0","icon":"💡","description":"Explains a post in simple words","permissions":["ai"]}
+// @manifest {"id":"ai-explain","name":"Explain","version":"1.0.0","icon":"lamp","description":"Explains a post in simple words","permissions":["ai"]}
 // @part js
 export default function (tx) {
-  tx.ui.add('post.actions', { id: 'explain', icon: '💡', title: 'Explain', run: function (ctx) {
+  tx.ui.add('post.actions', { id: 'explain', icon: 'lamp', title: 'Explain', run: function (ctx) {
     if (!tx.ai.available()) { tx.toast('Settings → Groq key'); return; }
     tx.ai.ask(String(ctx.post && ctx.post.text || '').slice(0, 4000), { system: 'Explain the text in two simple sentences.', maxTokens: 300 })
       .then(function (a) { tx.ui.openScreen({ title: 'Explain', render: function (b) { b.textContent = a; } }); })
@@ -79,7 +82,7 @@ export default function (tx) {
     "version": "1.0.0", "author": "me",
     "description": "one line shown on the card",
     "about": "longer text\nshown on the mod page",
-    "icon": "🧩",                    // emoji (card icon when there is no preview)
+    "icon": "tools",                 // icon-font name (or an SVG data URL / https image); NEVER an emoji
     "preview": ["https://…/shot.png"],   // optional; https:// or data:image/…; a theme gets an auto preview
     "tags": ["theme"],
     "permissions": [],              // [] | ["ai"] — "ai" unlocks tx.ai (the user's Groq key)
@@ -114,7 +117,7 @@ Limits: total ≤ 1.5 MB. A mod made only of `theme`/`css` parts executes no cod
 
 Any manifest text (`name`, `description`, `about`, settings `title`/`sub`, `options` labels) may be a string **or** `{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }`.
 Provide all five when the mod is meant for others; the app picks its language, then English. In code use `tx.L({ ru: '…', en: '…', … })`.
-`icon`: an emoji, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
+`icon`: an icon-font name, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
 rounded square `rx=22` with a two-colour gradient and a white stroke glyph (see `app/static/mods/icons/*.svg`).
 
 ## Restyling the whole app (skin tokens)
@@ -157,6 +160,8 @@ Wallpaper: `kind` `fill` | `pattern` (`url` to an svg); 1–4 `colors`; `rotatio
 | a **toast with an action** (Undo) | `tx.toast('Hidden', { action: 'Undo', run: () => … })` (stays ~5.5 s) |
 | **keyboard shortcuts** | `tx.keys.add('mod+shift+c', (e) => …)` — removed with the mod; plain keys never fire while the user types |
 | **weather / particles / any full-screen animation** | `tx.ambient.add({ id, draw(ctx, w, h, dtMs, palette) {…} })` — ONE shared canvas under the app (z-index 2, no clicks) and ONE ≤ 30 fps loop for all mods; cleared for you; off in power-saving mode. **Never create your own full-screen canvas or `requestAnimationFrame` loop.** |
+| a **full-screen page with a Telegram-like header** | `tx.ui.openScreen({ title, subtitle?, avatar?: svgOrImgHtml, actions?: [{ icon, title, run }], chat?: true, render(box, { footer, setSubtitle, close, el }) {…} })` — `chat: true` gives a chat layout: wallpaper background, scrolling `box`, a pinned `footer` for the composer; `setSubtitle('typing…')` updates the line under the title |
+| emoji that arrive inside **user content** (AI answers, post text) | `tx.emoji.html(escapedHtml)` renders them as Apple images. Do not put emoji in your own UI |
 | **media of a post** | `tx.media.of(post)` → `[{ type, url, thumb, duration, size }]`, `tx.media.urls(post)` → `[url]` — never scrape the DOM |
 | a **list of channels** in settings | setting `{ "key": "quiet", "type": "channels", "title": "…" }` → array of channel ids (strings); `{ "type": "select", "optionsFrom": "channels" }` → one id. Channels are in `tx.S.channels` (`id`, `title`) |
 | mods that **cannot work together** | manifest `"conflicts": ["other-mod-id"]` — the install dialog warns the user (check both mods: declare it in the newer one) |

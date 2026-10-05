@@ -65,3 +65,7 @@ p.tx-dialog-alert { color: var(--tx-red); font-weight: 500; }
 .tx-dialog-list b { color: var(--tx-text); font-weight: 600; }
 .tx-btn-ghost { background: var(--tx-surface-2) !important; color: var(--tx-text) !important; }
 .tx-btn-ghost.is-danger { color: var(--tx-red) !important; }
+
+.tx-onb-ico .emoji { display: none; }
+.tx-onb-sq { width: 56px; height: 56px; border-radius: 15px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); }
+.tx-onb-sq .icon { font-size: 30px; color: #fff; }

@@ -67,3 +67,38 @@ export async function reviewMod(bundle, { signal } = {}) {
     return { verdict, summary: String(j.summary || '').slice(0, 300), issues: (Array.isArray(j.issues) ? j.issues : []).slice(0, 5).map((x) => String(x).slice(0, 200)) };
   } catch { return null; }
 }
+
+/** Streaming chat: onToken(textSoFar) while the answer grows; resolves with the full text. */
+export async function groqStream(messages, { signal, maxTokens = 900, temperature, onToken } = {}) {
+  let lastErr;
+  for (const model of MODELS) {
+    const body = { model, messages, stream: true, temperature: temperature ?? 0.5, max_completion_tokens: maxTokens };
+    if (model.startsWith('openai/gpt-oss')) body.reasoning_effort = 'low';
+    try {
+      const r = await fetch(`${API}/chat/completions`, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getKey()}` }, body: JSON.stringify(body) });
+      if (r.status === 401 || r.status === 403) throw Object.assign(new Error('The Groq key was rejected'), { fatal: true, code: 'key' });
+      if (r.status === 429) throw Object.assign(new Error('Groq free limit reached, try again in a minute'), { fatal: true, code: 'limit' });
+      if (!r.ok || !r.body) { lastErr = new Error('HTTP ' + r.status); continue; }
+      const reader = r.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '', out = '';
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          const m = line.match(/^data:\s*(.*)$/);
+          if (!m || m[1] === '[DONE]') continue;
+          try { const d = JSON.parse(m[1]).choices?.[0]?.delta?.content; if (d) { out += d; onToken && onToken(out); } } catch {}
+        }
+      }
+      return out;
+    } catch (e) {
+      if (e.fatal || e.name === 'AbortError') throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error('failed');
+}

@@ -1,0 +1,34 @@
+{
+ "id": "ai-translate",
+ "name": {
+  "ru": "Переводчик постов",
+  "en": "Post translator",
+  "es": "Traductor de publicaciones",
+  "pt": "Tradutor de publicações",
+  "uk": "Перекладач дописів"
+ },
+ "version": "1.1.0",
+ "author": "TeleX",
+ "icon": "mods/icons/ai-translate.svg",
+ "description": {
+  "ru": "Перевод поста на нужный язык: кнопка у поста и пункт меню, перевод появляется по мере написания",
+  "en": "Translate a post: a button on the post and a menu item; the translation streams in as it is written",
+  "es": "Traduce una publicación: botón en la publicación y elemento de menú; la traducción aparece mientras se escribe",
+  "pt": "Traduza um post: botão no post e item de menu; a tradução aparece enquanto é escrita",
+  "uk": "Переклад допису потрібною мовою: кнопка біля допису й пункт меню, переклад з'являється по мірі написання"
+ },
+ "about": {
+  "ru": "Работает через ваш бесплатный ключ Groq (Настройки → Ключ Groq).",
+  "en": "Works through your free Groq key (Settings → Groq key).",
+  "es": "Funciona con tu clave gratuita de Groq (Ajustes → Clave de Groq).",
+  "pt": "Funciona com sua chave gratuita do Groq (Configurações → Chave do Groq).",
+  "uk": "Працює через ваш безкоштовний ключ Groq (Налаштування → Ключ Groq)."
+ },
+ "tags": [
+  "ai",
+  "feed"
+ ],
+ "permissions": [
+  "ai"
+ ]
+}

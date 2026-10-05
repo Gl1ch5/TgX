@@ -1,0 +1,42 @@
+.aic-list { display: flex; flex-direction: column; gap: 3px; padding: 10px 0 8px; min-height: 100%; justify-content: flex-end; }
+.aic-row { display: flex; }
+.aic-row.is-me { justify-content: flex-end; }
+.aic-row.is-last { margin-bottom: 6px; }
+.aic-msg { position: relative; max-width: 84%; padding: 7px 11px 6px; border-radius: 17px; font-size: 16px; line-height: 1.38; word-break: break-word; animation: aic-in .22s cubic-bezier(.2,.9,.3,1) both; }
+@keyframes aic-in { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+.aic-row.is-ai .aic-msg { background: var(--tx-bubble); color: var(--tx-text); }
+.aic-row.is-me .aic-msg { background: var(--tx-bubble-out); color: #fff; }
+.aic-row.is-ai.is-last .aic-msg { border-bottom-left-radius: 6px; }
+.aic-row.is-me.is-last .aic-msg { border-bottom-right-radius: 6px; }
+.aic-row.is-error .aic-msg { background: rgba(255, 91, 91, .16); color: var(--tx-red); }
+.aic-body a { color: var(--tx-link); }
+.aic-row.is-me .aic-body a { color: #fff; text-decoration: underline; }
+.aic-body code { padding: 1px 5px; border-radius: 6px; background: rgba(127, 127, 127, .22); font: 14px/1.3 'JetBrains Mono', monospace; }
+.aic-code { margin: 6px 0; padding: 10px 12px; border-radius: 11px; background: #1b1c20; overflow-x: auto; font: 13.5px/1.45 'JetBrains Mono', monospace; color: #e8e8ee; white-space: pre; }
+.aic-time { float: right; margin: 7px 0 -3px 10px; font-size: 11.5px; opacity: .6; }
+.aic-tools { display: flex; margin: 4px -4px -2px 0; }
+.aic-copy { width: 28px; height: 24px; border-radius: 8px; color: var(--tx-text-2); opacity: .8; }
+.aic-copy .icon { font-size: 16px; }
+.aic-dots { display: inline-flex; gap: 4px; padding: 6px 2px; }
+.aic-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--tx-text-2); animation: aic-dot 1.1s infinite ease-in-out; }
+.aic-dots i:nth-child(2) { animation-delay: .16s; } .aic-dots i:nth-child(3) { animation-delay: .32s; }
+@keyframes aic-dot { 0%, 70%, 100% { transform: translateY(0); opacity: .45; } 35% { transform: translateY(-4px); opacity: 1; } }
+.aic-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 30px 12px 16px; margin: auto 0; }
+.aic-hero { width: 92px; height: 92px; border-radius: 50%; box-shadow: 0 14px 40px rgba(124, 92, 255, .35); animation: aic-float 4s ease-in-out infinite; }
+.aic-hero svg { width: 100%; height: 100%; display: block; }
+@keyframes aic-float { 50% { transform: translateY(-5px); } }
+.aic-empty h2 { margin: 10px 0 0; font-size: 22px; font-weight: 700; }
+.aic-empty p { margin: 0; max-width: 300px; font-size: 14.5px; line-height: 1.4; color: var(--tx-text-2); }
+.aic-chips { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; width: 100%; max-width: 340px; }
+.aic-chip { padding: 11px 14px; border-radius: 16px; background: var(--tx-glass); border: 1px solid var(--tx-glass-border); backdrop-filter: var(--tx-glass-blur); -webkit-backdrop-filter: var(--tx-glass-blur); font-size: 14.5px; text-align: left; color: var(--tx-text); transition: transform .15s; }
+.aic-chip:active { transform: scale(.98); }
+.aic-cta { margin-top: 12px; padding: 12px 26px; border-radius: 999px; background: var(--tx-accent-fill); color: #fff; font-size: 15px; font-weight: 600; }
+.aic-comp { display: flex; align-items: flex-end; gap: 8px; }
+.aic-field { flex: 1; min-width: 0; border-radius: 23px; background: var(--tx-glass); border: 1px solid var(--tx-glass-border); backdrop-filter: var(--tx-glass-blur); -webkit-backdrop-filter: var(--tx-glass-blur); padding: 0 16px; }
+.aic-field textarea { display: block; width: 100%; box-sizing: border-box; resize: none; border: 0; outline: 0; background: none; color: var(--tx-text); font: 16px/1.35 var(--tx-font); padding: 12px 0; max-height: 130px; }
+.aic-send { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--tx-accent-fill); color: #fff; display: inline-flex; align-items: center; justify-content: center; transition: transform .15s, opacity .15s, background .15s; }
+.aic-send .icon { font-size: 22px; }
+.aic-send:active { transform: scale(.92); }
+.aic-send:disabled { background: var(--tx-glass); color: var(--tx-hint); border: 1px solid var(--tx-glass-border); }
+.aic-stop { width: 14px; height: 14px; border-radius: 3px; background: #fff; display: block; }
+.aic-row.is-error .icon { margin-right: 6px; vertical-align: -2px; }

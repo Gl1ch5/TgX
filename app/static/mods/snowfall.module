@@ -1,29 +1,86 @@
-// @manifest {"id": "snowfall", "name": {"ru": "Снегопад", "en": "Snowfall", "es": "Nevada", "pt": "Nevasca", "uk": "Снігопад"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/snowfall.svg", "description": {"ru": "Снег за постами: не мешает кликам, одна лёгкая анимация", "en": "Snow behind the posts: never blocks taps, one light animation", "es": "Nieve detrás de las publicaciones: no bloquea toques, una animación ligera", "pt": "Neve atrás das publicações: não bloqueia toques, uma animação leve", "uk": "Сніг за дописами: не заважає натисканням, одна легка анімація"}, "about": {"ru": "Рисует в общем слое tx.ambient: один холст и один цикл анимации на все визуальные моды. Цвет сам меняется днём и ночью.", "en": "Draws into the shared tx.ambient layer: one canvas and one animation loop for all visual mods. The colour follows day and night.", "es": "Dibuja en la capa compartida tx.ambient: un lienzo y un bucle para todos los mods visuales. El color sigue al día y la noche.", "pt": "Desenha na camada compartilhada tx.ambient: um canvas e um loop para todos os mods visuais. A cor segue o dia e a noite.", "uk": "Малює в спільному шарі tx.ambient: один полотно й один цикл анімації для всіх візуальних модів. Колір змінюється вдень і вночі."}, "tags": ["theme"], "conflicts": [], "settings": [{"key": "amount", "type": "number", "title": {"ru": "Снежинок", "en": "Snowflakes", "es": "Copos", "pt": "Flocos", "uk": "Сніжинок"}, "default": 80, "min": 20, "max": 220, "step": 10}, {"key": "speed", "type": "number", "title": {"ru": "Скорость, %", "en": "Speed, %", "es": "Velocidad, %", "pt": "Velocidade, %", "uk": "Швидкість, %"}, "default": 100, "min": 40, "max": 200, "step": 10}]}
-// @part js
-export default function (tx) {
-  var flakes = [];
-  function build(w, h, n) {
-    flakes = [];
-    for (var i = 0; i < n; i++) flakes.push({ x: Math.random() * w, y: Math.random() * h, r: 1 + Math.random() * 2.6, v: 18 + Math.random() * 38, p: Math.random() * 6.28 });
+{
+ "manifest": {
+  "id": "snowfall",
+  "name": {
+   "ru": "Снегопад",
+   "en": "Snowfall",
+   "es": "Nevada",
+   "pt": "Nevasca",
+   "uk": "Снігопад"
+  },
+  "version": "1.1.0",
+  "author": "TeleX",
+  "icon": "mods/icons/snowfall.svg",
+  "description": {
+   "ru": "Снег за постами: не мешает кликам, одна лёгкая анимация",
+   "en": "Snow behind the posts: never blocks taps, one light animation",
+   "es": "Nieve detrás de las publicaciones: no bloquea toques, una animación ligera",
+   "pt": "Neve atrás das publicações: não bloqueia toques, uma animação leve",
+   "uk": "Сніг за дописами: не заважає натисканням, одна легка анімація"
+  },
+  "about": {
+   "ru": "Рисует в общем слое tx.ambient: один холст и один цикл анимации на все визуальные моды. Цвет сам меняется днём и ночью.",
+   "en": "Draws into the shared tx.ambient layer: one canvas and one animation loop for all visual mods. The colour follows day and night.",
+   "es": "Dibuja en la capa compartida tx.ambient: un lienzo y un bucle para todos los mods visuales. El color sigue al día y la noche.",
+   "pt": "Desenha na camada compartilhada tx.ambient: um canvas e um loop para todos os mods visuais. A cor segue o dia e a noite.",
+   "uk": "Малює в спільному шарі tx.ambient: один полотно й один цикл анімації для всіх візуальних модів. Колір змінюється вдень і вночі."
+  },
+  "tags": [
+   "theme"
+  ],
+  "conflicts": [],
+  "settings": [
+   {
+    "key": "amount",
+    "type": "number",
+    "title": {
+     "ru": "Снежинок",
+     "en": "Snowflakes",
+     "es": "Copos",
+     "pt": "Flocos",
+     "uk": "Сніжинок"
+    },
+    "default": 90,
+    "min": 20,
+    "max": 220,
+    "step": 10
+   },
+   {
+    "key": "speed",
+    "type": "number",
+    "title": {
+     "ru": "Скорость, %",
+     "en": "Speed, %",
+     "es": "Velocidad, %",
+     "pt": "Velocidade, %",
+     "uk": "Швидкість, %"
+    },
+    "default": 100,
+    "min": 40,
+    "max": 200,
+    "step": 10
+   },
+   {
+    "key": "wind",
+    "type": "number",
+    "title": {
+     "ru": "Ветер, %",
+     "en": "Wind, %",
+     "es": "Viento, %",
+     "pt": "Vento, %",
+     "uk": "Вітер, %"
+    },
+    "default": 40,
+    "min": 0,
+    "max": 100,
+    "step": 10
+   }
+  ]
+ },
+ "parts": [
+  {
+   "type": "js",
+   "code": "// Snowfall: three depth layers, a slow gust of wind, soft glow. Draws into the shared tx.ambient canvas (one loop for all visual mods).\nexport default function (tx) {\n  var flakes = [], wind = 0, t = 0;\n  function build(w, h, n) {\n    flakes = [];\n    for (var i = 0; i < n; i++) {\n      var z = Math.random();                                   // 0 = far, 1 = near\n      flakes.push({ x: Math.random() * w, y: Math.random() * h, z: z, r: 0.8 + z * 2.8, v: 14 + z * 46, p: Math.random() * 6.28 });\n    }\n  }\n  tx.ambient.add({\n    id: 'snow',\n    draw: function (ctx, w, h, dt, pal) {\n      var n = Number(tx.config.get('amount')) || 90;\n      if (flakes.length !== n) build(w, h, n);\n      var k = (Number(tx.config.get('speed')) || 100) / 100;\n      var gust = (Number(tx.config.get('wind')) || 0) / 100;\n      t += dt / 1000;\n      wind = Math.sin(t / 5) * 14 * gust + 8 * gust;\n      var dark = pal.mode === 'dark';\n      for (var layer = 0; layer < 3; layer++) {\n        ctx.fillStyle = dark ? 'rgba(255,255,255,' + (0.35 + layer * 0.28) + ')' : 'rgba(80,120,185,' + (0.3 + layer * 0.25) + ')'; // follows day / night\n        ctx.beginPath();\n        for (var i = 0; i < flakes.length; i++) {\n          var f = flakes[i];\n          if (Math.min(2, Math.floor(f.z * 3)) !== layer) continue;\n          f.y += f.v * k * dt / 1000;\n          f.p += dt / 1500;\n          f.x += (Math.sin(f.p) * 0.3 + wind * (0.3 + f.z) / 30) * (dt / 16);\n          if (f.y > h + 6) { f.y = -6; f.x = Math.random() * w; }\n          if (f.x > w + 6) f.x = -6; else if (f.x < -6) f.x = w + 6;\n          ctx.moveTo(f.x + f.r, f.y);\n          ctx.arc(f.x, f.y, f.r, 0, 6.2832);\n        }\n        ctx.fill();\n      }\n    }\n  });\n}\n"
   }
-  tx.ambient.add({
-    id: 'snow',
-    draw: function (ctx, w, h, dt, pal) {
-      var n = Number(tx.config.get('amount')) || 80;
-      if (flakes.length !== n) build(w, h, n);
-      var k = (Number(tx.config.get('speed')) || 100) / 100;
-      ctx.fillStyle = pal.mode === 'dark' ? 'rgba(255,255,255,0.85)' : 'rgba(90,130,190,0.75)'; // follows day / night
-      ctx.beginPath();
-      for (var i = 0; i < flakes.length; i++) {
-        var f = flakes[i];
-        f.y += f.v * k * dt / 1000;
-        f.p += dt / 1400;
-        f.x += Math.sin(f.p) * 0.35;
-        if (f.y > h + 4) { f.y = -4; f.x = Math.random() * w; }
-        ctx.moveTo(f.x + f.r, f.y);
-        ctx.arc(f.x, f.y, f.r, 0, 6.2832);
-      }
-      ctx.fill();
-    }
-  });
+ ]
 }

@@ -2,6 +2,7 @@ You write mods for TeleX, a web client for Telegram. A mod is ONE text file with
 Below is the complete specification. Read it, then build exactly the mod the user asks for at the end of this message.
 
 HARD RULES FOR YOUR ANSWER
+- NO EMOJI anywhere: not in the interface, names, descriptions, toasts, empty states or the manifest icon. TeleX looks like Telegram: use the app's icon font (<i class="icon icon-NAME"></i>) or inline SVG. The manifest icon is an icon-font name such as "ai", "tools", "language", or an SVG data URL.
 - Put the ENTIRE .module file inside ONE markdown code block (``` … ```) and write nothing outside it except at most one short sentence. The user copies it with the "Copy" button of the code block; text outside code blocks loses backticks and turns code into links.
 - Inside the file use plain quotes and string concatenation ('a' + b) instead of backtick template literals wherever possible, so the code survives copying. Never put markdown formatting inside the code.
 - The file starts with "{" (JSON bundle) or with a comment line carrying @manifest (annotated / sectioned file).
@@ -13,6 +14,8 @@ HARD RULES FOR YOUR ANSWER
 
 SPECIFICATION
 # TeleX mods — brief for AI agents
+
+> **NO EMOJI. Ever.** Not in names, descriptions, buttons, toasts, dialogs, empty states, `icon` fields or code comments shown to the user. TeleX looks like Telegram: use the app's **icon font** (`<i class="icon icon-send"></i>`, names such as `ai`, `language`, `copy`, `favorite`, `favorite-filled`, `warning`, `tools`, `key-filled`, `more`, `close`, `settings`, `article`, `stars-filled`, `darkmode`, `brush`, `info-filled`, `check-bold`) or inline SVG with `currentColor`. The manifest `icon` is an icon-font name (e.g. `"icon": "ai"`), a 96×96 SVG (`data:image/svg+xml;base64,…`) or an https image — never an emoji.
 
 Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file with the extension `.module`** that the user installs in
 *Settings → Mods* (file, link or pasted text). No build step, no dependencies, no sandbox: the file runs inside the web app with full access.
@@ -38,7 +41,7 @@ Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file w
 | to change the **whole look** | `tx.theme.setSkin(...)`, `tx.theme.setAccent(...)`, `tx.theme.addCss(...)` |
 | a **floating widget** on top of the app | an `html` part (position: fixed) |
 
-`ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an emoji, an SVG string or an icon name.
+`ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an icon-font name (preferred) or an SVG string — never an emoji.
 Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole element. Every slot is removed automatically when the mod is turned off.
 
 ### AI inside a mod (`tx.ai`, free, uses the user's own Groq key)
@@ -47,6 +50,7 @@ TeleX has a built-in AI. A mod can use it **without its own API key**: declare `
 The user adds a free Groq key once (Settings → Groq key); the install dialog tells them that the mod uses AI.
 
 - `tx.ai.available()` → `true` when the manifest has the permission **and** a key is saved. Check it before calling and show a hint (`Settings → Groq key`) otherwise.
+- `await tx.ai.stream(messages, { system?, maxTokens?, temperature?, signal? }, (textSoFar) => …)` → full text — the answer appears as it is written (use it in chats/translators, with an `AbortController` for Stop).
 - `await tx.ai.ask('prompt', { system?, json?, maxTokens?, temperature? })` → string
 - `await tx.ai.chat([{ role: 'user'|'assistant', content }], { system?, json?, maxTokens?, temperature? })` → string (an object when `json: true`)
 - `tx.lang()` → `'ru'|'en'|'es'|'pt'|'uk'` — tell the model which language to answer in.
@@ -57,10 +61,10 @@ The user adds a free Groq key once (Settings → Groq key); the install dialog t
 Kinds that fit: a chat screen (`ui.addDockItem` + `ui.openScreen`), a "translate / summarise / explain" button on a post (`post.actions` → `ask(post.text)`), a post classifier or tone filter (`ui.onPost` + `json: true`, remember results in `tx.storage`, never one request per scrolled post), a writing helper. Full examples: `app/static/mods/ai-chat.module`, `ai-translate.module`.
 
 ```
-// @manifest {"id":"ai-explain","name":"Explain","version":"1.0.0","icon":"💡","description":"Explains a post in simple words","permissions":["ai"]}
+// @manifest {"id":"ai-explain","name":"Explain","version":"1.0.0","icon":"lamp","description":"Explains a post in simple words","permissions":["ai"]}
 // @part js
 export default function (tx) {
-  tx.ui.add('post.actions', { id: 'explain', icon: '💡', title: 'Explain', run: function (ctx) {
+  tx.ui.add('post.actions', { id: 'explain', icon: 'lamp', title: 'Explain', run: function (ctx) {
     if (!tx.ai.available()) { tx.toast('Settings → Groq key'); return; }
     tx.ai.ask(String(ctx.post && ctx.post.text || '').slice(0, 4000), { system: 'Explain the text in two simple sentences.', maxTokens: 300 })
       .then(function (a) { tx.ui.openScreen({ title: 'Explain', render: function (b) { b.textContent = a; } }); })
@@ -93,7 +97,7 @@ export default function (tx) {
     "version": "1.0.0", "author": "me",
     "description": "one line shown on the card",
     "about": "longer text\nshown on the mod page",
-    "icon": "🧩",                    // emoji (card icon when there is no preview)
+    "icon": "tools",                 // icon-font name (or an SVG data URL / https image); NEVER an emoji
     "preview": ["https://…/shot.png"],   // optional; https:// or data:image/…; a theme gets an auto preview
     "tags": ["theme"],
     "permissions": [],              // [] | ["ai"] — "ai" unlocks tx.ai (the user's Groq key)
@@ -128,7 +132,7 @@ Limits: total ≤ 1.5 MB. A mod made only of `theme`/`css` parts executes no cod
 
 Any manifest text (`name`, `description`, `about`, settings `title`/`sub`, `options` labels) may be a string **or** `{ "ru": "…", "en": "…", "es": "…", "pt": "…", "uk": "…" }`.
 Provide all five when the mod is meant for others; the app picks its language, then English. In code use `tx.L({ ru: '…', en: '…', … })`.
-`icon`: an emoji, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
+`icon`: an icon-font name, or an image — `data:image/svg+xml;base64,…` / `https://…` / `mods/icons/<id>.svg` (official mods). Prefer a 96×96 SVG:
 rounded square `rx=22` with a two-colour gradient and a white stroke glyph (see `app/static/mods/icons/*.svg`).
 
 ## Restyling the whole app (skin tokens)
@@ -171,6 +175,8 @@ Wallpaper: `kind` `fill` | `pattern` (`url` to an svg); 1–4 `colors`; `rotatio
 | a **toast with an action** (Undo) | `tx.toast('Hidden', { action: 'Undo', run: () => … })` (stays ~5.5 s) |
 | **keyboard shortcuts** | `tx.keys.add('mod+shift+c', (e) => …)` — removed with the mod; plain keys never fire while the user types |
 | **weather / particles / any full-screen animation** | `tx.ambient.add({ id, draw(ctx, w, h, dtMs, palette) {…} })` — ONE shared canvas under the app (z-index 2, no clicks) and ONE ≤ 30 fps loop for all mods; cleared for you; off in power-saving mode. **Never create your own full-screen canvas or `requestAnimationFrame` loop.** |
+| a **full-screen page with a Telegram-like header** | `tx.ui.openScreen({ title, subtitle?, avatar?: svgOrImgHtml, actions?: [{ icon, title, run }], chat?: true, render(box, { footer, setSubtitle, close, el }) {…} })` — `chat: true` gives a chat layout: wallpaper background, scrolling `box`, a pinned `footer` for the composer; `setSubtitle('typing…')` updates the line under the title |
+| emoji that arrive inside **user content** (AI answers, post text) | `tx.emoji.html(escapedHtml)` renders them as Apple images. Do not put emoji in your own UI |
 | **media of a post** | `tx.media.of(post)` → `[{ type, url, thumb, duration, size }]`, `tx.media.urls(post)` → `[url]` — never scrape the DOM |
 | a **list of channels** in settings | setting `{ "key": "quiet", "type": "channels", "title": "…" }` → array of channel ids (strings); `{ "type": "select", "optionsFrom": "channels" }` → one id. Channels are in `tx.S.channels` (`id`, `title`) |
 | mods that **cannot work together** | manifest `"conflicts": ["other-mod-id"]` — the install dialog warns the user (check both mods: declare it in the newer one) |
@@ -212,6 +218,8 @@ Full human documentation: `docs/mods.md`.
 
 # TeleX mods — layout, colours, safety and recipes (read this before writing any code)
 
+**Rule 0: no emoji anywhere** (UI text, buttons, toasts, names, descriptions, `icon`). Use the Telegram icon font (`<i class="icon icon-NAME"></i>`) or inline SVG. Emoji look cheap and break the Telegram feel.
+
 This part explains *how to do it well and why*. A mod that ignores it can overlap the phone's status bar, cover the bottom bar, become unreadable in day mode or
 (worst case) make the app unusable. The app has an emergency switch (⋮ menu → "Disable all mods", and automatic safe mode after 2 failed starts), but a good mod never needs it.
 
@@ -240,7 +248,7 @@ This part explains *how to do it well and why*. A mod that ignores it can overla
 ┌──────────────── phone ────────────────┐
 │ status bar (OS)      ← var(--tx-safe-top) tall, drawn over the page; NOTHING of yours here
 ├───────────────────────────────────────┤
-│ .tx-mainbar        56 px: stories stack · "TeleX" · search 🔍 · ⋮     ← slot 'topbar' (end side)
+│ .tx-mainbar        56 px: stories stack · "TeleX" · search · ⋮     ← slot 'topbar' (end side)
 │ #header-search-bar search field                                         ← slot 'search'
 │ #feed-tabs         All · Media · Popular · Favorites                    ← slot 'tabs'
 │ ┌ post card (.tx-bubble) ───────────┐
@@ -352,7 +360,7 @@ All recipes are sectioned `.module` files. Keep your own file in the same shape.
 
 ### 6.1 Clock in the top bar (the correct way — no overlap with the status bar)
 ```
-// @manifest {"id":"topbar-clock","name":{"ru":"Часы","en":"Clock","es":"Reloj","pt":"Relógio","uk":"Годинник"},"version":"1.0.0","author":"you","description":{"ru":"Часы в шапке ленты","en":"A clock in the feed header","es":"Un reloj en la cabecera","pt":"Um relógio no cabeçalho","uk":"Годинник у шапці стрічки"},"icon":"🕒","tags":["widget"],"settings":[{"key":"h24","type":"switch","title":{"ru":"24-часовой формат","en":"24-hour format","es":"Formato 24 h","pt":"Formato 24 h","uk":"24-годинний формат"},"default":true}]}
+// @manifest {"id":"topbar-clock","name":{"ru":"Часы","en":"Clock","es":"Reloj","pt":"Relógio","uk":"Годинник"},"version":"1.0.0","author":"you","description":{"ru":"Часы в шапке ленты","en":"A clock in the feed header","es":"Un reloj en la cabecera","pt":"Um relógio no cabeçalho","uk":"Годинник у шапці стрічки"},"icon":"clock","tags":["widget"],"settings":[{"key":"h24","type":"switch","title":{"ru":"24-часовой формат","en":"24-hour format","es":"Formato 24 h","pt":"Formato 24 h","uk":"24-годинний формат"},"default":true}]}
 // @part js
 export default function (tx) {
   function fmt() {
@@ -375,11 +383,11 @@ Why this is right: the slot puts the clock *inside* the 56 px bar that already s
 
 ### 6.2 A tool button + a result dialog
 ```
-// @manifest {"id":"post-counter","name":{"ru":"Счётчик постов","en":"Post counter","es":"Contador","pt":"Contador","uk":"Лічильник"},"version":"1.0.0","author":"you","description":{"ru":"Показывает, сколько постов загружено","en":"Shows how many posts are loaded","es":"Muestra cuántas publicaciones hay","pt":"Mostra quantas publicações há","uk":"Показує, скільки дописів завантажено"},"icon":"🔢"}
+// @manifest {"id":"post-counter","name":{"ru":"Счётчик постов","en":"Post counter","es":"Contador","pt":"Contador","uk":"Лічильник"},"version":"1.0.0","author":"you","description":{"ru":"Показывает, сколько постов загружено","en":"Shows how many posts are loaded","es":"Muestra cuántas publicaciones hay","pt":"Mostra quantas publicações há","uk":"Показує, скільки дописів завантажено"},"icon":"stats"}
 // @part js
 export default function (tx) {
   tx.ui.add('fab', {
-    id: 'count', icon: '🔢', title: 'Posts',
+    id: 'count', icon: 'stats', title: 'Posts',
     run: function () { tx.toast(String((tx.S.posts || []).length)); },
   });
 }
@@ -387,7 +395,7 @@ export default function (tx) {
 
 ### 6.3 Filter: hide posts containing words
 ```
-// @manifest {"id":"word-filter","name":{"ru":"Фильтр слов","en":"Word filter","es":"Filtro","pt":"Filtro","uk":"Фільтр слів"},"version":"1.0.0","author":"you","description":{"ru":"Скрывает посты с заданными словами","en":"Hides posts with chosen words","es":"Oculta publicaciones","pt":"Oculta publicações","uk":"Ховає дописи"},"icon":"🚫","settings":[{"key":"words","type":"text","title":{"ru":"Слова через запятую","en":"Words, comma separated","es":"Palabras","pt":"Palavras","uk":"Слова через кому"},"default":""}]}
+// @manifest {"id":"word-filter","name":{"ru":"Фильтр слов","en":"Word filter","es":"Filtro","pt":"Filtro","uk":"Фільтр слів"},"version":"1.0.0","author":"you","description":{"ru":"Скрывает посты с заданными словами","en":"Hides posts with chosen words","es":"Oculta publicaciones","pt":"Oculta publicações","uk":"Ховає дописи"},"icon":"hand-stop","settings":[{"key":"words","type":"text","title":{"ru":"Слова через запятую","en":"Words, comma separated","es":"Palabras","pt":"Palavras","uk":"Слова через кому"},"default":""}]}
 // @part js
 export default function (tx) {
   function words() {
@@ -404,7 +412,7 @@ export default function (tx) {
 
 ### 6.4 Post footer: reading time
 ```
-// @manifest {"id":"read-time","name":{"ru":"Время чтения","en":"Reading time","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання"},"version":"1.0.0","author":"you","description":{"ru":"Время чтения под постом","en":"Reading time under a post","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання під дописом"},"icon":"⏱️"}
+// @manifest {"id":"read-time","name":{"ru":"Время чтения","en":"Reading time","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання"},"version":"1.0.0","author":"you","description":{"ru":"Время чтения под постом","en":"Reading time under a post","es":"Tiempo de lectura","pt":"Tempo de leitura","uk":"Час читання під дописом"},"icon":"timer"}
 // @part js
 export default function (tx) {
   tx.ui.add('post.footer', {
@@ -421,11 +429,11 @@ export default function (tx) {
 
 ### 6.5 Own page with saved data (notebook)
 ```
-// @manifest {"id":"notebook","name":{"ru":"Блокнот","en":"Notebook","es":"Cuaderno","pt":"Caderno","uk":"Блокнот"},"version":"1.0.0","author":"you","description":{"ru":"Заметки в приложении","en":"Notes inside the app","es":"Notas","pt":"Notas","uk":"Нотатки"},"icon":"📝"}
+// @manifest {"id":"notebook","name":{"ru":"Блокнот","en":"Notebook","es":"Cuaderno","pt":"Caderno","uk":"Блокнот"},"version":"1.0.0","author":"you","description":{"ru":"Заметки в приложении","en":"Notes inside the app","es":"Notas","pt":"Notas","uk":"Нотатки"},"icon":"note"}
 // @part js
 export default function (tx) {
   tx.ui.addDockItem({
-    id: 'notes', title: 'Notes', icon: '📝',
+    id: 'notes', title: 'Notes', icon: 'note',
     run: function () {
       tx.ui.openScreen({
         title: 'Notes',
@@ -443,7 +451,7 @@ export default function (tx) {
 
 ### 6.6 Theme with skin (glass look, day + night)
 ```
-// @manifest {"id":"my-glass","name":{"ru":"Стекло","en":"Glass","es":"Cristal","pt":"Vidro","uk":"Скло"},"version":"1.0.0","author":"you","description":{"ru":"Полупрозрачные карточки","en":"Translucent cards","es":"Tarjetas translúcidas","pt":"Cartões translúcidos","uk":"Напівпрозорі картки"},"icon":"🪟","tags":["theme"]}
+// @manifest {"id":"my-glass","name":{"ru":"Стекло","en":"Glass","es":"Cristal","pt":"Vidro","uk":"Скло"},"version":"1.0.0","author":"you","description":{"ru":"Полупрозрачные карточки","en":"Translucent cards","es":"Tarjetas translúcidas","pt":"Cartões translúcidos","uk":"Напівпрозорі картки"},"icon":"brush","tags":["theme"]}
 // @part theme
 { "skin": {
     "dark":  { "--sk-card-bg": "rgba(28,28,32,.55)", "--sk-card-filter": "blur(18px) saturate(160%)", "--sk-card-border": "rgba(255,255,255,.08)", "--sk-bar-bg": "rgba(30,30,34,.6)" },
@@ -453,11 +461,14 @@ export default function (tx) {
 
 ### 6.7 A floating widget, only if a slot does not fit (safe-area aware)
 ```
-// @manifest {"id":"float-note","name":"Floating note","version":"1.0.0","author":"you","description":"A small note card above the dock","icon":"📌"}
+// @manifest {"id":"float-note","name":"Floating note","version":"1.0.0","author":"you","description":"A small note card above the dock","icon":"pin"}
 // @part html
 <div class="tx-mod-float" style="position:fixed;z-index:35;left:12px;bottom:calc(var(--tx-dock-h) + 24px + var(--tx-safe-bottom));max-width:60vw;padding:8px 12px;border-radius:14px;background:var(--tx-glass);border:1px solid var(--tx-glass-border);backdrop-filter:var(--tx-glass-blur);color:var(--tx-text);font:14px var(--tx-font);pointer-events:none">Hello</div>
 ```
 Note `bottom` includes the dock and the gesture inset, `pointer-events:none` lets taps through, theme colours, small size.
+
+### 6.8 Make it look like Telegram (official-mod quality)
+Official mods should feel native. Reuse the app's look instead of inventing one: bubbles use `--tx-bubble` / `--tx-bubble-out` with `border-radius: 17px` and a 6px corner on the last bubble of a group; glass bars use `--tx-glass` + `--tx-glass-blur`; primary buttons are round/pill with `--tx-accent-fill`; icons come from the icon font (`<i class="icon icon-send">`, `icon-copy`, `icon-close`, `icon-more`, `icon-language`, `icon-favorite`); no emoji at all (use icon-font glyphs; `tx.emoji.html` exists only to render emoji that arrive inside user content); lists use the `.tx-group` card look; add an empty state (big emoji + one sentence + a suggestion), a typing indicator (three bouncing dots) while waiting, a Telegram-style toast with Undo for destructive actions, and stream AI answers with `tx.ai.stream`. See `mods-src/ai-chat.js` for a complete example.
 
 ## 7. Pitfalls we have seen (do NOT repeat)
 

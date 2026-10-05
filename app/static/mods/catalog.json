@@ -124,21 +124,21 @@
   {
    "id": "ai-chat",
    "name": {
-    "ru": "ИИ-чат",
-    "en": "AI chat",
-    "es": "Chat IA",
-    "pt": "Chat IA",
-    "uk": "ШІ-чат"
+    "ru": "ИИ-помощник",
+    "en": "AI assistant",
+    "es": "Asistente IA",
+    "pt": "Assistente IA",
+    "uk": "ШІ-помічник"
    },
-   "version": "1.0.0",
+   "version": "1.1.0",
    "author": "TeleX",
    "icon": "mods/icons/ai-chat.svg",
    "description": {
-    "ru": "Чат с ИИ прямо в приложении — через ваш бесплатный ключ Groq",
-    "en": "A chat with AI inside the app — through your free Groq key",
-    "es": "Un chat con IA dentro de la app, con tu clave gratuita de Groq",
-    "pt": "Um chat com IA dentro do app, com sua chave gratuita do Groq",
-    "uk": "Чат зі ШІ просто в застосунку — через ваш безкоштовний ключ Groq"
+    "ru": "Чат в стиле Telegram: ответы пишутся на лету, подсказки, код и списки",
+    "en": "A Telegram-style chat: answers stream in, suggestions, code and lists",
+    "es": "Un chat al estilo Telegram: respuestas en vivo, sugerencias, código y listas",
+    "pt": "Um chat ao estilo Telegram: respostas ao vivo, sugestões, código e listas",
+    "uk": "Чат у стилі Telegram: відповіді пишуться наживо, підказки, код і списки"
    },
    "tags": [
     "ai"
@@ -154,15 +154,15 @@
     "pt": "Tradutor de publicações",
     "uk": "Перекладач дописів"
    },
-   "version": "1.0.0",
+   "version": "1.1.0",
    "author": "TeleX",
    "icon": "mods/icons/ai-translate.svg",
    "description": {
-    "ru": "Кнопка 🌐 у поста переводит его на язык приложения",
-    "en": "A 🌐 button on a post translates it into the app language",
-    "es": "Un botón 🌐 traduce la publicación al idioma de la app",
-    "pt": "Um botão 🌐 traduz a publicação para o idioma do app",
-    "uk": "Кнопка 🌐 біля допису перекладає його мовою застосунку"
+    "ru": "Перевод поста на нужный язык: кнопка у поста и пункт меню, перевод появляется по мере написания",
+    "en": "Translate a post: a button on the post and a menu item; the translation streams in as it is written",
+    "es": "Traduce una publicación: botón en la publicación y elemento de menú; la traducción aparece mientras se escribe",
+    "pt": "Traduza um post: botão no post e item de menu; a tradução aparece enquanto é escrita",
+    "uk": "Переклад допису потрібною мовою: кнопка біля допису й пункт меню, переклад з'являється по мірі написання"
    },
    "tags": [
     "ai",
@@ -179,7 +179,7 @@
     "pt": "Nevasca",
     "uk": "Снігопад"
    },
-   "version": "1.0.0",
+   "version": "1.1.0",
    "author": "TeleX",
    "icon": "mods/icons/snowfall.svg",
    "description": {
@@ -203,15 +203,15 @@
     "pt": "Ler depois",
     "uk": "Читати пізніше"
    },
-   "version": "1.0.0",
+   "version": "1.1.0",
    "author": "TeleX",
    "icon": "mods/icons/read-later.svg",
    "description": {
-    "ru": "Пункт с галочкой в меню поста, закладка 🔖 и список в настройках",
-    "en": "A checkable post-menu item, a 🔖 mark and a list in settings",
-    "es": "Un elemento con marca en el menú, una marca 🔖 y una lista en ajustes",
-    "pt": "Um item com marca no menu, uma marca 🔖 e uma lista nas configurações",
-    "uk": "Пункт із галочкою в меню допису, закладка 🔖 і список у налаштуваннях"
+    "ru": "Пункт с галочкой в меню поста, метка на карточке и список в настройках",
+    "en": "A checkable post-menu item, a mark on the card and a list in settings",
+    "es": "Un elemento con marca en el menú, una marca en la tarjeta y una lista en ajustes",
+    "pt": "Um item com marca no menu, uma marca no cartão e uma lista nas configurações",
+    "uk": "Пункт із галочкою в меню допису, мітка на картці й список у налаштуваннях"
    },
    "tags": [
     "feed"
@@ -227,7 +227,7 @@
     "pt": "Recolher posts longos",
     "uk": "Згорнути довгі дописи"
    },
-   "version": "1.0.0",
+   "version": "1.1.0",
    "author": "TeleX",
    "icon": "mods/icons/collapse-posts.svg",
    "description": {
@@ -246,7 +246,7 @@
  "presets": [
   {
    "id": "winter",
-   "icon": "❄️",
+   "icon": "darkmode",
    "name": {
     "ru": "Зимний набор",
     "en": "Winter set",
@@ -265,11 +265,13 @@
     "compact-feed",
     "collapse-posts",
     "snowfall"
-   ]
+   ],
+   "c1": "#4facfe",
+   "c2": "#7c5cff"
   },
   {
    "id": "ai",
-   "icon": "🤖",
+   "icon": "ai",
    "name": {
     "ru": "Набор «ИИ»",
     "en": "AI set",
@@ -287,11 +289,13 @@
    "mods": [
     "ai-chat",
     "ai-translate"
-   ]
+   ],
+   "c1": "#7c5cff",
+   "c2": "#2fc1e6"
   },
   {
    "id": "reader",
-   "icon": "📚",
+   "icon": "article",
    "name": {
     "ru": "Набор «Читатель»",
     "en": "Reader set",
@@ -310,7 +314,9 @@
     "reading-time",
     "read-later",
     "collapse-posts"
-   ]
+   ],
+   "c1": "#f59e0b",
+   "c2": "#ef4444"
   }
  ]
 }

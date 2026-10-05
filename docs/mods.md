@@ -15,7 +15,7 @@
 {
   "manifest": { "id": "my-mod", "name": "Мой мод", "version": "1.0.0", "author": "me",
                 "description": "коротко", "about": "подробно\nв несколько строк",
-                "icon": "🕒", "preview": ["https://…/1.png", "data:image/png;base64,…"], "tags": ["theme"],
+                "icon": "clock", "preview": ["https://…/1.png", "data:image/png;base64,…"], "tags": ["theme"],
                 "settings": [ { "key": "seconds", "type": "switch", "title": "Секунды", "default": false } ] },
   "parts": [
     { "type": "theme", "data": { … } },

@@ -9,6 +9,10 @@ for (const f of fs.readdirSync(src).filter((x) => x.endsWith('.manifest.json')))
   const id = f.replace('.manifest.json', '');
   const manifest = JSON.parse(fs.readFileSync(path.join(src, f), 'utf8'));
   const code = fs.readFileSync(path.join(src, `${id}.js`), 'utf8');
-  fs.writeFileSync(path.join(out, `${id}.module`), JSON.stringify({ manifest, parts: [{ type: 'js', code }] }, null, 1));
+  const parts = [];
+  const cssFile = path.join(src, `${id}.css`);
+  if (fs.existsSync(cssFile)) parts.push({ type: 'css', code: fs.readFileSync(cssFile, 'utf8') });
+  parts.push({ type: 'js', code });
+  fs.writeFileSync(path.join(out, `${id}.module`), JSON.stringify({ manifest, parts }, null, 1));
   console.log('built', id);
 }

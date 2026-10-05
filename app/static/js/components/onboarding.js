@@ -59,7 +59,7 @@ function show(startStep) {
     () => {
       const cur = getPrefs().theme || 'auto';
       return {
-        icon: '🎨',
+        icon: 'appearance-filled', tint: '#ffab40,#f57c00',
         title: t('Оформление'),
         sub: t('Выберите тему. Её можно изменить позже в настройках.'),
         body: `<div class="tx-onb-themes">${THEMES.map(([id, label]) => `<button class="tx-onb-theme${cur === id ? ' is-on' : ''}" data-theme="${id}">${preview(id)}<span>${t(label)}</span></button>`).join('')}</div>`,
@@ -67,14 +67,14 @@ function show(startStep) {
       };
     },
     () => ({
-      icon: '🌐',
+      icon: 'language', tint: '#b36cff,#7c4dff',
       title: t('Язык'),
       sub: t('Приложение перезагрузится, чтобы применить язык.'),
       body: `<div class="tx-onb-list">${LANGUAGES.map((l) => `<button class="tx-onb-opt${l.code === lang() ? ' is-on' : ''}" data-lang="${l.code}"><b>${escapeHtml(l.name)}</b><small>${escapeHtml(l.english)}</small><i></i></button>`).join('')}</div>`,
       next: t('Далее'),
     }),
     () => ({
-      icon: '⚡',
+      icon: 'key-filled', tint: '#5cd36b,#2e9e47',
       title: t('Ключ Groq (по желанию)'),
       sub: t('Бесплатный ключ нужен для умных функций. Сначала — проверка модов на ошибки и опасный код перед установкой.'),
       body: `<label class="tx-onb-field"><input id="onb-key" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="gsk_…" value="${escapeHtml(getKey())}"></label>
@@ -90,7 +90,7 @@ function show(startStep) {
     const s = steps[step]();
     box.innerHTML = `
       <div class="tx-onb-grab"></div>
-      <div class="tx-onb-ico">${parseEmojis(s.icon)}</div>
+      <div class="tx-onb-ico"><span class="tx-onb-sq" style="background:linear-gradient(180deg,${s.tint.split(',')[0]},${s.tint.split(',')[1]})"><i class="icon icon-${s.icon}"></i></span></div>
       <div class="tx-onb-dots">${steps.map((_, i) => `<i class="${i === step ? 'on' : ''}"></i>`).join('')}</div>
       <h2>${escapeHtml(s.title)}</h2>
       <p class="tx-onb-sub">${escapeHtml(s.sub)}</p>
@@ -122,7 +122,7 @@ function show(startStep) {
       })
       : await tgDialog({
         tone: 'alert',
-        icon: `<span class="tx-mod-pic is-icon is-alert">${parseEmojis('⚠️')}</span>`,
+        icon: '<span class="tx-mod-pic is-icon is-alert"><i class="icon icon-warning"></i></span>',
         title: t('Внимание!'),
         html: `<p class="tx-dialog-alert">${escapeHtml(t('Без ключа вы сами урезаете возможности TeleX. Ключ бесплатный и никуда не отправляется, кроме Groq.'))}</p>${benefits()}`,
         ok: t('Вставить ключ'),

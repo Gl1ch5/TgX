@@ -79,7 +79,7 @@ export function tapReaction(postId, index) {
   const r = post && post.reactions[index];
   if (!r) return;
   if (r.paid) {
-    showToast(t('Платные реакции ⭐ отправляются из приложения Telegram'));
+    showToast(t('Платные реакции отправляются из приложения Telegram'));
     return;
   }
   sendReaction(post.channel_id, post.msg_id, r.emoji, post.id, r.custom_id || null);

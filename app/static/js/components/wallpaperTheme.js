@@ -254,7 +254,7 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
   });
 
   if (showFeedback) {
-    showToast(t('Обои установлены: {a} ✨', {a: wp.name}));
+    showToast(t('Обои установлены: {a}', {a: wp.name}));
   }
 }
 

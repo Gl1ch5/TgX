@@ -1,0 +1,78 @@
+{
+ "id": "snowfall",
+ "name": {
+  "ru": "Снегопад",
+  "en": "Snowfall",
+  "es": "Nevada",
+  "pt": "Nevasca",
+  "uk": "Снігопад"
+ },
+ "version": "1.1.0",
+ "author": "TeleX",
+ "icon": "mods/icons/snowfall.svg",
+ "description": {
+  "ru": "Снег за постами: не мешает кликам, одна лёгкая анимация",
+  "en": "Snow behind the posts: never blocks taps, one light animation",
+  "es": "Nieve detrás de las publicaciones: no bloquea toques, una animación ligera",
+  "pt": "Neve atrás das publicações: não bloqueia toques, uma animação leve",
+  "uk": "Сніг за дописами: не заважає натисканням, одна легка анімація"
+ },
+ "about": {
+  "ru": "Рисует в общем слое tx.ambient: один холст и один цикл анимации на все визуальные моды. Цвет сам меняется днём и ночью.",
+  "en": "Draws into the shared tx.ambient layer: one canvas and one animation loop for all visual mods. The colour follows day and night.",
+  "es": "Dibuja en la capa compartida tx.ambient: un lienzo y un bucle para todos los mods visuales. El color sigue al día y la noche.",
+  "pt": "Desenha na camada compartilhada tx.ambient: um canvas e um loop para todos os mods visuais. A cor segue o dia e a noite.",
+  "uk": "Малює в спільному шарі tx.ambient: один полотно й один цикл анімації для всіх візуальних модів. Колір змінюється вдень і вночі."
+ },
+ "tags": [
+  "theme"
+ ],
+ "conflicts": [],
+ "settings": [
+  {
+   "key": "amount",
+   "type": "number",
+   "title": {
+    "ru": "Снежинок",
+    "en": "Snowflakes",
+    "es": "Copos",
+    "pt": "Flocos",
+    "uk": "Сніжинок"
+   },
+   "default": 90,
+   "min": 20,
+   "max": 220,
+   "step": 10
+  },
+  {
+   "key": "speed",
+   "type": "number",
+   "title": {
+    "ru": "Скорость, %",
+    "en": "Speed, %",
+    "es": "Velocidad, %",
+    "pt": "Velocidade, %",
+    "uk": "Швидкість, %"
+   },
+   "default": 100,
+   "min": 40,
+   "max": 200,
+   "step": 10
+  },
+  {
+   "key": "wind",
+   "type": "number",
+   "title": {
+    "ru": "Ветер, %",
+    "en": "Wind, %",
+    "es": "Viento, %",
+    "pt": "Vento, %",
+    "uk": "Вітер, %"
+   },
+   "default": 40,
+   "min": 0,
+   "max": 100,
+   "step": 10
+  }
+ ]
+}

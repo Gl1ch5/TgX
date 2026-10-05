@@ -1,24 +1,46 @@
-// @manifest {"id": "ai-translate", "name": {"ru": "Переводчик постов", "en": "Post translator", "es": "Traductor de publicaciones", "pt": "Tradutor de publicações", "uk": "Перекладач дописів"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/ai-translate.svg", "description": {"ru": "Кнопка 🌐 у поста переводит его на язык приложения", "en": "A 🌐 button on a post translates it into the app language", "es": "Un botón 🌐 traduce la publicación al idioma de la app", "pt": "Um botão 🌐 traduz a publicação para o idioma do app", "uk": "Кнопка 🌐 біля допису перекладає його мовою застосунку"}, "about": {"ru": "Работает через ваш бесплатный ключ Groq (Настройки → Ключ Groq).", "en": "Works through your free Groq key (Settings → Groq key).", "es": "Funciona con tu clave gratuita de Groq (Ajustes → Clave de Groq).", "pt": "Funciona com sua chave gratuita do Groq (Configurações → Chave do Groq).", "uk": "Працює через ваш безкоштовний ключ Groq (Налаштування → Ключ Groq)."}, "tags": ["ai", "feed"], "permissions": ["ai"]}
-// @part js
-export default function (tx) {
-  var NAMES = { ru: 'Russian', en: 'English', es: 'Spanish', pt: 'Portuguese', uk: 'Ukrainian' };
-  tx.ui.add('post.actions', {
-    id: 'translate',
-    icon: '🌐',
-    title: tx.L({ ru: 'Перевести', en: 'Translate', es: 'Traducir', pt: 'Traduzir', uk: 'Перекласти' }),
-    run: function (ctx) {
-      var post = ctx && ctx.post;
-      var text = String((post && (post.text || post.message)) || '').replace(/<[^>]+>/g, ' ').trim();
-      if (!text) { tx.toast(tx.L({ ru: 'В посте нет текста', en: 'This post has no text', es: 'La publicación no tiene texto', pt: 'A publicação não tem texto', uk: 'У дописі немає тексту' })); return; }
-      if (!tx.ai.available()) { tx.toast(tx.L({ ru: 'Нужен ключ Groq: Настройки → Ключ Groq', en: 'A Groq key is needed: Settings → Groq key', es: 'Se necesita una clave de Groq: Ajustes → Clave de Groq', pt: 'É preciso uma chave do Groq: Configurações → Chave do Groq', uk: 'Потрібен ключ Groq: Налаштування → Ключ Groq' })); return; }
-      var box;
-      tx.ui.openScreen({
-        title: tx.L({ ru: 'Перевод', en: 'Translation', es: 'Traducción', pt: 'Tradução', uk: 'Переклад' }),
-        render: function (b) { box = b; b.innerHTML = '<p style="color:var(--tx-text-2)">…</p>'; }
-      });
-      tx.ai.ask(text.slice(0, 6000), { system: 'Translate the user text into ' + (NAMES[tx.lang()] || 'English') + '. Keep the meaning, names, links and line breaks. Reply with the translation only.', maxTokens: 1500, temperature: 0.2 }).then(function (out) {
-        if (box) { box.innerHTML = ''; var p = document.createElement('div'); p.style.cssText = 'white-space:pre-wrap;font-size:16px;line-height:1.5;padding:12px 4px;color:var(--tx-text)'; p.textContent = out; box.appendChild(p); }
-      }).catch(function (e) { if (box) box.innerHTML = '<p style="color:var(--tx-red)">⚠ ' + tx.escapeHtml(e && e.message || 'error') + '</p>'; });
-    }
-  });
+{
+ "manifest": {
+  "id": "ai-translate",
+  "name": {
+   "ru": "Переводчик постов",
+   "en": "Post translator",
+   "es": "Traductor de publicaciones",
+   "pt": "Tradutor de publicações",
+   "uk": "Перекладач дописів"
+  },
+  "version": "1.1.0",
+  "author": "TeleX",
+  "icon": "mods/icons/ai-translate.svg",
+  "description": {
+   "ru": "Перевод поста на нужный язык: кнопка у поста и пункт меню, перевод появляется по мере написания",
+   "en": "Translate a post: a button on the post and a menu item; the translation streams in as it is written",
+   "es": "Traduce una publicación: botón en la publicación y elemento de menú; la traducción aparece mientras se escribe",
+   "pt": "Traduza um post: botão no post e item de menu; a tradução aparece enquanto é escrita",
+   "uk": "Переклад допису потрібною мовою: кнопка біля допису й пункт меню, переклад з'являється по мірі написання"
+  },
+  "about": {
+   "ru": "Работает через ваш бесплатный ключ Groq (Настройки → Ключ Groq).",
+   "en": "Works through your free Groq key (Settings → Groq key).",
+   "es": "Funciona con tu clave gratuita de Groq (Ajustes → Clave de Groq).",
+   "pt": "Funciona com sua chave gratuita do Groq (Configurações → Chave do Groq).",
+   "uk": "Працює через ваш безкоштовний ключ Groq (Налаштування → Ключ Groq)."
+  },
+  "tags": [
+   "ai",
+   "feed"
+  ],
+  "permissions": [
+   "ai"
+  ]
+ },
+ "parts": [
+  {
+   "type": "css",
+   "code": ".trl-chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none; }\n.trl-chips::-webkit-scrollbar { display: none; }\n.trl-chips button { flex: none; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--tx-surface); color: var(--tx-text-2); font-size: 14px; font-weight: 500; transition: background .15s, color .15s; }\n.trl-chips button.is-on { background: var(--tx-accent-fill); color: #fff; }\n.trl-card { padding: 14px 16px; border-radius: 20px; background: var(--tx-surface); margin-bottom: 10px; }\n.trl-out { background: var(--tx-bubble-out); color: #fff; }\n.trl-label { font-size: 12.5px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; opacity: .7; margin-bottom: 6px; }\n.trl-text { font-size: 16.5px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; min-height: 24px; }\n.trl-src .trl-text { font-size: 15px; color: var(--tx-text-2); }\n.trl-src .trl-text.is-clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }\n.trl-more { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--tx-accent); }\n.trl-actions { display: flex; justify-content: flex-end; margin-top: 8px; }\n.trl-copy { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: rgba(255, 255, 255, .18); font-size: 13.5px; font-weight: 600; color: #fff; }\n.trl-dots { display: inline-flex; gap: 4px; padding: 6px 0; }\n.trl-dots i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .5; animation: trl-d 1.1s infinite ease-in-out; }\n.trl-dots i:nth-child(2) { animation-delay: .16s; } .trl-dots i:nth-child(3) { animation-delay: .32s; }\n@keyframes trl-d { 35% { transform: translateY(-4px); opacity: 1; } }\n.trl-err { color: #ffd7d7; }\n"
+  },
+  {
+   "type": "js",
+   "code": "// Post translator: a sheet with the original and a streamed translation, copy button and language chips. Uses tx.ai (the user's Groq key).\nexport default function (tx) {\n  var NAMES = { ru: 'Russian', en: 'English', es: 'Spanish', pt: 'Portuguese', uk: 'Ukrainian' };\n  var LABEL = { ru: 'Русский', en: 'English', es: 'Español', pt: 'Português', uk: 'Українська' };\n  var T = function (o) { return tx.L(o); };\n  function plain(post) { return String((post && (post.text || post.message)) || '').replace(/<br\\s*\\/?>/gi, '\\n').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim(); }\n  function open(post) {\n    var text = plain(post);\n    if (!text) { tx.toast(T({ ru: 'В посте нет текста', en: 'This post has no text', es: 'La publicación no tiene texto', pt: 'A publicação não tem texto', uk: 'У дописі немає тексту' })); return; }\n    if (!tx.ai.available()) { tx.toast(T({ ru: 'Нужен ключ Groq: Настройки → Ключ Groq', en: 'A Groq key is needed: Settings → Groq key', es: 'Se necesita una clave de Groq: Ajustes → Clave de Groq', pt: 'É preciso uma chave do Groq: Configurações → Chave do Groq', uk: 'Потрібен ключ Groq: Налаштування → Ключ Groq' })); return; }\n    tx.ui.openScreen({\n      title: T({ ru: 'Перевод', en: 'Translation', es: 'Traducción', pt: 'Tradução', uk: 'Переклад' }),\n      render: function (box) {\n        var target = tx.lang(), abort = null, result = '';\n        box.innerHTML = '<div class=\"trl-chips\"></div><div class=\"trl-card trl-out\"><div class=\"trl-label\"></div><div class=\"trl-text\"></div><div class=\"trl-actions\"><button class=\"trl-copy\"><i class=\"icon icon-copy\"></i><span></span></button></div></div><div class=\"trl-card trl-src\"><div class=\"trl-label\"></div><div class=\"trl-text is-clamp\"></div><button class=\"trl-more\"></button></div>';\n        var chips = box.querySelector('.trl-chips'), outLabel = box.querySelector('.trl-out .trl-label'), outText = box.querySelector('.trl-out .trl-text'), copy = box.querySelector('.trl-copy');\n        var srcLabel = box.querySelector('.trl-src .trl-label'), srcText = box.querySelector('.trl-src .trl-text'), more = box.querySelector('.trl-more');\n        srcLabel.textContent = T({ ru: 'Оригинал', en: 'Original', es: 'Original', pt: 'Original', uk: 'Оригінал' });\n        srcText.textContent = text;\n        more.textContent = T({ ru: 'Показать полностью', en: 'Show more', es: 'Mostrar más', pt: 'Mostrar mais', uk: 'Показати повністю' });\n        more.addEventListener('click', function () { var o = srcText.classList.toggle('is-clamp'); more.textContent = o ? T({ ru: 'Показать полностью', en: 'Show more', es: 'Mostrar más', pt: 'Mostrar mais', uk: 'Показати повністю' }) : T({ ru: 'Свернуть', en: 'Show less', es: 'Mostrar menos', pt: 'Mostrar menos', uk: 'Згорнути' }); });\n        copy.querySelector('span').textContent = T({ ru: 'Копировать', en: 'Copy', es: 'Copiar', pt: 'Copiar', uk: 'Копіювати' });\n        copy.addEventListener('click', function () { if (result) { try { navigator.clipboard.writeText(result); tx.toast(T({ ru: 'Скопировано', en: 'Copied', es: 'Copiado', pt: 'Copiado', uk: 'Скопійовано' })); } catch (e) {} } });\n        chips.innerHTML = Object.keys(NAMES).map(function (c) { return '<button data-c=\"' + c + '\">' + tx.escapeHtml(LABEL[c]) + '</button>'; }).join('');\n        chips.addEventListener('click', function (e) { var b = e.target.closest('[data-c]'); if (b) { target = b.dataset.c; run(); } });\n        function run() {\n          if (abort) abort.abort();\n          abort = new AbortController();\n          result = '';\n          chips.querySelectorAll('button').forEach(function (b) { b.classList.toggle('is-on', b.dataset.c === target); });\n          outLabel.textContent = T({ ru: 'Перевод · ', en: 'Translation · ', es: 'Traducción · ', pt: 'Tradução · ', uk: 'Переклад · ' }) + LABEL[target];\n          outText.innerHTML = '<span class=\"trl-dots\"><i></i><i></i><i></i></span>';\n          tx.ai.stream([{ role: 'user', content: text.slice(0, 6000) }], { system: 'Translate the user text into ' + NAMES[target] + '. Keep meaning, names, links, emoji and line breaks. Reply with the translation only.', maxTokens: 1500, temperature: 0.2, signal: abort.signal }, function (t) { result = t; outText.textContent = t; }).catch(function (e) {\n            if (e && e.name === 'AbortError') return;\n            outText.innerHTML = '<span class=\"trl-err\"><i class=\"icon icon-warning\"></i> ' + tx.escapeHtml(e && e.message || 'error') + '</span>';\n          });\n        }\n        run();\n      }\n    });\n  }\n  tx.ui.add('post.actions', { id: 'translate', icon: 'language', title: T({ ru: 'Перевести', en: 'Translate', es: 'Traducir', pt: 'Traduzir', uk: 'Перекласти' }), run: function (ctx) { open(ctx && ctx.post); } });\n  tx.ext.addMenu('post', function (c) { return [{ label: T({ ru: 'Перевести', en: 'Translate', es: 'Traducir', pt: 'Traduzir', uk: 'Перекласти' }), icon: 'language', run: function () { open(c.post); } }]; });\n}\n"
+  }
+ ]
 }

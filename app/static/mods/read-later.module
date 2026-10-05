@@ -1,41 +1,42 @@
-// @manifest {"id": "read-later", "name": {"ru": "Читать позже", "en": "Read later", "es": "Leer después", "pt": "Ler depois", "uk": "Читати пізніше"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/read-later.svg", "description": {"ru": "Пункт с галочкой в меню поста, закладка 🔖 и список в настройках", "en": "A checkable post-menu item, a 🔖 mark and a list in settings", "es": "Un elemento con marca en el menú, una marca 🔖 y una lista en ajustes", "pt": "Um item com marca no menu, uma marca 🔖 e uma lista nas configurações", "uk": "Пункт із галочкою в меню допису, закладка 🔖 і список у налаштуваннях"}, "about": {"ru": "Показывает возможности API: пункт меню с галочкой, тост с кнопкой «Отмена», страница в настройках.", "en": "Shows API features: a checkable menu item, a toast with an Undo button, a settings page.", "es": "Muestra funciones del API: elemento con marca, aviso con «Deshacer», página en ajustes.", "pt": "Mostra recursos da API: item com marca, aviso com «Desfazer», página nas configurações.", "uk": "Показує можливості API: пункт із галочкою, тост із кнопкою «Скасувати», сторінка в налаштуваннях."}, "tags": ["feed"]}
-// @part js
-export default function (tx) {
-  function ids() { return tx.storage.get('items') || []; }
-  function has(id) { return ids().some(function (x) { return x.id === id; }); }
-  function put(post) {
-    var list = ids().filter(function (x) { return x.id !== post.id; });
-    list.unshift({ id: post.id, url: post.tg_url || '', text: String(post.text || '').slice(0, 140), channel: post.channel_title || '' });
-    tx.storage.set('items', list.slice(0, 200));
+{
+ "manifest": {
+  "id": "read-later",
+  "name": {
+   "ru": "Читать позже",
+   "en": "Read later",
+   "es": "Leer después",
+   "pt": "Ler depois",
+   "uk": "Читати пізніше"
+  },
+  "version": "1.1.0",
+  "author": "TeleX",
+  "icon": "mods/icons/read-later.svg",
+  "description": {
+   "ru": "Пункт с галочкой в меню поста, метка на карточке и список в настройках",
+   "en": "A checkable post-menu item, a mark on the card and a list in settings",
+   "es": "Un elemento con marca en el menú, una marca en la tarjeta y una lista en ajustes",
+   "pt": "Um item com marca no menu, uma marca no cartão e uma lista nas configurações",
+   "uk": "Пункт із галочкою в меню допису, мітка на картці й список у налаштуваннях"
+  },
+  "about": {
+   "ru": "Показывает возможности API: пункт меню с галочкой, тост с кнопкой «Отмена», страница в настройках.",
+   "en": "Shows API features: a checkable menu item, a toast with an Undo button, a settings page.",
+   "es": "Muestra funciones del API: elemento con marca, aviso con «Deshacer», página en ajustes.",
+   "pt": "Mostra recursos da API: item com marca, aviso com «Desfazer», página nas configurações.",
+   "uk": "Показує можливості API: пункт із галочкою, тост із кнопкою «Скасувати», сторінка в налаштуваннях."
+  },
+  "tags": [
+   "feed"
+  ]
+ },
+ "parts": [
+  {
+   "type": "css",
+   "code": ".rl-tag { display: inline-flex; margin-left: 6px; vertical-align: middle; }\n.rl-tag .icon { font-size: 15px; color: var(--tx-accent); }\n.rl-list { padding: 4px 0; }\n.rl-item { display: flex; align-items: center; gap: 4px; padding: 4px 6px 4px 0; }\n.rl-item + .rl-item { border-top: 1px solid var(--tx-separator); }\n.rl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; padding: 10px 6px 10px 16px; text-decoration: none; color: var(--tx-text); }\n.rl-main b { font-size: 14px; font-weight: 600; color: var(--tx-accent); }\n.rl-main span { font-size: 15px; line-height: 1.35; color: var(--tx-text-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }\n.rl-del { flex: none; width: 36px; height: 36px; border-radius: 50%; color: var(--tx-hint); }\n.rl-del:active { background: var(--tx-accent-soft); }\n.rl-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 56px 28px; text-align: center; color: var(--tx-text-2); }\n.rl-empty-ic { width: 72px; height: 72px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--tx-accent-soft); color: var(--tx-accent); }\n.rl-empty-ic .icon { font-size: 34px; }\n.rl-empty b { font-size: 18px; color: var(--tx-text); }\n"
+  },
+  {
+   "type": "js",
+   "code": "// Read later: a checkable item in the post menu, a mark on the card, a toast with Undo and a tidy list page in settings.\nexport default function (tx) {\n  var T = function (o) { return tx.L(o); };\n  var UNDO = T({ ru: 'Отмена', en: 'Undo', es: 'Deshacer', pt: 'Desfazer', uk: 'Скасувати' });\n  function ids() { return tx.storage.get('items') || []; }\n  function has(id) { return ids().some(function (x) { return x.id === id; }); }\n  function put(post) {\n    var list = ids().filter(function (x) { return x.id !== post.id; });\n    list.unshift({ id: post.id, url: post.tg_url || '', text: String(post.text || '').replace(/\\s+/g, ' ').slice(0, 160), channel: post.channel_title || post.channel_name || '', at: Date.now() });\n    tx.storage.set('items', list.slice(0, 200));\n  }\n  function drop(id) { tx.storage.set('items', ids().filter(function (x) { return x.id !== id; })); }\n  function mark() {\n    document.querySelectorAll('[id^=\"post-card-\"]').forEach(function (card) {\n      var id = card.id.replace('post-card-', ''), tag = card.querySelector('.rl-tag');\n      if (has(id) && !tag) { var s = document.createElement('span'); s.className = 'rl-tag'; s.innerHTML = '<i class=\"icon icon-favorite-filled\"></i>'; (card.querySelector('.tx-bubble-name') || card).appendChild(s); }\n      else if (!has(id) && tag) tag.remove();\n    });\n  }\n  tx.ext.addMenu('post', function (ctx) {\n    var post = ctx.post;\n    return [{\n      label: T({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }),\n      icon: 'favorite',\n      checked: has(post.id),\n      run: function () {\n        if (has(post.id)) { drop(post.id); mark(); tx.toast(T({ ru: 'Убрано из «Читать позже»', en: 'Removed from Read later', es: 'Quitado de Leer después', pt: 'Removido de Ler depois', uk: 'Прибрано з «Читати пізніше»' }), { action: UNDO, run: function () { put(post); mark(); } }); }\n        else { put(post); mark(); tx.toast(T({ ru: 'Добавлено в «Читать позже»', en: 'Added to Read later', es: 'Añadido a Leer después', pt: 'Adicionado a Ler depois', uk: 'Додано до «Читати пізніше»' }), { action: UNDO, run: function () { drop(post.id); mark(); } }); }\n      }\n    }];\n  });\n  tx.ui.onPostRendered(function () { mark(); });\n  tx.settings.addPage({\n    id: 'list', title: T({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }), sub: T({ ru: 'Сохранённые посты', en: 'Saved posts', es: 'Publicaciones guardadas', pt: 'Publicações salvas', uk: 'Збережені дописи' }), icon: 'favorite', color: 'ORANGE',\n    render: function (box) {\n      function draw() {\n        var list = ids();\n        if (!list.length) {\n          box.innerHTML = '<div class=\"rl-empty\"><span class=\"rl-empty-ic\"><i class=\"icon icon-favorite\"></i></span><b>' + tx.escapeHtml(T({ ru: 'Пока пусто', en: 'Nothing yet', es: 'Aún nada', pt: 'Nada ainda', uk: 'Поки порожньо' })) + '</b><span>' + tx.escapeHtml(T({ ru: 'Нажмите на пост и выберите «Читать позже».', en: 'Tap a post and choose “Read later”.', es: 'Toca una publicación y elige «Leer después».', pt: 'Toque numa publicação e escolha «Ler depois».', uk: 'Натисніть на допис і оберіть «Читати пізніше».' })) + '</span></div>';\n          return;\n        }\n        box.innerHTML = '<div class=\"tx-group rl-list\">' + list.map(function (x) {\n          return '<div class=\"rl-item\" data-id=\"' + tx.escapeHtml(x.id) + '\"><a class=\"rl-main\" href=\"' + tx.escapeHtml(x.url) + '\" target=\"_blank\" rel=\"noopener\"><b>' + tx.escapeHtml(x.channel || '—') + '</b><span>' + tx.escapeHtml(x.text || '…') + '</span></a><button class=\"rl-del\" title=\"' + tx.escapeHtml(T({ ru: 'Убрать', en: 'Remove', es: 'Quitar', pt: 'Remover', uk: 'Прибрати' })) + '\"><i class=\"icon icon-close\"></i></button></div>';\n        }).join('') + '</div>';\n      }\n      box.addEventListener('click', function (e) {\n        var b = e.target.closest('.rl-del');\n        if (!b) return;\n        var id = b.closest('.rl-item').dataset.id, item = ids().filter(function (x) { return x.id === id; })[0];\n        drop(id); draw(); mark();\n        tx.toast(T({ ru: 'Убрано', en: 'Removed', es: 'Quitado', pt: 'Removido', uk: 'Прибрано' }), { action: UNDO, run: function () { if (item) { var l = ids(); l.unshift(item); tx.storage.set('items', l); draw(); mark(); } } });\n      });\n      draw();\n    }\n  });\n}\n"
   }
-  function drop(id) { tx.storage.set('items', ids().filter(function (x) { return x.id !== id; })); }
-  function mark() {
-    document.querySelectorAll('[id^="post-card-"]').forEach(function (card) {
-      var id = card.id.replace('post-card-', '');
-      var tag = card.querySelector('.rl-tag');
-      if (has(id) && !tag) { var s = document.createElement('span'); s.className = 'rl-tag'; s.textContent = '🔖'; s.style.cssText = 'margin-left:6px;font-size:13px'; (card.querySelector('.tx-bubble-name') || card).appendChild(s); }
-      else if (!has(id) && tag) tag.remove();
-    });
-  }
-  tx.ext.addMenu('post', function (ctx) {
-    var post = ctx.post;
-    return [{
-      label: tx.L({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }),
-      icon: 'favorite',
-      checked: has(post.id),
-      run: function () {
-        if (has(post.id)) { drop(post.id); mark(); tx.toast(tx.L({ ru: 'Убрано из «Читать позже»', en: 'Removed from Read later', es: 'Quitado de Leer después', pt: 'Removido de Ler depois', uk: 'Прибрано з «Читати пізніше»' }), { action: tx.L({ ru: 'Отмена', en: 'Undo', es: 'Deshacer', pt: 'Desfazer', uk: 'Скасувати' }), run: function () { put(post); mark(); } }); }
-        else { put(post); mark(); tx.toast(tx.L({ ru: 'Добавлено в «Читать позже»', en: 'Added to Read later', es: 'Añadido a Leer después', pt: 'Adicionado a Ler depois', uk: 'Додано до «Читати пізніше»' }), { action: tx.L({ ru: 'Отмена', en: 'Undo', es: 'Deshacer', pt: 'Desfazer', uk: 'Скасувати' }), run: function () { drop(post.id); mark(); } }); }
-      }
-    }];
-  });
-  tx.ui.onPostRendered(function () { mark(); });
-  tx.settings.addPage({
-    id: 'list', title: tx.L({ ru: 'Читать позже', en: 'Read later', es: 'Leer después', pt: 'Ler depois', uk: 'Читати пізніше' }), icon: 'favorite', color: 'ORANGE',
-    render: function (box) {
-      var list = ids();
-      if (!list.length) { box.innerHTML = '<p style="padding:18px;color:var(--tx-text-2)">' + tx.escapeHtml(tx.L({ ru: 'Пока пусто. Нажмите на пост и выберите «Читать позже».', en: 'Nothing yet. Tap a post and choose “Read later”.', es: 'Aún nada. Toca una publicación y elige «Leer después».', pt: 'Nada ainda. Toque numa publicação e escolha «Ler depois».', uk: 'Поки порожньо. Натисніть на допис і оберіть «Читати пізніше».' })) + '</p>'; return; }
-      box.innerHTML = list.map(function (x) { return '<a class="tx-group" style="display:block;padding:14px 16px;margin-bottom:10px;text-decoration:none;color:var(--tx-text)" href="' + tx.escapeHtml(x.url) + '" target="_blank" rel="noopener"><b style="display:block;font-size:14px;color:var(--tx-accent)">' + tx.escapeHtml(x.channel) + '</b><span style="font-size:15px;color:var(--tx-text-2)">' + tx.escapeHtml(x.text || '…') + '</span></a>'; }).join('');
-    }
-  });
+ ]
 }

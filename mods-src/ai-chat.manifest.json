@@ -1,0 +1,33 @@
+{
+ "id": "ai-chat",
+ "name": {
+  "ru": "ИИ-помощник",
+  "en": "AI assistant",
+  "es": "Asistente IA",
+  "pt": "Assistente IA",
+  "uk": "ШІ-помічник"
+ },
+ "version": "1.1.0",
+ "author": "TeleX",
+ "icon": "mods/icons/ai-chat.svg",
+ "description": {
+  "ru": "Чат в стиле Telegram: ответы пишутся на лету, подсказки, код и списки",
+  "en": "A Telegram-style chat: answers stream in, suggestions, code and lists",
+  "es": "Un chat al estilo Telegram: respuestas en vivo, sugerencias, código y listas",
+  "pt": "Um chat ao estilo Telegram: respostas ao vivo, sugestões, código e listas",
+  "uk": "Чат у стилі Telegram: відповіді пишуться наживо, підказки, код і списки"
+ },
+ "about": {
+  "ru": "Кнопка в нижней панели открывает чат с ИИ. Работает через ваш бесплатный ключ Groq (Настройки → Ключ Groq). История хранится только на устройстве; меню ⋮ очищает чат.",
+  "en": "A button in the bottom bar opens a chat with AI. It works through your free Groq key (Settings → Groq key). The history stays on the device; the ⋮ menu clears it.",
+  "es": "Un botón de la barra inferior abre un chat con IA. Funciona con tu clave gratuita de Groq (Ajustes → Clave de Groq). El historial se queda en el dispositivo; el menú ⋮ lo borra.",
+  "pt": "Um botão na barra inferior abre um chat com IA. Funciona com sua chave gratuita do Groq (Configurações → Chave do Groq). O histórico fica no dispositivo; o menu ⋮ o limpa.",
+  "uk": "Кнопка в нижній панелі відкриває чат зі ШІ. Працює через ваш безкоштовний ключ Groq (Налаштування → Ключ Groq). Історія зберігається лише на пристрої; меню ⋮ очищає її."
+ },
+ "tags": [
+  "ai"
+ ],
+ "permissions": [
+  "ai"
+ ]
+}

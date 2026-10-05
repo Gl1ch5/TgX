@@ -580,7 +580,7 @@
   "plural": false
  },
  {
-  "key": "Платные реакции ⭐ отправляются из приложения Telegram",
+  "key": "Платные реакции отправляются из приложения Telegram",
   "where": "js/components/reactions.js",
   "plural": false
  },
@@ -635,7 +635,7 @@
   "plural": false
  },
  {
-  "key": "Обои установлены: {a} ✨",
+  "key": "Обои установлены: {a}",
   "where": "js/components/wallpaperTheme.js",
   "plural": false
  },
@@ -1925,6 +1925,26 @@
   "plural": false
  },
  {
+  "key": "Каталог",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установленные",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Сообщество",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Создать",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Настройки мода",
   "where": "js/views/settings.js",
   "plural": false
@@ -1935,47 +1955,27 @@
   "plural": false
  },
  {
-  "key": "Документация по созданию модов",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Установить из файла",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Файл .module",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Вставить ссылку или JSON",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Ссылка https://… или JSON мода",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Установка",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Установленные",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
   "key": "Модов пока нет",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Откройте «Каталог» и установите первый мод.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Открыть каталог",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Опубликовать свой мод",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Репозиторий сообщества на GitHub",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2010,12 +2010,52 @@
   "plural": false
  },
  {
-  "key": "Опубликовать свой мод",
+  "key": "Установить из файла",
   "where": "js/views/settings.js",
   "plural": false
  },
  {
-  "key": "Репозиторий сообщества на GitHub",
+  "key": "Файл .module",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить ссылку или JSON",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Ссылка https://… или JSON мода",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установка",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Мод может сменить тему, обои и цвета сообщений, добавить пункты в меню и настройки. Мод с кодом получает полный доступ к приложению и аккаунту: ставьте только то, чему доверяете.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Документация по созданию модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Набор модов",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Загрузка…",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Открыть",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2025,7 +2065,17 @@
   "plural": false
  },
  {
-  "key": "Открыть",
+  "key": "В наборе",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Установить всё",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Весь набор уже установлен",
   "where": "js/views/settings.js",
   "plural": false
  },
@@ -2036,11 +2086,6 @@
  },
  {
   "key": "Официальные моды",
-  "where": "js/views/settings.js",
-  "plural": false
- },
- {
-  "key": "Сообщество",
   "where": "js/views/settings.js",
   "plural": false
  },
