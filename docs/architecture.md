@@ -1,4 +1,4 @@
-# Архитектура TeleX 3.13.0 (актуально на момент передачи)
+# Архитектура
 
 ## 1. Общая картина
 ```
@@ -69,7 +69,7 @@ UI строится шаблонными строками (`innerHTML`) и об�
 
 ### 3.4 Данные
 * `state` (js/state.js) — простой объект: `isAuth`, `user`, `channels`, `posts`, `stories`…
-* Сообщение/пост — **простой объект** (см. `formatGroup()` в `telegram.js`): `{id, msg_id, channel_id, channel, timestamp, text, text_html, media_type, media_items[], views, replies_count, comments_enabled, reactions[], buttons, is_pinned, …}`. Для чатов нужно будет ввести аналогичную модель сообщения (этап 3).
+* Сообщение/пост — **простой объект** (см. `formatGroup()` в `telegram.js`): `{id, msg_id, channel_id, channel, timestamp, text, text_html, media_type, media_items[], views, replies_count, comments_enabled, reactions[], buttons, is_pinned, …}`. Для чатов используется своя модель (см. раздел «TeleX Chat»).
 * Медиа в UI — всегда URL вида `media/<kind>/…` (см. §4).
 
 ### 3.5 Сессия и кэши (`localStorage`)
@@ -92,7 +92,7 @@ URL `media/<kind>/…` → `sw.js` перехватывает → просит �
 * Android: `postNative('theme:light|dark')` меняет цвет иконок статус-бара.
 
 ## 7. Переводы
-См. `02-AGENT-RULES.md` §3. Движок — `js/i18n.js`: `t`, `tn`, `lang()`, `locale()`, `translateTree`. Словари генерирует `tools/i18n/build.mjs` из `translations.txt`. Язык: `prefs.lang` (`auto` = как в браузере), смена языка — перезагрузка страницы.
+Движок — `js/i18n.js`: `t`, `tn`, `lang()`, `locale()`, `translateTree`. Словари генерирует `tools/i18n/build.mjs` из `translations.txt`. Язык: `prefs.lang` (`auto` = как в браузере), смена языка — перезагрузка страницы.
 
 ## 8. Оболочки
 * Android (`native/android`): WebView, открывает `AppConfig.START_URL`, мост `window.TeleXNative.postMessage(str)` (строки: `retry`, `checkUpdate`, `theme:light|dark`, загрузки). Автообновление APK через `releases/download/nightly/version.json`.
@@ -105,3 +105,20 @@ URL `media/<kind>/…` → `sw.js` перехватывает → просит �
 * Подключения к другим ДЦ (файлы) создают новый ключ шифрования (секунды вычислений) → ключи сохраняются (`telex.dckeys`), соединения держатся 10 минут.
 * `loadDialogs()` грузит до 100 диалогов и кэширует сущности — для чатов нужна полноценная пагинация и IndexedDB.
 * Тестировать на живом Telegram из песочницы обычно нельзя → `07-TESTING.md`.
+
+## 10. TeleX Chat (`app/static/chat/`)
+Второй клиент: обычные чаты. Работает на том же движке и той же сессии, лежит внутри области Service Worker (`app/static/`), поэтому медиа идёт тем же путём.
+```
+chat/index.html         разметка: список (aside), переписка (main), меню, просмотрщик
+chat/chat.css           стили; цвета берутся из токенов css/tx/tokens.css и light.css
+chat/js/app.js          запуск: тема, язык, вход (authModal), вкладки, живые события
+chat/js/store.js        общее состояние S, шина событий, форматирование времени и статусов
+chat/js/list.js         вкладка «Чаты»: папки, архив, поиск, строки диалогов
+chat/js/conv.js         переписка: шапка, пузыри, композер, отправка, меню, просмотр медиа
+chat/js/pages.js        «Контакты», «Настройки», «Профиль»
+chat/js/fake.js         демо-сервис для ?fake=1 (тесты, скриншоты)
+js/telegram-chat.js     API чатов поверх TelegramService (работает и в Worker)
+```
+Ключи собеседников: `u123` (пользователь), `g123` (обычная группа), `c123` (канал/супергруппа). Диалоги и сообщения — простые объекты (`formatDialog`, `formatChatMessage`). Адреса медиа — `media/<тип>/<ключ>/<id сообщения>`; на странице они получают префикс `../`.
+
+Методы: `chatDialogs`, `chatFolders`, `chatHistory`, `chatSend`, `chatSendFile`, `chatEdit`, `chatDelete`, `chatMarkRead`, `chatTyping`, `chatSearch`, `chatContacts`, `startChatLive`.
