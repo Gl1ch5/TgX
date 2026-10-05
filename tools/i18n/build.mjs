@@ -44,3 +44,4 @@ for (const [code, name] of LANGS) {
 }
 console.log(`${seen.size} rows, ${used.size} keys used`);
 console.log(bad.length ? bad.join('\n') : 'OK: every key is translated');
+if (bad.length) process.exit(1);

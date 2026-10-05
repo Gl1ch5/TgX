@@ -21,3 +21,5 @@ app/media_cache/
 *.log
 node_modules/
 promo/build/
+out/
+node_modules/

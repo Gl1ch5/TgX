@@ -8,7 +8,8 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const acorn = require(process.env.ACORN || '/opt/node-tools/node_modules/acorn');
+let acorn;
+try { acorn = require('acorn'); } catch { acorn = require(process.env.ACORN || '/opt/node-tools/node_modules/acorn'); }
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../app/static/js');
 const SKIP = [/^vendor\//, /^lang\//, /^i18n\.js$/, /^emoji(-data)?\.js$/, /^tg-worker\.js$/, /^core\/devtools\.js$/, /^components\/countries\.js$/];

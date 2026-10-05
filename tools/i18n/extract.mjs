@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const acorn = require(process.env.ACORN || '/opt/node-tools/node_modules/acorn');
+let acorn;
+try { acorn = require('acorn'); } catch { acorn = require(process.env.ACORN || '/opt/node-tools/node_modules/acorn'); }
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../app/static');
 const keys = new Map();
 const add = (k, where, plural) => { if (!keys.has(k)) keys.set(k, { where, plural: !!plural }); };
