@@ -3,6 +3,38 @@
 Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file with the extension `.module`** that the user installs in
 *Settings → Mods* (file, link or pasted text). No build step, no dependencies, no sandbox: the file runs inside the web app with full access.
 
+## Where to put what (pick the slot, do not guess selectors)
+
+| The user wants… | Use |
+|---|---|
+| a button in the **bottom bar** (the dock) | `tx.ui.add('dock', { id, icon, title, run })` |
+| a button in the **top bar of the feed** (next to the TeleX title / menu) | `tx.ui.add('topbar', { id, icon, title, run })` |
+| something **inside the search field** (filter, voice…) | `tx.ui.add('search', { id, icon, run })` |
+| an **extra feed tab** (All · Media · Popular · Favorites · **Yours**) | `tx.ui.add('tabs', { id, title, run })` |
+| a round **floating button** | `tx.ui.add('fab', { id, icon, run })` |
+| a **badge by the channel name** on every post | `tx.ui.add('post.header', { id, html })` |
+| a **block under the post text** (stats, translate, notes) | `tx.ui.add('post.footer', { id, render(el, { post }) {…} })` |
+| a **button beside the share button** of a post | `tx.ui.add('post.actions', { id, icon, run({ post }) {…} })` |
+| an item in the **post's context menu** | `tx.ext.addMenu('post', ({ post }) => [{ label, icon, run }])` |
+| a row or a whole page in **Settings** | `tx.settings.addRow(...)` / `tx.settings.addPage(...)` |
+| a **full screen** of its own (opened from any button) | `tx.ui.openScreen({ title, render(box) })` |
+| to change **text of posts** | `tx.ext.addHook('postText', (html) => html)` |
+| to **react to every post** (hide, mark, count) | `tx.ui.onPost((el, post) => …)` |
+| to change the **whole look** | `tx.theme.setSkin(...)`, `tx.theme.setAccent(...)`, `tx.theme.addCss(...)` |
+| a **floating widget** on top of the app | an `html` part (position: fixed) |
+
+`ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an emoji, an SVG string or an icon name.
+Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole element. Every slot is removed automatically when the mod is turned off.
+
+### Kinds of mods (pick one, mix if needed)
+
+1. **Theme** — `theme` part: colours, wallpapers, `skin` tokens. No code.
+2. **Widget** — a small live element (clock, weather, counter): `ui.add('topbar', { html })` or an `html` part, refresh with `setInterval`, clear it in `tx.onStop`.
+3. **Tool button** — an icon that does one thing (`dock`/`topbar`/`fab`) and shows the result with `tx.toast` or `tx.ui.openScreen`.
+4. **Post enhancer** — `post.header`/`post.footer`/`post.actions`, or `ui.onPost` + `postText` (translate, reading time, link previews, notes).
+5. **Filter** — `ui.onPost((el, post) => { if (…) el.style.display = 'none'; })` with settings for the words/channels to hide.
+6. **Own page** — `ui.openScreen` or `settings.addPage` (statistics, lists, a notebook stored in `tx.storage`).
+
 ## Output contract
 
 1. Write exactly one file, `<id>.module`, UTF-8 text. Do not wrap it in markdown fences when saving it to a file.

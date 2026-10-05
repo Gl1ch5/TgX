@@ -1,0 +1,13 @@
+// @manifest {"id":"slots-demo","name":{"ru":"Демо слотов","en":"Slots demo","es":"Demo de ranuras","pt":"Demo de slots","uk":"Демо слотів"},"version":"1.0.0","author":"TeleX","icon":"🧩","description":{"ru":"Показывает все места, куда мод может вставить кнопку или блок","en":"Shows every place a mod can put a button or a block","es":"Muestra todos los lugares donde un mod puede poner un botón o un bloque","pt":"Mostra todos os lugares onde um mod pode pôr um botão ou bloco","uk":"Показує всі місця, куди мод може вставити кнопку чи блок"},"tags":["example","ui"]}
+// @part js
+export default function (tx) {
+  const hi = (where) => () => tx.toast('👋 ' + where);
+  tx.ui.add('topbar',       { id: 'a', icon: '🔔', title: 'Top bar',  run: hi('topbar') });            // top bar of the feed, next to search
+  tx.ui.add('search',       { id: 'a', icon: '🎙️', title: 'Search',   run: hi('search') });            // inside the search pill
+  tx.ui.add('tabs',         { id: 'a', title: 'Mine',                 run: hi('tabs') });              // one more tab: All / Media / … / Mine
+  tx.ui.add('dock',         { id: 'a', icon: '🧩', title: 'Demo',     run: hi('dock') });              // bottom bar
+  tx.ui.add('fab',          { id: 'a', icon: '✏️', title: 'Write',    run: hi('fab') });               // floating round button
+  tx.ui.add('post.header',  { id: 'a', html: '<span style="font-size:12px;opacity:.7">🧩</span>' });   // next to the channel name
+  tx.ui.add('post.footer',  { id: 'a', render: (el, { post }) => { el.style.cssText = 'font-size:12px;opacity:.6;padding:2px 12px 6px'; el.textContent = 'post ' + (post ? post.id : '?'); } });
+  tx.ui.add('post.actions', { id: 'a', icon: '⭐', title: 'Star',     run: ({ post }) => tx.toast('⭐ ' + (post && post.id)) }); // beside the share button
+}

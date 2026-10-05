@@ -184,6 +184,63 @@ function watchSelector(id, selector, fn) {
   mo.observe(document.body, { childList: true, subtree: true });
   observers.set(id, [...(observers.get(id) || []), mo]);
 }
+const SLOTS = {
+  topbar: { selector: '.tx-mainbar', kind: 'button', place: (host, node, pos) => (pos === 'start' ? host.querySelector('.tx-mainbar-title')?.after(node) || host.prepend(node) : host.append(node)) },
+  search: { selector: '#header-search-bar', kind: 'button', place: (host, node) => host.insertBefore(node, host.querySelector('.tx-search-clear') || null) },
+  tabs: { selector: '#feed-tabs', kind: 'tab', place: (host, node) => host.append(node) },
+  dock: { selector: '.tx-dock', kind: 'dock', place: (host, node) => host.append(node) },
+  fab: { selector: '#app', kind: 'fab', place: (host, node) => document.body.append(node) },
+  'post.header': { selector: '[id^="post-card-"]', kind: 'inline', post: true, place: (card, node) => (card.querySelector('.tx-bubble-name') || card).append(node) },
+  'post.footer': { selector: '[id^="post-card-"]', kind: 'block', post: true, place: (card, node) => { const st = card.querySelector('.tx-post-stack') || card; (card.querySelector('.tx-comments-row') ? card.querySelector('.tx-comments-row').before(node) : st.append(node)); } },
+  'post.actions': { selector: '[id^="post-card-"]', kind: 'side', post: true, place: (card, node) => { const side = card.querySelector('.tx-side-btn'); side ? side.after(node) : card.append(node); } },
+};
+
+function iconHtml(icon) {
+  if (!icon) return '';
+  if (/^</.test(icon)) return icon;
+  if (/^(https:|data:image\/|mods\/)/.test(icon)) return `<img src="${escapeHtml(icon)}" alt="" style="width:22px;height:22px;object-fit:contain">`;
+  if (/^[a-z0-9-]+$/.test(icon)) return `<i class="icon icon-${icon}"></i>`;
+  return `<span style="font-size:20px;line-height:1">${escapeHtml(icon)}</span>`;
+}
+
+function addToSlot(id, slot, spec) {
+  const def = SLOTS[slot];
+  if (!def) throw new Error(`unknown slot "${slot}" (use: ${Object.keys(SLOTS).join(', ')})`);
+  const key = `${id}:${slot}:${spec.id || 'x'}`;
+  const nodes = new Set();
+  const build = (host) => {
+    if (host.querySelector(`[data-mod-slot="${key}"]`) || (def.kind === 'fab' && document.querySelector(`[data-mod-slot="${key}"]`))) return;
+    const ctx = def.post ? { card: host, post: state.posts.find((p) => `post-card-${p.id}` === host.id) || null } : { host };
+    let node;
+    if (spec.el instanceof Element) node = spec.el.cloneNode(true);
+    else {
+      const custom = spec.html != null || typeof spec.render === 'function';
+      const tag = !custom && ['button', 'fab', 'side', 'tab', 'dock'].includes(def.kind) ? 'button' : 'div';
+      node = document.createElement(tag);
+      const label = L(spec.title) || '';
+      if (spec.html != null) node.innerHTML = spec.html;
+      else if (!custom) {
+        if (def.kind === 'dock') { node.className = 'tx-dock-tab tx-mod-dock'; node.innerHTML = `<span class="tx-tab-icon">${iconHtml(spec.icon || '•')}</span><span class="tx-tab-label">${escapeHtml(label)}</span>`; }
+        else if (def.kind === 'tab') { node.className = 'tx-tab'; node.textContent = label; }
+        else if (def.kind === 'fab') { node.className = 'tx-mod-fab tx-glass'; node.innerHTML = iconHtml(spec.icon || '+'); node.title = label; }
+        else if (def.kind === 'side') { node.className = 'tx-side-btn tx-glass'; node.innerHTML = iconHtml(spec.icon || '•'); node.title = label; }
+        else { node.className = 'tx-icon-btn'; node.innerHTML = iconHtml(spec.icon || '•'); node.title = label; }
+      }
+      if (typeof spec.render === 'function') { try { spec.render(node, ctx); } catch (e) { console.warn(`[mods] ${id} slot render`, e); } }
+      if (spec.run) node.addEventListener('click', (e) => { e.stopPropagation(); try { spec.run(ctx, e); } catch (err) { console.warn(`[mods] ${id} slot run`, err); } });
+      if (def.kind === 'inline' && !node.className) node.style.cssText += ';display:inline-flex;align-items:center;margin-left:6px';
+    }
+    node.dataset.modSlot = key;
+    def.place(host, node, spec.position || 'end');
+    nodes.add(node);
+  };
+  watchSelector(id, def.selector, build);
+  const me = running.get(id);
+  const remove = () => nodes.forEach((n) => n.remove());
+  if (me) me.cleanups.push(remove);
+  return { remove };
+}
+
 function openModScreen(id, { title = '', render } = {}) {
   const el = document.createElement('div');
   el.className = 'tx-mod-screen';
@@ -279,6 +336,15 @@ function makeApi(mod) {
       },
       /** A full-screen page of your own: openScreen({ title, render(box) }) → { close(), box }. The back button/gesture closes it. */
       openScreen: (opts) => openModScreen(id, opts),
+      /**
+       * Put something into a named place of the interface:
+       *   ui.add('topbar' | 'search' | 'tabs' | 'dock' | 'fab' | 'post.header' | 'post.footer' | 'post.actions', spec)
+       * spec = { id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start' | 'end' }
+       *   - buttons ('topbar', 'search', 'tabs', 'dock', 'fab', 'post.actions') are made from title/icon/run;
+       *   - html / el / render(host, ctx) give you the whole element; ctx = { post, card } for 'post.*' slots.
+       * Returns { remove() }.
+       */
+      add: (slot, spec) => addToSlot(id, slot, spec),
       /** A button in the bottom bar: addDockItem({ id, title, icon: emoji | svg markup | 'icon-name', run }). */
       addDockItem: (item) => {
         watchSelector(id, '.tx-dock', (dock) => {

@@ -111,8 +111,10 @@ const prompt = `You write mods for TeleX, a web client for Telegram. A mod is ON
 Below is the complete specification. Read it, then build exactly the mod the user asks for at the end of this message.
 
 HARD RULES FOR YOUR ANSWER
-- Reply with the contents of the .module file ONLY. No explanations before or after. No markdown code fences.
-- The first character must be "{" (JSON bundle) or the file must start with a comment line carrying @manifest (annotated / sectioned file).
+- Put the ENTIRE .module file inside ONE markdown code block (\`\`\` … \`\`\`) and write nothing outside it except at most one short sentence. The user copies it with the "Copy" button of the code block; text outside code blocks loses backticks and turns code into links.
+- Inside the file use plain quotes and string concatenation ('a' + b) instead of backtick template literals wherever possible, so the code survives copying. Never put markdown formatting inside the code.
+- The file starts with "{" (JSON bundle) or with a comment line carrying @manifest (annotated / sectioned file).
+- Choose the right slot from the "Where to put what" table; do not invent selectors when a slot exists.
 - Fill the manifest completely: id, name, version, author, description, about (all texts for ru, en, es, pt, uk), icon (an emoji or a 96x96 SVG data URL), tags and settings if the mod has options.
 - The mod must work in day and night mode and on a phone. Use the app's CSS variables and skin tokens, not hard-coded colours.
 - Use only the documented API. Do not invent tx methods.

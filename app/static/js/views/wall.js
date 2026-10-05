@@ -348,7 +348,7 @@ export async function loadFeed(forceRefresh = false) {
 
   const loader = $('feed-loader');
   const sentinelText = $('sentinel-text');
-  if (state.posts.length === 0 && state.isAuth) show(loader, true);
+  if (state.posts.length === 0 && state.isAuth) { show(loader, true); document.querySelector('#posts-container > .sk-wrap')?.remove(); }
   show(sentinelText, false);
 
   // Nothing on screen yet: paint channels as they arrive (text first, media streams in after).

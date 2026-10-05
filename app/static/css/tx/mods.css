@@ -59,3 +59,9 @@
 .tx-mod-card.is-tile .tx-switch { margin-left: 4px; }
 .tx-mod-screen { position: fixed; inset: 0; z-index: 150; background: var(--tx-bg); overflow-y: auto; padding: 0 12px calc(24px + var(--tx-safe-bottom)); }
 .tx-mod-screen .tx-titlebar { position: sticky; top: 0; z-index: 2; background: var(--tx-bg); }
+
+/* Slots */
+.tx-mod-fab { position: fixed; right: 16px; bottom: calc(var(--tx-dock-h) + 28px + var(--tx-safe-bottom)); z-index: 45; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 0; color: var(--tx-text); cursor: pointer; transition: transform .16s cubic-bezier(.3,1.4,.5,1); }
+.tx-mod-fab:active { transform: scale(0.9); }
+.tx-mod-fab .icon { font-size: 24px; }
+.tx-mainbar > .tx-icon-btn[data-mod-slot], #header-search-bar > .tx-icon-btn[data-mod-slot] { flex-shrink: 0; }
