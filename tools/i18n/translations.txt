@@ -480,3 +480,17 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Удалить ключ ‖ Remove key ‖ Eliminar clave ‖ Remover chave ‖ Видалити ключ
 Установить мод «{a}»? ‖ Install the mod “{a}”? ‖ ¿Instalar el mod «{a}»? ‖ Instalar o mod «{a}»? ‖ Встановити мод «{a}»?
 Это бесплатно ‖ It's free ‖ Es gratis ‖ É grátis ‖ Це безкоштовно
+Проверка модов ‖ Mod review ‖ Revisión de mods ‖ Revisão de mods ‖ Перевірка модів
+ИИ найдёт опасный код и ошибки до установки. ‖ AI will find dangerous code and errors before installing. ‖ La IA encontrará código peligroso y errores antes de instalar. ‖ A IA encontrará código perigoso e erros antes de instalar. ‖ ШІ знайде небезпечний код і помилки до встановлення.
+ИИ-моды ‖ AI mods ‖ Mods con IA ‖ Mods com IA ‖ ШІ-моди
+чат и умные инструменты работают сразу, без своих ключей. ‖ chat and smart tools work right away, no keys of their own. ‖ el chat y las herramientas inteligentes funcionan al instante, sin claves propias. ‖ o chat e as ferramentas inteligentes funcionam na hora, sem chaves próprias. ‖ чат і розумні інструменти працюють одразу, без власних ключів.
+Быстро ‖ Fast ‖ Rápido ‖ Rápido ‖ Швидко
+ответ за секунды, бесплатного лимита хватает для обычной работы. ‖ answers in seconds; the free limit is enough for everyday use. ‖ respuestas en segundos; el límite gratuito basta para el uso diario. ‖ respostas em segundos; o limite gratuito basta para o uso diário. ‖ відповідь за секунди, безкоштовного ліміту вистачає для звичайної роботи.
+Приватно ‖ Private ‖ Privado ‖ Privado ‖ Приватно
+ключ хранится только на вашем устройстве и никуда, кроме Groq, не отправляется. ‖ the key stays on your device and is sent nowhere except Groq. ‖ la clave se queda en tu dispositivo y no se envía a ningún sitio salvo Groq. ‖ a chave fica no seu dispositivo e não é enviada a lugar nenhum além do Groq. ‖ ключ зберігається лише на вашому пристрої й нікуди, крім Groq, не надсилається.
+Внимание! ‖ Attention! ‖ ¡Atención! ‖ Atenção! ‖ Увага!
+Без ключа вы сами урезаете возможности TeleX. Ключ бесплатный и никуда не отправляется, кроме Groq. ‖ Without a key you cut TeleX's abilities yourself. The key is free and is sent nowhere except Groq. ‖ Sin clave limitas tú mismo las funciones de TeleX. La clave es gratuita y no se envía a ningún sitio salvo Groq. ‖ Sem a chave você mesmo limita os recursos do TeleX. A chave é gratuita e não é enviada a lugar nenhum além do Groq. ‖ Без ключа ви самі обмежуєте можливості TeleX. Ключ безкоштовний і нікуди, крім Groq, не надсилається.
+Вставить ключ ‖ Enter the key ‖ Introducir la clave ‖ Inserir a chave ‖ Вставити ключ
+Всё равно пропустить ‖ Skip anyway ‖ Omitir igualmente ‖ Pular mesmo assim ‖ Все одно пропустити
+Нужен ключ Groq: Настройки → Ключ Groq ‖ A Groq key is needed: Settings → Groq key ‖ Se necesita una clave de Groq: Ajustes → Clave de Groq ‖ É preciso uma chave do Groq: Configurações → Chave do Groq ‖ Потрібен ключ Groq: Налаштування → Ключ Groq
+Мод использует ИИ через ваш ключ Groq. ‖ The mod uses AI through your Groq key. ‖ El mod usa IA con tu clave de Groq. ‖ O mod usa IA com a sua chave do Groq. ‖ Мод використовує ШІ через ваш ключ Groq.

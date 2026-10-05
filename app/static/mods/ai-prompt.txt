@@ -40,6 +40,34 @@ Goal: you are asked to "make a mod/theme/widget for TeleX". Produce **one file w
 `ui.add` spec: `{ id, title?, icon?, run?, html?, el?, render?(host, ctx), position?: 'start'|'end' }`. `icon` is an emoji, an SVG string or an icon name.
 Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole element. Every slot is removed automatically when the mod is turned off.
 
+### AI inside a mod (`tx.ai`, free, uses the user's own Groq key)
+
+TeleX has a built-in AI. A mod can use it **without its own API key**: declare `"permissions": ["ai"]` in the manifest and call `tx.ai`.
+The user adds a free Groq key once (Settings → Groq key); the install dialog tells them that the mod uses AI.
+
+- `tx.ai.available()` → `true` when the manifest has the permission **and** a key is saved. Check it before calling and show a hint (`Settings → Groq key`) otherwise.
+- `await tx.ai.ask('prompt', { system?, json?, maxTokens?, temperature? })` → string
+- `await tx.ai.chat([{ role: 'user'|'assistant', content }], { system?, json?, maxTokens?, temperature? })` → string (an object when `json: true`)
+- `tx.lang()` → `'ru'|'en'|'es'|'pt'|'uk'` — tell the model which language to answer in.
+- Limits: ≤ 12 requests per minute per mod, ≤ 12 000 characters per message, ≤ 2 000 output tokens, last 24 messages. The model is small and fast (a Groq free-plan model): give short, concrete instructions, ask for a short answer, never send secrets.
+- Errors are thrown (`e.message` is user-readable; `e.code` is `'no-key' | 'limit' | 'key'`) — always `.catch` and show the message.
+- A mod may also call any other AI with **its own** key: add a `settings` field `{ "key": "apiKey", "type": "text" }` and `fetch` it yourself — but prefer `tx.ai`.
+
+Kinds that fit: a chat screen (`ui.addDockItem` + `ui.openScreen`), a "translate / summarise / explain" button on a post (`post.actions` → `ask(post.text)`), a post classifier or tone filter (`ui.onPost` + `json: true`, remember results in `tx.storage`, never one request per scrolled post), a writing helper. Full examples: `app/static/mods/ai-chat.module`, `ai-translate.module`.
+
+```
+// @manifest {"id":"ai-explain","name":"Explain","version":"1.0.0","icon":"💡","description":"Explains a post in simple words","permissions":["ai"]}
+// @part js
+export default function (tx) {
+  tx.ui.add('post.actions', { id: 'explain', icon: '💡', title: 'Explain', run: function (ctx) {
+    if (!tx.ai.available()) { tx.toast('Settings → Groq key'); return; }
+    tx.ai.ask(String(ctx.post && ctx.post.text || '').slice(0, 4000), { system: 'Explain the text in two simple sentences.', maxTokens: 300 })
+      .then(function (a) { tx.ui.openScreen({ title: 'Explain', render: function (b) { b.textContent = a; } }); })
+      .catch(function (e) { tx.toast(e.message); });
+  } });
+}
+```
+
 ### Kinds of mods (pick one, mix if needed)
 
 1. **Theme** — `theme` part: colours, wallpapers, `skin` tokens. No code.
@@ -47,7 +75,8 @@ Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole 
 3. **Tool button** — an icon that does one thing (`dock`/`topbar`/`fab`) and shows the result with `tx.toast` or `tx.ui.openScreen`.
 4. **Post enhancer** — `post.header`/`post.footer`/`post.actions`, or `ui.onPost` + `postText` (translate, reading time, link previews, notes).
 5. **Filter** — `ui.onPost((el, post) => { if (…) el.style.display = 'none'; })` with settings for the words/channels to hide.
-6. **Own page** — `ui.openScreen` or `settings.addPage` (statistics, lists, a notebook stored in `tx.storage`).
+6. **AI tool** — `permissions: ["ai"]` + `tx.ai.ask/chat` (chat, translator, summariser, classifier).
+7. **Own page** — `ui.openScreen` or `settings.addPage` (statistics, lists, a notebook stored in `tx.storage`).
 
 ## Output contract
 
@@ -66,6 +95,7 @@ Buttons are built from `icon`/`title`/`run`; `html`/`render` give you the whole 
     "icon": "🧩",                    // emoji (card icon when there is no preview)
     "preview": ["https://…/shot.png"],   // optional; https:// or data:image/…; a theme gets an auto preview
     "tags": ["theme"],
+    "permissions": [],              // [] | ["ai"] — "ai" unlocks tx.ai (the user's Groq key)
     "settings": [ { "key": "size", "type": "number", "title": "Size", "default": 16, "min": 10, "max": 30 } ]
   },
   "parts": [
@@ -295,6 +325,7 @@ If a mod has *setting*s that change a token (blur strength, radius, accent), re-
 | Hide / mark posts | `ui.onPost` + a setting with the words | runs for every post, including new ones |
 | Change post text | `ext.addHook('postText', html => …)` | sync, before render; returns the new HTML |
 | Own page (notes, stats, list) | `ui.openScreen` (+ a dock or topbar button) or `settings.addPage` | a screen over the app with a back arrow; never inject into other screens |
+| AI feature (chat, translate, summarise) | `permissions: ["ai"]` + `tx.ai` | built-in, free, uses the user's key — no key handling in the mod |
 | Per-mod options | `manifest.settings` | the app renders the controls and persists the values |
 | Floating widget | an `html` part — **only** with the safe-area rules of section 1 | last resort |
 

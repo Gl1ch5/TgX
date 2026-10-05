@@ -7,7 +7,7 @@
 **Неофициальный клиент Telegram в браузере, на Android и Windows.**
 Два режима на одной учётной записи: лента всех каналов и обычные чаты.
 
-[Сайт](https://telex-web.ru/) · [TeleX](https://telex-web.ru/app/static/) · [Telegram You](https://telex-web.ru/telegram-you/) · [Android](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [Windows](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
+[Сайт](https://telex-web.ru/) · [TeleX](https://telex-web.ru/app/static/) · [Telegram You](https://telex-web.ru/telegram-you/) · [Android](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [Windows](https://github.com/Gl1ch5/TgX/releases/tag/nightly) · [Релизы](https://github.com/Gl1ch5/TgX/releases/latest)
 
 <img src="site/shots/wall.jpg" width="190" alt="Стена каналов" />
 <img src="site/shots/stories.jpg" width="190" alt="Истории" />

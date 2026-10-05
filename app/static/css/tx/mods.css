@@ -65,3 +65,7 @@
 .tx-mod-fab:active { transform: scale(0.9); }
 .tx-mod-fab .icon { font-size: 24px; }
 .tx-mainbar > .tx-icon-btn[data-mod-slot], #header-search-bar > .tx-icon-btn[data-mod-slot] { flex-shrink: 0; }
+
+.tx-mod-emoji { width: 22px; height: 22px; vertical-align: middle; }
+.tx-dock .tx-mod-emoji { width: 26px; height: 26px; }
+.tx-mod-fab .tx-mod-emoji { width: 28px; height: 28px; }

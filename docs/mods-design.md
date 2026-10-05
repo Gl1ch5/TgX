@@ -129,6 +129,7 @@ If a mod has *setting*s that change a token (blur strength, radius, accent), re-
 | Hide / mark posts | `ui.onPost` + a setting with the words | runs for every post, including new ones |
 | Change post text | `ext.addHook('postText', html => …)` | sync, before render; returns the new HTML |
 | Own page (notes, stats, list) | `ui.openScreen` (+ a dock or topbar button) or `settings.addPage` | a screen over the app with a back arrow; never inject into other screens |
+| AI feature (chat, translate, summarise) | `permissions: ["ai"]` + `tx.ai` | built-in, free, uses the user's key — no key handling in the mod |
 | Per-mod options | `manifest.settings` | the app renders the controls and persists the values |
 | Floating widget | an `html` part — **only** with the safe-area rules of section 1 | last resort |
 

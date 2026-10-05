@@ -125,7 +125,7 @@ function aiPage() {
       ${group(
         `<label class="tx-field"><input id="ai-key" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="gsk_…" value="${escapeHtml(k)}"></label>
          <div id="ai-msg" class="tx-group-hint" style="margin:0;padding:0 18px 8px;min-height:18px"></div>
-         <div style="padding:0 16px 14px;display:flex;gap:10px"><button class="tx-btn" style="flex:1" onclick="window.TelegramX.aiKeySave()">${t('Сохранить')}</button>${k ? `<button class="tx-btn" style="flex:1;background:var(--tx-surface-2);color:var(--tx-red)" onclick="window.TelegramX.aiKeyClear()">${t('Удалить ключ')}</button>` : ''}</div>`,
+         <div style="padding:0 16px 14px;display:flex;gap:10px"><button class="tx-btn" style="flex:1" onclick="window.TelegramX.aiKeySave()">${t('Сохранить')}</button>${k ? `<button class="tx-btn tx-btn-ghost is-danger" style="flex:1" onclick="window.TelegramX.aiKeyClear()">${t('Удалить ключ')}</button>` : ''}</div>`,
         { title: t('API-ключ'), hint: t('Ключ хранится только на этом устройстве и отправляется только в Groq. Бесплатный план: регистрация без карты.') },
       )}
       ${group(row({ icon: 'download', color: 'BLUE', title: t('Получить бесплатный ключ'), sub: 'console.groq.com/keys', onclick: `window.open('${GROQ_KEYS_URL}', '_blank', 'noopener')` }))}

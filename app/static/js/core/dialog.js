@@ -3,10 +3,11 @@
 import { t } from '../i18n.js';
 import { escapeHtml } from '../utils.js';
 
-export function tgDialog({ title = '', text = '', ok, cancel, icon = '', danger = false, html = '' } = {}) {
+export function tgDialog({ title = '', text = '', ok, cancel, icon = '', danger = false, html = '', tone = '' } = {}) {
   return new Promise((resolve) => {
     const el = document.createElement('div');
     el.className = 'tx-dialog-back';
+    if (tone) el.dataset.tone = tone;
     const okLabel = ok || t('ОК');
     const cancelLabel = cancel === undefined ? t('Отмена') : cancel;
     el.innerHTML = `<div class="tx-dialog" role="dialog" aria-modal="true">

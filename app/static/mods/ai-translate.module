@@ -1,0 +1,24 @@
+// @manifest {"id": "ai-translate", "name": {"ru": "Переводчик постов", "en": "Post translator", "es": "Traductor de publicaciones", "pt": "Tradutor de publicações", "uk": "Перекладач дописів"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/ai-translate.svg", "description": {"ru": "Кнопка 🌐 у поста переводит его на язык приложения", "en": "A 🌐 button on a post translates it into the app language", "es": "Un botón 🌐 traduce la publicación al idioma de la app", "pt": "Um botão 🌐 traduz a publicação para o idioma do app", "uk": "Кнопка 🌐 біля допису перекладає його мовою застосунку"}, "about": {"ru": "Работает через ваш бесплатный ключ Groq (Настройки → Ключ Groq).", "en": "Works through your free Groq key (Settings → Groq key).", "es": "Funciona con tu clave gratuita de Groq (Ajustes → Clave de Groq).", "pt": "Funciona com sua chave gratuita do Groq (Configurações → Chave do Groq).", "uk": "Працює через ваш безкоштовний ключ Groq (Налаштування → Ключ Groq)."}, "tags": ["ai", "feed"], "permissions": ["ai"]}
+// @part js
+export default function (tx) {
+  var NAMES = { ru: 'Russian', en: 'English', es: 'Spanish', pt: 'Portuguese', uk: 'Ukrainian' };
+  tx.ui.add('post.actions', {
+    id: 'translate',
+    icon: '🌐',
+    title: tx.L({ ru: 'Перевести', en: 'Translate', es: 'Traducir', pt: 'Traduzir', uk: 'Перекласти' }),
+    run: function (ctx) {
+      var post = ctx && ctx.post;
+      var text = String((post && (post.text || post.message)) || '').replace(/<[^>]+>/g, ' ').trim();
+      if (!text) { tx.toast(tx.L({ ru: 'В посте нет текста', en: 'This post has no text', es: 'La publicación no tiene texto', pt: 'A publicação não tem texto', uk: 'У дописі немає тексту' })); return; }
+      if (!tx.ai.available()) { tx.toast(tx.L({ ru: 'Нужен ключ Groq: Настройки → Ключ Groq', en: 'A Groq key is needed: Settings → Groq key', es: 'Se necesita una clave de Groq: Ajustes → Clave de Groq', pt: 'É preciso uma chave do Groq: Configurações → Chave do Groq', uk: 'Потрібен ключ Groq: Налаштування → Ключ Groq' })); return; }
+      var box;
+      tx.ui.openScreen({
+        title: tx.L({ ru: 'Перевод', en: 'Translation', es: 'Traducción', pt: 'Tradução', uk: 'Переклад' }),
+        render: function (b) { box = b; b.innerHTML = '<p style="color:var(--tx-text-2)">…</p>'; }
+      });
+      tx.ai.ask(text.slice(0, 6000), { system: 'Translate the user text into ' + (NAMES[tx.lang()] || 'English') + '. Keep the meaning, names, links and line breaks. Reply with the translation only.', maxTokens: 1500, temperature: 0.2 }).then(function (out) {
+        if (box) { box.innerHTML = ''; var p = document.createElement('div'); p.style.cssText = 'white-space:pre-wrap;font-size:16px;line-height:1.5;padding:12px 4px;color:var(--tx-text)'; p.textContent = out; box.appendChild(p); }
+      }).catch(function (e) { if (box) box.innerHTML = '<p style="color:var(--tx-red)">⚠ ' + tx.escapeHtml(e && e.message || 'error') + '</p>'; });
+    }
+  });
+}

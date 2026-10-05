@@ -8,6 +8,11 @@ on:
       - 'app/static/**'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Also publish to a versioned GitHub release with this tag (e.g. v1.0.0-beta)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -84,3 +89,18 @@ jobs:
             native/desktop/dist/TeleX-Setup.exe
             native/desktop/dist/TeleX-Portable.exe
             native/desktop/dist/version-win.json
+
+      # A normal, easy-to-find release (Releases page): run this workflow by hand with release_tag = v1.0.0-beta.
+      - name: Attach to the versioned release
+        if: ${{ inputs.release_tag != '' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: TeleX ${{ inputs.release_tag }}
+          prerelease: false
+          make_latest: true
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          files: |
+            native/desktop/dist/TeleX-Setup.exe
+            native/desktop/dist/TeleX-Portable.exe

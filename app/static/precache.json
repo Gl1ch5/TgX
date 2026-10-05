@@ -1,5 +1,5 @@
 {
- "build": "5a3bd08342",
+ "build": "2cf3fcb63e",
  "files": [
   "./",
   "index.html",
@@ -693,11 +693,15 @@
   "fonts/roboto-latin-400-normal.woff2",
   "fonts/roboto-latin-500-normal.woff2",
   "fonts/roboto-latin-700-normal.woff2",
+  "mods/ai-chat.module",
   "mods/ai-prompt.txt",
+  "mods/ai-translate.module",
   "mods/aurora-theme.module",
   "mods/catalog.json",
   "mods/clock-widget.module",
   "mods/compact-feed.module",
+  "mods/icons/ai-chat.svg",
+  "mods/icons/ai-translate.svg",
   "mods/icons/aurora-theme.svg",
   "mods/icons/clock-widget.svg",
   "mods/icons/compact-feed.svg",

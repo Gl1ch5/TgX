@@ -120,6 +120,55 @@
    "tags": [
     "widget"
    ]
+  },
+  {
+   "id": "ai-chat",
+   "name": {
+    "ru": "ИИ-чат",
+    "en": "AI chat",
+    "es": "Chat IA",
+    "pt": "Chat IA",
+    "uk": "ШІ-чат"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/ai-chat.svg",
+   "description": {
+    "ru": "Чат с ИИ прямо в приложении — через ваш бесплатный ключ Groq",
+    "en": "A chat with AI inside the app — through your free Groq key",
+    "es": "Un chat con IA dentro de la app, con tu clave gratuita de Groq",
+    "pt": "Um chat com IA dentro do app, com sua chave gratuita do Groq",
+    "uk": "Чат зі ШІ просто в застосунку — через ваш безкоштовний ключ Groq"
+   },
+   "tags": [
+    "ai"
+   ],
+   "file": "ai-chat.module"
+  },
+  {
+   "id": "ai-translate",
+   "name": {
+    "ru": "Переводчик постов",
+    "en": "Post translator",
+    "es": "Traductor de publicaciones",
+    "pt": "Tradutor de publicações",
+    "uk": "Перекладач дописів"
+   },
+   "version": "1.0.0",
+   "author": "TeleX",
+   "icon": "mods/icons/ai-translate.svg",
+   "description": {
+    "ru": "Кнопка 🌐 у поста переводит его на язык приложения",
+    "en": "A 🌐 button on a post translates it into the app language",
+    "es": "Un botón 🌐 traduce la publicación al idioma de la app",
+    "pt": "Um botão 🌐 traduz a publicação para o idioma do app",
+    "uk": "Кнопка 🌐 біля допису перекладає його мовою застосунку"
+   },
+   "tags": [
+    "ai",
+    "feed"
+   ],
+   "file": "ai-translate.module"
   }
  ]
 }

@@ -16,7 +16,8 @@ import { ext } from './ext.js';
 import { state } from '../state.js';
 import { api } from '../api.js';
 import { tgDialog } from './dialog.js';
-import { hasKey, reviewMod } from './groq.js';
+import { parseEmojis, renderEmoji } from '../emoji.js';
+import { hasKey, reviewMod, groqChat } from './groq.js';
 import { t, lang } from '../i18n.js';
 import { showToast, escapeHtml } from '../utils.js';
 import { getPrefs, onPrefsChange, applyAppearance, resolvedTheme } from './prefs.js';
@@ -191,7 +192,7 @@ function iconHtml(icon) {
   if (/^</.test(icon)) return icon;
   if (/^(https:|data:image\/|mods\/)/.test(icon)) return `<img src="${escapeHtml(icon)}" alt="" style="width:22px;height:22px;object-fit:contain">`;
   if (/^[a-z0-9-]+$/.test(icon)) return `<i class="icon icon-${icon}"></i>`;
-  return `<span style="font-size:20px;line-height:1">${escapeHtml(icon)}</span>`;
+  return `<span style="font-size:20px;line-height:1;display:inline-flex">${renderEmoji(icon, 'tx-mod-emoji')}</span>`; // Apple emoji, like in Telegram
 }
 
 function addToSlot(id, slot, spec) {
@@ -295,6 +296,10 @@ function makeApi(mod) {
       on: (name, fn) => ext.on(name, fn, id),
     },
     theme: themeApi(id),
+    /** The user's own Groq key, shared with mods that declare permissions: ["ai"]. */
+    ai: aiApi(mod),
+    /** Current app language code: 'ru' | 'en' | 'es' | 'pt' | 'uk'. */
+    lang: () => lang(),
     /** Register cleanup (timers, listeners, nodes you made yourself): runs when the mod is disabled or removed. */
     onStop: (fn) => { const r = running.get(id); if (r) r.cleanups.push(fn); },
     /** The mod's own settings (schema in manifest.settings): get(key), set(key, value), on(key | '*', fn), render(fn(container)) for a custom block */
@@ -477,10 +482,38 @@ export function cleanPasted(text) {
   return first > 0 ? s.slice(first).trim() : s;
 }
 
+const aiCalls = new Map(); // mod id → timestamps of the last minute
+/**
+ * tx.ai — built-in AI through the user's Groq key (free plan). Needs "ai" in manifest.permissions.
+ *   tx.ai.available() → boolean
+ *   await tx.ai.chat([{ role: 'user', content: '…' }], { system?, json?, maxTokens?, temperature? }) → string (or an object when json: true)
+ *   await tx.ai.ask('prompt', opts) → string
+ */
+function aiApi(mod) {
+  const id = mod.manifest.id;
+  const allowed = Array.isArray(mod.manifest.permissions) && mod.manifest.permissions.includes('ai');
+  const chat = async (messages, opts = {}) => {
+    if (!allowed) throw new Error('tx.ai needs "ai" in manifest.permissions');
+    if (!hasKey()) throw Object.assign(new Error(t('Нужен ключ Groq: Настройки → Ключ Groq')), { code: 'no-key' });
+    const now = Date.now();
+    const recent = (aiCalls.get(id) || []).filter((x) => now - x < 60000);
+    if (recent.length >= 12) throw Object.assign(new Error('tx.ai: at most 12 requests per minute per mod'), { code: 'limit' });
+    aiCalls.set(id, [...recent, now]);
+    let list = (Array.isArray(messages) ? messages : [{ role: 'user', content: String(messages) }]).map((m) => ({ role: m.role === 'assistant' || m.role === 'system' ? m.role : 'user', content: String(m.content ?? '').slice(0, 12000) }));
+    if (opts.system) list = [{ role: 'system', content: String(opts.system).slice(0, 6000) }, ...list];
+    list = list.slice(-24);
+    const out = await groqChat(list, { json: !!opts.json, maxTokens: Math.min(Number(opts.maxTokens) || 800, 2000), temperature: opts.temperature });
+    if (!opts.json) return out;
+    const m = out.match(/\{[\s\S]*\}/);
+    return JSON.parse(m ? m[0] : out);
+  };
+  return { available: () => allowed && hasKey(), chat, ask: (prompt, opts) => chat([{ role: 'user', content: prompt }], opts) };
+}
+
 function modIconHtml(m) {
   const i = modIcon(m.icon);
-  if (i.img) return `<img src="${escapeHtml(i.img)}" alt="">`;
-  return i.emoji ? `<span class="tx-mod-thumb" style="display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--tx-surface-2)">${escapeHtml(i.emoji)}</span>` : '';
+  if (i.img) return `<span class="tx-mod-pic is-img"><img src="${escapeHtml(i.img)}" alt=""></span>`;
+  return `<span class="tx-mod-pic is-icon">${parseEmojis(i.emoji || (L(m.name) || '?').trim().slice(0, 1).toUpperCase())}</span>`; // Apple emoji, like in Telegram
 }
 
 /** Reviews the mod with the user's Groq key (if any) behind a small progress dialog; null when there is no key or the check failed. */
@@ -510,6 +543,7 @@ export async function installMod(mod) {
   let note = '';
   if (risky) body = (escapeHtml(t('Мод получит полный доступ к приложению и вашему аккаунту. Ставьте только моды, которым доверяете.') + (m.verified ? '' : ' ' + t('Этот мод не проверен.'))));
   else body = escapeHtml(t('Тема меняет только оформление и не выполняет код.'));
+  if (Array.isArray(m.permissions) && m.permissions.includes('ai')) body += `<br><br>${escapeHtml(t('Мод использует ИИ через ваш ключ Groq.'))}${hasKey() ? '' : ' ' + escapeHtml(t('Нужен ключ Groq: Настройки → Ключ Groq'))}`;
   if (review) {
     const cls = review.verdict === 'ok' ? '' : review.verdict === 'bad' ? ' is-bad' : ' is-warn';
     const head = review.verdict === 'ok' ? t('ИИ-проверка: проблем не найдено') : review.verdict === 'bad' ? t('ИИ-проверка: опасный код') : t('ИИ-проверка: есть замечания');

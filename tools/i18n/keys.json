@@ -330,6 +330,46 @@
   "plural": false
  },
  {
+  "key": "Проверка модов",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ найдёт опасный код и ошибки до установки.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "ИИ-моды",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "чат и умные инструменты работают сразу, без своих ключей.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Быстро",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "ответ за секунды, бесплатного лимита хватает для обычной работы.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Приватно",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "ключ хранится только на вашем устройстве и никуда, кроме Groq, не отправляется.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
   "key": "Это бесплатно",
   "where": "js/components/onboarding.js",
   "plural": false
@@ -341,6 +381,26 @@
  },
  {
   "key": "Получить ключ",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Внимание!",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Без ключа вы сами урезаете возможности TeleX. Ключ бесплатный и никуда не отправляется, кроме Groq.",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Вставить ключ",
+  "where": "js/components/onboarding.js",
+  "plural": false
+ },
+ {
+  "key": "Всё равно пропустить",
   "where": "js/components/onboarding.js",
   "plural": false
  },
@@ -620,6 +680,11 @@
   "plural": false
  },
  {
+  "key": "Нужен ключ Groq: Настройки → Ключ Groq",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
   "key": "Проверяем мод…",
   "where": "js/core/mods.js",
   "plural": false
@@ -651,6 +716,11 @@
  },
  {
   "key": "Тема меняет только оформление и не выполняет код.",
+  "where": "js/core/mods.js",
+  "plural": false
+ },
+ {
+  "key": "Мод использует ИИ через ваш ключ Groq.",
   "where": "js/core/mods.js",
   "plural": false
  },

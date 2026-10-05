@@ -1,0 +1,60 @@
+// @manifest {"id": "ai-chat", "name": {"ru": "ИИ-чат", "en": "AI chat", "es": "Chat IA", "pt": "Chat IA", "uk": "ШІ-чат"}, "version": "1.0.0", "author": "TeleX", "icon": "mods/icons/ai-chat.svg", "description": {"ru": "Чат с ИИ прямо в приложении — через ваш бесплатный ключ Groq", "en": "A chat with AI inside the app — through your free Groq key", "es": "Un chat con IA dentro de la app, con tu clave gratuita de Groq", "pt": "Um chat com IA dentro do app, com sua chave gratuita do Groq", "uk": "Чат зі ШІ просто в застосунку — через ваш безкоштовний ключ Groq"}, "about": {"ru": "Кнопка 🤖 в нижней панели открывает чат. Ответы даёт модель Groq по вашему ключу (Настройки → Ключ Groq). История хранится только на устройстве.", "en": "The 🤖 button in the bottom bar opens a chat. Answers come from a Groq model using your key (Settings → Groq key). The history stays on the device only.", "es": "El botón 🤖 de la barra inferior abre un chat. Responde un modelo de Groq con tu clave (Ajustes → Clave de Groq). El historial queda solo en el dispositivo.", "pt": "O botão 🤖 na barra inferior abre um chat. As respostas vêm de um modelo do Groq com sua chave (Configurações → Chave do Groq). O histórico fica só no dispositivo.", "uk": "Кнопка 🤖 у нижній панелі відкриває чат. Відповіді дає модель Groq за вашим ключем (Налаштування → Ключ Groq). Історія зберігається лише на пристрої."}, "tags": ["ai"], "permissions": ["ai"]}
+// @part css
+.aic-list { display: flex; flex-direction: column; gap: 8px; padding: 8px 0 90px; }
+.aic-msg { max-width: 86%; padding: 9px 13px; border-radius: 17px; font-size: 15.5px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+.aic-msg.is-ai { align-self: flex-start; background: var(--tx-bubble); color: var(--tx-text); border-bottom-left-radius: 6px; }
+.aic-msg.is-me { align-self: flex-end; background: var(--tx-bubble-out); color: #fff; border-bottom-right-radius: 6px; }
+.aic-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 151; display: flex; gap: 8px; align-items: flex-end; padding: 8px 12px calc(10px + var(--tx-safe-bottom)); background: var(--tx-bg); }
+.aic-bar textarea { flex: 1; resize: none; max-height: 120px; border: 0; outline: 0; border-radius: 20px; padding: 11px 15px; background: var(--tx-surface); color: var(--tx-text); font: 16px var(--tx-font); }
+.aic-send { flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--tx-accent-fill); color: #fff; font-size: 18px; }
+// @part js
+export default function (tx) {
+  var NAMES = { ru: 'Russian', en: 'English', es: 'Spanish', pt: 'Portuguese', uk: 'Ukrainian' };
+  var SYSTEM = 'You are a helpful, concise assistant inside TeleX, a Telegram client. Answer in ' + (NAMES[tx.lang()] || 'English') + ' unless the user writes in another language. Be brief; use plain text without markdown headings.';
+  var history = tx.storage.get('history') || [];
+  function save() { tx.storage.set('history', history.slice(-30)); }
+  function open() {
+    var screen = tx.ui.openScreen({
+      title: tx.L({ ru: 'ИИ-чат', en: 'AI chat', es: 'Chat IA', pt: 'Chat IA', uk: 'ШІ-чат' }),
+      render: function (box) {
+        box.innerHTML = '<div class="aic-list"></div><div class="aic-bar"><textarea rows="1" placeholder="' + tx.escapeHtml(tx.L({ ru: 'Сообщение…', en: 'Message…', es: 'Mensaje…', pt: 'Mensagem…', uk: 'Повідомлення…' })) + '"></textarea><button class="aic-send">➤</button></div>';
+        var list = box.querySelector('.aic-list');
+        var input = box.querySelector('textarea');
+        var busy = false;
+        function bubble(role, text) {
+          var d = document.createElement('div');
+          d.className = 'aic-msg ' + (role === 'user' ? 'is-me' : 'is-ai');
+          d.textContent = text;
+          list.appendChild(d);
+          list.scrollTop = list.scrollHeight;
+          box.parentElement && (box.parentElement.scrollTop = box.parentElement.scrollHeight);
+          return d;
+        }
+        history.forEach(function (m) { bubble(m.role, m.content); });
+        if (!tx.ai.available()) bubble('assistant', tx.L({ ru: 'Нужен бесплатный ключ Groq: Настройки → Ключ Groq.', en: 'A free Groq key is needed: Settings → Groq key.', es: 'Se necesita una clave gratuita de Groq: Ajustes → Clave de Groq.', pt: 'É preciso uma chave gratuita do Groq: Configurações → Chave do Groq.', uk: 'Потрібен безкоштовний ключ Groq: Налаштування → Ключ Groq.' }));
+        function send() {
+          var text = input.value.trim();
+          if (!text || busy) return;
+          input.value = '';
+          busy = true;
+          history.push({ role: 'user', content: text });
+          bubble('user', text);
+          var wait = bubble('assistant', '…');
+          tx.ai.chat(history.slice(-12), { system: SYSTEM, maxTokens: 700, temperature: 0.6 }).then(function (answer) {
+            wait.textContent = answer;
+            history.push({ role: 'assistant', content: answer });
+            save();
+          }).catch(function (e) {
+            wait.textContent = '⚠ ' + (e && e.message ? e.message : 'error');
+            history.pop();
+          }).then(function () { busy = false; });
+        }
+        box.querySelector('.aic-send').addEventListener('click', send);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+      }
+    });
+    return screen;
+  }
+  tx.ui.addDockItem({ id: 'ai-chat', title: tx.L({ ru: 'ИИ', en: 'AI', es: 'IA', pt: 'IA', uk: 'ШІ' }), icon: '🤖', run: open });
+  tx.ext.addMenu('settings', function () { return [{ title: tx.L({ ru: 'ИИ-чат', en: 'AI chat', es: 'Chat IA', pt: 'Chat IA', uk: 'ШІ-чат' }), icon: 'st-features', color: 'PURPLE', run: open }]; });
+}

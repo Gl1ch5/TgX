@@ -24,16 +24,17 @@ export async function testKey(key) {
   } catch { return 'offline'; }
 }
 
-async function chat(messages, { signal, json = true, maxTokens = 900 } = {}) {
+export async function groqChat(messages, opts = {}) {
+  const { signal, json = true, maxTokens = 900 } = opts;
   let lastErr;
   for (const model of MODELS) {
-    const body = { model, messages, temperature: 0.1, max_completion_tokens: maxTokens };
+    const body = { model, messages, temperature: opts.temperature ?? 0.1, max_completion_tokens: maxTokens };
     if (json) body.response_format = { type: 'json_object' };
     if (model.startsWith('openai/gpt-oss')) body.reasoning_effort = 'low';
     try {
       const r = await fetch(`${API}/chat/completions`, { method: 'POST', signal, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getKey()}` }, body: JSON.stringify(body) });
-      if (r.status === 401 || r.status === 403) throw Object.assign(new Error('key'), { fatal: true });
-      if (r.status === 429) throw Object.assign(new Error('limit'), { fatal: true });
+      if (r.status === 401 || r.status === 403) throw Object.assign(new Error('The Groq key was rejected'), { fatal: true, code: 'key' });
+      if (r.status === 429) throw Object.assign(new Error('Groq free limit reached, try again in a minute'), { fatal: true, code: 'limit' });
       if (!r.ok) { lastErr = new Error('HTTP ' + r.status); continue; } // model missing / not allowed → next one
       const data = await r.json();
       return data.choices?.[0]?.message?.content || '';
@@ -59,7 +60,7 @@ export async function reviewMod(bundle, { signal } = {}) {
   const code = JSON.stringify({ manifest: { id: bundle.manifest?.id, name: bundle.manifest?.name, permissions: bundle.manifest?.permissions }, parts: bundle.parts }, null, 1);
   const clipped = code.length > 14000 ? code.slice(0, 9000) + '\n/* … cut … */\n' + code.slice(-4000) : code; // free plan: 8K tokens per minute
   try {
-    const out = await chat([{ role: 'system', content: REVIEW_RULES + `\nWrite "summary" and "issues" in ${language}.` }, { role: 'user', content: clipped }], { signal });
+    const out = await groqChat([{ role: 'system', content: REVIEW_RULES + `\nWrite "summary" and "issues" in ${language}.` }, { role: 'user', content: clipped }], { signal });
     const m = out.match(/\{[\s\S]*\}/);
     const j = JSON.parse(m ? m[0] : out);
     const verdict = ['ok', 'warn', 'bad'].includes(j.verdict) ? j.verdict : 'warn';

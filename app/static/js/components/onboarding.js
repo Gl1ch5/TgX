@@ -6,6 +6,7 @@ import { getPrefs, setPref, applyAppearance } from '../core/prefs.js';
 import { tgDialog } from '../core/dialog.js';
 import { getKey, setKey, testKey, looksLikeKey, GROQ_KEYS_URL } from '../core/groq.js';
 import { escapeHtml, showToast } from '../utils.js';
+import { parseEmojis } from '../emoji.js';
 
 const DONE = 'telex.onboarded';
 const ASKED = 'telex.groq.asked';
@@ -58,6 +59,7 @@ function show(startStep) {
     () => {
       const cur = getPrefs().theme || 'auto';
       return {
+        icon: '🎨',
         title: t('Оформление'),
         sub: t('Выберите тему. Её можно изменить позже в настройках.'),
         body: `<div class="tx-onb-themes">${THEMES.map(([id, label]) => `<button class="tx-onb-theme${cur === id ? ' is-on' : ''}" data-theme="${id}">${preview(id)}<span>${t(label)}</span></button>`).join('')}</div>`,
@@ -65,12 +67,14 @@ function show(startStep) {
       };
     },
     () => ({
+      icon: '🌐',
       title: t('Язык'),
       sub: t('Приложение перезагрузится, чтобы применить язык.'),
       body: `<div class="tx-onb-list">${LANGUAGES.map((l) => `<button class="tx-onb-opt${l.code === lang() ? ' is-on' : ''}" data-lang="${l.code}"><b>${escapeHtml(l.name)}</b><small>${escapeHtml(l.english)}</small><i></i></button>`).join('')}</div>`,
       next: t('Далее'),
     }),
     () => ({
+      icon: '⚡',
       title: t('Ключ Groq (по желанию)'),
       sub: t('Бесплатный ключ нужен для умных функций. Сначала — проверка модов на ошибки и опасный код перед установкой.'),
       body: `<label class="tx-onb-field"><input id="onb-key" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="gsk_…" value="${escapeHtml(getKey())}"></label>
@@ -86,6 +90,7 @@ function show(startStep) {
     const s = steps[step]();
     box.innerHTML = `
       <div class="tx-onb-grab"></div>
+      <div class="tx-onb-ico">${parseEmojis(s.icon)}</div>
       <div class="tx-onb-dots">${steps.map((_, i) => `<i class="${i === step ? 'on' : ''}"></i>`).join('')}</div>
       <h2>${escapeHtml(s.title)}</h2>
       <p class="tx-onb-sub">${escapeHtml(s.sub)}</p>
@@ -96,18 +101,35 @@ function show(startStep) {
       </div>`;
   };
 
+  const benefits = () => `<ul class="tx-dialog-list">
+      <li><b>${escapeHtml(t('Проверка модов'))}</b> — ${escapeHtml(t('ИИ найдёт опасный код и ошибки до установки.'))}</li>
+      <li><b>${escapeHtml(t('ИИ-моды'))}</b> — ${escapeHtml(t('чат и умные инструменты работают сразу, без своих ключей.'))}</li>
+      <li><b>${escapeHtml(t('Быстро'))}</b> — ${escapeHtml(t('ответ за секунды, бесплатного лимита хватает для обычной работы.'))}</li>
+      <li><b>${escapeHtml(t('Приватно'))}</b> — ${escapeHtml(t('ключ хранится только на вашем устройстве и никуда, кроме Groq, не отправляется.'))}</li>
+    </ul>`;
+
+  // 1st refusal: friendly explanation, 2nd: a red warning with every benefit and the sheet closes after a further refusal.
   const persuade = async () => {
-    // first refusal: explain; second refusal: never ask again
-    if (ls.get(ASKED) === '1') return true;
-    ls.set(ASKED, '1');
-    const again = await tgDialog({
-      title: t('Это бесплатно'),
-      text: t('Ключ Groq абсолютно бесплатный: регистрация занимает минуту, банковская карта не нужна. С ним TeleX проверяет моды перед установкой, а умные функции работают быстрее и удобнее.'),
-      ok: t('Получить ключ'),
-      cancel: t('Пропустить'),
-    });
+    const asked = Number(ls.get(ASKED) || 0);
+    if (asked >= 2) return true;
+    ls.set(ASKED, String(asked + 1));
+    const again = asked === 0
+      ? await tgDialog({
+        title: t('Это бесплатно'),
+        html: `<p>${escapeHtml(t('Ключ Groq абсолютно бесплатный: регистрация занимает минуту, банковская карта не нужна. С ним TeleX проверяет моды перед установкой, а умные функции работают быстрее и удобнее.'))}</p>`,
+        ok: t('Получить ключ'),
+        cancel: t('Пропустить'),
+      })
+      : await tgDialog({
+        tone: 'alert',
+        icon: `<span class="tx-mod-pic is-icon is-alert">${parseEmojis('⚠️')}</span>`,
+        title: t('Внимание!'),
+        html: `<p class="tx-dialog-alert">${escapeHtml(t('Без ключа вы сами урезаете возможности TeleX. Ключ бесплатный и никуда не отправляется, кроме Groq.'))}</p>${benefits()}`,
+        ok: t('Вставить ключ'),
+        cancel: t('Всё равно пропустить'),
+      });
     if (again) { window.open(GROQ_KEYS_URL, '_blank', 'noopener'); return false; }
-    return true;
+    return asked >= 1; // first refusal keeps the sheet open (the red warning follows), the second one finishes
   };
 
   const saveKey = async () => {
