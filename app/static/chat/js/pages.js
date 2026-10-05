@@ -48,7 +48,7 @@ export function renderSettings() {
       <a class="cx-set" href="../" style="text-decoration:none;color:inherit">${I.wall}<span>${t('Стена каналов TeleX')}</span></a>
     </div>
     <div class="cx-card"><button class="cx-set danger" data-act="logout">${I.logout}<span>${t('Выйти')}</span></button></div>
-    <div class="cx-end">TeleX Chat · ${t('неофициальный клиент Telegram')}</div></div>`;
+    <div class="cx-end">Telegram You · ${t('неофициальный клиент Telegram')}</div></div>`;
   el.onclick = async (e) => {
     const th = e.target.closest('[data-theme]');
     if (th) { setPref('theme', th.dataset.theme); renderSettings(); return; }

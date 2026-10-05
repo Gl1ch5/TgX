@@ -1,7 +1,7 @@
 /**
  * ====================================================================
  * CHAT CLIENT API — dialogs, history, sending, live updates for the
- * "TeleX Chat" client (app/static/chat/). Installed on TelegramService
+ * "Telegram You" client (app/static/chat/). Installed on TelegramService
  * (telegram.js), so it works both on the page and inside the worker.
  *
  * Peer keys: "u123" (user/bot), "g123" (basic group), "c123" (channel/supergroup).

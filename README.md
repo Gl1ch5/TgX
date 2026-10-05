@@ -7,7 +7,7 @@
 **Неофициальный клиент Telegram в браузере, на Android и Windows.**
 Два режима на одной учётной записи: лента всех каналов и обычные чаты.
 
-[Сайт](https://telex-web.ru/) · [TeleX](https://telex-web.ru/app/static/) · [TeleX Chat](https://telex-web.ru/app/static/chat/) · [Android](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [Windows](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
+[Сайт](https://telex-web.ru/) · [TeleX](https://telex-web.ru/app/static/) · [Telegram You](https://telex-web.ru/app/static/chat/) · [Android](https://github.com/Gl1ch5/TgX/releases/download/nightly/TeleX-android.apk) · [Windows](https://github.com/Gl1ch5/TgX/releases/tag/nightly)
 
 <img src="site/shots/wall.jpg" width="190" alt="Стена каналов" />
 <img src="site/shots/stories.jpg" width="190" alt="Истории" />
@@ -20,7 +20,7 @@
 
 **TeleX** — публикации всех ваших каналов одной лентой. Истории, комментарии, реакции, премиум-эмодзи, закреплённые сообщения, поиск по каналу.
 
-**TeleX Chat** (бета) — обычный клиент: список чатов с папками и архивом, переписка, ответы и пересылки, фото, видео, голосовые и файлы, отправка и редактирование, «печатает…», галочки прочитанного, контакты. Внешний вид повторяет Telegram для Android.
+**Telegram You** (бета) — обычный клиент: список чатов с папками и архивом, переписка, ответы и пересылки, фото, видео, голосовые и файлы, отправка и редактирование, «печатает…», галочки прочитанного, контакты. Внешний вид повторяет Telegram для Android.
 
 Общее для обоих:
 
@@ -56,7 +56,7 @@ npm run i18n         # проверка и сборка переводов
 | Папка | Назначение |
 |---|---|
 | `app/static/` | клиент TeleX: `js/telegram.js` (движок), `js/views`, `js/components`, `css/tx`, `sw.js` |
-| `app/static/chat/` | клиент TeleX Chat |
+| `app/static/chat/` | клиент Telegram You |
 | `native/android`, `native/desktop` | оболочки WebView и Electron |
 | `tools/` | сборка GramJS, переводы, извлечение иконок, тесты |
 | `site/`, `index.html` | лендинг |

@@ -69,7 +69,7 @@ UI строится шаблонными строками (`innerHTML`) и об�
 
 ### 3.4 Данные
 * `state` (js/state.js) — простой объект: `isAuth`, `user`, `channels`, `posts`, `stories`…
-* Сообщение/пост — **простой объект** (см. `formatGroup()` в `telegram.js`): `{id, msg_id, channel_id, channel, timestamp, text, text_html, media_type, media_items[], views, replies_count, comments_enabled, reactions[], buttons, is_pinned, …}`. Для чатов используется своя модель (см. раздел «TeleX Chat»).
+* Сообщение/пост — **простой объект** (см. `formatGroup()` в `telegram.js`): `{id, msg_id, channel_id, channel, timestamp, text, text_html, media_type, media_items[], views, replies_count, comments_enabled, reactions[], buttons, is_pinned, …}`. Для чатов используется своя модель (см. раздел «Telegram You»).
 * Медиа в UI — всегда URL вида `media/<kind>/…` (см. §4).
 
 ### 3.5 Сессия и кэши (`localStorage`)
@@ -106,7 +106,7 @@ URL `media/<kind>/…` → `sw.js` перехватывает → просит �
 * `loadDialogs()` грузит до 100 диалогов и кэширует сущности — для чатов нужна полноценная пагинация и IndexedDB.
 * Тестировать на живом Telegram из песочницы обычно нельзя → `07-TESTING.md`.
 
-## 10. TeleX Chat (`app/static/chat/`)
+## 10. Telegram You (`app/static/chat/`)
 Второй клиент: обычные чаты. Работает на том же движке и той же сессии, лежит внутри области Service Worker (`app/static/`), поэтому медиа идёт тем же путём.
 ```
 chat/index.html         разметка: список (aside), переписка (main), меню, просмотрщик

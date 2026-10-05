@@ -31,7 +31,7 @@ export const fake = {
   hasSession: () => true,
   cachedMe: () => ({ id: 1, name: 'Pavel', first_name: 'Pavel', phone: '79001234567', username: 'pavel', avatar: null }),
   async getMe() { return this.cachedMe(); },
-  async getFullMe() { return { about: 'TeleX Chat — демо' }; },
+  async getFullMe() { return { about: 'Telegram You — демо' }; },
   warmUp() {}, authError: (e) => ({ status: 'error', message: String(e) }),
   async chatDialogs({ limit = 40, cursor = null, archived = false } = {}) {
     if (archived) return { dialogs: [], hasMore: false, cursor: null };

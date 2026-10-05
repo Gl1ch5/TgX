@@ -1,4 +1,4 @@
-// TeleX Chat — boot: appearance, language, auth, tabs, live updates.
+// Telegram You — boot: appearance, language, auth, tabs, live updates.
 import { applyAppearance, getPrefs, onPrefsChange } from '../../js/core/prefs.js';
 import { applyDocumentLanguage, translateTree } from '../../js/i18n.js';
 import { S, t, on, avatar } from './store.js';

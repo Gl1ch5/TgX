@@ -122,8 +122,8 @@ const ok = (msg) => console.log('  ✓', msg);
       await ctx.close();
     }
   }
-  // ---- TeleX Chat (app/static/chat/, demo service ?fake=1) ----
-  console.log('\nTeleX Chat');
+  // ---- Telegram You (app/static/chat/, demo service ?fake=1) ----
+  console.log('\nTelegram You');
   for (const scheme of ['dark', 'light']) {
     const ctx = await browser.newContext({ viewport: { width: 412, height: 860 }, colorScheme: scheme, locale: 'ru-RU' });
     const page = await ctx.newPage();
