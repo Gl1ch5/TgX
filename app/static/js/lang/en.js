@@ -438,4 +438,5 @@ export const EN = {
   "Промпт скопирован — вставьте его в нейросеть": "Prompt copied — paste it into an AI",
   "Буфер обмена пуст": "The clipboard is empty",
   "Вставьте мод в поле ниже": "Paste the mod into the field below",
+  "Мод не запустился: {a}. Скорее всего, файл повредился при копировании (пропали обратные кавычки или код превратился в ссылки). Скопируйте его целиком из блока кода или сохраните файлом .module.": "The mod did not start: {a}. Most likely the file was damaged while copying (backticks lost or code turned into links). Copy it whole from the code block or save it as a .module file.",
 };

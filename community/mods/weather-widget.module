@@ -1,0 +1,69 @@
+// @manifest {"id": "weather-widget", "name": {"ru": "Виджет погоды", "en": "Weather Widget", "es": "Widget del Clima", "pt": "Widget do Clima", "uk": "Віджет погоди"}, "version": "1.0.1", "author": "TeleX Community", "description": {"ru": "Текущая погода и температура в шапке ленты через открытый API", "en": "Current weather and temperature in the feed bar via open API", "es": "Clima actual y temperatura en la barra superior con API abierta", "pt": "Clima atual e temperatura na barra superior via API pública", "uk": "Поточна погода і температура в шапці стрічки через відкритий API"}, "about": {"ru": "Виджет встраивается в верхнюю панель ленты и показывает погоду без API-ключей через публичный сервис Open-Meteo. Город (координаты) и единицы — на странице мода.", "en": "Sits in the top bar and shows live weather from the public Open-Meteo API, no keys. Set coordinates and units on the mod page.", "es": "Se integra en la barra superior y muestra el clima con la API abierta de Open-Meteo.", "pt": "Insere o clima atual na barra superior usando a API pública Open-Meteo.", "uk": "Показує поточну погоду у верхній панелі через відкритий API Open-Meteo."}, "icon": "🌤️", "tags": ["widget", "utility"], "settings": [{"key": "cityName", "type": "text", "title": {"ru": "Название города", "en": "City name", "es": "Nombre de la ciudad", "pt": "Nome da cidade", "uk": "Назва міста"}, "default": "London"}, {"key": "latitude", "type": "text", "title": {"ru": "Широта", "en": "Latitude", "es": "Latitud", "pt": "Latitude", "uk": "Широта"}, "default": "51.5072"}, {"key": "longitude", "type": "text", "title": {"ru": "Долгота", "en": "Longitude", "es": "Longitud", "pt": "Longitude", "uk": "Довгота"}, "default": "-0.1276"}, {"key": "units", "type": "select", "title": {"ru": "Единицы", "en": "Units", "es": "Unidades", "pt": "Unidades", "uk": "Одиниці"}, "options": [["celsius", "°C"], ["fahrenheit", "°F"]], "default": "celsius"}]}
+// @part css
+.tx-weather-widget { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px; margin-left: 8px; border-radius: var(--sk-bar-radius, 18px); background: var(--sk-bar-bg, var(--tx-surface)); border: 1px solid var(--sk-bar-border, var(--tx-glass-border)); color: var(--tx-text); font-size: 13px; font-weight: 500; cursor: pointer; user-select: none; box-sizing: border-box; transition: transform .15s ease; }
+.tx-weather-widget:active { transform: scale(0.97); }
+.tx-weather-icon { font-size: 16px; line-height: 1; }
+.tx-weather-text { line-height: 1.2; white-space: nowrap; }
+@media (max-width: 600px) { .tx-weather-city { display: none; } }
+// @part js
+export default function (tx) {
+  let timer = null;
+  let lastData = null;
+  const codes = {
+    0: ['☀️', { ru: 'Ясно', en: 'Clear', es: 'Despejado', pt: 'Limpo', uk: 'Ясно' }],
+    1: ['🌤️', { ru: 'Преимущественно ясно', en: 'Mainly clear', es: 'Mayormente despejado', pt: 'Predom. limpo', uk: 'Переважно ясно' }],
+    2: ['⛅', { ru: 'Переменная облачность', en: 'Partly cloudy', es: 'Parcialmente nublado', pt: 'Parc. nublado', uk: 'Мінлива хмарність' }],
+    3: ['☁️', { ru: 'Пасмурно', en: 'Overcast', es: 'Nublado', pt: 'Nublado', uk: 'Хмарно' }],
+    45: ['🌫️', { ru: 'Туман', en: 'Fog', es: 'Niebla', pt: 'Nevoeiro', uk: 'Туман' }],
+    51: ['🌦️', { ru: 'Морось', en: 'Drizzle', es: 'Llovizna', pt: 'Garoa', uk: 'Мряка' }],
+    61: ['🌧️', { ru: 'Дождь', en: 'Rain', es: 'Lluvia', pt: 'Chuva', uk: 'Дощ' }],
+    71: ['🌨️', { ru: 'Снег', en: 'Snow', es: 'Nieve', pt: 'Neve', uk: 'Сніг' }],
+    80: ['🌦️', { ru: 'Ливни', en: 'Showers', es: 'Chubascos', pt: 'Pancadas', uk: 'Зливи' }],
+    95: ['⛈️', { ru: 'Гроза', en: 'Thunderstorm', es: 'Tormenta', pt: 'Tempestade', uk: 'Гроза' }],
+  };
+  // the closest known code at or below the reported one
+  const info = (code) => { const k = Object.keys(codes).map(Number).filter((n) => n <= code).pop(); return codes[k] || ['🌡️', { ru: 'Погода', en: 'Weather', es: 'Clima', pt: 'Clima', uk: 'Погода' }]; };
+
+  async function fetchWeather() {
+    const lat = String(tx.config.get('latitude') || '51.5072').trim();
+    const lon = String(tx.config.get('longitude') || '-0.1276').trim();
+    const f = tx.config.get('units') === 'fahrenheit';
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,weather_code${f ? '&temperature_unit=fahrenheit' : ''}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data && data.current) {
+        lastData = { temp: Math.round(data.current.temperature_2m), code: data.current.weather_code, unit: f ? '°F' : '°C', city: tx.config.get('cityName') || '' };
+        document.querySelectorAll('.tx-weather-widget').forEach(update);
+      }
+    } catch (e) { /* offline: keep the last value */ }
+  }
+
+  function update(el) {
+    if (!lastData) { el.innerHTML = '<span class="tx-weather-icon">⏳</span><span class="tx-weather-text">…</span>'; return; }
+    const [icon, names] = info(lastData.code);
+    const city = lastData.city ? `<span class="tx-weather-city">${tx.escapeHtml(lastData.city)}: </span>` : '';
+    el.title = `${lastData.city ? lastData.city + ' — ' : ''}${tx.L(names)}`;
+    el.innerHTML = `<span class="tx-weather-icon">${icon}</span><span class="tx-weather-text">${city}${lastData.temp}${lastData.unit}</span>`;
+  }
+
+  function attach(bar) {
+    if (bar.querySelector('.tx-weather-widget')) return;
+    const w = document.createElement('div');
+    w.className = 'tx-weather-widget';
+    w.setAttribute('role', 'button');
+    update(w);
+    w.addEventListener('click', () => {
+      fetchWeather();
+      if (lastData) tx.toast(`${lastData.city ? lastData.city + ': ' : ''}${lastData.temp}${lastData.unit}, ${tx.L(info(lastData.code)[1])}`);
+    });
+    bar.appendChild(w);
+  }
+
+  tx.ui.watch('.tx-mainbar', attach);   // the feed's top bar
+  fetchWeather();
+  timer = setInterval(fetchWeather, 15 * 60 * 1000);
+  tx.config.on('*', fetchWeather);
+  tx.onStop(() => { clearInterval(timer); document.querySelectorAll('.tx-weather-widget').forEach((e) => e.remove()); });
+}

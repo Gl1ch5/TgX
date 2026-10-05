@@ -438,4 +438,5 @@ export const PT = {
   "Промпт скопирован — вставьте его в нейросеть": "Prompt copiado — cole em uma IA",
   "Буфер обмена пуст": "A área de transferência está vazia",
   "Вставьте мод в поле ниже": "Cole o mod no campo abaixo",
+  "Мод не запустился: {a}. Скорее всего, файл повредился при копировании (пропали обратные кавычки или код превратился в ссылки). Скопируйте его целиком из блока кода или сохраните файлом .module.": "O mod não iniciou: {a}. Provavelmente o arquivo foi danificado ao copiar (crases perdidas ou código virou links). Copie-o inteiro do bloco de código ou salve como arquivo .module.",
 };

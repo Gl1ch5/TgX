@@ -360,10 +360,12 @@ async function start(mod) {
     }
     applyVars();
     refreshWallpaper();
+    return null;
   } catch (e) {
     console.warn(`[mods] ${id} failed`, e);
     stop(id);
-    showToast(t('Мод «{a}» не запустился', { a: L(mod.manifest.name) }));
+    if (!mod.silentFail) showToast(t('Мод «{a}» не запустился', { a: L(mod.manifest.name) }));
+    return String(e && e.message || e);
   }
 }
 
@@ -436,7 +438,12 @@ export async function installMod(mod) {
   if (!ok) return false;
   const entry = { manifest: m, parts, enabled: true };
   save([...load().filter((x) => x.manifest.id !== m.id), entry]);
-  await start({ ...entry, justInstalled: true });
+  const failure = await start({ ...entry, justInstalled: true, silentFail: true });
+  if (failure) {
+    // do not leave a broken mod behind: say why (usually the file was damaged while copying)
+    save(load().filter((x) => x.manifest.id !== m.id));
+    throw new Error(t('Мод не запустился: {a}. Скорее всего, файл повредился при копировании (пропали обратные кавычки или код превратился в ссылки). Скопируйте его целиком из блока кода или сохраните файлом .module.', { a: failure }));
+  }
   document.dispatchEvent(new Event('tx:mods'));
   return true;
 }
