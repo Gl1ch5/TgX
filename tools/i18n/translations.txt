@@ -570,3 +570,5 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Скрытые слова ‖ Hidden words ‖ Palabras ocultas ‖ Palavras ocultas ‖ Приховані слова
 Посты, где встречается любое из этих слов, не появятся на стене. Слова через запятую. ‖ Posts containing any of these words will not appear on the wall. Separate words with commas. ‖ Las publicaciones que contengan cualquiera de estas palabras no aparecerán en el muro. Separa las palabras con comas. ‖ Publicações com qualquer uma dessas palavras não aparecerão no mural. Separe as palavras com vírgulas. ‖ Пости, де трапляється будь-яке з цих слів, не з'являться на стіні. Слова через кому.
 Продолжить с места, где остановились ‖ Continue where you left off ‖ Continuar donde lo dejaste ‖ Continuar de onde parou ‖ Продовжити з місця, де зупинилися
+Скрытых слов: {a} ‖ Hidden words: {a} ‖ Palabras ocultas: {a} ‖ Palavras ocultas: {a} ‖ Прихованих слів: {a}
+Реклама скрыта ‖ Ads hidden ‖ Anuncios ocultos ‖ Anúncios ocultos ‖ Реклама прихована

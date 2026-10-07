@@ -559,6 +559,7 @@ export function switchFeedType(type) {
     container.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-slideDir * 36}px)` }], { duration: 120, easing: 'ease-in', fill: 'forwards' });
   }
   state.feedType = type;
+  try { localStorage.setItem('tx.feedTab', type); } catch {}
   state.posts = [];
   state.hasMore = false;
   updateTabs();

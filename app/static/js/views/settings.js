@@ -97,7 +97,7 @@ function rootPage() {
 
       ${group(
         (u ? row({ icon: 'st-account', color: 'BLUE', title: t('Аккаунт'), sub: t('Имя, «О себе», фото профиля'), onclick: "window.TelegramX.setView('profile')" }) : '') +
-        row({ icon: 'st-channel', color: 'BLUE_DEEP', title: t('Стена'), sub: excluded ? t('Скрыто каналов: {a}', {a: excluded}) : t('Каналы на стене, прочитанное'), onclick: "window.TelegramX.openSettingsPage('wall')" }) +
+        row({ icon: 'st-channel', color: 'BLUE_DEEP', title: t('Стена'), sub: excluded ? t('Скрыто каналов: {a}', {a: excluded}) : (p.mutedWords || []).length ? t('Скрытых слов: {a}', { a: p.mutedWords.length }) : p.hideAds ? t('Реклама скрыта') : t('Каналы на стене, прочитанное'), onclick: "window.TelegramX.openSettingsPage('wall')" }) +
         row({ icon: 'st-chat', color: 'ORANGE', title: t('Настройки чатов'), sub: t('Обои, ночной режим, анимации'), onclick: "window.TelegramX.openSettingsPage('chat')" }) +
         row({ icon: 'st-data', color: 'BLUE_DEEP', title: t('Данные и память'), sub: t('Автозагрузка медиа, кэш'), onclick: "window.TelegramX.openSettingsPage('data')" }) +
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +

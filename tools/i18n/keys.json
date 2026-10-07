@@ -1375,6 +1375,16 @@
   "plural": false
  },
  {
+  "key": "Скрытых слов: {a}",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Реклама скрыта",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Каналы на стене, прочитанное",
   "where": "js/views/settings.js",
   "plural": false

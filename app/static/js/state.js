@@ -12,7 +12,8 @@ export const state = {
   user: null,
   channels: [],
   posts: [],
-  feedType: 'all',
+  // the feed tab you were on last time (All / Media / Popular / Favorites)
+  feedType: (() => { try { const v = localStorage.getItem('tx.feedTab'); return ['all', 'media', 'popular', 'favorites'].includes(v) ? v : 'all'; } catch { return 'all'; } })(),
   activeChannelId: null,
   searchQuery: '',
   qrCheckInterval: null,

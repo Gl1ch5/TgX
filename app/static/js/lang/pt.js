@@ -570,4 +570,6 @@ export const PT = {
   "Скрытые слова": "Palavras ocultas",
   "Посты, где встречается любое из этих слов, не появятся на стене. Слова через запятую.": "Publicações com qualquer uma dessas palavras não aparecerão no mural. Separe as palavras com vírgulas.",
   "Продолжить с места, где остановились": "Continuar de onde parou",
+  "Скрытых слов: {a}": "Palavras ocultas: {a}",
+  "Реклама скрыта": "Anúncios ocultos",
 };
