@@ -49,6 +49,8 @@ class Rec {
     fs.writeFileSync(path.join(this.dir, pad(this.n++) + '.jpg'), Buffer.from(r.screenshotData, 'base64'));
   }
   async frames(n, fn) { for (let i = 0; i < n; i++) { if (fn) await fn(n > 1 ? i / (n - 1) : 1, i); await this.tick(); } }
+  /** Real-time pause with the page clock stopped: images and data of a newly opened screen finish loading before the next frame. */
+  settle(ms = 1200) { return this.page.waitForTimeout(ms); }
   wait(sec) { return this.frames(Math.round(sec * FPS)); }
   /** Scroll along keyframes [[sec, y], ...] with ease-in-out between them. */
   async scroll(keys) {

@@ -52,6 +52,7 @@ async function setup(p, lang, { prefs = {}, base = 'http://localhost:8765/' } = 
   await p.route(/^https?:\/\/(?!localhost)/, (r) => r.abort());
   await p.route(/\/media\/doc\//, (r) => r.fulfill({ status: 200, contentType: 'video/mp4', body: fs.readFileSync(path.join(A, 'concert.mp4')) }));
   await p.addInitScript(() => { window.WebSocket = class { constructor() { this.readyState = 0; } send() {} close() {} addEventListener() {} removeEventListener() {} }; }); // no real Telegram connection attempts
+  await p.addInitScript(() => localStorage.setItem('tx.lowperf', '1')); // light screen slide instead of the page-snapshot transition (that one renders blank in frame-by-frame capture)
   await p.addInitScript((pr) => localStorage.setItem('telex.prefs', JSON.stringify({ workerMode: false, migration: 1, theme: 'dark', colorTheme: 'classic', accent: 'blue', ...pr })), prefs);
   await p.goto(base, { waitUntil: 'load' });
   await p.waitForTimeout(2500);

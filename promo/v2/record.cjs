@@ -32,6 +32,7 @@ const SCENES = {
     await r.scroll([[0.9, 330]]);
     await r.wait(0.3);
     await r.tapEl('#post-card-1_10 [onclick*="openThread"]');
+    await r.settle();
     await r.wait(1.6);
     await r.scroll([[1.4, 600]]);
     await r.wait(1.0);
@@ -40,6 +41,7 @@ const SCENES = {
   async stories(r, p) {
     await r.wait(0.5);
     await r.tap(50, 28, () => p.evaluate(() => window.TelegramX.openStackStories()));
+    await r.settle();
     await r.wait(2.3);
     await r.tap(330, 420, () => p.evaluate(() => document.querySelector('.tx-story-frame')?.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 340, clientY: 420 }))));
     await r.wait(2.2);
@@ -48,6 +50,7 @@ const SCENES = {
   async channel(r, p) {
     await r.wait(0.4);
     await r.tap(30, 191, () => p.evaluate(() => window.TelegramX.openChannelPage(1)));
+    await r.settle();
     await r.wait(1.8);
     await r.scroll([[1.6, 420]]);
     await r.wait(1.0);
@@ -56,6 +59,7 @@ const SCENES = {
   async viewer(r, p) {
     await r.wait(0.4);
     await r.tapEl('[data-viewer="1_10:0"]');
+    await r.settle();
     await r.wait(1.6);
     await r.tapEl('.tx-viewer-nav.next');
     await r.wait(1.0);
@@ -74,6 +78,7 @@ const SCENES = {
     await p.evaluate(() => { window.TelegramX.setView('settings'); });
     await r.wait(0.3);
     await p.evaluate(() => window.TelegramX.openSettingsPage('chat'));
+    await r.settle();
     await r.wait(1.2);
     await r.scroll([[0.8, 260]]);
     for (const i of [2, 4, 6, 8]) {
@@ -87,10 +92,13 @@ const SCENES = {
     await noVT(p);
     await r.wait(0.3);
     await r.tap(194, 810, () => p.evaluate(() => window.TelegramX.setView('settings')));
+    await r.settle(800);
     await r.wait(0.6);
     await p.evaluate(() => window.TelegramX.openSettingsPage('mods'));
+    await r.settle();
     await r.wait(1.2);
     await r.tapEl('.tx-modtabs .tx-tab[data-tab="catalog"]');
+    await r.settle(800);
     await r.wait(1.0);
     for (const id of ['snowfall', 'liquid-glass']) {
       await r.scroll([[0.5, id === 'snowfall' ? 220 : 250]]);
@@ -100,6 +108,7 @@ const SCENES = {
       await r.wait(1.3);
     }
     await r.tap(194, 810, () => p.evaluate(() => window.TelegramX.setView('wall')));
+    await r.settle();
     await r.wait(1.0);
     await r.scroll([[1.6, 500]]);
     await r.wait(1.6);
