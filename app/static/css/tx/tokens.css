@@ -27,7 +27,7 @@
   --tx-column-w: 680px;
   --tx-dock-h: 64px;
   --tx-font: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --tx-glass-blur: blur(22px) saturate(170%);
+  --tx-glass-blur: blur(14px);
 }
 
 html, body {

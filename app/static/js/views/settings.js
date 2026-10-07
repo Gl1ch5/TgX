@@ -336,7 +336,7 @@ function themeTile(c, selected) {
   const bg = day && wp.light ? wp.light : wp.gradient;
   return `
     <button class="tx-theme-tile ${selected ? 'is-active' : ''}" onclick="window.TelegramX.setColorTheme('${c.id}')" aria-label="${c.id}" style="${wp.remote ? '' : `background:${bg}`}">
-      ${wp.remote ? wallPreviewHtml(wp, day, 90) : wp.svg ? `<span class="tx-cp-pattern" style="background-image:url('${wp.svg}')"></span>` : ''}
+      ${wp.remote ? `<span style="position:absolute;inset:0;background:${wp.gradient}"></span>` : ''}
       <span class="tx-theme-out" style="background:${outGradient(c, day ? 'light' : 'dark')}"></span>
       <span class="tx-theme-in"></span>
       <span class="tx-theme-emoji">${parseEmojis(c.emoji)}</span>

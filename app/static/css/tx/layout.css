@@ -205,3 +205,10 @@ button.tx-row:active, label.tx-row:active { transform: scale(0.985); }
 .tx-switch input:active + span::after { width: 26px; }
 /* images fade in once loaded */
 .tx-media img, .tx-avatar img { transition: opacity 0.3s ease; }
+
+/* ---- performance: the wallpaper is painted once on its own GPU layer and stays out of page-transition snapshots ---- */
+#tgx-bg-canvas, #tgx-bg-pattern { will-change: transform; transform: translateZ(0); contain: strict; backface-visibility: hidden; }
+#tgx-bg-canvas { view-transition-name: tx-bg; }
+#tgx-bg-pattern { view-transition-name: tx-bgp; }
+::view-transition-group(tx-bg), ::view-transition-group(tx-bgp), ::view-transition-old(tx-bg), ::view-transition-new(tx-bg), ::view-transition-old(tx-bgp), ::view-transition-new(tx-bgp) { animation: none; }
+::view-transition-old(tx-bg), ::view-transition-old(tx-bgp) { display: none; }

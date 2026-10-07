@@ -214,7 +214,7 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
   if (!bgCanvas) {
     bgCanvas = document.createElement('div');
     bgCanvas.id = 'tgx-bg-canvas';
-    bgCanvas.className = 'fixed inset-0 pointer-events-none z-0 transition-all duration-700 ease-in-out';
+    bgCanvas.className = 'fixed inset-0 pointer-events-none z-0';
     document.body.prepend(bgCanvas);
   }
 
@@ -222,7 +222,7 @@ export function applyWallpaper(wallpaperId, showFeedback = true) {
   if (!bgPattern) {
     bgPattern = document.createElement('div');
     bgPattern.id = 'tgx-bg-pattern';
-    bgPattern.className = 'fixed inset-0 pointer-events-none z-0 transition-opacity duration-700 ease-in-out bg-repeat bg-center';
+    bgPattern.className = 'fixed inset-0 pointer-events-none z-0 bg-repeat bg-center';
     document.body.prepend(bgPattern);
   }
 
