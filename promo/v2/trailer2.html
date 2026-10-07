@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>TeleX trailer v2</title>
+<!--
+  Frame-exact trailer: nothing moves by itself, window.render(t) draws the frame at t seconds (async: waits for the images).
+  The phone screens are image sequences recorded from the REAL app (promo/v2/record.cjs): real scrolling, taps and animations.
+  ?f=v → 1080×1920 (Shorts, Reels, TikTok)   ?f=h → 1920×1080 (YouTube)   &l=ru|en
+-->
+<style>
+  :root { --bg: #04050a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); overflow: hidden; }
+  body { font-family: 'Inter', 'Roboto', sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: relative; overflow: hidden; background: var(--bg); }
+  .abs { position: absolute; }
+  .glow { position: absolute; border-radius: 50%; will-change: transform; }
+  .beam { position: absolute; left: -20%; width: 140%; mix-blend-mode: screen; will-change: transform; }
+  #grain { position: absolute; inset: -50px; opacity: .09; mix-blend-mode: overlay; pointer-events: none; z-index: 90; }
+  #vig { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.65)); pointer-events: none; z-index: 80; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 85; mix-blend-mode: overlay; }
+  .scene { position: absolute; inset: 0; will-change: transform, opacity, filter; }
+  .stage3d { position: absolute; perspective: 2600px; perspective-origin: 50% 40%; }
+
+  .ph { position: absolute; left: 0; top: 0; transform-style: preserve-3d; will-change: transform; }
+  .ph .body { position: absolute; inset: 0; background: linear-gradient(145deg, #3a3c45 0%, #0d0e12 35%, #24262d 70%, #0c0d10); box-shadow: 0 0 0 2px #52545e inset, 0 0 0 5px #0a0b0e inset, 0 80px 200px rgba(0,0,0,.75); }
+  .ph .scr { position: absolute; overflow: hidden; background: #000; }
+  .ph .scr img { position: absolute; left: 0; width: 100%; display: block; }
+  .ph .st { position: absolute; left: 0; top: 0; width: 100%; background: #000; display: flex; align-items: center; justify-content: space-between; z-index: 5; }
+  .ph .isl { position: absolute; left: 50%; transform: translateX(-50%); background: #000; border-radius: 99px; z-index: 9; }
+  .ph .glare { position: absolute; inset: 0; z-index: 10; pointer-events: none; mix-blend-mode: screen; }
+  .ph .btn { position: absolute; background: #1a1b20; border-radius: 3px; }
+
+  .win { position: absolute; border-radius: 22px; overflow: hidden; background: #15161a; box-shadow: 0 70px 180px rgba(0,0,0,.75), 0 0 0 1px #34363d; }
+  .win .top { height: 54px; display: flex; align-items: center; gap: 12px; padding: 0 22px; background: #232429; }
+  .win .dot { width: 15px; height: 15px; border-radius: 50%; }
+  .win .url { margin-left: 22px; height: 32px; padding: 0 16px; border-radius: 9px; background: #15161a; color: #c9cbd3; font: 500 17px/32px Roboto, sans-serif; }
+  .win img { display: block; width: 100%; }
+
+  .t { position: absolute; font-weight: 900; letter-spacing: -.035em; line-height: 1.02; text-shadow: 0 6px 40px rgba(0,0,0,.8), 0 0 8px rgba(0,0,0,.35); }
+  .t .w { display: inline-block; white-space: pre; will-change: transform, opacity, filter; }
+  .sub { position: absolute; font-weight: 500; color: rgba(255,255,255,.74); letter-spacing: -.01em; line-height: 1.3; }
+  .grad { background-clip: text; -webkit-background-clip: text; color: transparent; text-shadow: none; }
+  .t .grad, .t .w.grad { filter: drop-shadow(0 6px 30px rgba(0,0,0,.6)); }
+  .chip { position: absolute; display: inline-flex; align-items: center; gap: 12px; padding: 14px 26px 14px 18px; border-radius: 99px; font-weight: 700; font-size: 34px; white-space: nowrap;
+    background: rgba(30,32,44,.72); border: 1.5px solid rgba(255,255,255,.22); backdrop-filter: blur(18px); box-shadow: 0 20px 60px rgba(0,0,0,.4); will-change: transform, opacity; }
+  .chip i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+  .orb { position: absolute; border-radius: 50%; overflow: hidden; will-change: transform, opacity, filter; box-shadow: 0 24px 70px rgba(0,0,0,.55); }
+  .orb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card { position: absolute; border-radius: 34px; overflow: hidden; will-change: transform, opacity, filter; box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badge { position: absolute; min-width: 1.9em; height: 1.9em; padding: 0 .55em; border-radius: 99px; background: #ff3b4e; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(255,59,78,.55); will-change: transform, opacity; }
+  .pillbtn { position: absolute; display: inline-flex; align-items: center; gap: 22px; padding: .42em 1.1em; border-radius: 99px; font-weight: 800; white-space: nowrap; color: #fff; will-change: transform, opacity; }
+  .tag { width: max-content; padding: .35em .95em; border-radius: 99px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); font-weight: 700; white-space: nowrap; will-change: transform, opacity; }
+  .ring { position: absolute; border-radius: 50%; border: 6px solid rgba(255,255,255,.7); pointer-events: none; will-change: transform, opacity; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const Q = new URLSearchParams(location.search);
+const V = Q.get('f') !== 'h';
+const W = V ? 1080 : 1920, H = V ? 1920 : 1080;
+const LNG = Q.get('l') === 'en' ? 'en' : 'ru';
+const CLIPS = `build/clips-${LNG}/`;
+const META = window.META || {};
+const ASSET = '../assets/';
+const BPM = 124, B = 60 / BPM;
+
+const TXT = {
+  ru: {
+    hook: ['100 каналов.', 'Тысячи постов.', 'Хватит.'], tag: 'Все каналы Telegram — одной лентой', tagB: 'Бесплатно · Открытый код',
+    feed: { t: ['Одна', 'стена'], s: 'Все каналы в одной ленте. Альбомы, видео, кнопки и закрепы — как в Telegram.', chips: ['Альбомы', 'Видео', 'Кнопки'] },
+    comments: { t: ['Комментарии', 'в ленте'], s: 'Читай обсуждение, не выходя из поста.', chips: ['Ответы', 'Реакции'] },
+    react: { t: ['Реакции', 'в одно касание'], s: 'Нажми на пост — и вся панель реакций под рукой.', chips: ['Премиум-эмодзи', 'Закладки'] },
+    stories: { t: ['Истории', 'каналов и друзей'], s: 'Смотри истории, не открывая Telegram.', chips: ['Полный экран', 'Лайки'] },
+    channel: { t: ['Каналы', 'как в Telegram'], s: 'Закрепы, описание, медиа и истории канала.', chips: ['Закреп', 'Медиа'] },
+    viewer: { t: ['Фото и видео', 'на весь экран'], s: 'Листай альбомы, сохраняй в галерею, пересылай.', chips: ['Альбомы', 'Сохранить'] },
+    themes: { t: ['Темы', 'и обои Telegram'], s: 'Цветные темы чатов, день и ночь, оригинальные обои.', chips: ['День и ночь', '10+ тем'] },
+    mods: { t: ['Моды', 'меняй всё'], s: 'Снегопад, жидкое стекло, ИИ-помощник и переводчик. Ставятся одним касанием.', chips: ['Снегопад', 'Жидкое стекло', 'ИИ-помощник', 'Переводчик'] },
+    plat: { t: ['Везде', 'где ты'], s: 'Android, Windows и браузер. Запускается мгновенно, говорит на 5 языках.', chips: ['Android', 'Windows', 'Браузер'] },
+    cta: { t: ['Скачай', 'TeleX'], s: 'Все каналы Telegram — одной лентой', chips: ['Android', 'Windows', 'Браузер', 'Бесплатно'], url: 'telex-web.ru' },
+  },
+  en: {
+    hook: ['100 channels.', 'Thousands of posts.', 'Enough.'], tag: 'All your Telegram channels in one feed', tagB: 'Free · Open source',
+    feed: { t: ['One', 'wall'], s: 'Every channel in one feed. Albums, video, buttons and pins — like in Telegram.', chips: ['Albums', 'Video', 'Buttons'] },
+    comments: { t: ['Comments', 'in the feed'], s: 'Read the discussion without leaving the post.', chips: ['Replies', 'Reactions'] },
+    react: { t: ['Reactions', 'in one tap'], s: 'Tap a post and the whole reaction bar is at hand.', chips: ['Premium emoji', 'Bookmarks'] },
+    stories: { t: ['Stories', 'of channels and friends'], s: 'Watch stories without opening Telegram.', chips: ['Full screen', 'Likes'] },
+    channel: { t: ['Channels', 'like Telegram'], s: 'Pins, description, media and the channel stories.', chips: ['Pinned', 'Media'] },
+    viewer: { t: ['Photos & video', 'full screen'], s: 'Swipe albums, save to gallery, forward.', chips: ['Albums', 'Save'] },
+    themes: { t: ['Themes', 'and Telegram wallpapers'], s: 'Colour chat themes, day and night, the original wallpapers.', chips: ['Day & night', '10+ themes'] },
+    mods: { t: ['Mods', 'change everything'], s: 'Snowfall, liquid glass, AI assistant and translator. One tap to install.', chips: ['Snowfall', 'Liquid glass', 'AI assistant', 'Translator'] },
+    plat: { t: ['Everywhere', 'you are'], s: 'Android, Windows and the browser. Instant start, 5 languages.', chips: ['Android', 'Windows', 'Browser'] },
+    cta: { t: ['Get', 'TeleX'], s: 'All your Telegram channels in one feed', chips: ['Android', 'Windows', 'Browser', 'Free'], url: 'telex-web.ru' },
+  },
+}[LNG];
+
+// ---------------------------------------------------------------- timeline (in beats of the 124 bpm soundtrack)
+const BEATS = { hook: [0, 8], logo: [8, 14], feed: [14, 26], comments: [26, 36], react: [36, 46], stories: [46, 56], channel: [56, 64], viewer: [64, 72], themes: [72, 82], mods: [82, 100], plat: [100, 110], cta: [110, 126] };
+const TL = Object.fromEntries(Object.entries(BEATS).map(([k, [a, b]]) => [k, [a * B, b * B]]));
+const DURATION = 126 * B;
+const HUE = {
+  hook: ['#ff3b4e', '#5a3bff', '#00a2ff'], logo: ['#3b6bff', '#8a4dff', '#00c2ff'], feed: ['#2f6bff', '#7a4dff', '#00b8ff'], comments: ['#00b87a', '#2f6bff', '#00d4ff'],
+  react: ['#ff3b7a', '#ff9a3b', '#8a4dff'], stories: ['#ff4d9a', '#8a4dff', '#ff9a3b'], channel: ['#00a2ff', '#3b5bff', '#00e0c0'], viewer: ['#8a4dff', '#ff4d9a', '#3b6bff'],
+  themes: ['#ff9a3b', '#ff3b7a', '#7a4dff'], mods: ['#8a4dff', '#00c2ff', '#ff3bd4'], plat: ['#00b8ff', '#3b5bff', '#00e0a0'], cta: ['#3b6bff', '#8a4dff', '#00c2ff'],
+};
+const ACC = { feed: ['#8fb4ff', '#b9a4ff'], comments: ['#7ff0c8', '#8fb4ff'], react: ['#ff9ac0', '#ffc08f'], stories: ['#ff9ac8', '#c3a4ff'], channel: ['#8fd4ff', '#8fffe8'], viewer: ['#c3a4ff', '#ff9ac8'], themes: ['#ffc08f', '#ff9ac0'], mods: ['#c3a4ff', '#8fe8ff'], plat: ['#8fe0ff', '#8fffc8'], cta: ['#8fb4ff', '#c3a4ff'] };
+
+// ---------------------------------------------------------------- helpers
+const stage = document.getElementById('stage');
+stage.style.width = W + 'px'; stage.style.height = H + 'px';
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const outCubic = (k) => 1 - Math.pow(1 - k, 3);
+const outQuint = (k) => 1 - Math.pow(1 - k, 5);
+const inCubic = (k) => k * k * k;
+const inOutCubic = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const outBack = (k, c = 1.7) => 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2);
+const outElastic = (k) => (k === 0 || k === 1 ? k : Math.pow(2, -10 * k) * Math.sin((k * 10 - .75) * (2 * Math.PI / 3)) + 1);
+const rnd = (i, n = 0) => { const x = Math.sin(i * 127.1 + n * 311.7) * 43758.5453; return x - Math.floor(x); };
+const el = (tag, cls, parent = stage, html = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; if (parent) parent.appendChild(e); return e; };
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => { const x = hex(a), y = hex(b); return `rgb(${x.map((v, i) => Math.round(lerp(v, y[i], k))).join(',')})`; };
+const rgba = (h, a) => { const x = hex(h); return `rgba(${x[0]},${x[1]},${x[2]},${a})`; };
+const sceneAt = (t) => Object.keys(TL).find((k) => t >= TL[k][0] && t < TL[k][1]) || 'cta';
+const beatPulse = (t, k = 7) => Math.exp(-k * ((t / B) % 1)); // 1 on each beat, fades fast
+
+// ---------------------------------------------------------------- persistent background
+const glows = [0, 1, 2].map((i) => { const e = el('div', 'glow'); const d = Math.max(W, H) * (i === 0 ? 1.15 : .9); Object.assign(e.style, { width: d + 'px', height: d + 'px' }); return { e, d, i }; });
+const beams = [0, 1].map((i) => { const e = el('div', 'beam'); Object.assign(e.style, { height: (V ? 260 : 220) + 'px', top: '0' }); return { e, i }; });
+const dust = Array.from({ length: 46 }, (_, i) => { const e = el('div', 'abs'); const s = 3 + rnd(i, 1) * 7; Object.assign(e.style, { width: s + 'px', height: s + 'px', borderRadius: '50%', background: '#fff' }); return { e, x: rnd(i, 2) * W, y: rnd(i, 3) * H, s, sp: 18 + rnd(i, 4) * 60, ph: rnd(i, 5) * 6 }; });
+const grain = el('div', '', stage); grain.id = 'grain';
+grain.style.backgroundImage = `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")`;
+el('div', '', stage).id = 'vig';
+const flash = el('div', '', stage); flash.id = 'flash';
+
+// ---------------------------------------------------------------- phone
+function Phone(pw) {
+  const bez = pw * .028, sw = pw - 2 * bez, sc = sw / 390, st = 36 * sc, sh = 844 * sc;
+  const ph = sh + st + 2 * bez;
+  const root = el('div', 'ph', null);
+  Object.assign(root.style, { width: pw + 'px', height: ph + 'px' });
+  const body = el('div', 'body', root); body.style.borderRadius = pw * .15 + 'px';
+  const scr = el('div', 'scr', root); Object.assign(scr.style, { left: bez + 'px', top: bez + 'px', width: sw + 'px', height: st + sh + 'px', borderRadius: pw * .125 + 'px' });
+  const status = el('div', 'st', scr, `<span style="padding-left:${28 * sc}px;font:700 ${15 * sc}px Roboto,sans-serif">9:41</span><span style="display:flex;gap:${5 * sc}px;align-items:center;padding-right:${24 * sc}px">
+    <svg width="${18 * sc}" height="${12 * sc}" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#fff"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#fff"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#fff"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#fff"/></svg>
+    <svg width="${16 * sc}" height="${12 * sc}" viewBox="0 0 16 12"><path d="M8 11.5 L5.6 8.9 A3.4 3.4 0 0 1 10.4 8.9Z M2.9 6.2 A7.3 7.3 0 0 1 13.1 6.2 L11.7 7.6 A5.3 5.3 0 0 0 4.3 7.6Z M0.2 3.5 A11.2 11.2 0 0 1 15.8 3.5 L14.4 4.9 A9.2 9.2 0 0 0 1.6 4.9Z" fill="#fff"/></svg>
+    <svg width="${26 * sc}" height="${12 * sc}" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="19" height="8" rx="1.8" fill="#fff"/><rect x="23.5" y="4" width="2" height="4" rx="1" fill="#fff" fill-opacity=".5"/></svg></span>`);
+  status.style.height = st + 'px';
+  const im = el('img', '', scr); im.style.top = st + 'px'; im.style.height = sh + 'px'; im.style.objectFit = 'cover';
+  const isl = el('div', 'isl', root); Object.assign(isl.style, { top: bez + st * .2 + 'px', width: sw * .27 + 'px', height: st * .66 + 'px' });
+  const glare = el('div', 'glare', root); glare.style.borderRadius = pw * .15 + 'px';
+  el('div', 'btn', root).style.cssText = `left:${-pw * .008}px;top:${ph * .2}px;width:${pw * .012}px;height:${ph * .05}px`;
+  el('div', 'btn', root).style.cssText = `right:${-pw * .008}px;top:${ph * .26}px;width:${pw * .012}px;height:${ph * .09}px`;
+  return { root, im, pw, ph, sw, sc, st, sh, src: '' };
+}
+let imgCache = new Map();
+function frameUrl(clip, tSec) {
+  const n = META[clip] || 1;
+  const i = clamp(Math.floor(tSec * 30), 0, n - 1);
+  return `${CLIPS}${clip}/${String(i).padStart(5, '0')}.jpg`;
+}
+const pending = [];
+function setClip(p, clip, tSec) {
+  const u = frameUrl(clip, tSec);
+  if (p.src === u) return;
+  p.src = u; p.im.src = u;
+  if (p.im.decode) pending.push(p.im.decode().catch(() => {}));
+}
+
+// ---------------------------------------------------------------- kinetic text
+function Title(parent, lines, { size, accIdx = 1, acc, align = 'left', maxW }) {
+  const root = el('div', 't', parent);
+  root.style.fontSize = size + 'px'; root.style.textAlign = align;
+  const ws = [];
+  lines.forEach((ln, li) => {
+    const row = el('div', '', root);
+    ln.split(' ').forEach((w, wi, arr) => {
+      const s = el('span', 'w' + (li === accIdx ? ' grad' : ''), row, w + (wi < arr.length - 1 ? ' ' : ''));
+      if (li === accIdx && acc) s.style.backgroundImage = `linear-gradient(90deg, ${acc[0]}, ${acc[1]})`;
+      ws.push(s);
+    });
+  });
+  if (maxW) { // shrink to fit
+    let k = 1; document.body.appendChild(root); root.style.position = 'absolute'; root.style.visibility = 'hidden';
+    const widest = Math.max(...[...root.children].map((r) => r.scrollWidth)); if (widest > maxW) k = maxW / widest;
+    root.style.fontSize = size * k + 'px'; root.style.visibility = ''; parent.appendChild(root);
+  }
+  return { root, ws };
+}
+function animWords(ws, t0, t, tOut, step = .09) {
+  ws.forEach((w, i) => {
+    const a = t0 + i * step;
+    const k = outBack(prog(t, a, a + .5), 1.4), o = prog(t, a, a + .22);
+    const out = tOut == null ? 0 : inCubic(prog(t, tOut + i * .02, tOut + .3 + i * .02));
+    w.style.opacity = o * (1 - out);
+    w.style.transform = `translateY(${(1 - k) * 90 - out * 60}px) scale(${.82 + .18 * k})`;
+    w.style.filter = `blur(${(1 - prog(t, a, a + .32)) * 18 + out * 14}px)`;
+  });
+}
+
+// ---------------------------------------------------------------- scenes
+const scenes = {};
+const mk = (id) => { const root = el('div', 'scene'); root.dataset.id = id; scenes[id] = { id, root, t: TL[id] }; return scenes[id]; };
+
+// layout constants
+const PW = V ? 700 : 470;
+const PHX = V ? (W - PW) / 2 : 1190;
+const PHY = V ? 500 : 22;
+const TX = V ? 70 : 150, TW = V ? W - 140 : 930;
+const TFS = V ? 118 : 128, SFS = V ? 40 : 40;
+const TTOP = V ? 64 : 250;
+
+// ---- hook: faces and photos rush at the camera, unread badges multiply
+const hook = mk('hook');
+const FACES = [44, 12, 16, 47, 60, 53, 20, 32, 68, 25, 9, 5].map((n) => `${ASSET}faces/f${n}.jpg`);
+const PHOTOS = [1015, 1011, 1039, 433, 452, 529, 488, 274, 1062, 655, 1069, 238].map((n) => `${ASSET}photos/p${n}.jpg`);
+const rush = Array.from({ length: 22 }, (_, i) => {
+  const isFace = i % 2 === 0;
+  const e = el(isFace ? 'div' : 'div', isFace ? 'orb' : 'card', hook.root);
+  const im = el('img', '', e); im.src = isFace ? FACES[(i >> 1) % FACES.length] : PHOTOS[(i >> 1) % PHOTOS.length];
+  const s = isFace ? 150 + rnd(i, 1) * 90 : 260 + rnd(i, 2) * 120;
+  e.style.width = s + 'px'; e.style.height = (isFace ? s : s * .7) + 'px';
+  if (!isFace) e.style.borderRadius = '26px';
+  const badge = el('div', 'badge', hook.root, rnd(i, 9) > .5 ? '99+' : String(1 + Math.floor(rnd(i, 8) * 40))); badge.style.fontSize = '40px';
+  return { e, badge, ang: rnd(i, 3) * Math.PI * 2, r0: .15 + rnd(i, 4) * .3, a0: i * .13, s, sp: .7 + rnd(i, 5) * .9 };
+});
+const hookT = TXT.hook.map((txt, i) => {
+  const tt = Title(hook.root, [txt], { size: V ? 210 : 200, align: 'center', acc: ['#ff8a9a', '#ffd0a4'], accIdx: i === 2 ? 0 : -1, maxW: W - 140 });
+  tt.root.style.left = '70px'; tt.root.style.width = W - 140 + 'px'; tt.root.style.top = (H / 2 - (V ? 110 : 130)) + 'px';
+  if (i === 2) tt.ws.forEach((w) => { w.style.backgroundImage = 'linear-gradient(90deg,#ff8a9a,#ffd0a4)'; w.classList.add('grad'); });
+  return tt;
+});
+
+// ---- logo slam + tagline
+const logo = mk('logo');
+const logoWrap = el('div', 'abs', logo.root); Object.assign(logoWrap.style, { left: 0, width: W + 'px', top: (V ? 640 : 250) + 'px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '36px' });
+const logoImg = el('img', '', logoWrap); logoImg.src = '../../app/static/icons/telex.svg'; Object.assign(logoImg.style, { width: (V ? 230 : 210) + 'px', height: (V ? 230 : 210) + 'px', borderRadius: '24%', boxShadow: '0 30px 100px rgba(90,130,255,.6)' });
+const logoTxt = el('div', 't', logoWrap, 'TeleX'); logoTxt.style.position = 'static'; logoTxt.style.fontSize = (V ? 230 : 220) + 'px';
+const logoTag = el('div', 'sub', logo.root, TXT.tag); Object.assign(logoTag.style, { left: '60px', width: W - 120 + 'px', top: (V ? 960 : 560) + 'px', textAlign: 'center', fontSize: (V ? 58 : 54) + 'px', fontWeight: 700, color: '#fff' });
+const logoTagB = el('div', 'tag', logo.root, TXT.tagB); Object.assign(logoTagB.style, { left: '50%', top: (V ? 1120 : 700) + 'px', fontSize: (V ? 40 : 38) + 'px' });
+const rings = [0, 1, 2].map(() => el('div', 'ring', logo.root));
+
+// ---- feature scenes (phone + kinetic title + chips)
+const FEATURES = [['feed', 'feed'], ['comments', 'comments'], ['react', 'react'], ['stories', 'stories'], ['channel', 'channel'], ['viewer', 'viewer'], ['themes', 'themes'], ['mods', 'mods']];
+const chipColors = ['#5a83f3', '#ff6fb1', '#3be0a0', '#ffb84d'];
+FEATURES.forEach(([id, clip], fi) => {
+  const s = mk(id); const c = TXT[id];
+  s.clip = clip;
+  s.stage = el('div', 'stage3d', s.root); Object.assign(s.stage.style, { left: 0, top: 0, width: W + 'px', height: H + 'px' });
+  s.phone = Phone(PW); s.stage.appendChild(s.phone.root);
+  s.title = Title(s.root, c.t, { size: TFS, acc: ACC[id], maxW: TW });
+  Object.assign(s.title.root.style, { left: TX + 'px', top: TTOP + 'px', width: TW + 'px', textAlign: V ? 'center' : 'left' });
+  s.sub = el('div', 'sub', s.root, c.s); Object.assign(s.sub.style, { left: TX + 'px', width: (V ? TW : 760) + 'px', top: (V ? TTOP + 262 : TTOP + 290) + 'px', fontSize: SFS + 'px', textAlign: V ? 'center' : 'left' });
+  s.chips = c.chips.map((txt, i) => { const e = el('div', 'chip', s.root, `<i style="background:${chipColors[i % 4]};box-shadow:0 0 18px ${chipColors[i % 4]}"></i>${txt}`); return { e, i }; });
+});
+
+// clip speed (the recorded real-time clips are a little longer than their scenes)
+const SPEED = { feed: 1.32, comments: 1.12, react: 1.02, stories: 1.14, channel: 1.3, viewer: 1.3, themes: 1.45, mods: 1.68 };
+Object.entries(SPEED).forEach(([k, v]) => { scenes[k].speed = v; scenes[k].cs = .15; });
+
+// ---- platforms
+const plat = mk('plat');
+plat.stage = el('div', 'stage3d', plat.root); Object.assign(plat.stage.style, { left: 0, top: 0, width: W + 'px', height: H + 'px' });
+plat.phone = Phone(V ? 520 : 400); plat.stage.appendChild(plat.phone.root);
+plat.win = el('div', 'win', plat.stage); plat.winTop = el('div', 'top', plat.win, '<span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="url">telex-web.ru/app/static/</span>');
+plat.winImg = el('img', '', plat.win);
+plat.title = Title(plat.root, TXT.plat.t, { size: TFS, acc: ACC.plat, maxW: TW });
+Object.assign(plat.title.root.style, { left: TX + 'px', top: TTOP + 'px', width: TW + 'px', textAlign: V ? 'center' : 'left' });
+plat.sub = el('div', 'sub', plat.root, TXT.plat.s); Object.assign(plat.sub.style, { left: TX + 'px', width: (V ? TW : 760) + 'px', top: (V ? TTOP + 262 : TTOP + 290) + 'px', fontSize: SFS + 'px', textAlign: V ? 'center' : 'left' });
+plat.chips = TXT.plat.chips.map((txt, i) => ({ e: el('div', 'chip', plat.root, `<i style="background:${chipColors[i % 4]};box-shadow:0 0 18px ${chipColors[i % 4]}"></i>${txt}`), i }));
+
+// ---- call to action
+const cta = mk('cta');
+const ctaOrbs = FACES.slice(0, 10).map((u, i) => { const e = el('div', 'orb', cta.root); const im = el('img', '', e); im.src = u; const s = 90 + rnd(i, 1) * 70; e.style.width = e.style.height = s + 'px'; return { e, s, ang: i / 10 * Math.PI * 2, r: .62 + rnd(i, 2) * .3 }; });
+const ctaLogo = el('div', 'abs', cta.root); Object.assign(ctaLogo.style, { left: 0, width: W + 'px', top: (V ? 560 : 190) + 'px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '34px' });
+const ctaImg = el('img', '', ctaLogo); ctaImg.src = '../../app/static/icons/telex.svg'; Object.assign(ctaImg.style, { width: (V ? 210 : 190) + 'px', height: (V ? 210 : 190) + 'px', borderRadius: '24%', boxShadow: '0 30px 100px rgba(90,130,255,.6)' });
+const ctaTxt = el('div', 't', ctaLogo, 'TeleX'); ctaTxt.style.position = 'static'; ctaTxt.style.fontSize = (V ? 210 : 200) + 'px';
+const ctaSub = el('div', 'sub', cta.root, TXT.cta.s); Object.assign(ctaSub.style, { left: '60px', width: W - 120 + 'px', top: (V ? 860 : 450) + 'px', textAlign: 'center', fontSize: (V ? 56 : 52) + 'px', fontWeight: 700, color: '#fff' });
+const ctaBtn = el('div', 'pillbtn', cta.root, `<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg><span>${TXT.cta.url}</span>`);
+Object.assign(ctaBtn.style, { left: '50%', top: (V ? 1040 : 580) + 'px', fontSize: (V ? 84 : 84) + 'px', background: 'linear-gradient(90deg,#3b6bff,#8a4dff)', boxShadow: '0 30px 90px rgba(90,110,255,.55)' });
+const ctaChips = TXT.cta.chips.map((txt, i) => el('div', 'tag', cta.root, txt));
+ctaChips.forEach((c) => { c.style.fontSize = (V ? 42 : 40) + 'px'; });
+const ctaTop = V ? 1330 : 790;
+
+// ---------------------------------------------------------------- render
+let lastScene = '';
+[...FEATURES.map(([id]) => scenes[id].chips), plat.chips].forEach((list) => list.forEach((c) => { c.w = c.e.offsetWidth; }));
+ctaChips.forEach((c) => { c.w = c.offsetWidth; });
+window.DURATION = DURATION;
+window.ready = Promise.all([document.fonts.ready, new Promise((r) => (document.readyState === 'complete' ? r() : addEventListener('load', r)))]);
+
+function background(t, id, prevId, kPrev) {
+  const hu = HUE[id] || HUE.cta, hp = HUE[prevId] || hu;
+  glows.forEach((g, i) => {
+    const col = mix(hp[i], hu[i], 1 - kPrev);
+    const x = (.5 + Math.sin(t * .23 + i * 2.1) * .42) * W - g.d / 2, y = (.5 + Math.cos(t * .19 + i * 1.7) * .38) * H - g.d / 2;
+    g.e.style.transform = `translate(${x}px, ${y}px)`;
+    g.e.style.background = `radial-gradient(circle, ${col.replace('rgb', 'rgba').replace(')', ',.55)')} 0%, ${col.replace('rgb', 'rgba').replace(')', ',0)')} 62%)`;
+  });
+  beams.forEach((b, i) => {
+    const col = mix(hp[(i + 1) % 3], hu[(i + 1) % 3], 1 - kPrev);
+    b.e.style.background = `linear-gradient(90deg, transparent, ${col.replace('rgb', 'rgba').replace(')', ',.22)')}, transparent)`;
+    b.e.style.transform = `translateY(${((t * (70 + i * 40) + i * 700) % (H + 700)) - 350}px) rotate(${-24 + i * 14}deg)`;
+  });
+  dust.forEach((d) => { const y = (d.y - t * d.sp + H * 20) % H; d.e.style.transform = `translate(${d.x + Math.sin(t + d.ph) * 20}px, ${y}px)`; d.e.style.opacity = (.12 + .3 * (.5 + .5 * Math.sin(t * 1.7 + d.ph))) * (d.s > 7 ? .5 : 1); });
+  grain.style.transform = `translate(${(Math.floor(t * 24) * 37) % 50}px, ${(Math.floor(t * 24) * 61) % 50}px)`;
+}
+
+function featureScene(s, t) {
+  const [a, b] = s.t, tl = t - a, dur = b - a;
+  const c = TXT[s.id];
+  // phone: flies in on a 3D arc, then drifts; the beat gives it a small push
+  const inK = outQuint(prog(tl, 0, .9)), outK = inCubic(prog(tl, dur - .35, dur));
+  const drift = Math.sin(t * .8);
+  const rotY = V ? lerp(-38, -6 + drift * 4, inK) + outK * 20 : lerp(-52, -16 + drift * 4, inK) + outK * 24;
+  const rotX = lerp(14, 4 + Math.cos(t * .6) * 2, inK);
+  const rotZ = lerp(V ? 6 : 8, V ? -1.5 : 2, inK);
+  const slideY = (1 - inK) * (V ? 900 : 700) + outK * (V ? 500 : 300);
+  const zoom = 1 + .05 * beatPulse(t, 9) + tl * .006;
+  const x = PHX + (V ? 0 : (1 - inK) * 400 + outK * 260), y = PHY + slideY;
+  s.phone.root.style.transform = `translate3d(${x}px, ${y}px, 0) rotateY(${rotY}deg) rotateX(${rotX}deg) rotateZ(${rotZ}deg) scale(${zoom})`;
+  s.phone.root.style.opacity = 1 - outK * .9;
+  s.phone.root.querySelector('.glare').style.background = `linear-gradient(${105 + drift * 20}deg, transparent ${30 + drift * 12}%, rgba(255,255,255,.16) ${45 + drift * 12}%, transparent ${60 + drift * 12}%)`;
+  setClip(s.phone, s.clip, Math.max(0, tl - .15) * (s.speed || 1) + (s.cs || 0));
+  // words
+  animWords(s.title.ws, .08, tl, dur - .4);
+  const so = prog(tl, .55, .95) * (1 - prog(tl, dur - .4, dur - .15));
+  s.sub.style.opacity = so; s.sub.style.transform = `translateY(${(1 - outCubic(prog(tl, .55, 1))) * 40}px)`;
+  // chips orbit around the phone, bobbing on the beat
+  s.chips.forEach((ch, i) => {
+    const k = outBack(prog(tl, 1.0 + i * .22, 1.6 + i * .22), 2), o = prog(tl, 1.0 + i * .22, 1.3 + i * .22) * (1 - prog(tl, dur - .5, dur - .2));
+    const bob = Math.sin(t * 1.6 + i * 1.7) * 10;
+    const w = ch.w || 300;
+    let cx, cy;
+    if (V) { const right = i % 2; cx = right ? W - 30 - w : 30; cy = 700 + i * 200; } else { cx = 150 + s.chips.slice(0, i).reduce((a, c) => a + (c.w || 250) + 22, 0); cy = TTOP + 600; }
+    ch.e.style.transform = `translate(${cx}px, ${cy + bob + (1 - k) * 60}px) scale(${.6 + .4 * k})`;
+    ch.e.style.opacity = o;
+  });
+}
+
+function sceneVisibility(t) {
+  Object.values(scenes).forEach((s) => {
+    const [a, b] = s.t;
+    const show = t >= a - .02 && t < b + .22;
+    s.root.style.display = show ? 'block' : 'none';
+    if (!show) return;
+    // the cut: outgoing scene slides away blurred, incoming scene arrives from the other side
+    const inK = outQuint(prog(t, a, a + .38)), outK = inCubic(prog(t, b - .08, b + .2));
+    const first = s.id === 'hook';
+    const dx = first ? 0 : (1 - inK) * 160 - outK * 160;
+    const blur = first ? 0 : (1 - inK) * 16 + outK * 16;
+    const sc = first ? 1 : 1.08 - .08 * inK + outK * .04;
+    s.root.style.opacity = (first ? 1 : clamp(inK * 1.6)) * (1 - outK);
+    s.root.style.transform = `translateX(${dx}px) scale(${sc})`;
+    s.root.style.filter = blur > .5 ? `blur(${blur}px)` : 'none';
+  });
+}
+
+window.render = async (t) => {
+  pending.length = 0;
+  const id = sceneAt(t);
+  const keys = Object.keys(TL), ix = keys.indexOf(id);
+  const prevId = ix > 0 ? keys[ix - 1] : id;
+  const kPrev = 1 - inOutCubic(prog(t, TL[id][0] - .1, TL[id][0] + .6));
+  background(t, id, prevId, ix > 0 ? kPrev : 0);
+  sceneVisibility(t);
+
+  // global kick: tiny shake + flash on every cut
+  const cutT = Math.min(...Object.values(TL).map(([a]) => Math.abs(t - a)));
+  flash.style.opacity = id === 'hook' && t < .05 ? 0 : .5 * Math.exp(-cutT * 14) * (cutT < .3 ? 1 : 0);
+  const sh = beatPulse(t, 12) * (id === 'cta' ? 0 : 1.4);
+  stage.style.transform = `translate(${Math.sin(t * 91) * sh}px, ${Math.cos(t * 77) * sh}px)`;
+
+  // ---- hook
+  const hk = scenes.hook;
+  if (hk.root.style.display !== 'none') {
+    const tl = t - hk.t[0];
+    rush.forEach((r, i) => {
+      const k = prog(tl, r.a0 * .5, r.a0 * .5 + 3.2 * r.sp); // 0 → 1: from the centre to past the camera
+      const z = Math.pow(k, 2.2);
+      const cx = W / 2 + Math.cos(r.ang) * (W * .9 * z + 40) * (V ? .9 : 1.6), cy = H / 2 + Math.sin(r.ang) * (H * .9 * z + 40) * (V ? 1.1 : .9);
+      const sc = .25 + z * 3.2;
+      r.e.style.transform = `translate(${cx - r.s / 2}px, ${cy - r.s * .35}px) rotate(${Math.sin(i) * 12 * z}deg) scale(${sc})`;
+      r.e.style.opacity = clamp(k * 6) * (1 - prog(k, .85, 1));
+      r.e.style.filter = z > .35 ? `blur(${(z - .35) * 18}px)` : 'none';
+      r.e.style.display = k <= 0 || k >= 1 ? 'none' : 'block';
+      const bk = outBack(prog(tl, r.a0 * .5 + .5, r.a0 * .5 + .8));
+      r.badge.style.transform = `translate(${cx + r.s * sc * .28}px, ${cy - r.s * sc * .42}px) scale(${bk * (k > 0 && k < .9 ? 1 : 0)})`;
+      r.badge.style.opacity = k > 0 && k < .9 ? 1 : 0;
+    });
+    hookT.forEach((tt, i) => {
+      const a0 = [0.1, 4 * B, 6.4 * B][i];
+      const out = [3.8 * B, 5.8 * B, null][i];
+      animWords(tt.ws, a0, tl, out == null ? null : out, .1);
+      tt.root.style.display = tl >= a0 - .05 && (out == null || tl < out + .5) ? 'block' : 'none';
+    });
+  }
+
+  // ---- logo
+  const lg = scenes.logo;
+  if (lg.root.style.display !== 'none') {
+    const tl = t - lg.t[0];
+    const k = outBack(prog(tl, 0, .55), 2.4);
+    logoWrap.style.transform = `scale(${lerp(2.4, 1, outQuint(prog(tl, 0, .5)))})`;
+    logoWrap.style.opacity = prog(tl, 0, .12);
+    logoImg.style.transform = `rotate(${(1 - k) * -40}deg) scale(${.6 + .4 * k})`;
+    logoTxt.style.transform = `translateX(${(1 - outCubic(prog(tl, .1, .6))) * 120}px)`;
+    logoTxt.style.opacity = prog(tl, .1, .35);
+    rings.forEach((r, i) => { const q = prog(tl, i * .12, i * .12 + .9); const d = 200 + q * 1500; Object.assign(r.style, { width: d + 'px', height: d + 'px', left: W / 2 - d / 2 + 'px', top: (V ? 755 : 355) - d / 2 + 'px', opacity: (1 - q) * .9 * (q > 0 ? 1 : 0) }); });
+    const tg = outCubic(prog(tl, 1.0, 1.5)); logoTag.style.opacity = tg; logoTag.style.transform = `translateY(${(1 - tg) * 40}px)`;
+    const tb = outBack(prog(tl, 1.5, 2.0)); logoTagB.style.opacity = prog(tl, 1.5, 1.8); logoTagB.style.transform = `translate(-50%, 0) scale(${.7 + .3 * tb})`;
+  }
+
+  // ---- features
+  FEATURES.forEach(([fid]) => { const s = scenes[fid]; if (s.root.style.display !== 'none') featureScene(s, t); });
+
+  // ---- platforms
+  if (plat.root.style.display !== 'none') {
+    const tl = t - plat.t[0], dur = plat.t[1] - plat.t[0];
+    const inK = outQuint(prog(tl, 0, .9)), outK = inCubic(prog(tl, dur - .35, dur));
+    const winW = V ? 940 : 820;
+    plat.win.style.width = winW + 'px';
+    plat.winImg.src = `${CLIPS}desktop/${String(clamp(Math.floor(Math.max(0, tl - .1) * 30), 0, (META.desktop || 1) - 1)).padStart(5, '0')}.jpg`;
+    if (plat.winImg.decode) pending.push(plat.winImg.decode().catch(() => {}));
+    const drift = Math.sin(t * .8);
+    plat.win.style.transform = `translate3d(${V ? (W - winW) / 2 : 720 + (1 - inK) * 500}px, ${(V ? 1000 : 420) + (1 - inK) * 400}px, 0) rotateY(${V ? 0 : lerp(-20, -8 + drift * 3, inK)}deg) rotateX(${lerp(10, 2, inK)}deg) scale(${1 + outK * .1})`;
+    plat.win.style.opacity = 1 - outK;
+    plat.phone.root.style.transform = `translate3d(${V ? W / 2 - plat.phone.pw / 2 - 20 : 1380 + (1 - inK) * 500}px, ${(V ? 520 : 70) + (1 - inK) * 800 + outK * 300}px, 60px) rotateY(${lerp(-40, V ? -8 : -14 + drift * 3, inK)}deg) rotateZ(${lerp(8, 2, inK)}deg)`;
+    plat.phone.root.style.opacity = 1 - outK;
+    setClip(plat.phone, 'feed', 1.0 + Math.max(0, tl) * .9);
+    animWords(plat.title.ws, .08, tl, dur - .4);
+    plat.sub.style.opacity = prog(tl, .55, .95) * (1 - prog(tl, dur - .4, dur - .15));
+    plat.chips.forEach((ch, i) => {
+      const k = outBack(prog(tl, 1.0 + i * .22, 1.6 + i * .22), 2), o = prog(tl, 1.0 + i * .22, 1.3 + i * .22) * (1 - prog(tl, dur - .5, dur - .2));
+      const bob = Math.sin(t * 1.6 + i * 1.7) * 10;
+      const cx = V ? [40, 790 - (ch.w || 300) + 250, 300][i] : 150 + i * 290, cy = V ? [760, 960, 1780][i] : TTOP + 560;
+      ch.e.style.transform = `translate(${cx}px, ${cy + bob + (1 - k) * 60}px) scale(${.6 + .4 * k})`; ch.e.style.opacity = o;
+    });
+  }
+
+  // ---- call to action
+  if (cta.root.style.display !== 'none') {
+    const tl = t - cta.t[0];
+    ctaOrbs.forEach((o, i) => {
+      const k = outBack(prog(tl, .1 + i * .06, .7 + i * .06), 1.8);
+      const a = o.ang + t * .16;
+      const rx = (V ? W * .5 : W * .42) * o.r, ry = (V ? H * .36 : H * .46) * o.r;
+      o.e.style.transform = `translate(${W / 2 + Math.cos(a) * rx - o.s / 2}px, ${(V ? 960 : H / 2) + Math.sin(a) * ry - o.s / 2}px) scale(${k * (.7 + .3 * Math.sin(a + 1))})`;
+      o.e.style.opacity = prog(tl, .1 + i * .06, .5 + i * .06) * (.5 + .4 * Math.sin(a + 1.2)) * .8;
+      o.e.style.filter = `blur(${(1 - (.5 + .5 * Math.sin(a + 1.2))) * 5}px)`;
+    });
+    const k = outBack(prog(tl, .05, .6), 2.2);
+    ctaLogo.style.transform = `scale(${.5 + .5 * k})`; ctaLogo.style.opacity = prog(tl, .05, .25);
+    ctaSub.style.opacity = prog(tl, .7, 1.1); ctaSub.style.transform = `translateY(${(1 - outCubic(prog(tl, .7, 1.2))) * 40}px)`;
+    const bk = outBack(prog(tl, 1.1, 1.7), 2);
+    const pulse = 1 + .035 * beatPulse(t, 6);
+    ctaBtn.style.opacity = prog(tl, 1.1, 1.4); ctaBtn.style.transform = `translate(-50%, 0) scale(${(.6 + .4 * bk) * pulse})`;
+    ctaChips.forEach((c, i) => {
+      const q = outBack(prog(tl, 1.7 + i * .15, 2.2 + i * .15), 2);
+      const widths = ctaChips.map((x) => x.w || 240), gap = 24;
+      let x, y;
+      if (V) { const row = i < 2 ? 0 : 1; const idx = row ? [2, 3] : [0, 1]; const rw = widths[idx[0]] + widths[idx[1]] + gap; x = (W - rw) / 2 + (i % 2 ? widths[idx[0]] + gap : 0); y = ctaTop + row * 100; }
+      else { const total = widths.reduce((a, b) => a + b, 0) + gap * 3; let acc = 0; for (let j = 0; j < i; j++) acc += widths[j] + gap; x = (W - total) / 2 + acc; y = ctaTop; }
+      c.style.transform = `translate(${x}px, ${y + (1 - q) * 40}px) scale(${.6 + .4 * q})`; c.style.opacity = prog(tl, 1.7 + i * .15, 2.0 + i * .15);
+    });
+  }
+  await Promise.all(pending);
+};
+</script>
+</body>
+</html>
