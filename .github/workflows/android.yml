@@ -84,14 +84,17 @@ jobs:
           else
             cp "$debug" dist/TeleX-android.apk
           fi
-          cat > dist/version.json <<JSON
-          {
-            "versionCode": ${TELEX_VERSION_CODE},
-            "versionName": "${TELEX_VERSION_NAME}",
-            "apk": "https://github.com/${{ github.repository }}/releases/download/nightly/TeleX-android.apk",
-            "commit": "${{ github.sha }}"
-          }
-          JSON
+          python3 - <<'PY'
+          import json, os
+          notes = [l.strip().lstrip('-').strip() for l in open('release-notes.txt', encoding='utf8') if l.strip()] if os.path.exists('release-notes.txt') else []
+          json.dump({
+              'versionCode': int(os.environ['TELEX_VERSION_CODE']),
+              'versionName': os.environ['TELEX_VERSION_NAME'],
+              'apk': 'https://github.com/${{ github.repository }}/releases/download/nightly/TeleX-android.apk',
+              'commit': '${{ github.sha }}',
+              'notes': notes,
+          }, open('dist/version.json', 'w', encoding='utf8'), ensure_ascii=False)
+          PY
           ls -la dist
 
       - uses: actions/upload-artifact@v4

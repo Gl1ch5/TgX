@@ -47,7 +47,7 @@ import java.util.concurrent.Executors
  */
 class Updater(private val activity: Activity) {
 
-    private class Info(val code: Long, val name: String, val apkUrl: String)
+    private class Info(val code: Long, val name: String, val apkUrl: String, val notes: List<String> = emptyList())
 
     private val io = Executors.newSingleThreadExecutor()
     private val prefs = activity.getSharedPreferences("updater", Context.MODE_PRIVATE)
@@ -184,7 +184,17 @@ class Updater(private val activity: Activity) {
             background = GradientDrawable().apply { setColor(0xFF1C1C1E.toInt()); cornerRadius = dp(22).toFloat() }
             addView(icon)
             addView(title, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) })
-            addView(sub, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6); bottomMargin = dp(12) })
+            addView(sub, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6); bottomMargin = if (info.notes.isEmpty()) dp(12) else dp(8) })
+            if (info.notes.isNotEmpty()) {
+                val head = TextView(activity).apply { text = "Что нового"; setTextColor(Color.WHITE); textSize = 15f; typeface = Typeface.DEFAULT_BOLD }
+                val list = TextView(activity).apply {
+                    text = info.notes.joinToString("\n\n") { "•  $it" }
+                    setTextColor(0xFFD0D0D6.toInt()); textSize = 14.5f; setLineSpacing(0f, 1.15f)
+                }
+                val scroll = android.widget.ScrollView(activity).apply { addView(list); isVerticalScrollBarEnabled = false }
+                addView(head, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(4) })
+                addView(scroll, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6); bottomMargin = dp(12) })
+            }
             addView(row)
         }
         d.setContentView(box)
@@ -300,7 +310,9 @@ class Updater(private val activity: Activity) {
         val json = JSONObject(httpText("$VERSION_URL?t=${System.currentTimeMillis()}"))
         val code = json.optLong("versionCode", 0)
         if (code <= 0) throw IllegalStateException("version.json без versionCode")
-        return Info(code, json.optString("versionName", code.toString()), json.optString("apk", APK_URL).ifBlank { APK_URL })
+        val arr = json.optJSONArray("notes")
+        val notes = if (arr == null) emptyList() else (0 until arr.length()).map { arr.optString(it) }.filter { it.isNotBlank() }
+        return Info(code, json.optString("versionName", code.toString()), json.optString("apk", APK_URL).ifBlank { APK_URL }, notes)
     }
 
     private fun download(url: String): File {

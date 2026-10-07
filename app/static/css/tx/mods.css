@@ -211,22 +211,20 @@ html.tx-chat-open #app, html.tx-chat-open .tx-dock, html.tx-chat-open .tx-mod-fa
 .tx-modtabs .tx-tab-ind { background: var(--tx-accent-soft); }
 .tx-setscroll, .tx-hscroll { margin: 0 -12px; padding: 4px 12px 14px; scroll-padding-left: 12px; }
 .tx-hscroll { padding-bottom: 8px; }
-.tx-setcard { background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--tx-surface)), color-mix(in srgb, var(--c2) 24%, var(--tx-surface))); color: var(--tx-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c1) 22%, transparent); }
-.tx-setcard::after { background: color-mix(in srgb, var(--c2) 20%, transparent); }
+.tx-setcard { background: var(--tx-surface); color: var(--tx-text); box-shadow: none; }
+.tx-setcard::after { display: none; }
 .tx-setcard small { opacity: 1; color: var(--tx-text-2); }
-.tx-setcard-ic { width: 46px; height: 46px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: 0 6px 16px color-mix(in srgb, var(--c1) 40%, transparent); }
+.tx-setcard-ic { width: 46px; height: 46px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: none; }
 .tx-setcard-ic .icon { font-size: 26px; color: #fff; }
 .tx-setcard-mods em { color: var(--tx-text-2); opacity: 1; }
 .tx-setmini { background: var(--tx-surface-2); box-shadow: 0 0 0 2px var(--tx-surface); }
 .tx-setmini .icon { color: var(--tx-accent); }
-html[data-theme='light'] .tx-setcard { background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 22%, #fff), color-mix(in srgb, var(--c2) 16%, #fff)); }
-.tx-sethero, .tx-modhero { color: var(--tx-text); background: linear-gradient(135deg, color-mix(in srgb, var(--c1, var(--tx-accent-fill)) 30%, var(--tx-surface)), color-mix(in srgb, var(--c2, #8a5cff) 22%, var(--tx-surface))); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c1, var(--tx-accent-fill)) 20%, transparent); }
+.tx-sethero, .tx-modhero { color: var(--tx-text); background: var(--tx-surface); box-shadow: none; }
 .tx-sethero p, .tx-modhero small { color: var(--tx-text-2); opacity: 1; }
 .tx-sethero-ic { width: 64px; height: 64px; border-radius: 18px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--c1), var(--c2)); }
 .tx-sethero-ic .icon { font-size: 34px; color: #fff; }
 .tx-modhero-ic { background: var(--tx-accent-fill); }
 .tx-modhero-ic .icon { color: #fff; }
-html[data-theme='light'] .tx-sethero, html[data-theme='light'] .tx-modhero { background: linear-gradient(135deg, color-mix(in srgb, var(--c1, var(--tx-accent-fill)) 20%, #fff), color-mix(in srgb, var(--c2, #8a5cff) 14%, #fff)); }
 
 /* mod page (installed / official / store) */
 .tx-mdhero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 22px 16px 18px; margin: 4px 0 12px; border-radius: 26px; background: linear-gradient(180deg, var(--tx-accent-soft), transparent 90%); }

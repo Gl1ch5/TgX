@@ -314,15 +314,24 @@ function jumpButton() {
       updateJump();
     };
     document.getElementById('app').appendChild(btn);
-    window.addEventListener('scroll', updateJump, { passive: true });
+    let raf = 0;
+    window.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; updateJump(); }); }, { passive: true });
   }
   return btn;
 }
 
 function updateJump() {
   const btn = jumpButton();
+  // back at the top by hand: the waiting posts simply appear, no need to press the button
+  if (jumpApply && window.scrollY < 120 && document.getElementById('app').dataset.view === 'wall') {
+    const apply = jumpApply;
+    jumpApply = null;
+    jumpCount = 0;
+    apply();
+  }
   const badge = btn.querySelector('.tx-badge');
-  badge.textContent = jumpCount > 99 ? '99+' : String(jumpCount);
+  const label = jumpCount > 99 ? '99+' : String(jumpCount);
+  if (badge.textContent !== label) badge.textContent = label;
   show(badge, jumpCount > 0);
   btn.classList.toggle('is-visible', jumpCount > 0 || window.scrollY > 1200);
 }
