@@ -1540,6 +1540,16 @@
   "plural": false
  },
  {
+  "key": "Лёгкие переходы",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Без снимка экрана при переходах: быстрее на слабых телефонах",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Ресурсоёмкие процессы",
   "where": "js/views/settings.js",
   "plural": false
@@ -2506,11 +2516,6 @@
  },
  {
   "key": "В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать».",
-  "where": "js/views/store.js",
-  "plural": false
- },
- {
-  "key": "Каталог сообщества недоступен, показаны официальные моды.",
   "where": "js/views/store.js",
   "plural": false
  },

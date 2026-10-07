@@ -524,7 +524,6 @@ export const EN = {
   "Категории": "Categories",
   "Новинки": "New",
   "В каталоге пока нет модов сообщества. Опубликуйте первый на вкладке «Создать».": "There are no community mods yet. Publish the first one on the Create tab.",
-  "Каталог сообщества недоступен, показаны официальные моды.": "The community catalog is unavailable; showing official mods.",
   "Инструменты": "Tools",
   "Мод не найден": "Mod not found",
   "Оценок: {a}": "Ratings: {a}",
@@ -559,4 +558,6 @@ export const EN = {
   "Источник": "Source",
   "Работает сейчас": "Running now",
   "Выключен": "Off",
+  "Лёгкие переходы": "Light transitions",
+  "Без снимка экрана при переходах: быстрее на слабых телефонах": "No screen snapshot during transitions: faster on slow phones",
 };

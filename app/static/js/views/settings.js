@@ -183,7 +183,8 @@ function powerPage() {
       ${group(
         switchRow({ title: t('Автовоспроизведение видео'), sub: t('Короткие видео в ленте без звука'), checked: p.autoplayVideos, onchange: "window.TelegramX.setPref('autoplayVideos', this.checked)" }) +
         switchRow({ title: t('Автовоспроизведение GIF'), checked: p.autoplayGifs, onchange: "window.TelegramX.setPref('autoplayGifs', this.checked)" }) +
-        switchRow({ title: t('Эффекты стекла'), sub: t('Размытие под панелями'), checked: p.glass, onchange: "window.TelegramX.setPref('glass', this.checked)" }),
+        switchRow({ title: t('Эффекты стекла'), sub: t('Размытие под панелями'), checked: p.glass, onchange: "window.TelegramX.setPref('glass', this.checked)" }) +
+        switchRow({ title: t('Лёгкие переходы'), sub: t('Без снимка экрана при переходах: быстрее на слабых телефонах'), checked: (() => { try { return localStorage.getItem('tx.lowperf') === '1'; } catch { return false; } })(), onchange: "try { localStorage.setItem('tx.lowperf', this.checked ? '1' : '0') } catch {}" }),
         { title: t('Ресурсоёмкие процессы') },
       )}
     </div>`;

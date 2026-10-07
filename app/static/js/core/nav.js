@@ -61,9 +61,27 @@ function apply(view, params = {}) {
     swap(view, params);
     return;
   }
+  // slow phones: the full-page snapshot of the View Transitions API drops frames, so a light slide of the screen is used instead
+  if (lowPerf()) {
+    swap(view, params);
+    const app = document.getElementById('app');
+    const dx = kind === 'push' ? 28 : kind === 'pop' ? -28 : 0;
+    app.animate([{ opacity: kind === 'tab' ? 0 : 0.4, transform: `translateX(${dx}px)` }, { opacity: 1, transform: 'none' }], { duration: kind === 'tab' ? 160 : 230, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+    return;
+  }
   document.documentElement.dataset.nav = kind;
+  const started = performance.now();
   const t = document.startViewTransition(() => swap(view, params));
-  t.finished.finally(() => { delete document.documentElement.dataset.nav; });
+  t.finished.finally(() => {
+    delete document.documentElement.dataset.nav;
+    // a transition that takes far longer than its animation means the device cannot keep up: after two of them switch to the light mode
+    if (performance.now() - started > 700 && ++slowCount >= 2) { try { localStorage.setItem('tx.lowperf', '1'); } catch {} }
+  });
+}
+
+let slowCount = 0;
+function lowPerf() {
+  try { return localStorage.getItem('tx.lowperf') === '1'; } catch { return false; }
 }
 
 /**
