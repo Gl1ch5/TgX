@@ -26,3 +26,4 @@ node_modules/
 native/desktop/web/
 native/desktop/src/build-info.json
 app/static/community/
+promo/v2/share/
