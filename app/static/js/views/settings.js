@@ -56,11 +56,12 @@ function render() {
   if (page.startsWith('set:')) fillSet(page.slice(4));
   if (page.startsWith('mod:')) { const box = document.getElementById('mod-custom'); if (box) modRenderers(page.slice(4)).forEach((fn) => { try { fn(box); } catch (e) { console.warn('[mods] render', e); } }); }
   // a sub-page slides in from the right, going back slides the list in from the left; groups rise one by one
-  if (prevPage !== null && prevPage !== page && !document.body.classList.contains('tx-reduce-motion')) {
+  const slid = prevPage !== null && prevPage !== page && !document.body.classList.contains('tx-reduce-motion');
+  if (slid) {
     const forward = page !== 'root';
     el.animate([{ opacity: 0, transform: `translateX(${forward ? 28 : -28}px)` }, { opacity: 1, transform: 'none' }], { duration: 280, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
   }
-  if (prevPage !== page) el.querySelectorAll('.tx-group, .tx-hero').forEach((g, i) => { if (i < 9) { g.style.setProperty('--i', i); g.classList.add('tx-rise'); } });
+  if (prevPage !== page && !slid) el.querySelectorAll('.tx-group, .tx-hero').forEach((g, i) => { if (i < 9) { g.style.setProperty('--i', i); g.classList.add('tx-rise'); } });
   shownPage = page;
   if (page === 'about' && isAndroidApp()) {
     window.__txUpdate = (json) => { try { const i = JSON.parse(json); const el = document.getElementById('upd-status'); if (el) el.textContent = `${i.name} · ${i.code}\n${i.status}`; } catch {} };
@@ -553,8 +554,9 @@ export function setModsTab(tab, dir = 0) {
   document.querySelectorAll('.tx-modtabs .tx-tab').forEach((b) => b.classList.toggle('is-active', b.dataset.tab === tab));
   placeModTabs(true);
   window.scrollTo({ top: 0 });
-  afterModsBody();
   if (!document.body.classList.contains('tx-reduce-motion')) pg.animate([{ opacity: 0, transform: `translateX(${dir * 24}px)` }, { opacity: 1, transform: 'none' }], { duration: 200, easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)' });
+  // fills (catalog, network) start after the first frame so the slide never waits for them
+  requestAnimationFrame(() => setTimeout(() => { if (modsTab === tab && page === 'mods') afterModsBody(); }, 0));
 }
 
 /** The sliding indicator of the mod tabs (same look as the feed tabs). */

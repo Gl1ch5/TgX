@@ -55,7 +55,9 @@ function apply(view, params = {}) {
   const kind = d > 0 ? 'push' : d < 0 ? 'pop' : (TABS.includes(view) && view !== from.view ? 'tab' : 'none');
   const reduce = document.body.classList.contains('tx-reduce-motion') || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (!document.startViewTransition || kind === 'none' || reduce) {
+  // settings sub-pages animate themselves (light slide in settings.js); a full-page snapshot would stack a second, heavy transition on top
+  const inner = view === from.view && view === 'settings';
+  if (!document.startViewTransition || kind === 'none' || reduce || inner) {
     swap(view, params);
     return;
   }
