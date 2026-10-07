@@ -1,6 +1,31 @@
 [
  {
+  "key": "{n} слово скрыто",
+  "where": "js/app.js",
+  "plural": true,
+  "forms": [
+   "{n} слово скрыто",
+   "{n} слова скрыто",
+   "{n} слов скрыто"
+  ]
+ },
+ {
+  "key": "Скрытых слов нет",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
   "key": "Просмотренные посты будут отмечаться прочитанными",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Нет подключения к интернету. Показываю сохранённые посты",
+  "where": "js/app.js",
+  "plural": false
+ },
+ {
+  "key": "Снова в сети",
   "where": "js/app.js",
   "plural": false
  },
@@ -1775,6 +1800,31 @@
   "plural": false
  },
  {
+  "key": "Скрывать рекламу",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Посты с маркировкой erid и #реклама",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Например: розыгрыш, крипта",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Скрытые слова",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Посты, где встречается любое из этих слов, не появятся на стене. Слова через запятую.",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Сколько каналов загружать",
   "where": "js/views/settings.js",
   "plural": false
@@ -2731,6 +2781,11 @@
  },
  {
   "key": "Вы всё прочитали",
+  "where": "js/views/wall.js",
+  "plural": false
+ },
+ {
+  "key": "Продолжить с места, где остановились",
   "where": "js/views/wall.js",
   "plural": false
  },

@@ -94,6 +94,7 @@ export function openPostMenu(postId, event) {
     if (post.comments_enabled) items.push({ icon: 'reply', label: t('Ответить'), run: () => tx.openThread(post.id) });
     if (post.text) items.push({ icon: 'copy', label: t('Копировать'), run: () => copyText(post.text) });
     items.push({ icon: 'link', label: t('Копировать ссылку'), run: () => tx.copyPostLink(post.tg_url) });
+    if (navigator.share) items.push({ icon: 'share-filled', label: t('Поделиться'), run: () => sharePost(post.id) });
     if (savable(post)) items.push({ icon: 'save-gallery', label: t('Сохранить в галерею'), run: () => saveMedia(post) });
     items.push(
       { icon: 'forward', label: t('Переслать в «Избранное»'), run: () => tx.forwardToSaved(post.channel_id, post.msg_id) },

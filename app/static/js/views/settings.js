@@ -278,6 +278,10 @@ function wallPage() {
         switchRow({ icon: 'readchats', color: 'GREEN', title: t('Отмечать прочитанным'), sub: t('Просмотренные посты — прочитаны и в Telegram'), checked: p.syncRead, onchange: "window.TelegramX.setPref('syncRead', this.checked)" }) +
         switchRow({ icon: 'group-filled', color: 'PURPLE', title: t('Показывать группы'), sub: t('Сообщения супергрупп на стене'), checked: p.showGroups, onchange: "window.TelegramX.setPref('showGroups', this.checked); window.TelegramX.rerenderSettings()" }),
       )}
+      ${group(
+        switchRow({ icon: 'block-filled', color: 'RED', title: t('Скрывать рекламу'), sub: t('Посты с маркировкой erid и #реклама'), checked: p.hideAds, onchange: "window.TelegramX.setPref('hideAds', this.checked); window.TelegramX.reloadWall()" }) +
+        `<label class="tx-words"><input type="text" placeholder="${t('Например: розыгрыш, крипта')}" value="${escapeHtml((p.mutedWords || []).join(', '))}" onchange="window.TelegramX.setMutedWords(this.value)" /></label>`,
+        { title: t('Скрытые слова'), hint: t('Посты, где встречается любое из этих слов, не появятся на стене. Слова через запятую.') })}
       ${group(segments([[10, '10'], [20, '20'], [40, '40'], [60, '60']], p.feedSize, "window.TelegramX.setPref('feedSize', $v); window.TelegramX.rerenderSettings()"),
         { title: t('Сколько каналов загружать'), hint: t('Чем больше каналов, тем дольше обновляется стена.') })}
       <label class="tx-search tx-glass" style="margin:0 0 12px;background:var(--tx-surface)">

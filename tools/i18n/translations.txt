@@ -560,3 +560,13 @@ Groq не принял этот ключ. Проверьте, что скопи�
 Выключен ‖ Off ‖ Desactivado ‖ Desativado ‖ Вимкнено
 Лёгкие переходы ‖ Light transitions ‖ Transiciones ligeras ‖ Transições leves ‖ Легкі переходи
 Без снимка экрана при переходах: быстрее на слабых телефонах ‖ No screen snapshot during transitions: faster on slow phones ‖ Sin captura de pantalla al cambiar: más rápido en teléfonos lentos ‖ Sem captura de tela nas transições: mais rápido em celulares lentos ‖ Без знімка екрана під час переходів: швидше на слабких телефонах
+#{n} слово скрыто ‖ {n} word hidden / {n} words hidden ‖ {n} palabra oculta / {n} palabras ocultas ‖ {n} palavra oculta / {n} palavras ocultas ‖ {n} слово приховано / {n} слова приховано / {n} слів приховано
+Скрытых слов нет ‖ No hidden words ‖ No hay palabras ocultas ‖ Nenhuma palavra oculta ‖ Прихованих слів немає
+Нет подключения к интернету. Показываю сохранённые посты ‖ No internet connection. Showing saved posts ‖ Sin conexión a internet. Mostrando publicaciones guardadas ‖ Sem conexão com a internet. Mostrando publicações salvas ‖ Немає підключення до інтернету. Показую збережені пости
+Снова в сети ‖ Back online ‖ De nuevo en línea ‖ De volta online ‖ Знову в мережі
+Скрывать рекламу ‖ Hide ads ‖ Ocultar anuncios ‖ Ocultar anúncios ‖ Приховувати рекламу
+Посты с маркировкой erid и #реклама ‖ Posts marked with erid or #ad ‖ Publicaciones marcadas con erid o #publicidad ‖ Publicações marcadas com erid ou #anúncio ‖ Пости з маркуванням erid і #реклама
+Например: розыгрыш, крипта ‖ For example: giveaway, crypto ‖ Por ejemplo: sorteo, cripto ‖ Por exemplo: sorteio, cripto ‖ Наприклад: розіграш, крипта
+Скрытые слова ‖ Hidden words ‖ Palabras ocultas ‖ Palavras ocultas ‖ Приховані слова
+Посты, где встречается любое из этих слов, не появятся на стене. Слова через запятую. ‖ Posts containing any of these words will not appear on the wall. Separate words with commas. ‖ Las publicaciones que contengan cualquiera de estas palabras no aparecerán en el muro. Separa las palabras con comas. ‖ Publicações com qualquer uma dessas palavras não aparecerão no mural. Separe as palavras com vírgulas. ‖ Пости, де трапляється будь-яке з цих слів, не з'являться на стіні. Слова через кому.
+Продолжить с места, где остановились ‖ Continue where you left off ‖ Continuar donde lo dejaste ‖ Continuar de onde parou ‖ Продовжити з місця, де зупинилися

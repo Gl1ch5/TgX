@@ -381,7 +381,7 @@ export async function loadFeed(forceRefresh = false) {
     if (token !== feedToken) return; // another tab was opened while this one loaded
     const posts = data.posts || [];
     const apply = () => {
-      state.posts = posts;
+      state.posts = posts.filter(keepPost);
       state.hasMore = data.has_more || false;
       state.nextOffset = data.next_offset || null;
       renderFeed();
@@ -411,6 +411,7 @@ export async function loadFeed(forceRefresh = false) {
     }
   }
 
+  if (state.posts.length) offerResume();
   if (!updateAsked && state.posts.length) { updateAsked = true; postNative('updateCheck'); } // Android app: look for a new version (tiny request, throttled natively)
   if (refreshAfterCache && token === feedToken) loadFeed(true);
 }
@@ -439,6 +440,54 @@ function renderFeed() {
   }
 }
 
+// ---------------- Hidden posts: muted words and sponsored posts ----------------
+const AD_RE = /(^|[^a-zа-я])(erid|#реклама|#ad|#промо|#партн[её]р|на правах рекламы|реклама\.\s)/i;
+export function keepPost(p) {
+  const prefs = getPrefs();
+  const text = `${p.text || ''} ${String(p.text_html || '').replace(/<[^>]+>/g, '')}`.toLowerCase().trim();
+  if (!text) return true;
+  if (prefs.hideAds && AD_RE.test(text)) return false;
+  return !(prefs.mutedWords || []).some((w) => w && text.includes(w));
+}
+
+// ---------------- Resume reading: the top post on screen is remembered, after a restart a pill offers to jump back ----------------
+const RESUME_KEY = 'tx.resume';
+let resumeTimer = 0;
+function rememberPosition() {
+  clearTimeout(resumeTimer);
+  resumeTimer = setTimeout(() => {
+    if (document.getElementById('app').dataset.view !== 'wall' || state.feedType !== 'all' || state.activeChannelId || state.searchQuery) return;
+    if (window.scrollY < 600) return;
+    const top = [...document.querySelectorAll('#posts-container > .tx-post')].find((c) => c.getBoundingClientRect().bottom > 120);
+    if (top) { try { localStorage.setItem(RESUME_KEY, JSON.stringify({ id: top.dataset.post, at: Date.now() })); } catch {} }
+  }, 400);
+}
+window.addEventListener('scroll', rememberPosition, { passive: true });
+
+let resumeOffered = false;
+function offerResume() {
+  if (resumeOffered || state.feedType !== 'all' || state.activeChannelId) return;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null'); } catch {}
+  if (!saved || Date.now() - saved.at > 3 * 86400e3 || window.scrollY > 400) { resumeOffered = true; return; }
+  if (!state.posts.some((p) => p.id === saved.id)) return; // not loaded yet: try again after the next load
+  resumeOffered = true;
+  if (state.posts[0]?.id === saved.id) return;
+  const pill = document.createElement('button');
+  pill.className = 'tx-resume tx-glass';
+  pill.innerHTML = `<i class="icon icon-arrow-down"></i><span>${t('Продолжить с места, где остановились')}</span>`;
+  pill.onclick = () => {
+    pill.remove();
+    const card = document.getElementById(`post-card-${saved.id}`);
+    if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
+  };
+  document.getElementById('app').appendChild(pill);
+  window.addEventListener('tx:view', () => pill.remove(), { once: true });
+  setTimeout(() => pill.classList.add('is-out'), 9000);
+  setTimeout(() => pill.remove(), 9400);
+  window.addEventListener('scroll', function off() { if (window.scrollY > 400) { pill.remove(); window.removeEventListener('scroll', off); } }, { passive: true });
+}
+
 export async function loadMorePosts() {
   if (state.isLoadingFeed || !state.hasMore || !state.nextOffset) return;
   state.isLoadingFeed = true;
@@ -453,7 +502,7 @@ export async function loadMorePosts() {
       limit: 30,
     });
     const known = new Set(state.posts.map((p) => p.id));
-    const fresh = (data.posts || []).filter((p) => !known.has(p.id));
+    const fresh = (data.posts || []).filter((p) => !known.has(p.id) && keepPost(p));
     if (fresh.length) {
       state.posts.push(...fresh);
       state.hasMore = data.has_more;
@@ -463,7 +512,7 @@ export async function loadMorePosts() {
       state.hasMore = false;
     }
     const end = $('sentinel-text');
-    end.textContent = t('Вы всё прочитали');
+    end.innerHTML = `${t('Вы всё прочитали')} · <a href="#" onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' })">${t('Наверх')}</a>`;
     show(end, !state.hasMore);
   } catch (e) {
     console.error('Load more error', e);
@@ -678,7 +727,7 @@ function prependPosts(posts) {
 }
 
 export function onLivePosts(posts) {
-  const visible = posts.filter(matchesView);
+  const visible = posts.filter((p) => matchesView(p) && keepPost(p));
   if (!visible.length) return;
   const atTop = window.scrollY < 300 && document.getElementById('app').dataset.view === 'wall';
   if (atTop && !pendingLive.length) {

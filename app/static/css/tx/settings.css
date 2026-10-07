@@ -136,3 +136,6 @@ body.tx-no-glass { --tx-glass: rgba(34, 34, 36, 0.97); }
 .tx-chat-settings .tx-slider { padding: 8px 22px 16px; }
 .tx-chat-settings .tx-row { gap: 16px; }
 .tx-name-pill { font-size: 15.5px; padding: 5px 15px; }
+.tx-words { display: block; padding: 4px 16px 12px; }
+.tx-words input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--tx-separator); background: var(--tx-surface-2); color: var(--tx-text); padding: 0 14px; font: inherit; font-size: 16px; outline: none; }
+.tx-words input:focus { border-color: var(--tx-accent); }

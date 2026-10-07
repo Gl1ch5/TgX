@@ -39,7 +39,7 @@ import { ext } from './core/ext.js';
 import * as profile from './views/profile.js';
 import * as channel from './views/channel.js';
 import { captureLogs, initDevtools, postNative } from './core/devtools.js';
-import { t, applyDocumentLanguage, translateTree } from './i18n.js';
+import { t, tn, applyDocumentLanguage, translateTree } from './i18n.js';
 
 captureLogs();
 
@@ -58,7 +58,14 @@ window.TelegramX = {
   showToast,
 
   // Navigation
-  setView: (view) => go(view),
+  setView: (view) => {
+    // tapping the tab you are on: the wall scrolls to the top, a second tap at the top refreshes (like Telegram)
+    if (view === 'wall' && document.getElementById('app').dataset.view === 'wall' && !(history.state && history.state.channel)) {
+      if (window.scrollY > 40) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      wall.refreshFeed(); return;
+    }
+    go(view);
+  },
   back,
   openSettingsPage: settings.openSettingsPage,
   rerenderSettings: settings.rerenderSettings,
@@ -164,6 +171,13 @@ window.TelegramX = {
   filterLanguages: settings.filterLanguages,
   toggleLanguageSearch: settings.toggleLanguageSearch,
   setChannelOnWall: settings.setChannelOnWall,
+  setMutedWords: (v) => {
+    const words = [...new Set(String(v || '').split(/[,\n]/).map((w) => w.trim().toLowerCase()).filter((w) => w.length > 1))].slice(0, 100);
+    setPref('mutedWords', words);
+    showToast(words.length ? tn(['{n} слово скрыто', '{n} слова скрыто', '{n} слов скрыто'], words.length, { n: words.length }) : t('Скрытых слов нет'));
+    wall.loadFeed(true);
+  },
+  reloadWall: () => wall.loadFeed(true),
   filterWallChannels: settings.filterWallChannels,
   terminateSession: settings.terminateSession,
   clearMediaCache,
@@ -264,6 +278,9 @@ async function initApp() {
   setupStoriesBar();
   initDevtools();
   setupKeyboard();
+  // connection lost / back: say it once instead of silent spinners
+  window.addEventListener('offline', () => showToast(t('Нет подключения к интернету. Показываю сохранённые посты')));
+  window.addEventListener('online', () => { showToast(t('Снова в сети')); if (document.getElementById('app').dataset.view === 'wall') wall.loadFeed(true); });
   setupResilience();
   setupMediaFadeIn();
   api.onReadChange(() => wall.loadChannels());

@@ -23,6 +23,8 @@ export const ACCENTS = [
 
 const DEFAULTS = {
   excludedChannels: [],   // channel ids hidden from the wall
+  mutedWords: [],         // posts containing any of these words are hidden from the wall
+  hideAds: false,         // hide sponsored posts (erid marking, #реклама)
   showGroups: false,      // include supergroups on the wall
   feedSize: 20,           // how many channels the wall polls
   textSize: 16,           // message text size, px
