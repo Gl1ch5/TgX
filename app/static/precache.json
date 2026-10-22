@@ -1,9 +1,10 @@
 {
- "build": "1ff18ffedf",
+ "build": "9c8d26815b",
  "files": [
   "./",
   "index.html",
   "chat/index.html",
+  "codes/index.html",
   "css/animations.css",
   "css/fonts.css",
   "css/telegram-icons.css",
