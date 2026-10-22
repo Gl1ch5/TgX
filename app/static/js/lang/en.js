@@ -438,4 +438,6 @@ export const EN = {
   "Промпт скопирован — вставьте его в нейросеть": "Prompt copied — paste it into an AI",
   "Буфер обмена пуст": "The clipboard is empty",
   "Вставьте мод в поле ниже": "Paste the mod into the field below",
+  "Коды входа": "Login codes",
+  "Чат «Telegram» с кодами": "\"Telegram\" chat with codes",
 };
