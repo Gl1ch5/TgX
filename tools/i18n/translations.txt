@@ -437,3 +437,5 @@ TeleX — стена каналов Telegram ‖ TeleX — a wall of your Telegr
 Промпт скопирован — вставьте его в нейросеть ‖ Prompt copied — paste it into an AI ‖ Prompt copiado: pégalo en una IA ‖ Prompt copiado — cole em uma IA ‖ Промпт скопійовано — вставте його в нейромережу
 Буфер обмена пуст ‖ The clipboard is empty ‖ El portapapeles está vacío ‖ A área de transferência está vazia ‖ Буфер обміну порожній
 Вставьте мод в поле ниже ‖ Paste the mod into the field below ‖ Pega el mod en el campo de abajo ‖ Cole o mod no campo abaixo ‖ Вставте мод у поле нижче
+Коды входа ‖ Login codes ‖ Códigos de acceso ‖ Códigos de login ‖ Коди входу
+Чат «Telegram» с кодами ‖ "Telegram" chat with codes ‖ Chat «Telegram» con códigos ‖ Chat «Telegram» com códigos ‖ Чат «Telegram» з кодами

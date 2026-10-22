@@ -438,4 +438,6 @@ export const ES = {
   "Промпт скопирован — вставьте его в нейросеть": "Prompt copiado: pégalo en una IA",
   "Буфер обмена пуст": "El portapapeles está vacío",
   "Вставьте мод в поле ниже": "Pega el mod en el campo de abajo",
+  "Коды входа": "Códigos de acceso",
+  "Чат «Telegram» с кодами": "Chat «Telegram» con códigos",
 };

@@ -94,6 +94,7 @@ function rootPage() {
         row({ icon: 'st-devices', color: 'CYAN', title: t('Устройства'), sub: t('Управление активными сеансами'), onclick: "window.TelegramX.openSettingsPage('devices')" }) +
         row({ icon: 'st-power', color: 'ORANGE_DEEP', title: t('Энергосбережение'), sub: p.reduceMotion ? t('Анимации выключены') : t('Анимации и автовоспроизведение'), onclick: "window.TelegramX.openSettingsPage('power')" }) +
         row({ icon: 'st-chat', color: 'GREEN', title: 'Telegram You', sub: t('Полноценный клиент Telegram'), onclick: "window.open('https://gl1ch5.github.io/Telegram-YOU/', '_blank', 'noopener')" }) +
+        row({ icon: 'st-chat', color: 'BLUE', title: t('Коды входа'), sub: t('Чат «Telegram» с кодами'), onclick: "location.href = new URL('codes/', location.href).href" }) +
         row({ icon: 'st-language', color: 'PURPLE', title: t('Язык'), sub: (LANGUAGES.find((l) => l.code === lang()) || LANGUAGES[0]).name, onclick: "window.TelegramX.openSettingsPage('language')" }) +
         row({ icon: 'st-features', color: 'PURPLE', title: t('Моды'), sub: modsSummary(), onclick: "window.TelegramX.openSettingsPage('mods')" }),
       )}

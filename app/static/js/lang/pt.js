@@ -438,4 +438,6 @@ export const PT = {
   "Промпт скопирован — вставьте его в нейросеть": "Prompt copiado — cole em uma IA",
   "Буфер обмена пуст": "A área de transferência está vazia",
   "Вставьте мод в поле ниже": "Cole o mod no campo abaixo",
+  "Коды входа": "Códigos de login",
+  "Чат «Telegram» с кодами": "Chat «Telegram» com códigos",
 };

@@ -1170,6 +1170,16 @@
   "plural": false
  },
  {
+  "key": "Коды входа",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
+  "key": "Чат «Telegram» с кодами",
+  "where": "js/views/settings.js",
+  "plural": false
+ },
+ {
   "key": "Язык",
   "where": "js/views/settings.js",
   "plural": false
